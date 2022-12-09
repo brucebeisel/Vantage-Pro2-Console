@@ -1,0 +1,103 @@
+This file contains the JSON API used to communicate the the Vantage Pro2 driver.
+
+
+{
+    "command" : "<command name>,
+    "arguments" : [
+        { "<argument 1>" : "<argument 1 value>" },
+        { "<argument 2>" : "<argument 2 value>" },
+        ...
+    ]
+}
+
+{
+    "response" : "<command name>",
+    "status"   : "<success|failure>",
+    "info"  : "<Any additional information>"
+}
+
+General response:
+Backlight command:
+{ "command" : "backlight", "arguments" : [ { "state" : "on|off" } ] }
+{ "response" : "backlight", "status" : "success", "info" : "Light is on|off" }
+
+Date/Time command:
+{ "command" : "set-date-time", "arguments" : [ { "date" : "YYYY-MM-DD" }, { "time" : "HH:MM:SS" } ] }
+{ "response" : "set-date-time", "status" : "success", "info" : "Date/time set to 2023-03-21 14:23:58" }
+
+{ "command" : "get-date-time", "arguments" }
+{ "response" : "get-date-time", "status" : "success", "info" : "2023-03-21 14:23:58" }
+
+Firmware query:
+{ "command" : "firmware-query" }
+{ "response" : "firmware-query", "status" : "success", "info" : "2.54 Apr 23, 2022" }
+
+
+1. Test Commands
+    "TEST"      Sends the string “TEST\n” back.
+    "RXCHECK"   Sends the Console Diagnostics report.
+    "RXTEST"    Moves the console from the “Receiving from” screen to the main current conditions screen.
+    "VER"       Sends the firmware date code as a text string.
+    "RECEIVERS" Sends the bit map of station IDs that the console can hear, This is not the byte for indicating what the console selects to listen from.
+    "NVER"      Sends the firmware version number as a text string. This command is only supported by Vantage Pro2 (Firmware 1.90 or later) and Vantage Vue.
+
+2. Current Data commands
+    "LOOP <number of LOOP packets to send-decimal>"
+                Sends the specified number of LOOP packets, 1 every 2 seconds. Console sleeps between packets.
+    "LPS <loop packet type bit mask-hex> <number of packets to send-decimal>"
+                Sends the specified number of the different loop packet(s), 1 every 2 seconds. Console sleeps between packets.
+    "HILOWS"    Sends all the current high/low data in a single 436 byte data block, plus 2 CRC bytes.
+    "PUTRAIN <Yearly Rain in rain clicks-decimal>"
+                Set the Yearly rainfall amount on the Vantage Console.
+    "PUTET <Yearly ET in 100th inch-decimal>"
+                Set the Yearly ET amount on the Vantage Console.
+
+3. Download Commands
+    "DMP"       Downloads the entire archive memory. See the sections X.6 and X.4 for more details.
+    "DMPAFT"    Downloads the records after a specified date and time. See the sections X.6 and X.4 for more details.
+
+4. EEPROM Commands
+    "GETEE"     Reads the full 4K EEPROM in one data block.
+    "EEWR <EE address-hex> <EE data-hex>"
+                Writes one byte of data to the specified address in the EEPROM.
+    "EERD <EE address-hex> <number of bytes to read-hex>"
+                Reads the specified number of bytes starting at the specified address. Results are given as hex strings, one byte per line.
+    "EEBWR <EE address-hex> <number of bytes to write-hex>"
+                Writes data to the EEPROM. The data and CRC are given in binary format following an ACK response.
+    "EEBRD <EE address-hex> <number of bytes to read-hex>"
+                Reads data from the EEPROM. The data and CRC are given in binary format following an ACK response.
+
+5. Calibration Commands
+    "CALED"     Sends a block of data with the current temperature and humidity values for setting calibration values.
+    "CALFIX"    Updates the display when calibration numbers have been changed.
+    "BAR=<bar value to display (in Hg * 1000)-decimal> <elevation (ft)-decimal>"
+                Sets the elevation and barometer offset values when setting the barometer for a new location.
+    "BARDATA"   Displays of the current barometer calibration parameters in text.
+
+6. Clearing Commands
+    "CLRLOG"    Clears the archive data.
+    "CLRALM"    Clears all the alarm thresholds.
+    "CLRCAL"    Clears all the Temperature and Humidity calibration offsets.
+    "CLRGRA"    Clears all of the graph points on the Vantage console.
+    "CLRVAR <Data variable-decimal>"
+                Clears a rain or ET data value.
+    "CLRHIGHS <0, 1, or 2>"
+                Clears all of the daily (0), monthly (1), or yearly (2) high values.
+    "CLRLOWS <0, 1, or 2>"
+                Clears all of the daily (0), monthly (1), or yearly (2) low values.
+    "CLRBITS"   Clears the active alarm bits. Alarms will be reactivated if the alarm condition is still present.
+    "CLRDATA"   Clears all current data values to dashes.
+
+7. Configuration Commands
+    "BAUD <New baud rate-decimal>"
+                Sets the console to a new baud rate. Valid values are 1200, 2400, 4800, 9600, 14400, and 19200.
+    "SETTIME"   Sets the time and date on the Vantage console. Data in a binary format is sent after ACK.
+    "GAIN <Gain State: '0' (off) or '1' (on)>"
+                Sets the gain of the radio receiver. This command is currently not supported in Vantage Pro2.
+    "GETTIME"   Retrieves the current time and date on the Vantage console. Data is sent in a binary format.
+    "SETPER <Archive interval in minutes-decimal>"
+                Sets the Vantage archive interval. Valid values are (1, 5, 10, 15, 30, 60, and 120).
+    "STOP"      Disables the creation of archive records.
+    "START"     Enables the creation of archive records, if they have been halted with the STOP command.
+    "NEWSETUP"  Re-initialize the Vantage console after making certain configuration changes.
+    "LAMPS <Lamp state: '0' (off) or '1' (on)>"
