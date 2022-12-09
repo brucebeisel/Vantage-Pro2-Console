@@ -193,7 +193,21 @@ static const char *ALARM_STRINGS[][8] = {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-LoopPacket::LoopPacket(void) : log(VP2Logger::getLogger("LoopPacket")) {
+LoopPacket::LoopPacket(void) : log(VP2Logger::getLogger("LoopPacket")),
+                               rainRate(0.0),
+                               stormRain(0.0),
+                               dayRain(0,0),
+                               monthRain(0,0),
+                               yearRain(0.0),
+                               consoleBatteryVoltage(0.0),
+                               forecastRule(0),
+                               stormStart(0),
+                               sunriseTime(0),
+                               sunsetTime(0),
+                               transmitterBatteryStatus(0),
+                               nextRecord(-1),
+                               baroTrend(STEADY),
+                               forecastIcon(SUNNY) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////

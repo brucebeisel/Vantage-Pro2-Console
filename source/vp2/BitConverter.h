@@ -70,8 +70,20 @@ public:
      */
     static void getBytes(int value, byte buffer[], int index, int nbytes, bool littleEndian = true);
 
+    /**
+     * Get the upper nibble of the provided byte.
+     *
+     * @param value The value from which to extract the upper nibble
+     * @return The value of the upper nibble
+     */
     static int getUpperNibble(byte value);
 
+    /**
+     * Get the lower nibble of the provided byte.
+     *
+     * @param value The value from which to extract the lower nibble
+     * @return The value of the lower nibble
+     */
     static int getLowerNibble(byte value);
 
 private:

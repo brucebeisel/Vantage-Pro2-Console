@@ -22,13 +22,18 @@
 #include "VP2Decoder.h"
 #include "Loop2Packet.h"
 
+
+
 using namespace std;
 
 namespace vp2 {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Loop2Packet::Loop2Packet() : log(VP2Logger::getLogger("Loop2Packet")) {
+Loop2Packet::Loop2Packet() : log(VP2Logger::getLogger("Loop2Packet")),
+                             rain15Minute(0.0),
+                             rainHour(0.0),
+                             rain24Hour(0.0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
