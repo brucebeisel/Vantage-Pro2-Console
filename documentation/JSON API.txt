@@ -12,25 +12,34 @@ This file contains the JSON API used to communicate the the Vantage Pro2 driver.
 
 {
     "response" : "<command name>",
-    "status"   : "<success|failure>",
+    "result"   : "<success|failure>",
     "info"  : "<Any additional information>"
 }
 
 General response:
 Backlight command:
-{ "command" : "backlight", "arguments" : [ { "state" : "on|off" } ] }
-{ "response" : "backlight", "status" : "success", "info" : "Light is on|off" }
+{ "command"  : "backlight", "arguments" : [ { "state" : "on|off" } ] }
+{ "response" : "backlight", "result" : "success", "info" : "Light is on|off" }
 
 Date/Time command:
-{ "command" : "set-date-time", "arguments" : [ { "date" : "YYYY-MM-DD" }, { "time" : "HH:MM:SS" } ] }
-{ "response" : "set-date-time", "status" : "success", "info" : "Date/time set to 2023-03-21 14:23:58" }
+{ "command"  : "set-date-time", "arguments" : [ { "date" : "YYYY-MM-DD" }, { "time" : "HH:MM:SS" } ] }
+{ "response" : "set-date-time", "result" : "success", "info" : "Date/time set to 2023-03-21 14:23:58" }
 
-{ "command" : "get-date-time", "arguments" }
-{ "response" : "get-date-time", "status" : "success", "info" : "2023-03-21 14:23:58" }
+{ "command"  : "get-date-time", "arguments" }
+{ "response" : "get-date-time", "result" : "success", "info" : "2023-03-21 14:23:58" }
 
 Firmware query:
-{ "command" : "firmware-query" }
-{ "response" : "firmware-query", "status" : "success", "info" : "2.54 Apr 23, 2022" }
+{ "command"  : "firmware-query" }
+{ "response" : "firmware-query", "result" : "success", "info" : "2.54 Apr 23, 2022" }
+
+Console diagnostics:
+{ "command"  : "console-diagnostics" }
+{ "response" : "console-diagnostics", "result" : "success" }
+{ "console-diagnostic-report" : { "total-packets-received" : "100", "total-packets-missed" : "10", "resync-count" : "11", "packet-reception-hwm" : "1234", "crc-error-count" : "12" } }
+
+Console recovery and clear CRC error count
+{ "command"  : "console-recovery-clear-crc-error-count" }
+{ "response" : "console-recovery-clear-crc-error-count", "result" : "success" }
 
 
 1. Test Commands

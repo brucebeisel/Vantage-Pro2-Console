@@ -78,25 +78,25 @@ public:
      * @param buffer The buffer to decode
      * @return True if the LOOP packet was decoded successfully
      */
-    bool               decodeLoopPacket(byte buffer[]);
+    bool                                    decodeLoopPacket(byte buffer[]);
 
-    int                              getNextRecord() const;
-    const Measurement<Temperature> & getOutsideTemperature() const;
-    const Measurement<Temperature> & getInsideTemperature() const;
-    const Measurement<Temperature> & getExtraTemperature(int index) const;
-    const Measurement<Humidity> &    getOutsideHumidity() const;
-    const Measurement<Humidity> &    getInsideHumidity() const;
-    const Measurement<Humidity> &    getExtraHumidity(int index) const;
-    Rainfall                         getRainRate() const;
-    Rainfall                         getDayRain() const;
-    Rainfall                         getMonthRain() const;
-    Rainfall                         getYearRain() const;
-    Rainfall                         getStormRain() const;
-    const Measurement<Speed> &       getWindSpeed() const;
-    const Measurement<Speed> &       getAvgWindSpeed10Min() const;
-    const Measurement<Heading> &     getWindDirection() const;
-    const Measurement<Pressure> &    getBarometricPressure() const;
-    const Measurement<UvIndex> &     getUvIndex() const;
+    int                                     getNextRecord() const;
+    const Measurement<Temperature> &        getOutsideTemperature() const;
+    const Measurement<Temperature> &        getInsideTemperature() const;
+    const Measurement<Temperature> &        getExtraTemperature(int index) const;
+    const Measurement<Humidity> &           getOutsideHumidity() const;
+    const Measurement<Humidity> &           getInsideHumidity() const;
+    const Measurement<Humidity> &           getExtraHumidity(int index) const;
+    Rainfall                                getRainRate() const;
+    Rainfall                                getDayRain() const;
+    Rainfall                                getMonthRain() const;
+    Rainfall                                getYearRain() const;
+    Rainfall                                getStormRain() const;
+    const Measurement<Speed> &              getWindSpeed() const;
+    const Measurement<Speed> &              getAvgWindSpeed10Min() const;
+    const Measurement<Heading> &            getWindDirection() const;
+    const Measurement<Pressure> &           getBarometricPressure() const;
+    const Measurement<UvIndex> &            getUvIndex() const;
     const Measurement<Temperature> &        getLeafTemperature(int index) const;
     const Measurement<SoilMoisture> &       getSoilMoisture(int index) const;
     const Measurement<LeafWetness> &        getLeafWetness(int index) const;
@@ -105,22 +105,22 @@ public:
     const Measurement<Evapotranspiration> & getDayET() const;
     const Measurement<Evapotranspiration> & getMonthET() const;
     const Measurement<Evapotranspiration> & getYearET() const;
-    bool               isTransmitterBatteryGood(int index) const;
-    float              getConsoleBatteryVoltage() const;
-    DateTime           getStormStart() const;
-    bool               isStormOngoing() const;
-    Forecast           getForecastIcon() const;
-    std::string        getForecastIconString() const;
-    int                getForecastRule() const;
-    BaroTrend          getBaroTrend() const;
-    std::string        getBaroTrendString() const;
+    bool                                    isTransmitterBatteryGood(int index) const;
+    float                                   getConsoleBatteryVoltage() const;
+    DateTime                                getStormStart() const;
+    bool                                    isStormOngoing() const;
+    Forecast                                getForecastIcon() const;
+    std::string                             getForecastIconString() const;
+    int                                     getForecastRuleIndex() const;
+    BaroTrend                               getBaroTrend() const;
+    std::string                             getBaroTrendString() const;
 
 private:
     std::string lookupAlarm(int byte, int bit) const;
 
     static const int LOOP_PACKET_TYPE = 0;
 
-    VP2Logger          log;
+    VP2Logger                       log;
 
     int                             nextRecord;
     Measurement<Temperature>        outsideTemperature;
@@ -149,14 +149,13 @@ private:
     Measurement<Temperature>        soilTemperature[VP2Constants::MAX_SOIL_TEMPERATURES];
     Measurement<Temperature>        extraTemperature[VP2Constants::MAX_EXTRA_TEMPERATURES];
     Measurement<Humidity>           extraHumidity[VP2Constants::MAX_EXTRA_HUMIDITIES];
-
-    Forecast           forecastIcon;
-    int                forecastRule;
-    DateTime           sunriseTime;
-    DateTime           sunsetTime;
-    DateTime           stormStart;
-    int                transmitterBatteryStatus;
-    float              consoleBatteryVoltage;
+    Forecast                        forecastIcon;
+    int                             forecastRuleIndex;
+    DateTime                        sunriseTime;
+    DateTime                        sunsetTime;
+    DateTime                        stormStart;
+    int                             transmitterBatteryStatus;
+    float                           consoleBatteryVoltage;
 
 };
 }

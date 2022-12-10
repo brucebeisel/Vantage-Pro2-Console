@@ -16,6 +16,9 @@
  */
 #include "ForecastRule.h"
 
+/*
+ * This text for the forecast rules was obtained off the Internet. Using Google will turn up many references to the list.
+ */
 namespace vp2 {
 const std::string ForecastRule::FORECAST[] = {
     "Mostly clear and cooler.",

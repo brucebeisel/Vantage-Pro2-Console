@@ -196,11 +196,11 @@ static const char *ALARM_STRINGS[][8] = {
 LoopPacket::LoopPacket(void) : log(VP2Logger::getLogger("LoopPacket")),
                                rainRate(0.0),
                                stormRain(0.0),
-                               dayRain(0,0),
-                               monthRain(0,0),
+                               dayRain(0.0),
+                               monthRain(0.0),
                                yearRain(0.0),
                                consoleBatteryVoltage(0.0),
-                               forecastRule(0),
+                               forecastRuleIndex(0),
                                stormStart(0),
                                sunriseTime(0),
                                sunsetTime(0),
@@ -380,8 +380,8 @@ LoopPacket::getForecastIcon() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-LoopPacket::getForecastRule() const {
-    return forecastRule;
+LoopPacket::getForecastRuleIndex() const {
+    return forecastRuleIndex;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -464,7 +464,6 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
         return false;
     }
 
-
     int packetType = BitConverter::toInt8(buffer, 4);
     if (packetType != LOOP_PACKET_TYPE) {
         log.log(VP2Logger::VP2_ERROR)<< "Invalid packet type for LOOP packet. Expected: "
@@ -479,30 +478,25 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
 
 
     if (buffer[3] != 'P') {
-        switch (BitConverter::toInt8(buffer, 3)) {
-            case 255:
-                baroTrend = UNKNOWN;
-                break;
-            case 196:
-                baroTrend = FALLING_RAPIDLY;
-                break;
-            case 236:
-                baroTrend = FALLING_SLOWLY;
-                break;
-            case 0:
-                baroTrend = STEADY;
-                break;
-            case 20:
-                baroTrend = RISING_SLOWLY;
-                break;
-            case 60:
-                baroTrend = RISING_RAPIDLY;
+        int baroTrendValue = BitConverter::toInt8(buffer, 3);
+
+        switch (baroTrendValue) {
+            case UNKNOWN:
+            case FALLING_RAPIDLY:
+            case FALLING_SLOWLY:
+            case STEADY:
+            case RISING_SLOWLY:
+            case RISING_RAPIDLY:
+                baroTrend = baroTrendValue;
                 break;
             default:
                 log.log(VP2Logger::VP2_ERROR) << "Invalid barometer trend 0x" << hex << (int)buffer[3] << dec << endl;
+                baroTrend = UNKNOWN;
                 return false;
         }
     }
+    else
+        baroTrend = UNKNOWN;
 
     nextRecord = BitConverter::toInt16(buffer,5);
 
@@ -568,7 +562,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     log.log(VP2Logger::VP2_DEBUG2) << "Console Battery Voltage: " << consoleBatteryVoltage << endl;
 
     forecastIcon = static_cast<Forecast>(BitConverter::toInt8(buffer, 89));
-    forecastRule = BitConverter::toInt8(buffer, 90);
+    forecastRuleIndex = BitConverter::toInt8(buffer, 90);
 
     sunriseTime = VP2Decoder::decodeTime(buffer, 91);
     sunsetTime = VP2Decoder::decodeTime(buffer, 93);
@@ -597,22 +591,22 @@ string
 LoopPacket::getBaroTrendString() const {
     switch(baroTrend) {
         case FALLING_RAPIDLY:
-            return "FALLING_RAPIDLY";
+            return "Falling Rapidly";
 
         case FALLING_SLOWLY:
-            return "FALLING_SLOWLY";
+            return "Falling Slowly";
 
         case STEADY:
-            return "STEADY";
+            return "Steady";
 
         case RISING_SLOWLY:
-            return "RISING_SLOWLY";
+            return "Rising Slowly";
 
         case RISING_RAPIDLY:
-            return "RISING_RAPIDLY";
+            return "Rising Rapidly";
 
         default:
-            return "STEADY";
+            return "Steady";
     }
 }
 
@@ -625,31 +619,31 @@ LoopPacket::getForecastIconString() const {
             return "SUNNY";
 
         case PARTLY_CLOUDY:
-            return "PARTLY_CLOUDY";
+            return "Partly Cloudy";
 
         case MOSTLY_CLOUDY:
-            return "MOSTLY_CLOUDY";
+            return "Mostly Cloudy";
 
         case MOSTLY_CLOUDY_WITH_RAIN:
-            return "MOSTLY_CLOUDY_WITH_RAIN";
+            return "Mostly Cloudy With Rain";
 
         case MOSTLY_CLOUDY_WITH_SNOW:
-            return "MOSTLY_CLOUDY_WITH_SNOW";
+            return "Mostly Cloudy With Snow";
 
         case MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW:
-            return "MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW";
+            return "Mostly Cloudy With Rain or Snow";
 
         case PARTLY_CLOUDY_WITH_RAIN_LATER:
-            return "PARTLY_CLOUDY_WITH_RAIN_LATER";
+            return "Partly Cloudy With Rain Later";
 
         case PARTLY_CLOUDY_WITH_SNOW_LATER:
-            return "PARTLY_CLOUDY_WITH_SNOW_LATER";
+            return "Partly Cloudy With Snow Later";
 
         case PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER:
-            return "PARTLY_CLOUDY_WITH_SNOW_LATER";
+            return "Partly Cloudy With Snow Later";
 
         default:
-            return "SUNNY";
+            return "Sunny";
     }
 }
 
