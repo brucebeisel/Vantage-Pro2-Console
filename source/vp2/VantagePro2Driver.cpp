@@ -107,10 +107,10 @@ VantagePro2Driver::initialize() {
         return false;
     }
 
-    if (!archiveManager.synchronizeArchive()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to read the archive during initialization" << endl;
-        return false;
-    }
+    //if (!archiveManager.synchronizeArchive()) {
+    //    log.log(VP2Logger::VP2_ERROR) << "Failed to read the archive during initialization" << endl;
+    //    return false;
+    //}
 
     AlarmManager::getInstance().initialize();
 
@@ -217,15 +217,22 @@ VantagePro2Driver::mainLoop() {
     vector<ArchivePacket> list;
     list.reserve(VP2Constants::NUM_ARCHIVE_RECORDS);
 
+    if (!initialize())
+        return;
+
+    if (!archiveManager.synchronizeArchive()) {
+        log.log(VP2Logger::VP2_ERROR) << "Failed to read the archive during initialization" << endl;
+        return;
+    }
+
+
     while (!exitLoop) {
         try {
             //
             // If the weather station could not be woken, then close and open
             // the console. It has been observed that on a rare occasion the console
             // never wakes up. Only restarting this driver fixes the issue. Reopening
-            // the serial port will hopefully fix this issue. It is hoped that if
-            // this does not work, it will cause the health monitor to restart the
-            // driver, also fixing the issue.
+            // the serial port will hopefully fix this issue.
             //
             if (!station.wakeupStation()) {
                 reopenStation();

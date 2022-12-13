@@ -385,8 +385,9 @@ VantagePro2Station::currentValuesLoop(int records) {
         //
         // Per the Vantage Pro serial communication document, sleep 2 seconds between
         // the loop the loop 2 packets
+        // TBD Removed the sleep as the read has a timeout built into it
         //
-        Weather::sleep(LOOP_PACKET_WAIT);
+        //Weather::sleep(LOOP_PACKET_WAIT);
         if (!readLoop2Packet(loop2Packet)) {
             resetNeeded = true;
             break;
@@ -411,9 +412,10 @@ VantagePro2Station::currentValuesLoop(int records) {
         //
         // Per the Vantage Pro serial communication document, sleep 2 seconds between
         // the loop 2 the loop packets
+        // TBD Removed the sleep as the read has a timeout built into it
         //
-        if (!terminateLoop)
-            Weather::sleep(LOOP_PACKET_WAIT);
+        //if (!terminateLoop)
+        //    Weather::sleep(LOOP_PACKET_WAIT);
        
         log.log(VP2Logger::VP2_INFO) << "Retrieved Current Weather" << endl;
     }
@@ -786,35 +788,59 @@ VantagePro2Station::updateConsoleTime() {
     int crc = VantagePro2CRC::calculateCRC(buffer, SET_TIME_LENGTH);
     BitConverter::getBytes(crc, buffer, SET_TIME_LENGTH, CRC_BYTES, false);
 
-    serialPort.write(buffer, SET_TIME_LENGTH + CRC_BYTES);
+    int nbytes = serialPort.write(buffer, SET_TIME_LENGTH + CRC_BYTES);
 
-    return consumeAck();
+    bool success = true;
+
+    if (nbytes != SET_TIME_LENGTH + CRC_BYTES)
+        success = false;
+    else
+        success = consumeAck();
+
+    if (!success)
+        wakeupStation();
+
+    return success;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantagePro2Station::retrieveConsoleTime(DateTime & stationTime) {
+    bool success = true;
     stationTime = 0;
 
     if (!sendAckedCommand(GET_TIME_CMD))
         return false;
 
-    if (serialPort.read(buffer, TIME_RESPONSE_LENGTH + CRC_BYTES) && VantagePro2CRC::checkCRC(buffer, TIME_RESPONSE_LENGTH)) {
-        time_t now = time(0);
-        struct tm tm;
-        Weather::localtime(now, tm);
-        int n = 0;
-        tm.tm_sec = buffer[n++];
-        tm.tm_min = buffer[n++];
-        tm.tm_hour = buffer[n++];
-        tm.tm_mday = buffer[n++];
-        tm.tm_mon = buffer[n++] - 1;
-        tm.tm_year = buffer[n];
-        stationTime = mktime(&tm);
+    if (serialPort.read(buffer, TIME_RESPONSE_LENGTH + CRC_BYTES)) {
+        if (VantagePro2CRC::checkCRC(buffer, TIME_RESPONSE_LENGTH)) {
+            time_t now = time(0);
+            struct tm tm;
+            Weather::localtime(now, tm);
+            int n = 0;
+            tm.tm_sec = buffer[n++];
+            tm.tm_min = buffer[n++];
+            tm.tm_hour = buffer[n++];
+            tm.tm_mday = buffer[n++];
+            tm.tm_mon = buffer[n++] - 1;
+            tm.tm_year = buffer[n];
+            stationTime = mktime(&tm);
+        }
+        else {
+            log.log(VP2Logger::VP2_WARNING) << "Received time failed CRC check" << endl;
+            success = false;
+        }
+    }
+    else {
+        log.log(VP2Logger::VP2_WARNING) << "Failed to read time from console" << endl;
+        success = false;
     }
 
-    return true;
+    if (!success)
+        wakeupStation();
+
+    return success;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1011,14 +1037,14 @@ bool
 VantagePro2Station::readAfterArchivePages(DateTime afterTime, vector<ArchivePacket> & list, int firstRecord, int numPages) {
     DateTime newestPacketTime = afterTime;
 
-    bool rv = true;
+    bool success = true;
     for (int i = 0; i < numPages; i++) {
         //
         // Process a single page. This will return 1 - 5 packets
         //
         if (!readNextArchivePage(list, firstRecord, newestPacketTime)) {
             serialPort.write(DMP_CANCEL_DOWNLOAD);
-            rv = false;
+            success = false;
             break;
         }
 
@@ -1035,12 +1061,14 @@ VantagePro2Station::readAfterArchivePages(DateTime afterTime, vector<ArchivePack
         firstRecord = 0;
     }
 
-    if (rv)
+    if (success)
         log.log(VP2Logger::VP2_INFO) << "Received " << list.size() << " records from DMPAFT " << Weather::formatDateTime(afterTime) << endl;
-    else
+    else {
         log.log(VP2Logger::VP2_WARNING) << "Read of archive after " << Weather::formatDateTime(afterTime) << " failed" << endl;
+        wakeupStation();
+    }
 
-    return rv;
+    return success;
 
 }
 
@@ -1048,7 +1076,7 @@ VantagePro2Station::readAfterArchivePages(DateTime afterTime, vector<ArchivePack
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantagePro2Station::readNextArchivePage(vector<ArchivePacket> & list, int firstRecord, DateTime newestPacketTime) {
-    bool rv = true;
+    bool success = true;
     log.log(VP2Logger::VP2_DEBUG1) << "Processing archive page. Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
 
     //
@@ -1058,23 +1086,23 @@ VantagePro2Station::readNextArchivePage(vector<ArchivePacket> & list, int firstR
         if (serialPort.read(buffer, ARCHIVE_PAGE_SIZE + CRC_BYTES)) {
             if (VantagePro2CRC::checkCRC(buffer, ARCHIVE_PAGE_SIZE)) {
                 decodeArchivePage(list, buffer, firstRecord, newestPacketTime);
-                rv = true;
+                success = true;
                 break;
             }
             else {
                 log.log(VP2Logger::VP2_WARNING) << "CRC check failed on archive page. Try # " << (i + 1) << endl;
                 serialPort.write(DMP_RESEND_PAGE);
-                rv = false;
+                success = false;
             }
         }
         else {
             serialPort.write(DMP_CANCEL_DOWNLOAD);
-            rv = false;
+            success = false;
             break;
         }
     }
 
-    return rv;
+    return success;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1194,7 +1222,7 @@ VantagePro2Station::sendAckedCommand(const string & command) {
     bool success = false;
 
     //
-    // Try multiple times for completeness. If an ACK is not received then wakeup the console and
+    // Try multiple times for completeness. If an ACK is not received then wake up the console and
     // try again.
     //
     for (int i = 0; i < COMMAND_RETRIES && !success; i++) {
@@ -1213,7 +1241,7 @@ VantagePro2Station::sendAckedCommand(const string & command) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantagePro2Station::sendStringValueCommand(const string & command, string & results) {
-    bool rv = false;
+    bool success = false;
 
     results.clear();
 
@@ -1228,14 +1256,18 @@ VantagePro2Station::sendStringValueCommand(const string & command, string & resu
     while (serialPort.read(&b, 1)) {
         if (b != VP2Constants::LINE_FEED && b != VP2Constants::CARRIAGE_RETURN)
             results.append(1, b);
-
-        if (b == VP2Constants::CARRIAGE_RETURN) {
-            rv = true;
-            break;
+        else if (b == VP2Constants::LINE_FEED) {
+            if (serialPort.read(&b, 1) && b == VP2Constants::CARRIAGE_RETURN) {
+                success = true;
+                break;
+            }
         }
     }
 
-    return rv;
+    if (!success)
+        wakeupStation();
+
+    return success;
 }
 
 
@@ -1244,7 +1276,6 @@ VantagePro2Station::sendStringValueCommand(const string & command, string & resu
 bool
 VantagePro2Station::consumeAck() {
     byte b;
-    bool rv = false;
     if (!serialPort.read(&b, 1)) {
         log.log(VP2Logger::VP2_INFO) << "consumeACK() read failed while consuming ACK" << endl;
         return false;

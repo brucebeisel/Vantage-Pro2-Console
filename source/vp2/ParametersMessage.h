@@ -21,7 +21,9 @@
 namespace vp2 {
 
 /**
- * A class that is a container for various VP2 parameters and also builds the parameters messages that is sent to the collector.
+ * A class that is a container for various VP2 parameters and also builds the parameters response message.
+ *
+ * TBD Should this class even exist or do we let the client ask for each parameter separately?
  */
 class ParametersMessage {
 public:

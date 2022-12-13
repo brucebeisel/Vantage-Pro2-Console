@@ -45,7 +45,8 @@ static const EepromEntry entries[] = {
     { "HUM33",      "Humidity 33",       "07", 2, false,  "These are the factory inside humidity calibration values. Do not modify them!" },
     { "HUM80",      "Humidity 80",       "09", 2, false,  "These are the factory inside humidity calibration values. Do not modify them!" },
     { "LATITUDE",   "Station Latitude",  "0B", 2, true,   "Station Latitude in tenths of a degree. Negative values = southern hemisphere" },
-    { "LONGITUDE",  "Station Longitude", "0B", 2, true,   "Station Latitude in tenths of a degree. Negative values = southern hemisphere" },
+    { "LONGITUDE",  "Station Longitude", "0B", 2, true,   "Station Latitude in tenths of a degree. Negative values = southern hemisphere" }
+};
 
 /*
 Name Hex Dec Size Description
@@ -60,7 +61,7 @@ ELEVATION 0F 15 2 Station elevation in feet.  Use the "BAR=" command to set this
 TIME_ZONE 11 17 1 String number of the time zone selected on the setup screen.
 MANUAL_OR_AUTO 12 18 1 1 = manual daylight savings, 0 = automatic daylight savings Rev 2.6.1 Page 40 of 60 March 29, 2013
 DAYLIGHT_SAVINGS 13 19 1 This is the configuration bit for the day light savings mode when it is set in manual mode. 1 = daylight savings is now on, 0 = daylight savings is now off. When automatic daylight savings mode is selected, this bit is ignored and it does not indicate whether the daylight savings is on or not.
-GMT_OFFSET 14 20 2 The time difference between GMT and local time (a 2-byte signed number in hundredths of hours. For example, a value of 850 would be +8.50 hours. Negative values in 2’s complements, represent western hemisphere.
+GMT_OFFSET 14 20 2 The time difference between GMT and local time (a 2-byte signed number in hundredths of hours. For example, a value of 850 would be +8.50 hours. Negative values in 2ï¿½s complements, represent western hemisphere.
 GMT_OR_ZONE 16 22 1 1 = use the GMT_OFFSET value, 0 = use the TIME_ZONE value
 USETX 17 23 1 Bitmapped field that indicates which DavisTalk transmitters to listen to. Bit 0 = ID 1.
 RE_TRANSMIT_TX 18 24 1 "ID number to use for retransmit. 0 = don't retransmit, 1 = use ID 1, 2 = use ID 2, etc."
@@ -112,14 +113,14 @@ SETUP_BITS 2B 43 1 AM/PM Time Mode (Bit 0):
 RAIN_SEASON_START 2C 44 1 Month that the Yearly rain total is cleared. 1 = January, etc
 ARCHIVE_PERIOD 2D 45 1 Number of minutes in the archive period.  Use "SETPER" to set this value.
 
-Calibration values are 1 byte signed numbers that are offsets applied to the corresponding raw sensor value in the native sensor units (either 0.1 °F or 1 %)
-TEMP_IN_CAL 32 50 1 The setting range is from (-12.8 °F to 12.7 °F) with the most significant byte as the sign bit.
+Calibration values are 1 byte signed numbers that are offsets applied to the corresponding raw sensor value in the native sensor units (either 0.1 ï¿½F or 1 %)
+TEMP_IN_CAL 32 50 1 The setting range is from (-12.8 ï¿½F to 12.7 ï¿½F) with the most significant byte as the sign bit.
 TEMP_IN_COMP 33 51 1 1's compliment of TEMP_IN_CAL to validate calibration data
-TEMP_OUT_CAL 34 52 1 The setting range is from (-12.8 °F to 12.7 °F) with the most significant byte as the sign bit.
+TEMP_OUT_CAL 34 52 1 The setting range is from (-12.8 ï¿½F to 12.7 ï¿½F) with the most significant byte as the sign bit.
 TEMP_CAL 35 53 15 7 "extra" temperatures, 4 soil temperatures, and 4 leaf temperatures
 HUM_IN_CAL 44 68 1 The inside humidity calibration value is ranged from 0 to 100%.
 HUM_CAL 45 69 8 The first entry is the currently selected outside humidity sensor.
-DIR_CAL 4D 77 2 2 byte wind direction calibration allows full 360° calibration in both directions.
+DIR_CAL 4D 77 2 2 byte wind direction calibration allows full 360ï¿½ calibration in both directions.
 DEFAULT_BAR_GRAPH 4F 79 1 These values control which time span to use on the console graph display when Rain, Barometer, or Wind Speed is shown.
 DEFAULT_RAIN_GRAPH 50 80 1
 DEFAULT_SPEED_GRAPH 51 81 1
@@ -129,21 +130,21 @@ BAR_RISE_ALARM 52 82 1 3 hour rising bar trend alarm. Units are in Hg * 1000
 BAR_FALL_ALARM 53 83 1 3 hour falling bar trend alarm. Units are in Hg * 1000
 TIME_ALARM 54 84 2 Time alarm. Hours * 100 + minutes
 TIME_COMP_ALARM 56 86 2 1's compliment of TIME_ALARM to validate alarm entries
-LOW_TEMP_IN_ALARM 58 88 1 Threshold is (data value – 90) °F
-HIGH_TEMP_IN_ALARM 59 89 1 Threshold is (data value – 90) °F Rev 2.6.1 Page 42 of 60 March 29, 2013
-LOW_TEMP_OUT_ALARM 5A 90 1 Threshold is (data value – 90) °F
-HIGH_TEMP_OUT_ALARM 5B 91 1 Threshold is (data value – 90) °F
+LOW_TEMP_IN_ALARM 58 88 1 Threshold is (data value ï¿½ 90) ï¿½F
+HIGH_TEMP_IN_ALARM 59 89 1 Threshold is (data value ï¿½ 90) ï¿½F Rev 2.6.1 Page 42 of 60 March 29, 2013
+LOW_TEMP_OUT_ALARM 5A 90 1 Threshold is (data value ï¿½ 90) ï¿½F
+HIGH_TEMP_OUT_ALARM 5B 91 1 Threshold is (data value ï¿½ 90) ï¿½F
 LOW_TEMP_ALARM 5C 92 15 7 extra temps, 4 soil temps, 4 leaf temps
 HIGH_TEMP_ALARM 6B 107 15 7 extra temps, 4 soil temps, 4 leaf temps
 LOW_HUM_IN_ALARM 7A 122 1 Low relative humidity alarm in %.
 HIGH_HUM_IN_ALARM 7B 123 1 High relative humidity alarm in %.
 LOW_HUM_ALARM 7C 124 8 First entry is the current Outside Humidity setting
 HIGH_HUM_ALARM 84 132 8 First entry is the current Outside Humidity setting
-LOW_DEW_ALARM 8C 140 1 Threshold is (data value – 120) °F
-HIGH_DEW_ALARM 8D 141 1 Threshold is (data value – 120) °F
-CHILL_ALARM 8E 142 1 Threshold is (data value – 120) °F
-HEAT_ALARM 8F 143 1 Threshold is (data value – 90) °F
-THSW_ALARM 90 144 1 Threshold is (data value – 90) °F
+LOW_DEW_ALARM 8C 140 1 Threshold is (data value ï¿½ 120) ï¿½F
+HIGH_DEW_ALARM 8D 141 1 Threshold is (data value ï¿½ 120) ï¿½F
+CHILL_ALARM 8E 142 1 Threshold is (data value ï¿½ 120) ï¿½F
+HEAT_ALARM 8F 143 1 Threshold is (data value ï¿½ 90) ï¿½F
+THSW_ALARM 90 144 1 Threshold is (data value ï¿½ 90) ï¿½F
 SPEED_ALARM 91 145 1 Current Wind Speed alarm. Units are MPH
 SPEED_10MIN_ALARM 92 146 1 10 minute average Wind Speed alarm. Units are MPH
 UV_ALARM 93 147 1 Current UV index alarm. Units are (UV Index * 10)

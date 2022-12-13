@@ -155,6 +155,7 @@ SerialPort::close() {
 int
 SerialPort::write(const void * buffer, int nbytes) {
     ssize_t bytesWritten = ::write(commPort, buffer, nbytes);
+    log.log(VP2Logger::VP2_WARNING) << "Write to station failed. Expected=" << nbytes << " Actual=" << bytesWritten << endl;
     return bytesWritten;
 }
 
@@ -163,7 +164,7 @@ SerialPort::write(const void * buffer, int nbytes) {
 int
 SerialPort::read(byte buffer[], int index, int nbytes) {
     ssize_t bytesRead = 0;
-    struct timeval timeout = {2, 0};
+    struct timeval timeout = {2, 500000};
     fd_set readSet;
     FD_ZERO(&readSet);
     FD_SET(commPort, &readSet);

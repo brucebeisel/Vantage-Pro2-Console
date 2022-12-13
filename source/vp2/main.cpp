@@ -57,8 +57,8 @@ consoleThreadEntry(const string & archiveFile, const string & serialPortName, co
 
 
     try {
-        if (!driver.initialize())
-            return;
+        //if (!driver.initialize())
+        //    return;
 
         driver.mainLoop();
         log.log(VP2Logger::VP2_INFO) << "Main loop returned" << endl;

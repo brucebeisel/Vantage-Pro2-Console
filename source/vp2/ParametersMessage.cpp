@@ -26,7 +26,13 @@ const std::string ParametersMessage::MODEL = "Vantage Pro 2";
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ParametersMessage::ParametersMessage() {
+ParametersMessage::ParametersMessage() : latitude(0.0),
+                                         longitude(0.0),
+                                         elevation(0),
+                                         rainSeasonStart(0),
+                                         archivePeriod(0),
+                                         windCupSize(0),
+                                         rainCollectorSize(0.0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
