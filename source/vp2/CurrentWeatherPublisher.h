@@ -49,7 +49,6 @@ public:
      */
     void sendCurrentWeather(const CurrentWeather & cw);
 
-private:
     /**
      * Connect with the WeatherSense collector.
      * 
@@ -57,6 +56,7 @@ private:
      */
     bool createSocket();
 
+private:
     /**
      * Get the local IP address for the multicast socket. Note that this
      * returns the first non-loopback interface found.

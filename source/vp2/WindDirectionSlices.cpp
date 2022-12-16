@@ -25,9 +25,6 @@ using namespace std;
 
 namespace vp2 {
 
-//const Heading WindDirectionSlices::DEGREES_PER_SLICE = static_cast<Heading>(22.5);
-//const Heading WindDirectionSlices::HALF_SLICE = DEGREES_PER_SLICE / static_cast<Heading>(2.0);
-
 const std::string WindDirectionSlices::SLICE_NAMES[NUM_SLICES] = {
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
 };
@@ -50,7 +47,7 @@ WindDirectionSlices::~WindDirectionSlices() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlices::addHeading(Heading heading) {
+WindDirectionSlices::addDirection(Heading heading) {
     DateTime now = time(0);
 
     if (heading > MAX_HEADING - HALF_SLICE)
@@ -84,12 +81,18 @@ void
 WindDirectionSlices::find10MinuteDominantWindDirection(DateTime now) {
     int highSampleCount = 0;
     int highCountIndex = -1;
+    //
+    // TBD Should there be a minimum count in order to be declared the dominant direction?
+    //
     for (int i = 0; i < NUM_SLICES; i++) {
         if (windSlices[i].getSampleSize() > highSampleCount) {
             highSampleCount = windSlices[i].getSampleSize();
             highCountIndex = i;
         }
 
+        //
+        // A direction slice can only stay on the list of dominant directions for an hour
+        //
         if (now - windSlices[i].getLast10MinuteDominantTime() > HOUR_SECONDS)
             windSlices[i].setLast10MinuteDominantTime(0);
     }
@@ -122,7 +125,7 @@ WindDirectionSlices::removeOldSamples(DateTime now) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlices::pastHeadings(vector<int> & headings) const {
+WindDirectionSlices::pastDirections(vector<int> & headings) const {
     cout << "Wind Direction Slices: Samples: " << totalSamples << endl;
     for (int i = 0; i < NUM_SLICES; i++) { 
         char buffer[100];

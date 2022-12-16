@@ -135,7 +135,7 @@ public:
     std::string formatJSON(const std::string & element) const {
         std::ostringstream ss;
         if (valid) 
-            ss << '"' << element << "\" : " << value;
+            ss << '{ "' << element << "\" : " << value << "\" }";
 
         return ss.str();
     }

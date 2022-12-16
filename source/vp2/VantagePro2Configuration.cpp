@@ -44,6 +44,7 @@ VantagePro2Configuration::decodeData(const byte buffer[]) {
     }
 }
 
+/*
 bool
 VantagePro2Configuration::retrieveConfigurationParameters() {
     byte buffer[EEPROMR::EEPROM_NON_]
@@ -55,5 +56,6 @@ VantagePro2Configuration::retrieveConfigurationParameters() {
     else
         return false;
 }
+*/
 
 }

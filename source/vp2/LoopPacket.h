@@ -93,8 +93,9 @@ public:
     Rainfall                                getYearRain() const;
     Rainfall                                getStormRain() const;
     const Measurement<Speed> &              getWindSpeed() const;
-    const Measurement<Speed> &              getAvgWindSpeed10Min() const;
     const Measurement<Heading> &            getWindDirection() const;
+    const Measurement<Speed> &              getWindSpeed2MinuteAverage() const;
+    const Measurement<Speed> &              getWindSpeed10MinuteAverage() const;
     const Measurement<Pressure> &           getBarometricPressure() const;
     const Measurement<UvIndex> &            getUvIndex() const;
     const Measurement<Temperature> &        getLeafTemperature(int index) const;
@@ -129,6 +130,8 @@ private:
     Measurement<Humidity>           insideHumidity;
     Measurement<Speed>              windSpeed;
     Measurement<Heading>            windDirection;
+    Measurement<Speed>              windSpeed2MinuteAverage;
+    Measurement<Speed>              windSpeed10MinuteAverage;
     Measurement<Pressure>           barometricPressure;
     BaroTrend                       baroTrend;
     Rainfall                        rainRate;
@@ -141,8 +144,6 @@ private:
     Measurement<Evapotranspiration> dayET;
     Measurement<Evapotranspiration> monthET;
     Measurement<Evapotranspiration> yearET;
-    Measurement<Speed>              avgWindSpeed10Min;
-    Measurement<Speed>              avgWindSpeed2Min;
     Measurement<SoilMoisture>       soilMoisture[VP2Constants::MAX_SOIL_MOISTURES];
     Measurement<LeafWetness>        leafWetness[VP2Constants::MAX_LEAF_WETNESSES];
     Measurement<Temperature>        leafTemperature[VP2Constants::MAX_LEAF_TEMPERATURES];

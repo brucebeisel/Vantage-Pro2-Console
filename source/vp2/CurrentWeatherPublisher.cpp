@@ -33,9 +33,8 @@ const std::string CurrentWeatherPublisher::MULTICAST_HOST = "224.0.0.120";
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeatherPublisher::CurrentWeatherPublisher() : log(VP2Logger::getLogger("CurrentWeatherPublisher"))
+CurrentWeatherPublisher::CurrentWeatherPublisher() : log(VP2Logger::getLogger("CurrentWeatherPublisher")), socketId(NO_SOCKET)
 {
-    createSocket();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +53,7 @@ CurrentWeatherPublisher::sendCurrentWeather(const CurrentWeather & cw)
     if (socketId == NO_SOCKET)
         return;
 
-    std::string s = cw.formatXML();
+    std::string s = cw.formatJSON();
     const char * data = s.c_str();
     size_t length = strlen(data);
     if (sendto(socketId, data, length, 0, reinterpret_cast<struct sockaddr *>(&groupAddr), sizeof(groupAddr)) != length) {

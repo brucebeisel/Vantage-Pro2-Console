@@ -42,12 +42,10 @@ VantagePro2Driver::VantagePro2Driver(ArchiveManager & archiveManager, CurrentWea
                                                                 archiveManager(archiveManager),
                                                                 eventManager(evtMgr),
                                                                 exitLoop(false),
-                                                                receivedFirstLoopPacket(false),
                                                                 nextRecord(-1),
                                                                 previousNextRecord(-1),
                                                                 lastArchivePacketTime(0),
-                                                                log(VP2Logger::getLogger("VantagePro2Driver")),
-                                                                sensorStationSendTime(0) {
+                                                                log(VP2Logger::getLogger("VantagePro2Driver")) {
     //
     // Indicate the the console time needs to be set in the near future. 
     // We do not want the console time to be set immediately in case the computer has just started and
@@ -74,9 +72,8 @@ VantagePro2Driver::initialize() {
         log.log(VP2Logger::VP2_ERROR) << "Failed to open weather station" << endl;
         return false;
     }
-    else {
-        log.log(VP2Logger::VP2_INFO) << "Port is open" << endl;
-    }
+
+    log.log(VP2Logger::VP2_INFO) << "Port is open" << endl;
 
     if (!station.wakeupStation()) {
         log.log(VP2Logger::VP2_ERROR) << "Failed to wake up weather station" << endl;
@@ -85,6 +82,28 @@ VantagePro2Driver::initialize() {
     else {
         log.log(VP2Logger::VP2_INFO) << "Weather Station is awake" << endl;
     }
+
+    if (!station.retrieveStationType()) {
+        log.log(VP2Logger::VP2_ERROR) << "Failed to retrieve station type for weather station" << endl;
+        return false;
+    }
+
+    if (!station.retrieveConfigurationData()) {
+        log.log(VP2Logger::VP2_ERROR) << "Failed to retrieve configuration data for weather station" << endl;
+        return false;
+    }
+
+    AlarmManager::getInstance().initialize();
+
+    log.log(VP2Logger::VP2_INFO) << "Initialization complete." << endl;
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantagePro2Driver::retrieveConfiguration() {
 
     VP2Decoder::setRainCollectorSize(station.getRainCollectorSize()); // TBD, this should come from VantagePro2Configuration class
 
@@ -96,30 +115,20 @@ VantagePro2Driver::initialize() {
     */
 
     //
-    // Get one current weather record so that the sensors are detected
+    // Get one LOOP packet weather so that the sensors are detected
     //
-    for (int i = 0; i < INITIAL_LOOP_PACKET_RETRIES && !receivedFirstLoopPacket; i++) {
-        station.currentValuesLoop(1);
+    LoopPacket loopPacket;
+    bool loopPacketReceived = false;
+    for (int i = 0; i < INITIAL_LOOP_PACKET_RETRIES && !loopPacketReceived; i++) {
+        loopPacketReceived = station.retrieveLoopPacket(loopPacket);
     }
 
-    if (!receivedFirstLoopPacket) {
+    if (!loopPacketReceived) {
         log.log(VP2Logger::VP2_ERROR) << "Failed to receive a LOOP packet needed to determine current sensor suite" << endl;
         return false;
     }
 
-    //if (!archiveManager.synchronizeArchive()) {
-    //    log.log(VP2Logger::VP2_ERROR) << "Failed to read the archive during initialization" << endl;
-    //    return false;
-    //}
-
-    AlarmManager::getInstance().initialize();
-
-    if (!station.wakeupStation()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to wake up console after initialization" << endl;
-        return false;
-    }
-
-    log.log(VP2Logger::VP2_INFO) << "Initialization complete." << endl;
+    // TBD Figure out what to extract from the loop packet for initialization purposes.
 
     return true;
 }
@@ -138,11 +147,9 @@ bool
 VantagePro2Driver::processCurrentWeather(const CurrentWeather & cw) {
     nextRecord = cw.getNextPacket();
 
-    if (receivedFirstLoopPacket)
-        currentWeatherPublisher.sendCurrentWeather(cw);
+    currentWeatherPublisher.sendCurrentWeather(cw);
 
     log.log(VP2Logger::VP2_DEBUG1) << "Previous Next Record: " << previousNextRecord << " Next Record: " << nextRecord << endl;
-    receivedFirstLoopPacket = true;
 
     bool sc = signalCaught.load();
     bool em = eventManager.isEventAvailable();
@@ -220,11 +227,18 @@ VantagePro2Driver::mainLoop() {
     if (!initialize())
         return;
 
+    if (!retrieveConfiguration())
+        return;
+
     if (!archiveManager.synchronizeArchive()) {
         log.log(VP2Logger::VP2_ERROR) << "Failed to read the archive during initialization" << endl;
         return;
     }
 
+    if (!station.wakeupStation()) {
+        log.log(VP2Logger::VP2_ERROR) << "Failed to wake up console after initialization" << endl;
+        return;
+    }
 
     while (!exitLoop) {
         try {

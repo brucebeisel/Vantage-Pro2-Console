@@ -32,7 +32,7 @@ CurrentWeather::CurrentWeather() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 CurrentWeather::CurrentWeather(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const WindDirectionSlices  & pastWindDirs) :
-        loopPacket(loopPacket), loop2Packet(loop2Packet), pastWindDirs(pastWindDirs) {
+        loopPacket(loopPacket), loop2Packet(loop2Packet), pastWindDirections(pastWindDirs), windSpeed(0.0), windDirection(0.0), windSpeed10MinuteAverage(0.0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,10 +43,29 @@ CurrentWeather::~CurrentWeather() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CurrentWeather::setData(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const WindDirectionSlices  & pastWindDirs) {
+CurrentWeather::setLoopData(const LoopPacket & loopPacket) {
     this->loopPacket = loopPacket;
+
+    windSpeed = loopPacket.getWindSpeed();
+    windDirection = loopPacket.getWindDirection();
+    windSpeed10MinuteAverage = loopPacket.getWindSpeed10MinuteAverage();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CurrentWeather::setLoop2Data(const Loop2Packet & loop2Packet) {
     this->loop2Packet = loop2Packet;
-    this->pastWindDirs = pastWindDirs;
+    windSpeed = loop2Packet.getWindSpeed();
+    windDirection = loop2Packet.getWindDirection();
+    windSpeed10MinuteAverage = loop2Packet.getWindSpeed10MinuteAverage();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CurrentWeather::setWindDirections(const WindDirectionSlices & windDirections) {
+    this->pastWindDirections = windDirections;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,13 +92,13 @@ CurrentWeather::formatXML() const {
        << loop2Packet.getHeatIndex().formatXML("heatIndex")
        << loop2Packet.getThsw().formatXML("thsw");
 
-    ss << "<wind><speed>" << loopPacket.getWindSpeed() << "</speed><direction>" << loopPacket.getWindDirection() << "</direction></wind>"
-       << "<windGust><speed>" << loop2Packet.getWindGust10Minute() << "</speed><direction>" << loop2Packet.getWindGustHeading10Minute() << "</direction></windGust>"
-       << "<windSpeed10MinAvg>" << loop2Packet.getWindSpeed10MinuteAvg() << "</windSpeed10MinAvg>" 
-       << "<windSpeed2MinAvg>" << loop2Packet.getWindSpeed2MinuteAvg() << "</windSpeed2MinAvg>";
+    ss << "<wind><speed>" << windSpeed << "</speed><direction>" << windDirection << "</direction></wind>"
+       << "<windGust><speed>" << loop2Packet.getWindGust10Minute() << "</speed><direction>" << loop2Packet.getWindGustDirection10Minute() << "</direction></windGust>"
+       << "<windSpeed10MinuteAverage>" << windSpeed10MinuteAverage << "</windSpeed10MinAverage>"
+       << "<windSpeed2MinuteAverage>" << loop2Packet.getWindSpeed2MinuteAverage() << "</windSpeed2MinAverage>";
 
     vector<int> pastWindDirsList;
-    pastWindDirs.pastHeadings(pastWindDirsList);
+    pastWindDirections.pastDirections(pastWindDirsList);
     for (unsigned int i = 0; i < pastWindDirsList.size(); i++)
        ss << "<windDir" << i + 2 << ">" << pastWindDirsList.at(i) << "</windDir" << i + 2 << ">";
    
@@ -110,7 +129,7 @@ CurrentWeather::formatXML() const {
         ss << "<stormStart>" << Weather::formatDate(loopPacket.getStormStart()) << "</stormStart><stormRain>" << loopPacket.getStormRain() << "</stormRain>";
 
 
-     ss << "<forecastRule>" << ForecastRule::forecastString(loopPacket.getForecastRule()) << "</forecastRule>"
+     ss << "<forecastRule>" << ForecastRule::forecastString(loopPacket.getForecastRuleIndex()) << "</forecastRule>"
         << "<forecast>" << loopPacket.getForecastIconString() << "</forecast>";
 
      ss << "<extraTemperatures>";
@@ -154,6 +173,105 @@ CurrentWeather::formatXML() const {
     ss << "</leafWetnesses>";
 
     ss << "</currentWeather>";
+
+    return ss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+CurrentWeather::formatJSON() const {
+    ostringstream ss;
+    ss << "{ \"currentWeather\" : {"
+       << "{ \"time\" : \"" << Weather::formatDateTime(time(0)) << "\" },"
+       << loopPacket.getInsideTemperature().formatJSON("indoorTemperature") << ","
+       << loopPacket.getInsideHumidity().formatJSON("indoorHumidity") << ","
+       << loopPacket.getOutsideTemperature().formatJSON("outdoorTemperature") << ","
+       << loopPacket.getOutsideHumidity().formatJSON("outdoorHumidity") << ","
+       << loop2Packet.getDewPoint().formatJSON("dewPoint") << ","
+       << loop2Packet.getWindChill().formatJSON("windChill") << ","
+       << loop2Packet.getHeatIndex().formatJSON("heatIndex") << ","
+       << loop2Packet.getThsw().formatJSON("thsw") << ","
+       << "{ \"wind\" : { \"speed\" : " << windSpeed() << " }, { \"direction>\" : " << windDirection() << " } },"
+       << "{ \"wind\" : { \"speed\" : " << loop2Packet.getWindGust10Minute() << " }, { \"direction>\" : " << loop2Packet.getWindGustDirection10Minute() << " } },"
+       << "{ \"windSpeed10MinAvg\" : " << windSpeed10MinuteAverage << " },"
+       << "{ \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage() << " },";
+
+    vector<int> pastWindDirsList;
+    pastWindDirections.pastDirections(pastWindDirsList);
+    for (unsigned int i = 0; i < pastWindDirsList.size(); i++)
+       ss << "{ \"windDir" << i + 2 << "\" : " << pastWindDirsList.at(i) << " }, ";
+
+    ss << loopPacket.getBarometricPressure().formatJSON("baroPressure") << ", "
+       << loop2Packet.getAtmPressure().formatJSON("atmPressure") << "}, "
+       << "{ \"baroTrend\" : \"" << loopPacket.getBaroTrendString() << "\" }, "
+       << "{ \"rainRate\" : " << loopPacket.getRainRate() << "}, "
+       << "{ \"rainToday\" : " << loopPacket.getDayRain() << "}, "
+       << "{ \"rain15Minute\" : " << loop2Packet.getRain15Minute() << "}, "
+       << "{ \"rainHour\" : " << loop2Packet.getRainHour() << "}, "
+       << "{ \"rain24Hour\" : " << loop2Packet.getRain24Hour() << "}, "
+       << "{ \"rainMonth\" : " << loopPacket.getMonthRain() << "}, "
+       << "{ \"rainWeatherYear\" : " << loopPacket.getYearRain() << "}, "
+       << loopPacket.getSolarRadiation().formatJSON("solarRadiation") << ", ";
+
+    if (loopPacket.getDayET() > 0.0)
+        ss << "{ \"dayET\" : " << loopPacket.getDayET() << " }, ";
+
+    if (loopPacket.getMonthET() > 0.0)
+        ss << "{ \"monthET\" : " << loopPacket.getMonthET() << " }, ";
+
+    if (loopPacket.getYearET() > 0.0)
+        ss << "{ \"yearET\" : " << loopPacket.getYearET() << " }, ";
+
+    ss << loopPacket.getUvIndex().formatJSON("uvIndex") << " }, ";
+
+    if (loopPacket.isStormOngoing())
+        ss << "{ \"stormStart\" : \"" << Weather::formatDate(loopPacket.getStormStart()) << "\" }, "
+           << "{ \"stormRain\" : " << loopPacket.getStormRain() << " }, ";
+
+
+    ss << "{ \"forecastRule\" : \"" << ForecastRule::forecastString(loopPacket.getForecastRuleIndex()) << "\" }, "
+        << "{ \"forecast\" : \"" << loopPacket.getForecastIconString() << "\" }";
+
+    /*
+    ss << "<extraTemperatures>";
+    for (int i = 0; i < VP2Constants::MAX_EXTRA_TEMPERATURES; i++) {
+        if (loopPacket.getExtraTemperature(i).isValid()) {
+            ss << "<temperature><index>" << i << "</index><value>" << loopPacket.getExtraTemperature(i).getValue() << "</value></temperature>";
+        }
+    }
+    ss << "</extraTemperatures>";
+
+
+    ss << "<extraHumidities>";
+    for (int i = 0; i < VP2Constants::MAX_EXTRA_HUMIDITIES; i++) {
+        if (loopPacket.getExtraHumidity(i).isValid())
+            ss << "<humidity><index>" << i << "</index><value>" << loopPacket.getExtraHumidity(i).getValue() << "</value></humidity>";
+    }
+    ss << "</extraHumidities>";
+
+    ss << "<soilMoistures>";
+    for (int i = 0; i < VP2Constants::MAX_SOIL_MOISTURES; i++) {
+        if (loopPacket.isSoilMoistureValid(i)) {
+            ss << "<entry><key>" << 600 + i << "</key><value><sensorId>" << 600 + i << "</sensorId><sensorType>SOIL_MOISTURE</sensorType>"
+               << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"soilMoisture\">"
+               << loopPacket.getSoilMoisture(i) << "</measurement></value></entry>";
+        }
+    }
+    ss << "</soilMoistures>";
+
+    ss << "<leafWetnesses>";
+    for (int i = 0; i < VP2Constants::MAX_LEAF_WETNESSES; i++) {
+        if (loopPacket.isLeafWetnessValid(i)) {
+            ss << "<entry><key>" << 500 + i << "</key><value><sensorId>" << 500 + i << "</sensorId><sensorType>LEAF_WETNESS</sensorType>"
+               << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"leafWetness\">"
+               << loopPacket.getLeafWetness(i) << "</measurement></value></entry>";
+        }
+    }
+    ss << "</leafWetnesses>";
+    */
+
+    ss << "}";
 
     return ss.str();
 }

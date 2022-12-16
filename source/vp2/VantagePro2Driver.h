@@ -59,6 +59,13 @@ public:
     bool initialize();
 
     /**
+     * Retrieve the configuration data from the console.
+     *
+     * @return True if all of the configuration data was retrieved
+     */
+     bool retrieveConfiguration();
+
+    /**
      * Close and open the station.
      */
     bool reopenStation();
@@ -100,12 +107,12 @@ private:
     ArchiveManager &          archiveManager;
     EventManager &            eventManager;
     bool                      exitLoop;
-    bool                      receivedFirstLoopPacket;
     int                       nextRecord;
     int                       previousNextRecord;
     DateTime                  lastArchivePacketTime;
     DateTime                  consoleTimeSetTime;
-    DateTime                  sensorStationSendTime;
+    //DateTime                  sensorStationSendTime;
+    //bool                      receivedFirstLoopPacket;
     VP2Logger                 log;
 };
 

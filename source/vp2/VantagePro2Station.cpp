@@ -44,7 +44,7 @@ static const std::string WAKEUP_RESPONSE = std::string(1, VP2Constants::LINE_FEE
 // Testing Commands
 //
 static const std::string TEST_CMD = "TEST";                          // Sends the string "TEST\n" back
-//static const std::string STATION_TYPE_CMD = "WRD\0x12\0x4D";       // Responds with a weather station type that is backward compatible with earlier Davis weather products
+static const std::string STATION_TYPE_CMD = "WRD\0x12\0x4D";         // Responds with the weather station type. This command is backward compatible with earlier Davis weather products.
 static const std::string RECEIVE_CHECK_CMD = "RXCHECK";              // Console diagnostics report
 static const std::string RXTEST_CMD = "RXTEST";                      // Move console to main current conditions screen
 static const std::string FIRMWARE_DATE_CMD = "VER";                  // Firmware date
@@ -54,7 +54,7 @@ static const std::string FIRMWARE_VERSION_CMD = "NVER";              // Get the 
 //
 // Current Data Commands
 //
-//static const std::string LOOP_CMD = "LOOP";                        // Get the current data values, alarms, battery status, etc. through the LOOP packet. Note that the LPS command renders this superfluous.
+static const std::string LOOP_CMD = "LOOP";                          // Get the current data values, alarms, battery status, etc. through the LOOP packet. Note that the LPS command renders this superfluous.
 static const std::string LPS_CMD = "LPS 3";                          // Get the current values through both the LOOP and LOOP2 packets
 static const std::string HIGH_LOW_CMD = "HILOWS";                    // Get the high and low that includes daily, monthly and yearly
 static const std::string PUT_YEARLY_RAIN_CMD = "PUTRAIN";            // Set the yearly rainfall
@@ -65,7 +65,6 @@ static const std::string PUT_YEARLY_ET_CMD = "PUTET";                // Set the 
 //
 static const std::string DUMP_ARCHIVE_CMD = "DMP";                   // Dump the entire archive
 static const std::string DUMP_AFTER_CMD = "DMPAFT";                  // Dump the archive after a given date/time
-
 
 //
 // EEPROM Commands
@@ -104,8 +103,8 @@ static const std::string SET_BAUD_RATE_CMD = "BAUD";                 // Sets the
 static const std::string SET_TIME_CMD = "SETTIME";                   // Sets the time and date on the console
 static const std::string GET_TIME_CMD = "GETTIME";                   // Retrieves the current time and date on the Vantage console. Data is sent in binary format
 static const std::string SET_ARCHIVE_PERIOD_CMD = "SETPER";          // Set how often the console saves an archive record
-//static const std::string STOP_ARCHIVING_CMD = "STOP";              // Disables the creation of archive records
-//static const std::string START_ARCHIVING_CMD = "START";            // Enables the create of archive records
+static const std::string STOP_ARCHIVING_CMD = "STOP";              // Disables the creation of archive records
+static const std::string START_ARCHIVING_CMD = "START";            // Enables the create of archive records
 static const std::string REINITIALIZE_CMD = "NEWSETUP";              // Reinitialize the console after making any significant changes to the console's configuration
 static const std::string CONTROL_LAMP_CMD = "LAMPS";                 // Turn on/off the console's light
 
@@ -131,6 +130,7 @@ static const std::string TEST_RESPONSE = "TEST" + std::string(1, VP2Constants::L
 VantagePro2Station::VantagePro2Station(const string & portName, int baudRate) :
                                             serialPort(portName, baudRate),
                                             callback(nullptr),
+                                            stationType(VANTAGE_PRO_2),
                                             consoleBatteryVoltage(0.0),
                                             baudRate(baudRate),
                                             rainCollectorSize(0.0),
@@ -156,10 +156,7 @@ VantagePro2Station::setCallback(Callback & callback) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantagePro2Station::openStation() {
-    if (!serialPort.open())
-        return false;
-    else
-        return initialize();
+    return serialPort.open();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +180,6 @@ VantagePro2Station::wakeupStation() {
         //
         // After sending the wakeup command the console will respond with <LF><CR>
         //
-        //if (serialPort.read(buffer, 2) && (char)buffer[0] == VP2Constants::LINE_FEED && (char)buffer[1] == VP2Constants::CARRIAGE_RETURN) {
         if (serialPort.read(buffer, 2) && buffer[0] == WAKEUP_RESPONSE[0] && buffer[1] == WAKEUP_RESPONSE[1]) {
             awake = true;
             log.log(VP2Logger::VP2_INFO) << "Console is awake" << endl;
@@ -195,10 +191,12 @@ VantagePro2Station::wakeupStation() {
     return awake;
 }
 
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantagePro2Station::initialize() {
+VantagePro2Station::retrieveConfigurationData() {
     if (!wakeupStation())
         return false;
 
@@ -272,6 +270,33 @@ VantagePro2Station::retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport & r
                                                &report.syncCount,
                                                &report.maxPacketSequence,
                                                &report.crcErrorCount);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantagePro2Station::retrieveStationType() {
+    if (!sendAckedCommand(STATION_TYPE_CMD))
+        return false;
+
+    byte stationTypeByte;
+    if (!serialPort.read(&stationTypeByte, 1))
+        return false;
+
+    stationType = static_cast<StationType>(stationTypeByte);
+
+    std::string stationTypeName;
+    if (stationType == VANTAGE_PRO_2)
+        stationTypeName = "Vantage Pro 2";
+    else if (stationType == VANTAGE_VUE)
+        stationTypeName = "Vantage Vue";
+    else
+        stationTypeName = "UNKNOWN";
+
+    log.log(VP2Logger::VP2_INFO) << "Retrieved station type of " << stationTypeName << endl;
+
 
     return true;
 }
@@ -383,6 +408,22 @@ VantagePro2Station::currentValuesLoop(int records) {
         }
 
         //
+        // Build a list of past wind directions. This is to mimic what is shown on the
+        // console
+        //
+        pastWindDirections.addDirection(loopPacket.getWindDirection());
+
+        //
+        // After the first pass through the loop, send the current weather data
+        // after each loop packet and loop2 packet.
+        //
+        if (i > 0) {
+            currentWeather.setLoopData(loopPacket);
+            currentWeather.setWindDirections(pastWindDirections);
+            terminateLoop = callback->processCurrentWeather(currentWeather);
+        }
+
+        //
         // Per the Vantage Pro serial communication document, sleep 2 seconds between
         // the loop the loop 2 packets
         // TBD Removed the sleep as the read has a timeout built into it
@@ -396,13 +437,7 @@ VantagePro2Station::currentValuesLoop(int records) {
         //
         // Build a current weather message from the loop packets
         //
-        currentWeather.setData(loopPacket, loop2Packet, pastWindDirs);
-
-        //
-        // Build a list of past wind directions. This is to mimic what is shown on the
-        // console
-        //
-        pastWindDirs.addHeading(loopPacket.getWindDirection());
+        currentWeather.setLoop2Data(loop2Packet);
 
         //
         // Send the message for processing
@@ -425,6 +460,23 @@ VantagePro2Station::currentValuesLoop(int records) {
     //
     if (terminateLoop || resetNeeded)
         wakeupStation();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantagePro2Station::retrieveLoopPacket(LoopPacket & loopPacket) {
+    ostringstream command;
+    command << LOOP_CMD << " 1";
+
+    if (!sendAckedCommand(command.str()))
+        return false;
+
+    if (!readLoopPacket(loopPacket)) {
+        return false;
+    }
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -857,6 +909,22 @@ VantagePro2Station::updateArchivePeriod(VP2Constants::ArchivePeriod period) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
+VantagePro2Station::startArchiving() {
+    log.log(VP2Logger::VP2_INFO) << "Starting to archive" << endl;
+    return sendAckedCommand(START_ARCHIVING_CMD);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantagePro2Station::stopArchiving() {
+    log.log(VP2Logger::VP2_INFO) << "Stopping archiving" << endl;
+    return sendAckedCommand(STOP_ARCHIVING_CMD);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
 VantagePro2Station::initializeSetup() {
     log.log(VP2Logger::VP2_INFO) << "Reinitializing console" << endl;
     return sendAckedCommand(REINITIALIZE_CMD);
@@ -995,10 +1063,10 @@ VantagePro2Station::readLoopPacket(LoopPacket & loopPacket) {
     // First time through determine what sensors are attached to the weather station based on the valid data in
     // the LOOP packet.
     //
-    if (!firstLoopPacketReceived) {
-        firstLoopPacketReceived = true;
-        //Sensor::detectSensors(loopPacket, sensors);
-    }
+    //if (!firstLoopPacketReceived) {
+    //    firstLoopPacketReceived = true;
+    //    //Sensor::detectSensors(loopPacket, sensors);
+    //}
 
     //
     // Save the battery voltage of the console

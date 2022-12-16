@@ -42,20 +42,19 @@ public:
      * 
      * @param heading The direction of the non-zero speed wind
      */
-    void addHeading(Heading heading);
+    void addDirection(Heading heading);
 
     /**
      * Process a wind sample with a zero speed.
      */
     void processCalmWindSample();
 
-
     /**
      * Return the past heading tendencies.
      * 
      * @param headings The directions that the wind has been blowing most often in the last hour
      */
-    void pastHeadings(std::vector<int> & headings) const;
+    void pastDirections(std::vector<int> & headings) const;
 
 private:
     void removeOldSamples(DateTime time);
@@ -64,7 +63,7 @@ private:
     static constexpr Heading MAX_HEADING = 360.0;
 
     /**
-     * Each wind slice (N, NNE, NE...) will be tracked for direction tendency
+     * Each wind slice (N, NNE, NE...) will be tracked for direction tendency.
      */
     static const int NUM_SLICES = 16;
 
@@ -82,12 +81,12 @@ private:
     static const int AGE_SPAN = 10 * 60;
 
     /**
-     * The number of samples needed to be part of the direction tendencies
+     * The number of samples needed to be part of the direction tendencies.
      */
     static const int SECONDS_PER_SAMPLE = 4;
 
     /**
-     * Number of directions that are reported to the collector.
+     * Number of directions that are reported in the current weather.
      */
     static const int MAX_PAST_HEADINGS = 4;
 

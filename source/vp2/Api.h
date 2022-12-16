@@ -18,6 +18,7 @@
 #define API_H
 
 #include "Weather.h"
+#include "SensorStation.h"
 /**
  * Class(es) for the RESTful API for the Vantage Pro 2 service.
  */
@@ -36,6 +37,10 @@ public:
      * This data should be requested the first time the software starts.
      */
     void requestSensorStationIds();
+
+    void setSensorStationType(int id, const std::string & sensorStationTypeName);
+
+    void requestSensorStationTypeChoices();
 
     /**
      * Request the current weather, that will be sent in the response.

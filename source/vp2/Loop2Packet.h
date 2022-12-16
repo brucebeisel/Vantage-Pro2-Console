@@ -45,10 +45,12 @@ public:
      */
     bool decodeLoop2Packet(const byte[]);
 
+    const Measurement<Speed> &       getWindSpeed() const;
+    const Measurement<Heading> &     getWindDirection() const;
     const Measurement<Speed> &       getWindGust10Minute() const;
-    const Measurement<Heading> &     getWindGustHeading10Minute() const;
-    const Measurement<Speed> &       getWindSpeed2MinuteAvg() const;
-    const Measurement<Speed> &       getWindSpeed10MinuteAvg() const;
+    const Measurement<Heading> &     getWindGustDirection10Minute() const;
+    const Measurement<Speed> &       getWindSpeed2MinuteAverage() const;
+    const Measurement<Speed> &       getWindSpeed10MinuteAverage() const;
     Rainfall                         getRainHour() const;
     Rainfall                         getRain15Minute() const;
     Rainfall                         getRain24Hour() const;
@@ -61,10 +63,12 @@ public:
 private:
     static const int LOOP2_PACKET_TYPE = 1;
 
+    Measurement<Speed>       windSpeed;
+    Measurement<Heading>     windDirection;
     Measurement<Speed>       windGust10Minute;
-    Measurement<Heading>     windGustHeading10Minute;
-    Measurement<Speed>       windSpeed2MinuteAvg;
-    Measurement<Speed>       windSpeed10MinuteAvg;
+    Measurement<Heading>     windGustDirection10Minute;
+    Measurement<Speed>       windSpeed2MinuteAverage;
+    Measurement<Speed>       windSpeed10MinuteAverage;
     Rainfall                 rain15Minute;
     Rainfall                 rainHour;
     Rainfall                 rain24Hour;

@@ -104,6 +104,16 @@ public:
     };
 
     /**
+     * The station types supported by this software. Note that there are many more
+     * legacy value that include the Vantage Pro, which reports the same value as
+     * the Vantage Pro 2.
+     */
+    enum StationType {
+        VANTAGE_PRO_2 = 16,
+        VANTAGE_VUE = 17
+    };
+
+    /**
      * Constructor.
      * 
      * @param portName The name of he serial port to open
@@ -143,9 +153,9 @@ public:
     bool wakeupStation();
 
     /**
-     * Read any data from the station that is needed for other commands, such as the archive period or rain collector.
+     * Read the configuration data from the station that is needed for other commands, such as the archive period or rain collector.
      */
-    bool initialize();
+    bool retrieveConfigurationData();
 
     //
     // The following methods correspond to the commands in section VIII of the Vantage Serial Protocol Document, version 2.6.1
@@ -171,6 +181,13 @@ public:
      * @return True if the report was successfully retrieved
      */
     bool retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport & report);
+
+    /**
+     * Retrieve the type of station of this console.
+     *
+     * @return True if the station type was retrieved successfully
+     */
+    bool retrieveStationType();
 
     /**
      * Move the console from the "Receiving from..." screen to the current condition screen and reset
@@ -220,6 +237,14 @@ public:
      * @param records The number of times to execute the loop before returning
      */
     void currentValuesLoop(int records);
+
+    /**
+     * Get a single LOOP packet.
+     *
+     * @param loopPacket Will contain the LOOP packet data if successful
+     * @return True if the LOOP packet was read successfully
+     */
+    bool retrieveLoopPacket(LoopPacket & loop);
 
     /**
      * Retrieve the current high/low packet from the console.
@@ -399,6 +424,9 @@ public:
      * @return True if successful
      */
     bool updateArchivePeriod(VP2Constants::ArchivePeriod period);
+
+    bool startArchiving();
+    bool stopArchiving();
 
 private:
     /**
@@ -583,10 +611,11 @@ public:
     bool retrieveSensorStationInfo();
 private:
     Callback *                 callback;
+    StationType                stationType;
     SerialPort                 serialPort;               // The serial port object that communicates with the console
     bool                       firstLoopPacketReceived;  // Whether a LOOP packet has been received
     int                        baudRate;                 // The baud rate for communicating with the console
-    WindDirectionSlices        pastWindDirs;             // The past wind direction measurements used to determine the arrows on the wind display
+    WindDirectionSlices        pastWindDirections;       // The past wind direction measurements used to determine the arrows on the wind display
     CurrentWeather             currentWeather;           // The most recent current weather data
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
     float                      consoleBatteryVoltage;    // The console battery voltage received in the LOOP packet

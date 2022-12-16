@@ -267,8 +267,8 @@ LoopPacket::getWindSpeed() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Speed> &
-LoopPacket::getAvgWindSpeed10Min() const {
-    return avgWindSpeed10Min;
+LoopPacket::getWindSpeed10MinuteAverage() const {
+    return windSpeed10MinuteAverage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -507,7 +507,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     VP2Decoder::decode16BitTemperature(buffer, 12, outsideTemperature);
 
     windSpeed = VP2Decoder::decodeWindSpeed(buffer, 14);
-    avgWindSpeed10Min = VP2Decoder::decodeWindSpeed(buffer, 15);
+    windSpeed10MinuteAverage = VP2Decoder::decodeWindSpeed(buffer, 15);
     windDirection = VP2Decoder::decodeWindDirection(buffer, 16);
 
     for (int i = 0; i < VP2Constants::MAX_EXTRA_TEMPERATURES; i++)

@@ -129,13 +129,24 @@ namespace VP2Constants {
     //
     // Maximum counts
     //
-    static const int MAX_SENSOR_STATIONS = 16;
-    static const int MAX_EXTRA_TEMPERATURES = 7;
-    static const int MAX_EXTRA_HUMIDITIES = 7;
-    static const int MAX_SOIL_TEMPERATURES = 4;
-    static const int MAX_SOIL_MOISTURES = 4;
-    static const int MAX_LEAF_TEMPERATURES = 4;
-    static const int MAX_LEAF_WETNESSES = 4;
+    static constexpr int MAX_INTEGRATED_SENSOR_STATIONS = 1;
+    static constexpr int MAX_ANEMOMETER_STATIONS = 1;
+    //
+    // Per the serial protocol ICD, you cannot have two stations with both leaf and soil moisture sensors.
+    // One can have both, but if there are two stations, one must be leaf, the other soil.
+    // I am not sure how the console knows this and how it would handle the unsupported configuration.
+    //
+    static constexpr int MAX_LEAF_SOIL_MOISTURE_TEMPERATURE_STATIONS = 2;
+    static constexpr int MAX_TEMPERATURE_STATIONS = 8;
+    static constexpr int MAX_TEMPERATURE_HUMIDITY_STATIONS = 8;
+
+    static constexpr int MAX_SENSOR_STATIONS = 8;
+    static constexpr int MAX_EXTRA_TEMPERATURES = 7;
+    static constexpr int MAX_EXTRA_HUMIDITIES = 7;
+    static constexpr int MAX_SOIL_TEMPERATURES = 4;
+    static constexpr int MAX_SOIL_MOISTURES = 4;
+    static constexpr int MAX_LEAF_TEMPERATURES = 4;
+    static constexpr int MAX_LEAF_WETNESSES = 4;
 
     //
     // Common constants
@@ -147,10 +158,10 @@ namespace VP2Constants {
     static constexpr Pressure           BAROMETER_SCALE = 1000.0;
     static constexpr Speed              AVG_WIND_SPEED_SCALE = 10.0;
     static constexpr int                YEAR_OFFSET = 2000;
-    static constexpr UvIndex            UV_INDEX_SCALE= 10.0;
-    static constexpr Evapotranspiration DAY_ET_SCALE= 1000.0;
-    static constexpr Evapotranspiration MONTH_YEAR_ET_SCALE= 100.0;
-    static constexpr Rainfall           STORM_RAIN_SCALE= 100.0;
+    static constexpr UvIndex            UV_INDEX_SCALE = 10.0;
+    static constexpr Evapotranspiration DAY_ET_SCALE = 1000.0;
+    static constexpr Evapotranspiration MONTH_YEAR_ET_SCALE = 100.0;
+    static constexpr Rainfall           STORM_RAIN_SCALE = 100.0;
 
     static const int NORTH_HEADING_VALUE = 360;
 

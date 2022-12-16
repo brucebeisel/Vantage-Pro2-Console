@@ -45,6 +45,14 @@ public:
         UNKNOWN = 99       // The sensor station has been heard, but not identified
     };
 
+    enum VantageVueSensorStationType {
+        VUE_INTEGRATED_SENSOR_STATION = 0,
+        VUE_ANEMOMETER = 4,
+        VP2_INTEGRATED_SENSOR_STATION = 5,
+        VUE_NO_STATION = 10,
+        VUE_UNKNOWN = 99       // The sensor station has been heard, but not identified
+    };
+
     enum RepeaterId {
         NO_REPEATER = 0,
         REPEATER_A = 8,
@@ -66,6 +74,8 @@ public:
      * @param sensorTransmitterChannel The channel on which the station is transmitting.  The channel is usually determined by
      *                                 DIP switches within the hardware. Note that sensor stations may be heard, but are not
      *                                 part of this Vantage network.
+     * @param repeaterId               The repeater through which this sensor station is transmitting
+     * @param hasAnemometer            Whether this station has an anemometer which will determine if link quality is calculated
      */
     SensorStation(SensorStationType type, int sensorTransmitterChannel, RepeaterId repeaterId = NO_REPEATER, bool hasAnemometer = false);
 
@@ -132,6 +142,9 @@ public:
 
     int getTemperatureIndex() const;
     int getHumidityIndex() const;
+
+    static const std::string & sensorStationTypeToString(SensorStationType sensorStationType);
+    static bool lookupSensorStationType(const std::string & sensorStationName, SensorStationType & sensorStationType);
 
     /**
      * Build a message to send to the collector that reports which sensor stations are connected (wired or wireless) to the console.
