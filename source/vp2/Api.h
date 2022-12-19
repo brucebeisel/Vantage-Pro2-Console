@@ -20,7 +20,7 @@
 #include "Weather.h"
 #include "SensorStation.h"
 /**
- * Class(es) for the RESTful API for the Vantage Pro 2 service.
+ * Class(es) for the RESTful API for the Vantage weather station service.
  */
 
 namespace vp2 {
@@ -33,13 +33,32 @@ public:
     void processCommand(std::string & command);
 
     /**
+     * Request the initialization state of the console.
+     * This is used to determine if configuration parameters like
+     * latitude/longitude/altitude, wind cup size need to be set.
+     */
+    void requestConsoleInitializedState();
+
+    /**
+     * Request the type of console to which this software is connected.
+     */
+    void requestConsoleType();
+
+    /**
      * Request the list of sensor stations that the console can hear.
      * This data should be requested the first time the software starts.
      */
     void requestSensorStationIds();
 
+    /**
+     * Set the station type for the given station ID.
+     */
     void setSensorStationType(int id, const std::string & sensorStationTypeName);
 
+    /**
+     * Request the sensor station type choice list.
+     * The list returned is determined by the type of console.
+     */
     void requestSensorStationTypeChoices();
 
     /**

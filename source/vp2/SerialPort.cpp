@@ -92,7 +92,7 @@ SerialPort::write(const void * buffer, int nbytes) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-SerialPort::read(byte buffer[], int index, int nbytes) {
+SerialPort::read(byte buffer[], int index, int nbytes, int timeoutMillis) {
     DWORD dwRead;
     if (!ReadFile(commPort, &buffer[index], nbytes, &dwRead, nullptr)) {
         log.log(VP2Logger::VP2_INFO) << "Read " << dwRead << " bytes (failed)" << endl;
@@ -162,12 +162,15 @@ SerialPort::write(const void * buffer, int nbytes) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-SerialPort::read(byte buffer[], int index, int nbytes) {
+SerialPort::read(byte buffer[], int index, int nbytes, int timeoutMillis) {
     ssize_t bytesRead = 0;
-    struct timeval timeout = {2, 500000};
+    struct timeval timeout;
     fd_set readSet;
     FD_ZERO(&readSet);
     FD_SET(commPort, &readSet);
+
+    timeout.tv_sec = timeoutMillis / 1000;
+    timeout.tv_usec = (timeoutMillis % 1000) * 1000;
 
     int numFdsSet = select(commPort + 1, &readSet, nullptr, nullptr, &timeout);
     if (numFdsSet < 0) {

@@ -44,6 +44,13 @@ Loop2Packet::~Loop2Packet() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Speed> &
+Loop2Packet::getWindSpeed() const {
+    return windSpeed;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const Measurement<Speed> &
 Loop2Packet::getWindGust10Minute() const {
     return windGust10Minute;
 }
@@ -51,22 +58,29 @@ Loop2Packet::getWindGust10Minute() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Heading> &
+Loop2Packet::getWindDirection() const {
+    return windDirection;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const Measurement<Heading> &
 Loop2Packet::getWindGustHeading10Minute() const {
-    return windGustHeading10Minute;
+    return windGustDirection10Minute;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Speed> &
-Loop2Packet::getWindSpeed2MinuteAvg() const {
-    return windSpeed2MinuteAvg;
+Loop2Packet::getWindSpeed2MinuteAverage() const {
+    return windSpeed2MinuteAverage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Speed> &
-Loop2Packet::getWindSpeed10MinuteAvg() const {
-    return windSpeed10MinuteAvg;
+Loop2Packet::getWindSpeed10MinuteAverage() const {
+    return windSpeed10MinuteAverage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -156,10 +170,10 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
         return false;
     }
 
-    windSpeed10MinuteAvg = VP2Decoder::decodeAvgWindSpeed(buffer, 18);
-    windSpeed2MinuteAvg = VP2Decoder::decodeAvgWindSpeed(buffer, 20);
+    windSpeed10MinuteAverage = VP2Decoder::decodeAverageWindSpeed(buffer, 18);
+    windSpeed2MinuteAverage = VP2Decoder::decodeAverageWindSpeed(buffer, 20);
     windGust10Minute = VP2Decoder::decode16BitWindSpeed(buffer, 22);
-    windGustHeading10Minute = VP2Decoder::decodeWindDirection(buffer, 24);
+    windGustDirection10Minute = VP2Decoder::decodeWindDirection(buffer, 24);
 
     rain15Minute = VP2Decoder::decodeRain(buffer, 52);
     rainHour = VP2Decoder::decodeRain(buffer, 54);

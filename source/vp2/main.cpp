@@ -32,7 +32,7 @@
 using namespace std;
 using namespace vp2;
 
-atomic_bool signalCaught = false;
+atomic<bool> signalCaught(false);
 
 //#ifndef WIN32
 ////////////////////////////////////////////////////////////////////////////////

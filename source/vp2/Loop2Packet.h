@@ -27,6 +27,8 @@ namespace vp2 {
  */
 class Loop2Packet {
 public:
+    static const int LOOP2_PACKET_SIZE = 99;
+
     /**
      * Constructor.
      */

@@ -103,8 +103,8 @@ static const std::string SET_BAUD_RATE_CMD = "BAUD";                 // Sets the
 static const std::string SET_TIME_CMD = "SETTIME";                   // Sets the time and date on the console
 static const std::string GET_TIME_CMD = "GETTIME";                   // Retrieves the current time and date on the Vantage console. Data is sent in binary format
 static const std::string SET_ARCHIVE_PERIOD_CMD = "SETPER";          // Set how often the console saves an archive record
-static const std::string STOP_ARCHIVING_CMD = "STOP";              // Disables the creation of archive records
-static const std::string START_ARCHIVING_CMD = "START";            // Enables the create of archive records
+static const std::string STOP_ARCHIVING_CMD = "STOP";                // Disables the creation of archive records
+static const std::string START_ARCHIVING_CMD = "START";              // Enables the create of archive records
 static const std::string REINITIALIZE_CMD = "NEWSETUP";              // Reinitialize the console after making any significant changes to the console's configuration
 static const std::string CONTROL_LAMP_CMD = "LAMPS";                 // Turn on/off the console's light
 
@@ -136,8 +136,7 @@ VantagePro2Station::VantagePro2Station(const string & portName, int baudRate) :
                                             rainCollectorSize(0.0),
                                             archivePeriod(0),
                                             windSensorStationId(0),
-                                            log(VP2Logger::getLogger("VantagePro2Station")),
-                                            firstLoopPacketReceived(false) {
+                                            log(VP2Logger::getLogger("VantagePro2Station")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +174,7 @@ VantagePro2Station::wakeupStation() {
     for (int i = 0; i < WAKEUP_TRIES && !awake; i++) {
         log.log(VP2Logger::VP2_DEBUG1) << "Attempting to wakeup console" << endl;
         serialPort.write(WAKEUP_COMMAND);
-        Weather::sleep(WAKEUP_WAIT);
+        //Weather::sleep(WAKEUP_WAIT);
       
         //
         // After sending the wakeup command the console will respond with <LF><CR>
@@ -391,6 +390,9 @@ VantagePro2Station::currentValuesLoop(int records) {
     bool terminateLoop = false;
     bool resetNeeded = false;
 
+    if (stationIds.size() == 0)
+        log.log(VP2Logger::VP2_WARNING) << "Reading current values without any sensor stations connected" << endl;
+
     ostringstream command;
     command << LPS_CMD << " " << (records * 2);
 
@@ -563,7 +565,7 @@ VantagePro2Station::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     //
     struct tm tm;
     Weather::localtime(time, tm);
-    int datestamp = tm.tm_mday + ((tm.tm_mon + 1) * 32) + ((tm.tm_year + 1900 - VP2_YEAR_OFFSET) * 512);
+    int datestamp = tm.tm_mday + ((tm.tm_mon + 1) * 32) + ((tm.tm_year + 1900 - VANTAGE_YEAR_OFFSET) * 512);
     int timestamp = (tm.tm_hour * 100) + tm.tm_min;
 
     byte dateTimeBytes[TIME_LENGTH + CRC_BYTES];
@@ -1053,7 +1055,7 @@ VantagePro2Station::readLoopPacket(LoopPacket & loopPacket) {
     //
     // Read and decode the LOOP packet
     //
-    if (!serialPort.read(buffer, LOOP_PACKET_SIZE))
+    if (!serialPort.read(buffer, LoopPacket::LOOP_PACKET_SIZE))
         return false;
 
     if (!loopPacket.decodeLoopPacket(buffer))
@@ -1089,7 +1091,7 @@ VantagePro2Station::readLoopPacket(LoopPacket & loopPacket) {
 bool
 VantagePro2Station::readLoop2Packet(Loop2Packet & loop2Packet) {
     log.log(VP2Logger::VP2_DEBUG1) << "Reading LOOP2 Packet" << endl;
-    if (!serialPort.read(buffer, LOOP_PACKET_SIZE))
+    if (!serialPort.read(buffer, Loop2Packet::LOOP2_PACKET_SIZE))
         return false;
 
     if (!loop2Packet.decodeLoop2Packet(buffer))

@@ -481,15 +481,14 @@ private:
     static constexpr int BYTES_PER_ARCHIVE_RECORD = 52;  // The size of each archive record
     static constexpr int RECORDS_PER_ARCHIVE_PAGE = 5;   // The number of archive records per archive page
     static constexpr int DUMP_AFTER_RESPONSE_LENGTH = 4; // The length of the response to the DUMP AFTER command
-    static constexpr int EEPROM_READ_LINE_LENGTH = 4; // The length of the response to the DUMP AFTER command
+    static constexpr int EEPROM_READ_LINE_LENGTH = 4;    // The length of the response to the EEPROM READ command
 
-    static constexpr int LOOP_PACKET_SIZE = 99;
     static constexpr int TIME_RESPONSE_LENGTH = 6;
     static constexpr int TIME_LENGTH = 4;
     static constexpr int SET_TIME_LENGTH = 6;
     static constexpr int LOOP_PACKET_WAIT = 2000;
     static constexpr int WAKEUP_WAIT = 1000;
-    static constexpr int VP2_YEAR_OFFSET = 2000;
+    static constexpr int VANTAGE_YEAR_OFFSET = 2000;
     static constexpr int HILOW_PACKET_SIZE = 436;
     static constexpr int NO_VALUE = 0xFF;
     static constexpr int EEPROM_DATA_BLOCK_SIZE = 4096;
@@ -613,7 +612,7 @@ private:
     Callback *                 callback;
     StationType                stationType;
     SerialPort                 serialPort;               // The serial port object that communicates with the console
-    bool                       firstLoopPacketReceived;  // Whether a LOOP packet has been received
+    //bool                       firstLoopPacketReceived;  // Whether a LOOP packet has been received
     int                        baudRate;                 // The baud rate for communicating with the console
     WindDirectionSlices        pastWindDirections;       // The past wind direction measurements used to determine the arrows on the wind display
     CurrentWeather             currentWeather;           // The most recent current weather data

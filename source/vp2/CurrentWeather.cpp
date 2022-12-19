@@ -192,7 +192,7 @@ CurrentWeather::formatJSON() const {
        << loop2Packet.getWindChill().formatJSON("windChill") << ","
        << loop2Packet.getHeatIndex().formatJSON("heatIndex") << ","
        << loop2Packet.getThsw().formatJSON("thsw") << ","
-       << "{ \"wind\" : { \"speed\" : " << windSpeed() << " }, { \"direction>\" : " << windDirection() << " } },"
+       << "{ \"wind\" : { \"speed\" : " << windSpeed << " }, { \"direction>\" : " << windDirection << " } },"
        << "{ \"wind\" : { \"speed\" : " << loop2Packet.getWindGust10Minute() << " }, { \"direction>\" : " << loop2Packet.getWindGustDirection10Minute() << " } },"
        << "{ \"windSpeed10MinAvg\" : " << windSpeed10MinuteAverage << " },"
        << "{ \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage() << " },";

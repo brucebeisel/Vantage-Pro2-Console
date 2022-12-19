@@ -62,6 +62,8 @@ public:
         PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER = 0x17
     };
 
+    static const int LOOP_PACKET_SIZE = 99;
+
     /**
      * Constructor.
      */

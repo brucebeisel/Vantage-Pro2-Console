@@ -61,10 +61,12 @@ public:
      * @param buffer The buffer into which the data will be read
      * @param index  The index into the buffer where bytes read will be stored
      * @param nbytes The number of bytes to read
+     * @param timeoutMillis The number of milliseconds to wait for data to be available
      *
      * @return The number of bytes actually read
      */
-    int read(byte * buffer, int index, int nbytes);
+    static const int DEFAULT_TIMEOUT_MILLIS = 2500;
+    int read(byte * buffer, int index, int nbytes, int timeoutMillis = DEFAULT_TIMEOUT_MILLIS);
 
     /**
      * Read from the serial port.
@@ -115,6 +117,7 @@ public:
     bool isOpen() const;
 
 private:
+
     HANDLE      commPort;    // The file descriptor of the open port
     std::string device;     // The name of the serial port to be opened
     int         baudRate;   // The baud rate used to communicate over the serial port

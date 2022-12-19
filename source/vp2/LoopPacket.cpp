@@ -487,7 +487,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
             case STEADY:
             case RISING_SLOWLY:
             case RISING_RAPIDLY:
-                baroTrend = baroTrendValue;
+                baroTrend = static_cast<BaroTrend>(baroTrendValue);
                 break;
             default:
                 log.log(VP2Logger::VP2_ERROR) << "Invalid barometer trend 0x" << hex << (int)buffer[3] << dec << endl;

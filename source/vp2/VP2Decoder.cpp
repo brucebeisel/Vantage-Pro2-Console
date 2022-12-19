@@ -250,7 +250,7 @@ VP2Decoder::decode16BitWindSpeed(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Speed> &
-VP2Decoder::decodeAvgWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
+VP2Decoder::decodeAverageWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != VP2Constants::INVALID_WIND_SPEED)
@@ -264,9 +264,9 @@ VP2Decoder::decodeAvgWindSpeed(const byte buffer[], int offset, Measurement<Spee
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Speed>
-VP2Decoder::decodeAvgWindSpeed(const byte buffer[], int offset) {
+VP2Decoder::decodeAverageWindSpeed(const byte buffer[], int offset) {
     Measurement<Speed> measurement;
-    return decodeAvgWindSpeed(buffer, offset, measurement);
+    return decodeAverageWindSpeed(buffer, offset, measurement);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
