@@ -65,7 +65,7 @@ Loop2Packet::getWindDirection() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Heading> &
-Loop2Packet::getWindGustHeading10Minute() const {
+Loop2Packet::getWindGustDirection10Minute() const {
     return windGustDirection10Minute;
 }
 
