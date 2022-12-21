@@ -155,7 +155,10 @@ SerialPort::close() {
 int
 SerialPort::write(const void * buffer, int nbytes) {
     ssize_t bytesWritten = ::write(commPort, buffer, nbytes);
-    log.log(VP2Logger::VP2_WARNING) << "Write to station failed. Expected=" << nbytes << " Actual=" << bytesWritten << endl;
+
+    if (bytesWritten != nbytes)
+        log.log(VP2Logger::VP2_WARNING) << "Write to station failed. Expected=" << nbytes << " Actual=" << bytesWritten << endl;
+
     return bytesWritten;
 }
 

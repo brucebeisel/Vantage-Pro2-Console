@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <iostream>
 #include <vector>
@@ -88,12 +89,14 @@ VantagePro2Driver::initialize() {
         return false;
     }
 
+    /*
     if (!station.retrieveConfigurationData()) {
         log.log(VP2Logger::VP2_ERROR) << "Failed to retrieve configuration data for weather station" << endl;
         return false;
     }
 
     AlarmManager::getInstance().initialize();
+    */
 
     log.log(VP2Logger::VP2_INFO) << "Initialization complete." << endl;
 
@@ -227,6 +230,7 @@ VantagePro2Driver::mainLoop() {
     if (!initialize())
         return;
 
+    /*
     if (!retrieveConfiguration())
         return;
 
@@ -239,9 +243,21 @@ VantagePro2Driver::mainLoop() {
         log.log(VP2Logger::VP2_ERROR) << "Failed to wake up console after initialization" << endl;
         return;
     }
+    */
 
     while (!exitLoop) {
-        try {
+        //try {
+            usleep(500000);
+            VantagePro2Station::ConsoleDiagnosticReport report;
+            station.retrieveConsoleDiagnosticsReport(report);
+            log.log(VP2Logger::VP2_INFO) << "Diagnostic Report: " << "Packets: " << report.packetCount << "       Missed Packets: " << report.missedPacketCount
+                                         << "      CRC Errors: " << report.crcErrorCount << endl;
+            if (signalCaught.load()) {
+                exitLoop = true;
+            }
+            //exitLoop = true;
+
+            /*
             //
             // If the weather station could not be woken, then close and open
             // the console. It has been observed that on a rare occasion the console
@@ -314,6 +330,7 @@ VantagePro2Driver::mainLoop() {
         catch (std::exception & e) {
             log.log(VP2Logger::VP2_ERROR) << "Caught exception: " << e.what() << endl;     
         } 
+        */
     }
 }
 }

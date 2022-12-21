@@ -44,7 +44,9 @@ static const std::string WAKEUP_RESPONSE = std::string(1, VP2Constants::LINE_FEE
 // Testing Commands
 //
 static const std::string TEST_CMD = "TEST";                          // Sends the string "TEST\n" back
-static const std::string STATION_TYPE_CMD = "WRD\0x12\0x4D";         // Responds with the weather station type. This command is backward compatible with earlier Davis weather products.
+static const byte WRD_BYTE1 = 0x12;
+static const byte WRD_BYTE2 = 0x4D;
+static const std::string STATION_TYPE_CMD = "WRD";                   // Responds with the weather station type. This command is backward compatible with earlier Davis weather products.
 static const std::string RECEIVE_CHECK_CMD = "RXCHECK";              // Console diagnostics report
 static const std::string RXTEST_CMD = "RXTEST";                      // Move console to main current conditions screen
 static const std::string FIRMWARE_DATE_CMD = "VER";                  // Firmware date
@@ -277,12 +279,18 @@ VantagePro2Station::retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport & r
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantagePro2Station::retrieveStationType() {
-    if (!sendAckedCommand(STATION_TYPE_CMD))
+    const char command[] = {'W', 'R', 'D', WRD_BYTE1, WRD_BYTE2, '\0'};
+
+    if (!sendAckedCommand(command))
         return false;
 
+    log.log(VP2Logger::VP2_INFO) << "Reading station type" << endl;
+
     byte stationTypeByte;
-    if (!serialPort.read(&stationTypeByte, 1))
+    if (!serialPort.read(&stationTypeByte, 1)) {
+        log.log(VP2Logger::VP2_ERROR) << "Failed to read station type" << endl;
         return false;
+    }
 
     stationType = static_cast<StationType>(stationTypeByte);
 
