@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@ namespace vp2 {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindSlice::WindSlice() : slice(0), name(""), lowHeading(0.0),
-                         highHeading(0.0), sampleSizeAtDominantTime(0), last10MinuteDominantTime(0) {
+WindSlice::WindSlice() : slice(0), name(""), lowHeading(0.0), sampleCount(0),
+                         highHeading(0.0), last10MinuteDominantTime(0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ WindSlice::WindSlice(int slice, const std::string & name, Heading low, Heading h
                                                                                        name(name),
                                                                                        lowHeading(low),
                                                                                        highHeading(high),
-                                                                                       sampleSizeAtDominantTime(0),
+                                                                                       sampleCount(0),
                                                                                        last10MinuteDominantTime(0) {
 }
 
@@ -77,27 +77,23 @@ WindSlice::isInSlice(Heading heading) const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindSlice::addSample(DateTime time) {
-    samples.insert(samples.begin(), time);
+WindSlice::addSample(DateTime time, Heading heading) {
+    if (isInSlice(heading))
+        sampleCount++;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindSlice::removeOldSamples(DateTime time) {
-   for (vector<DateTime>::iterator it = samples.begin(); it != samples.end(); ++it) {
-        if (*it <= time) {
-            samples.erase(it, samples.end());
-            break;
-        }
-    }
+WindSlice::clearSamples() {
+    sampleCount = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-WindSlice::getSampleSize() const {
-    return samples.size();
+WindSlice::getSampleCount() const {
+    return sampleCount;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,10 +101,6 @@ WindSlice::getSampleSize() const {
 void
 WindSlice::setLast10MinuteDominantTime(time_t time) {
     last10MinuteDominantTime = time;
-    if (time == 0)
-        sampleSizeAtDominantTime = 0;
-    else
-        sampleSizeAtDominantTime = samples.size();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,33 +112,8 @@ WindSlice::getLast10MinuteDominantTime() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
-WindSlice::getSampleSizeAtDominantTime() const {
-    return sampleSizeAtDominantTime;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-operator<(const WindSlice & x, const WindSlice & y) {
-    DateTime timex = x.last10MinuteDominantTime;
-    DateTime timey = y.last10MinuteDominantTime;
-
-    if (timex != timey)
-        return timex > timey;
-    else
-        return x.samples.size() > y.samples.size();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 ostream & operator<<(ostream & os, const WindSlice & slice) {
-    os << "Low: " << slice.lowHeading << " High: " << slice.highHeading << " ";
-    for (vector<DateTime>::const_iterator it = slice.samples.begin(); it != slice.samples.end(); ++it) {
-        os << *it << " ";
-    }
-    os << endl;
-
+    os << "Low: " << slice.lowHeading << " High: " << slice.highHeading << " " << "Sample Count: " << slice.sampleCount;
     return os;
 }
 }

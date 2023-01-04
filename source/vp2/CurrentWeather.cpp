@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,9 +98,11 @@ CurrentWeather::formatXML() const {
        << "<windSpeed2MinuteAverage>" << loop2Packet.getWindSpeed2MinuteAverage() << "</windSpeed2MinAverage>";
 
     vector<int> pastWindDirsList;
-    pastWindDirections.pastDirections(pastWindDirsList);
-    for (unsigned int i = 0; i < pastWindDirsList.size(); i++)
-       ss << "<windDir" << i + 2 << ">" << pastWindDirsList.at(i) << "</windDir" << i + 2 << ">";
+    pastWindDirections.dominantDirectionsForPastHour(pastWindDirsList);
+    for (unsigned int i = 0; i < pastWindDirsList.size(); i++) {
+        int windDirNumber = i + 2;
+        ss << "<windDir" << windDirNumber << ">" << pastWindDirsList.at(i) << "</windDir" << windDirNumber << ">";
+    }
    
     ss << loopPacket.getBarometricPressure().formatXML("baroPressure")
        << loop2Packet.getAtmPressure().formatXML("atmPressure")
@@ -198,7 +200,7 @@ CurrentWeather::formatJSON() const {
        << "{ \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage() << " },";
 
     vector<int> pastWindDirsList;
-    pastWindDirections.pastDirections(pastWindDirsList);
+    pastWindDirections.dominantDirectionsForPastHour(pastWindDirsList);
     for (unsigned int i = 0; i < pastWindDirsList.size(); i++)
        ss << "{ \"windDir" << i + 2 << "\" : " << pastWindDirsList.at(i) << " }, ";
 

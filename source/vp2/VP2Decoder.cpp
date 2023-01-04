@@ -253,7 +253,7 @@ const Measurement<Speed> &
 VP2Decoder::decodeAverageWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VP2Constants::INVALID_WIND_SPEED)
+    if (value16 != VP2Constants::INVALID_16BIT_AVG_WIND_SPEED)
         measurement.setValue(UnitConverter::toMetersPerSecond(static_cast<Speed>(value16) / VP2Constants::AVG_WIND_SPEED_SCALE));
     else
         measurement.invalidate();

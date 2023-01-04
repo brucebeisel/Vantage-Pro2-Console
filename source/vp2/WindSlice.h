@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,26 +80,25 @@ public:
     bool isInSlice(Heading heading) const;
 
     /**
-     * Remove any wind samples that are before the specified time.
-     * 
-     * @param time The time
+     * Remove all wind samples time stamps.
      */
-    void removeOldSamples(DateTime time);
+    void clearSamples();
 
     /**
-     * Add a sample to this slice.
+     * Add a sample to this slice if the heading fall within this slice.
      * A sample is nothing more than a time that the wind was blowing within this slice.
      * 
-     * @param time The time of the wind sample
+     * @param time    The time of the wind sample
+     * @param heading The heading measured at the specified time
      */
-    void addSample(DateTime time);
+    void addSample(DateTime time, Heading heading);
 
     /**
      * Get the number of samples currently stored by this slice.
      * 
      * @return The sample size
      */
-    int getSampleSize() const;
+    int getSampleCount() const;
 
     /**
      * Set the last time this heading was the 10 minute dominant wind direction.
@@ -116,30 +115,17 @@ public:
     time_t getLast10MinuteDominantTime() const;
 
     /**
-     * Get the sample size when this slice was last declared the dominant direction.
-     *
-     * @return The sample size when this slice was last declared the dominant direction
-     */
-    int getSampleSizeAtDominantTime() const;
-
-    /**
-     * Less than operator needed for sorting.
-     */
-    friend bool operator<(const WindSlice & lhs, const WindSlice & rhs);
-
-    /**
      * ostream operator for output.
      */
     friend std::ostream & operator<<(std::ostream &, const WindSlice &);
 
 private:
-    int                   slice;
-    std::string           name;
-    Heading               lowHeading;
-    Heading               highHeading;
-    std::vector<DateTime> samples;
-    time_t                last10MinuteDominantTime;
-    int                   sampleSizeAtDominantTime;
+    int         slice;
+    std::string name;
+    Heading     lowHeading;
+    Heading     highHeading;
+    int         sampleCount;
+    time_t      last10MinuteDominantTime;
 };
 }
 

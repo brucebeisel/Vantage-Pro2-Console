@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,7 +121,6 @@ static const std::string DMP_RESEND_PAGE = std::string(1, VP2Constants::NACK);
 // Generic strings for various command protocols
 //
 static const std::string COMMAND_TERMINATOR = std::string(1, VP2Constants::LINE_FEED);
-//static const std::string CRC_FAILURE = std::string(1, VP2Constants::CANCEL);
 static const std::string RESPONSE_FRAME = std::string(1, VP2Constants::LINE_FEED) + std::string(1, VP2Constants::CARRIAGE_RETURN);;
 static const std::string COMMAND_RECOGNIZED_RESPONSE = RESPONSE_FRAME + "OK" + RESPONSE_FRAME;
 static const std::string DONE_RESPONSE = "DONE" + std::string(1, VP2Constants::LINE_FEED) + std::string(1, VP2Constants::CARRIAGE_RETURN);;
@@ -279,7 +278,7 @@ VantagePro2Station::retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport & r
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantagePro2Station::retrieveStationType() {
-    const char command[] = {'W', 'R', 'D', WRD_BYTE1, WRD_BYTE2, '\0'};
+    const char command[] = {STATION_TYPE_CMD[0], STATION_TYPE_CMD[1], STATION_TYPE_CMD[2], WRD_BYTE1, WRD_BYTE2, '\0'};
 
     if (!sendAckedCommand(command))
         return false;
@@ -421,7 +420,7 @@ VantagePro2Station::currentValuesLoop(int records) {
         // Build a list of past wind directions. This is to mimic what is shown on the
         // console
         //
-        pastWindDirections.addDirection(loopPacket.getWindDirection());
+        pastWindDirections.processWindSample(time(0), loopPacket.getWindDirection(), loopPacket.getWindSpeed());
 
         //
         // After the first pass through the loop, send the current weather data
@@ -448,6 +447,7 @@ VantagePro2Station::currentValuesLoop(int records) {
         // Build a current weather message from the loop packets
         //
         currentWeather.setLoop2Data(loop2Packet);
+        pastWindDirections.processWindSample(time(0), loop2Packet.getWindDirection(), loop2Packet.getWindSpeed());
 
         //
         // Send the message for processing
@@ -1353,18 +1353,27 @@ VantagePro2Station::sendStringValueCommand(const string & command, string & resu
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantagePro2Station::consumeAck() {
+    bool rv = true;
     byte b;
+
     if (!serialPort.read(&b, 1)) {
         log.log(VP2Logger::VP2_INFO) << "consumeACK() read failed while consuming ACK" << endl;
-        return false;
+        rv = false;
     }
-
-    if (b != VP2Constants::ACK) {
+    else if (b == VP2Constants::CRC_FAILURE) {
+        log.log(VP2Logger::VP2_WARNING) << "consumeACK() received a CRC failure response" << endl;
+        rv = false;
+    }
+    else if (b != VP2Constants::NACK) {
+        log.log(VP2Logger::VP2_WARNING) << "consumeACK() received a NACK response" << endl;
+        rv = false;
+    }
+    else if (b != VP2Constants::ACK) {
         log.log(VP2Logger::VP2_WARNING) << "consumeACK() read " << hex << static_cast<int>(b) << dec << " not an ACK" << endl;
-        return false;
+        rv = false;
     }
 
-    return true;
+    return rv;
 }
 
 }

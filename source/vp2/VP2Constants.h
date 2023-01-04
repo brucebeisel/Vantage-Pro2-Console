@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ namespace VP2Constants {
     static constexpr char ACK = 0x6;
     static constexpr char NACK = 0x21; // Not an ASCII NACK, but it is what is used
     static constexpr char CANCEL = 0x18;
+    static constexpr char CRC_FAILURE = CANCEL;
     static constexpr char ESCAPE = 0x15;
 
     //
@@ -172,6 +173,7 @@ namespace VP2Constants {
     static constexpr int INVALID_WIND_DIRECTION_SLICE = 255;
     static constexpr int INVALID_WIND_DIRECTION = 0;
     static constexpr int INVALID_WIND_SPEED = 255;
+    static constexpr int INVALID_16BIT_AVG_WIND_SPEED = 32767;
     static constexpr int INVALID_UV_INDEX = 255;
     static constexpr int INVALID_LEAF_WETNESS = 255;
     static constexpr int INVALID_LEAF_TEMPERATURE = 255;
