@@ -423,6 +423,7 @@ VantagePro2Station::currentValuesLoop(int records) {
         // console
         //
         pastWindDirections.processWindSample(time(0), loopPacket.getWindDirection(), loopPacket.getWindSpeed());
+        pastWindDirections.dumpData();
 
         //
         // After the first pass through the loop, send the current weather data

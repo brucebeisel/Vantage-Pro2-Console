@@ -162,7 +162,8 @@ VantagePro2Driver::processCurrentWeather(const CurrentWeather & cw) {
     log.log(VP2Logger::VP2_DEBUG1) << "Stop current weather loop: " << stopCurrentWeatherLoop
                                    << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
 
-    return signalCaught.load() || eventManager.isEventAvailable() || previousNextRecord != nextRecord;
+    //return signalCaught.load() || eventManager.isEventAvailable() || previousNextRecord != nextRecord;
+    return signalCaught.load();
 }
 
 /*

@@ -94,8 +94,8 @@ CurrentWeather::formatXML() const {
 
     ss << "<wind><speed>" << windSpeed << "</speed><direction>" << windDirection << "</direction></wind>"
        << "<windGust><speed>" << loop2Packet.getWindGust10Minute() << "</speed><direction>" << loop2Packet.getWindGustDirection10Minute() << "</direction></windGust>"
-       << "<windSpeed10MinuteAverage>" << windSpeed10MinuteAverage << "</windSpeed10MinAverage>"
-       << "<windSpeed2MinuteAverage>" << loop2Packet.getWindSpeed2MinuteAverage() << "</windSpeed2MinAverage>";
+       << "<windSpeed10MinAvg>" << windSpeed10MinuteAverage << "</windSpeed10MinAvg>"
+       << "<windSpeed2MinAvg>" << loop2Packet.getWindSpeed2MinuteAverage() << "</windSpeed2MinAvg>";
 
     vector<int> pastWindDirsList;
     dominantWindDirections.dominantDirectionsForPastHour(pastWindDirsList);

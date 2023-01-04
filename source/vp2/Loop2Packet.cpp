@@ -170,6 +170,8 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
         return false;
     }
 
+    windSpeed = VP2Decoder::decodeWindSpeed(buffer, 14);
+    windDirection = VP2Decoder::decodeWindDirection(buffer, 16);
     windSpeed10MinuteAverage = VP2Decoder::decodeAverageWindSpeed(buffer, 18);
     windSpeed2MinuteAverage = VP2Decoder::decodeAverageWindSpeed(buffer, 20);
     windGust10Minute = VP2Decoder::decode16BitWindSpeed(buffer, 22);
