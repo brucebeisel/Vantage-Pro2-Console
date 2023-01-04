@@ -1365,7 +1365,7 @@ VantagePro2Station::consumeAck() {
         log.log(VP2Logger::VP2_WARNING) << "consumeACK() received a CRC failure response" << endl;
         rv = false;
     }
-    else if (b != VP2Constants::NACK) {
+    else if (b == VP2Constants::NACK) {
         log.log(VP2Logger::VP2_WARNING) << "consumeACK() received a NACK response" << endl;
         rv = false;
     }
