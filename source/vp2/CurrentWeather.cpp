@@ -31,8 +31,8 @@ CurrentWeather::CurrentWeather() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeather::CurrentWeather(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const WindDirectionSlices  & pastWindDirs) :
-        loopPacket(loopPacket), loop2Packet(loop2Packet), pastWindDirections(pastWindDirs), windSpeed(0.0), windDirection(0.0), windSpeed10MinuteAverage(0.0) {
+CurrentWeather::CurrentWeather(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const DominantWindDirections  & pastWindDirs) :
+        loopPacket(loopPacket), loop2Packet(loop2Packet), dominantWindDirections(pastWindDirs), windSpeed(0.0), windDirection(0.0), windSpeed10MinuteAverage(0.0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,8 +64,8 @@ CurrentWeather::setLoop2Data(const Loop2Packet & loop2Packet) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CurrentWeather::setWindDirections(const WindDirectionSlices & windDirections) {
-    this->pastWindDirections = windDirections;
+CurrentWeather::setWindDirections(const DominantWindDirections & windDirections) {
+    this->dominantWindDirections = windDirections;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ CurrentWeather::formatXML() const {
        << "<windSpeed2MinuteAverage>" << loop2Packet.getWindSpeed2MinuteAverage() << "</windSpeed2MinAverage>";
 
     vector<int> pastWindDirsList;
-    pastWindDirections.dominantDirectionsForPastHour(pastWindDirsList);
+    dominantWindDirections.dominantDirectionsForPastHour(pastWindDirsList);
     for (unsigned int i = 0; i < pastWindDirsList.size(); i++) {
         int windDirNumber = i + 2;
         ss << "<windDir" << windDirNumber << ">" << pastWindDirsList.at(i) << "</windDir" << windDirNumber << ">";
@@ -200,7 +200,7 @@ CurrentWeather::formatJSON() const {
        << "{ \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage() << " },";
 
     vector<int> pastWindDirsList;
-    pastWindDirections.dominantDirectionsForPastHour(pastWindDirsList);
+    dominantWindDirections.dominantDirectionsForPastHour(pastWindDirsList);
     for (unsigned int i = 0; i < pastWindDirsList.size(); i++)
        ss << "{ \"windDir" << i + 2 << "\" : " << pastWindDirsList.at(i) << " }, ";
 

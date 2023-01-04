@@ -18,9 +18,10 @@
 #define CURRENTWEATHER_H
 
 #include <string>
+
+#include "DominantWindDirections.h"
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
-#include "WindDirectionSlices.h"
 
 namespace vp2 {
 /**
@@ -42,7 +43,7 @@ public:
      * @param loop2Packet The LOOP2 packet that was read in the most recent loop through the current weather processor
      * @param The dominant directions that the wind has been blowing over the last hour
      */
-    CurrentWeather(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const WindDirectionSlices & windDirectionSlices);
+    CurrentWeather(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const DominantWindDirections & windDirectionSlices);
 
     /**
      * Destuctor.
@@ -59,7 +60,7 @@ public:
     //void setData(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const WindDirectionSlices  & pastWindDirs);
     void setLoopData(const LoopPacket & loopPacket);
     void setLoop2Data(const Loop2Packet & loopPacket);
-    void setWindDirections(const WindDirectionSlices & pastWindDirections);
+    void setWindDirections(const DominantWindDirections & pastWindDirections);
 
     /**
      * Get the next packet field that was extracted from the LOOP packet.
@@ -85,9 +86,9 @@ public:
     std::string formatJSON() const;
 
 private:
-    LoopPacket          loopPacket;
-    Loop2Packet         loop2Packet;
-    WindDirectionSlices pastWindDirections;
+    LoopPacket             loopPacket;
+    Loop2Packet            loop2Packet;
+    DominantWindDirections dominantWindDirections;
 
     //
     // Since wind data changes frequently, store the wind from both loop packets

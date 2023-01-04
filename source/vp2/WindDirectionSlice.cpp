@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Weather.h"
-#include "WindSlice.h"
+#include "WindDirectionSlice.h"
 
 using namespace std;
 
@@ -23,13 +23,13 @@ namespace vp2 {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindSlice::WindSlice() : slice(0), name(""), lowHeading(0.0), sampleCount(0),
+WindDirectionSlice::WindDirectionSlice() : slice(0), name(""), lowHeading(0.0), sampleCount(0),
                          highHeading(0.0), last10MinuteDominantTime(0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindSlice::WindSlice(int slice, const std::string & name, Heading low, Heading high) : slice(slice),
+WindDirectionSlice::WindDirectionSlice(int slice, const std::string & name, Heading low, Heading high) : slice(slice),
                                                                                        name(name),
                                                                                        lowHeading(low),
                                                                                        highHeading(high),
@@ -39,13 +39,13 @@ WindSlice::WindSlice(int slice, const std::string & name, Heading low, Heading h
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindSlice::~WindSlice() {
+WindDirectionSlice::~WindDirectionSlice() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindSlice::setValues(int slice, const std::string & name, Heading low, Heading high) {
+WindDirectionSlice::setValues(int slice, const std::string & name, Heading low, Heading high) {
     this->slice = slice;
     this->name = name;
     this->lowHeading = low;
@@ -55,7 +55,7 @@ WindSlice::setValues(int slice, const std::string & name, Heading low, Heading h
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-WindSlice::getName() const {
+WindDirectionSlice::getName() const {
     return name;
 }
 
@@ -63,21 +63,21 @@ WindSlice::getName() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Heading
-WindSlice::getCenter() const {
+WindDirectionSlice::getCenter() const {
     return lowHeading + ((highHeading - lowHeading) / static_cast<Heading>(2));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-WindSlice::isInSlice(Heading heading) const {
+WindDirectionSlice::isInSlice(Heading heading) const {
     return heading > lowHeading && heading <= highHeading;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindSlice::addSample(DateTime time, Heading heading) {
+WindDirectionSlice::addSample(DateTime time, Heading heading) {
     if (isInSlice(heading))
         sampleCount++;
 }
@@ -85,34 +85,34 @@ WindSlice::addSample(DateTime time, Heading heading) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindSlice::clearSamples() {
+WindDirectionSlice::clearSamples() {
     sampleCount = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-WindSlice::getSampleCount() const {
+WindDirectionSlice::getSampleCount() const {
     return sampleCount;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindSlice::setLast10MinuteDominantTime(time_t time) {
+WindDirectionSlice::setLast10MinuteDominantTime(time_t time) {
     last10MinuteDominantTime = time;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 time_t
-WindSlice::getLast10MinuteDominantTime() const {
+WindDirectionSlice::getLast10MinuteDominantTime() const {
     return last10MinuteDominantTime;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ostream & operator<<(ostream & os, const WindSlice & slice) {
+ostream & operator<<(ostream & os, const WindDirectionSlice & slice) {
     os << "Low: " << slice.lowHeading << " High: " << slice.highHeading << " " << "Sample Count: " << slice.sampleCount;
     return os;
 }

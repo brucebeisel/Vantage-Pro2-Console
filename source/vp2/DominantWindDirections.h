@@ -20,7 +20,7 @@
 #include <vector>
 #include "Weather.h"
 #include "VP2Logger.h"
-#include "WindSlice.h"
+#include "WindDirectionSlice.h"
 
 namespace vp2 {
 /**
@@ -44,17 +44,17 @@ namespace vp2 {
  * is detected. The start of the period will be moved back to the beginning of the current minute
  * so that all 10 minute periods start on a even minute boundary.
  */
-class WindDirectionSlices {
+class DominantWindDirections {
 public:
     /**
      * Constructor.
      */
-    WindDirectionSlices();
+    DominantWindDirections();
 
     /**
      * Destructor.
      */
-    virtual ~WindDirectionSlices();
+    virtual ~DominantWindDirections();
 
     /**
      * Process a wind sample.
@@ -88,7 +88,7 @@ private:
      *
      * @return A pointer to the dominant wind direction or NULL if there is not one
      */
-    WindSlice * findDominantWindDirection();
+    WindDirectionSlice * findDominantWindDirection();
 
     /**
      * Check if the current 10 minute window has expired.
@@ -149,7 +149,7 @@ private:
     static const int DOMINANT_DIR_DURATION = 3600;
 
     VP2Logger                log;
-    WindSlice                windSlices[NUM_SLICES];
+    WindDirectionSlice                windSlices[NUM_SLICES];
     time_t                   startOf10MinuteTimeWindow;
     time_t                   endOf10MinuteTimeWindow;
 };

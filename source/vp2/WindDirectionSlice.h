@@ -25,12 +25,12 @@ namespace vp2 {
 /**
  * Class that keeps track of the number of wind samples that have occured in a given slice of wind direction.
  */
-class WindSlice {
+class WindDirectionSlice {
 public:
     /**
      * Default constructor used in array declarations.
      */
-    WindSlice();
+    WindDirectionSlice();
 
     /**
      * Constructor.
@@ -40,12 +40,12 @@ public:
      * @param low The lowest direction in this slice (exclusive)
      * @param high The highest direction in this slice (inclusive)
      */
-    WindSlice(int slice, const std::string & name, Heading low, Heading high);
+    WindDirectionSlice(int slice, const std::string & name, Heading low, Heading high);
 
     /**
      * Destructor.
      */
-    virtual ~WindSlice();
+    virtual ~WindDirectionSlice();
 
     /**
      * Set the values that describe the slice.
@@ -117,7 +117,7 @@ public:
     /**
      * ostream operator for output.
      */
-    friend std::ostream & operator<<(std::ostream &, const WindSlice &);
+    friend std::ostream & operator<<(std::ostream &, const WindDirectionSlice &);
 
 private:
     int         slice;

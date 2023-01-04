@@ -14,19 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "DominantWindDirections.h"
+
 #include <time.h>
 #include <cstring>
 #include <vector>
 #include <algorithm>
 #include <iomanip>
 #include "VP2Logger.h"
-#include "WindDirectionSlices.h"
 
 using namespace std;
 
 namespace vp2 {
 
-const std::string WindDirectionSlices::SLICE_NAMES[NUM_SLICES] = {
+const std::string DominantWindDirections::SLICE_NAMES[NUM_SLICES] = {
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
 };
 
@@ -42,7 +43,7 @@ dateFormat(time_t t) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindDirectionSlices::WindDirectionSlices() : startOf10MinuteTimeWindow(0),
+DominantWindDirections::DominantWindDirections() : startOf10MinuteTimeWindow(0),
                                              endOf10MinuteTimeWindow(0),
                                              log(VP2Logger::getLogger("DominantWindDirections")) {
     Heading heading = -HALF_SLICE;
@@ -54,14 +55,14 @@ WindDirectionSlices::WindDirectionSlices() : startOf10MinuteTimeWindow(0),
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindDirectionSlices::~WindDirectionSlices() {
+DominantWindDirections::~DominantWindDirections() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindSlice *
-WindDirectionSlices::findDominantWindDirection() {
-    WindSlice * dominantDirection = NULL;
+WindDirectionSlice *
+DominantWindDirections::findDominantWindDirection() {
+    WindDirectionSlice * dominantDirection = NULL;
 
     //
     // This algorithm will favor lower valued directions in the case of a
@@ -81,7 +82,7 @@ WindDirectionSlices::findDominantWindDirection() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlices::startWindow(DateTime time) {
+DominantWindDirections::startWindow(DateTime time) {
     for (int i = 0; i < NUM_SLICES; i++)
         windSlices[i].clearSamples();
 
@@ -110,9 +111,9 @@ WindDirectionSlices::startWindow(DateTime time) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlices::endWindow(DateTime time) {
+DominantWindDirections::endWindow(DateTime time) {
     log.log(VP2Logger::VP2_DEBUG1) << "Ending window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
-    WindSlice * slice = findDominantWindDirection();
+    WindDirectionSlice * slice = findDominantWindDirection();
 
     if (slice != NULL) {
         slice->setLast10MinuteDominantTime(endOf10MinuteTimeWindow);
@@ -141,7 +142,7 @@ WindDirectionSlices::endWindow(DateTime time) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-WindDirectionSlices::checkForEndOfWindow(DateTime time) {
+DominantWindDirections::checkForEndOfWindow(DateTime time) {
     //
     // If the end of the time window is zero, there is no window to end
     //
@@ -159,7 +160,7 @@ WindDirectionSlices::checkForEndOfWindow(DateTime time) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlices::processWindSample(DateTime time, Heading heading, Speed speed) {
+DominantWindDirections::processWindSample(DateTime time, Heading heading, Speed speed) {
     log.log(VP2Logger::VP2_DEBUG1) << "Processing wind sample at time " << dateFormat(time) << " Heading = " << heading << " Speed = " << speed << endl;
     bool windowEnded = checkForEndOfWindow(time);
 
@@ -188,7 +189,7 @@ WindDirectionSlices::processWindSample(DateTime time, Heading heading, Speed spe
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-WindDirectionSlices::getDominantDirectionsCount() const {
+DominantWindDirections::getDominantDirectionsCount() const {
     int count = 0;
     for (int i = 0; i < NUM_SLICES; i++) {
         if (windSlices[i].getLast10MinuteDominantTime() != 0)
@@ -201,7 +202,7 @@ WindDirectionSlices::getDominantDirectionsCount() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlices::dumpDataShort() const {
+DominantWindDirections::dumpDataShort() const {
     for (int i = 0; i < NUM_SLICES; i++) {
         char buffer[100];
         DateTime dtime = windSlices[i].getLast10MinuteDominantTime();
@@ -222,7 +223,7 @@ WindDirectionSlices::dumpDataShort() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlices::dumpData() const {
+DominantWindDirections::dumpData() const {
     for (int i = 0; i < NUM_SLICES; i++) { 
         char buffer[100];
         DateTime dtime = windSlices[i].getLast10MinuteDominantTime();
@@ -243,7 +244,7 @@ WindDirectionSlices::dumpData() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlices::dominantDirectionsForPastHour(vector<int> & headings) const {
+DominantWindDirections::dominantDirectionsForPastHour(vector<int> & headings) const {
     //
     // Pull out the wind directions that have been dominant for a 10 minute period over the past hour
     //

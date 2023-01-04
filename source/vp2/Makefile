@@ -11,6 +11,7 @@ SRCS=\
 	CommandSocket.cpp \
 	CurrentWeather.cpp \
 	CurrentWeatherPublisher.cpp \
+	DominantWindDirections.cpp \
 	EventManager.cpp \
 	ForecastRule.cpp \
     HiLowPacket.cpp \
@@ -31,8 +32,7 @@ SRCS=\
     VP2Decoder.cpp \
 	Weather.cpp \
 	WeatherSenseSocket.cpp \
-	WindDirectionSlices.cpp \
-	WindSlice.cpp
+	WindDirectionSlice.cpp
 
 
 OBJDIR=../../target/VP2

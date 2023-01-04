@@ -7,7 +7,8 @@
 
 #include <string.h>
 #include <vector>
-#include "../vp2/WindDirectionSlices.h"
+
+#include "../vp2/DominantWindDirections.h"
 #include "../vp2/Weather.h"
 #include "../vp2/VP2Logger.h"
 
@@ -20,7 +21,7 @@ main(int argc, char * argv[]) {
     struct tm tm;
 
     VP2Logger::setLogLevel(VP2Logger::VP2_DEBUG3);
-    WindDirectionSlices dominantWinds;
+    DominantWindDirections dominantWinds;
 
     memset(&tm, 0, sizeof(tm));
     tm.tm_year = 122;

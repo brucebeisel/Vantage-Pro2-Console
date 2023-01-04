@@ -25,10 +25,10 @@
 #include "CurrentWeather.h"
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
-#include "WindDirectionSlices.h"
 #include "SensorStation.h"
 #include "Sensor.h"
 #include "BitConverter.h"
+#include "DominantWindDirections.h"
 #include "SerialPort.h"
 
 namespace vp2 {
@@ -614,7 +614,7 @@ private:
     SerialPort                 serialPort;               // The serial port object that communicates with the console
     //bool                       firstLoopPacketReceived;  // Whether a LOOP packet has been received
     int                        baudRate;                 // The baud rate for communicating with the console
-    WindDirectionSlices        pastWindDirections;       // The past wind direction measurements used to determine the arrows on the wind display
+    DominantWindDirections        pastWindDirections;       // The past wind direction measurements used to determine the arrows on the wind display
     CurrentWeather             currentWeather;           // The most recent current weather data
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
     float                      consoleBatteryVoltage;    // The console battery voltage received in the LOOP packet
