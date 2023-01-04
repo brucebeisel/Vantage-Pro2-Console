@@ -95,11 +95,12 @@ DominantWindDirections::startWindow(DateTime time) {
     if (startOf10MinuteTimeWindow == 0) {
         startOf10MinuteTimeWindow = time - (time % 60);
     }
-    else if (endOf10MinuteTimeWindow + AGE_SPAN < time) {
+    else if (endOf10MinuteTimeWindow + DOMINANT_DIR_DURATION < time) {
+        log.log(VP2Logger::VP2_DEBUG1) << "Resetting end window time due to large gap in samples" << endl;
         startOf10MinuteTimeWindow = time - (time % 60);
     }
     else {
-        while (time > startOf10MinuteTimeWindow + AGE_SPAN)
+        while (time >= startOf10MinuteTimeWindow + AGE_SPAN)
             startOf10MinuteTimeWindow += AGE_SPAN;
     }
 
@@ -162,6 +163,7 @@ DominantWindDirections::checkForEndOfWindow(DateTime time) {
 void
 DominantWindDirections::processWindSample(DateTime time, Heading heading, Speed speed) {
     log.log(VP2Logger::VP2_DEBUG1) << "Processing wind sample at time " << dateFormat(time) << " Heading = " << heading << " Speed = " << speed << endl;
+    log.log(VP2Logger::VP2_DEBUG1) << "Active window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
     bool windowEnded = checkForEndOfWindow(time);
 
     //

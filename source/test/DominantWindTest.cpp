@@ -116,6 +116,20 @@ main(int argc, char * argv[]) {
     dominantWinds.processWindSample(t, h, s);
     dominantWinds.dumpData();
 
+    //
+    // Fix this test so that a sample comes in at the exact time as the end of window time
+    //
+    cout << "----- Replicate test where multiple dominant winds are selected in one window -----" << endl;
+    t = time(0) - 3600;
+
+    for (int i = 0; i < 1000; i++) {
+        h = (i % 4) * 22;
+        s = 1;
+        dominantWinds.processWindSample(t, h, s);
+        dominantWinds.dumpData();
+        t += 7;
+    }
+
     return 0;
 }
 

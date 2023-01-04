@@ -15,8 +15,8 @@ $(OBJDIR)/%.o : %.cpp
 	$(CC) $(CXXFLAGS) -c $< -o $@
 	
 DOMWINDOBJS=\
-	$(VP2TESTOBJDIR)/WindDirectionSlices.o \
-	$(VP2TESTOBJDIR)/WindSlice.o \
+	$(VP2TESTOBJDIR)/DominantWindDirections.o \
+	$(VP2TESTOBJDIR)/WindDirectionSlice.o \
 	$(VP2TESTOBJDIR)/VP2Logger.o \
 	$(VP2TESTOBJDIR)/Weather.o 
 	

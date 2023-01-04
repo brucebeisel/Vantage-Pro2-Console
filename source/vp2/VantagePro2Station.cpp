@@ -406,7 +406,7 @@ VantagePro2Station::currentValuesLoop(int records) {
     if (!sendAckedCommand(command.str()))
         return;
 
-    currentWeather.setWindDirections(pastWindDirections);
+    currentWeather.setWindDirections(dominantWindDirections);
 
     for (int i = 0; i < records && !terminateLoop; i++) {
         log.log(VP2Logger::VP2_DEBUG1) << "Getting Current Weather ---------------------------------" << endl;
@@ -422,8 +422,8 @@ VantagePro2Station::currentValuesLoop(int records) {
         // Build a list of past wind directions. This is to mimic what is shown on the
         // console
         //
-        pastWindDirections.processWindSample(time(0), loopPacket.getWindDirection(), loopPacket.getWindSpeed());
-        pastWindDirections.dumpData();
+        dominantWindDirections.processWindSample(time(0), loopPacket.getWindDirection(), loopPacket.getWindSpeed());
+        dominantWindDirections.dumpData();
 
         //
         // After the first pass through the loop, send the current weather data
@@ -449,7 +449,7 @@ VantagePro2Station::currentValuesLoop(int records) {
         // Build a current weather message from the loop packets
         //
         currentWeather.setLoop2Data(loop2Packet);
-        pastWindDirections.processWindSample(time(0), loop2Packet.getWindDirection(), loop2Packet.getWindSpeed());
+        dominantWindDirections.processWindSample(time(0), loop2Packet.getWindDirection(), loop2Packet.getWindSpeed());
 
         //
         // Send the message for processing
@@ -458,7 +458,7 @@ VantagePro2Station::currentValuesLoop(int records) {
 
         //
         // Per the Vantage Pro serial communication document, sleep 2 seconds between
-        // the loop 2 the loop packets
+        // the 2 the loop packets
         // TBD Removed the sleep as the read has a timeout built into it
         //
         //if (!terminateLoop)
