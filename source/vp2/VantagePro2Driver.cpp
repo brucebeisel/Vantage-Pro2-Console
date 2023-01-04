@@ -246,7 +246,8 @@ VantagePro2Driver::mainLoop() {
     */
 
     while (!exitLoop) {
-        //try {
+        try {
+            /*
             usleep(500000);
             VantagePro2Station::ConsoleDiagnosticReport report;
             station.retrieveConsoleDiagnosticsReport(report);
@@ -255,9 +256,9 @@ VantagePro2Driver::mainLoop() {
             if (signalCaught.load()) {
                 exitLoop = true;
             }
+            */
             //exitLoop = true;
 
-            /*
             //
             // If the weather station could not be woken, then close and open
             // the console. It has been observed that on a rare occasion the console
@@ -289,9 +290,11 @@ VantagePro2Driver::mainLoop() {
             //
             // Get the high/low values
             //
+            /*
             HiLowPacket packet;
             if (station.retrieveHiLowValues(packet))
                 cout << "Got hi/low packet" << endl;
+                */
 
             //
             // Get the current weather values for about a minute
@@ -315,6 +318,7 @@ VantagePro2Driver::mainLoop() {
             // If the LOOP packet data indicates that a new archive packet is available
             // go get it.
             //
+            /*
             if (previousNextRecord != nextRecord) {
                 if (archiveManager.synchronizeArchive()) {
                     ArchivePacket packet;
@@ -326,11 +330,11 @@ VantagePro2Driver::mainLoop() {
                     previousNextRecord = nextRecord;
                 }
             }
+            */
         }
         catch (std::exception & e) {
             log.log(VP2Logger::VP2_ERROR) << "Caught exception: " << e.what() << endl;     
         } 
-        */
     }
 }
 }

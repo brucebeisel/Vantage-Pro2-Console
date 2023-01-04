@@ -406,6 +406,8 @@ VantagePro2Station::currentValuesLoop(int records) {
     if (!sendAckedCommand(command.str()))
         return;
 
+    currentWeather.setWindDirections(pastWindDirections);
+
     for (int i = 0; i < records && !terminateLoop; i++) {
         log.log(VP2Logger::VP2_DEBUG1) << "Getting Current Weather ---------------------------------" << endl;
         //
@@ -428,7 +430,6 @@ VantagePro2Station::currentValuesLoop(int records) {
         //
         if (i > 0) {
             currentWeather.setLoopData(loopPacket);
-            currentWeather.setWindDirections(pastWindDirections);
             terminateLoop = callback->processCurrentWeather(currentWeather);
         }
 

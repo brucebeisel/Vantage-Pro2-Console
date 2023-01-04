@@ -614,7 +614,7 @@ private:
     SerialPort                 serialPort;               // The serial port object that communicates with the console
     //bool                       firstLoopPacketReceived;  // Whether a LOOP packet has been received
     int                        baudRate;                 // The baud rate for communicating with the console
-    DominantWindDirections        pastWindDirections;       // The past wind direction measurements used to determine the arrows on the wind display
+    DominantWindDirections     pastWindDirections;       // The past wind direction measurements used to determine the arrows on the wind display
     CurrentWeather             currentWeather;           // The most recent current weather data
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
     float                      consoleBatteryVoltage;    // The console battery voltage received in the LOOP packet
