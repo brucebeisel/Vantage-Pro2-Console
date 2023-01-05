@@ -24,20 +24,20 @@
 #include "CurrentWeatherPublisher.h"
 #include "HiLowPacket.h"
 #include "SensorStation.h"
-#include "VP2Logger.h"
-#include "VP2Decoder.h"
-#include "VP2Constants.h"
 #include "Alarm.h"
-#include "VantagePro2Driver.h"
+#include "VantageConstants.h"
+#include "VantageDecoder.h"
+#include "VantageDriver.h"
+#include "VantageLogger.h"
 
 using namespace std;
 extern atomic_bool signalCaught;
 
-namespace vp2 {
+namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantagePro2Driver::VantagePro2Driver(ArchiveManager & archiveManager, CurrentWeatherPublisher & cwp, VantagePro2Station & station, EventManager & evtMgr) :
+VantageDriver::VantageDriver(ArchiveManager & archiveManager, CurrentWeatherPublisher & cwp, VantageWeatherStation & station, EventManager & evtMgr) :
                                                                 station(station),
                                                                 currentWeatherPublisher(cwp),
                                                                 archiveManager(archiveManager),
@@ -46,7 +46,7 @@ VantagePro2Driver::VantagePro2Driver(ArchiveManager & archiveManager, CurrentWea
                                                                 nextRecord(-1),
                                                                 previousNextRecord(-1),
                                                                 lastArchivePacketTime(0),
-                                                                log(VP2Logger::getLogger("VantagePro2Driver")) {
+                                                                log(VantageLogger::getLogger("VantageDriver")) {
     //
     // Indicate the the console time needs to be set in the near future. 
     // We do not want the console time to be set immediately in case the computer has just started and
@@ -58,47 +58,47 @@ VantagePro2Driver::VantagePro2Driver(ArchiveManager & archiveManager, CurrentWea
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantagePro2Driver::~VantagePro2Driver() {
+VantageDriver::~VantageDriver() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantagePro2Driver::initialize() {
-    log.log(VP2Logger::VP2_INFO) << "Initializing..." << endl;
+VantageDriver::initialize() {
+    log.log(VantageLogger::VANTAGE_INFO) << "Initializing..." << endl;
 
     station.setCallback(*this);
 
     if (!station.openStation()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to open weather station" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to open weather station" << endl;
         return false;
     }
 
-    log.log(VP2Logger::VP2_INFO) << "Port is open" << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "Port is open" << endl;
 
     if (!station.wakeupStation()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to wake up weather station" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to wake up weather station" << endl;
         return false;
     }
     else {
-        log.log(VP2Logger::VP2_INFO) << "Weather Station is awake" << endl;
+        log.log(VantageLogger::VANTAGE_INFO) << "Weather Station is awake" << endl;
     }
 
     if (!station.retrieveStationType()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to retrieve station type for weather station" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve station type for weather station" << endl;
         return false;
     }
 
     /*
     if (!station.retrieveConfigurationData()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to retrieve configuration data for weather station" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve configuration data for weather station" << endl;
         return false;
     }
 
     AlarmManager::getInstance().initialize();
     */
 
-    log.log(VP2Logger::VP2_INFO) << "Initialization complete." << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "Initialization complete." << endl;
 
     return true;
 }
@@ -106,13 +106,13 @@ VantagePro2Driver::initialize() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantagePro2Driver::retrieveConfiguration() {
+VantageDriver::retrieveConfiguration() {
 
-    VP2Decoder::setRainCollectorSize(station.getRainCollectorSize()); // TBD, this should come from VantagePro2Configuration class
+    VantageDecoder::setRainCollectorSize(station.getRainCollectorSize()); // TBD, this should come from VantageConfiguration class
 
     /*
     if (!station.retrieveConfigurationParameters()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to retrieve configuration parameters" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve configuration parameters" << endl;
         return false;
     }
     */
@@ -127,7 +127,7 @@ VantagePro2Driver::retrieveConfiguration() {
     }
 
     if (!loopPacketReceived) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to receive a LOOP packet needed to determine current sensor suite" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to receive a LOOP packet needed to determine current sensor suite" << endl;
         return false;
     }
 
@@ -139,7 +139,7 @@ VantagePro2Driver::retrieveConfiguration() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantagePro2Driver::stop() {
+VantageDriver::stop() {
     exitLoop = true;
     station.closeStation();
 }
@@ -147,19 +147,19 @@ VantagePro2Driver::stop() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantagePro2Driver::processCurrentWeather(const CurrentWeather & cw) {
+VantageDriver::processCurrentWeather(const CurrentWeather & cw) {
     nextRecord = cw.getNextPacket();
 
     currentWeatherPublisher.sendCurrentWeather(cw);
 
-    log.log(VP2Logger::VP2_DEBUG1) << "Previous Next Record: " << previousNextRecord << " Next Record: " << nextRecord << endl;
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Previous Next Record: " << previousNextRecord << " Next Record: " << nextRecord << endl;
 
     bool sc = signalCaught.load();
     bool em = eventManager.isEventAvailable();
     bool nr = previousNextRecord != nextRecord;
     bool stopCurrentWeatherLoop = sc || em || nr;
 
-    log.log(VP2Logger::VP2_DEBUG1) << "Stop current weather loop: " << stopCurrentWeatherLoop
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Stop current weather loop: " << stopCurrentWeatherLoop
                                    << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
 
     //return signalCaught.load() || eventManager.isEventAvailable() || previousNextRecord != nextRecord;
@@ -170,9 +170,9 @@ VantagePro2Driver::processCurrentWeather(const CurrentWeather & cw) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantagePro2Driver::processArchive(const vector<ArchivePacket> & archive) {
+VantageDriver::processArchive(const vector<ArchivePacket> & archive) {
 
-    log.log(VP2Logger::VP2_DEBUG1) << "Processing " << archive.size() << " archive packets" << endl;
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Processing " << archive.size() << " archive packets" << endl;
 
     for (vector<ArchivePacket>::const_iterator it = archive.begin(); it != archive.end(); ++it) {
         DateTime now = time(0);
@@ -184,7 +184,7 @@ VantagePro2Driver::processArchive(const vector<ArchivePacket> & archive) {
             if (issReception > 100)
                 issReception = 100;
 
-            log.log(VP2Logger::VP2_DEBUG2) << "IIS Reception for archive interval ending at " << it->getDateTime()
+            log.log(VantageLogger::VANTAGE_DEBUG2) << "IIS Reception for archive interval ending at " << it->getDateTime()
                                            << " is " << issReception
                                            << ". Max Packets = " << maxPackets
                                            << ", Actual Packets - " << actualPackets << endl;
@@ -200,7 +200,7 @@ VantagePro2Driver::processArchive(const vector<ArchivePacket> & archive) {
         }
 
         string message = it->formatMessage();
-        log.log(VP2Logger::VP2_INFO) << "=== Archive === " << Weather::formatDateTime(it->getDateTime()) << " =============" << endl;
+        log.log(VantageLogger::VANTAGE_INFO) << "=== Archive === " << Weather::formatDateTime(it->getDateTime()) << " =============" << endl;
         socket.sendData(message);
     }
 
@@ -211,12 +211,12 @@ VantagePro2Driver::processArchive(const vector<ArchivePacket> & archive) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantagePro2Driver::reopenStation() {
+VantageDriver::reopenStation() {
     station.closeStation();
     bool success = station.openStation();
 
     if (!success)
-        log.log(VP2Logger::VP2_ERROR) << "Failed to reopen weather station" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to reopen weather station" << endl;
 
     return success;
 }
@@ -224,9 +224,9 @@ VantagePro2Driver::reopenStation() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantagePro2Driver::mainLoop() {
+VantageDriver::mainLoop() {
     vector<ArchivePacket> list;
-    list.reserve(VP2Constants::NUM_ARCHIVE_RECORDS);
+    list.reserve(VantageConstants::NUM_ARCHIVE_RECORDS);
 
     if (!initialize())
         return;
@@ -236,12 +236,12 @@ VantagePro2Driver::mainLoop() {
         return;
 
     if (!archiveManager.synchronizeArchive()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to read the archive during initialization" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to read the archive during initialization" << endl;
         return;
     }
 
     if (!station.wakeupStation()) {
-        log.log(VP2Logger::VP2_ERROR) << "Failed to wake up console after initialization" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to wake up console after initialization" << endl;
         return;
     }
     */
@@ -250,9 +250,9 @@ VantagePro2Driver::mainLoop() {
         try {
             /*
             usleep(500000);
-            VantagePro2Station::ConsoleDiagnosticReport report;
+            VantageWeatherStation::ConsoleDiagnosticReport report;
             station.retrieveConsoleDiagnosticsReport(report);
-            log.log(VP2Logger::VP2_INFO) << "Diagnostic Report: " << "Packets: " << report.packetCount << "       Missed Packets: " << report.missedPacketCount
+            log.log(VantageLogger::VANTAGE_INFO) << "Diagnostic Report: " << "Packets: " << report.packetCount << "       Missed Packets: " << report.missedPacketCount
                                          << "      CRC Errors: " << report.crcErrorCount << endl;
             if (signalCaught.load()) {
                 exitLoop = true;
@@ -273,9 +273,9 @@ VantagePro2Driver::mainLoop() {
 
             DateTime consoleTime;
             if (station.retrieveConsoleTime(consoleTime))
-                log.log(VP2Logger::VP2_INFO) << "Station Time: " << Weather::formatDateTime(consoleTime) << endl;
+                log.log(VantageLogger::VANTAGE_INFO) << "Station Time: " << Weather::formatDateTime(consoleTime) << endl;
             else
-                log.log(VP2Logger::VP2_INFO) << "Station Time retrieval failed" << endl;
+                log.log(VantageLogger::VANTAGE_INFO) << "Station Time retrieval failed" << endl;
 
             //
             // If it has been a while since the time was set, set the time
@@ -283,7 +283,7 @@ VantagePro2Driver::mainLoop() {
             DateTime now = time(0);
             if (consoleTimeSetTime + TIME_SET_INTERVAL < now) {
                 if (!station.updateConsoleTime())
-                    log.log(VP2Logger::VP2_ERROR) << "Failed to set station time " << endl;
+                    log.log(VantageLogger::VANTAGE_ERROR) << "Failed to set station time " << endl;
 
                 consoleTimeSetTime = now;
             }
@@ -325,16 +325,16 @@ VantagePro2Driver::mainLoop() {
                     ArchivePacket packet;
                     // TBD What if multiple archive packets are received?
                     archiveManager.getNewestRecord(packet);
-                    log.log(VP2Logger::VP2_DEBUG1) << "Most recent archive packet time is: "
-                                                   << Weather::formatDateTime(packet.getDateTime())
-                                                   << " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
+                    log.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: "
+                                                           << Weather::formatDateTime(packet.getDateTime())
+                                                           << " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
                     previousNextRecord = nextRecord;
                 }
             }
             */
         }
         catch (std::exception & e) {
-            log.log(VP2Logger::VP2_ERROR) << "Caught exception: " << e.what() << endl;     
+            log.log(VantageLogger::VANTAGE_ERROR) << "Caught exception: " << e.what() << endl;     
         } 
     }
 }

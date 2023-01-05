@@ -1,17 +1,17 @@
-#ifndef VANTAGE_PRO2_CONFIGURATION_H
-#define VANTAGE_PRO2_CONFIGURATION_H
+#ifndef VANTAGE_CONFIGURATION_H
+#define VANTAGE_CONFIGURATION_H
 
 #include "SensorStation.h"
 #include "Sensor.h"
+#include "VantageWeatherStation.h"
 #include "Weather.h"
-#include "VantagePro2Station.h"
 
-namespace vp2 {
+namespace vws {
 
-class VantagePro2Configuration {
+class VantageConfiguration {
 public:
-    VantagePro2Configuration();
-    virtual ~VantagePro2Configuration();
+    VantageConfiguration();
+    virtual ~VantageConfiguration();
 
     enum RainCupSizeType {
         POINT_01_INCH = 0,
@@ -62,7 +62,7 @@ public:
     //std::vector<SensorStation> sensorStations;
     //std::string                firmwareDate;
     //std::string                firmwareVersion;
-    //VP2Logger                  log;
+    //VantageLogger                  log;
 
     /**
      * Get the list of sensor stations.
@@ -81,9 +81,9 @@ public:
     void decodeData(const byte buffer[]);
 
 private:
-    VantagePro2Station station;
+    VantageWeatherStation station;
 };
 
 }
 
-#endif /* SRC_VP2_VANTAGEPRO2CONFIGURATION_H_ */
+#endif /* VANTAGE_CONFIGURATION_H */

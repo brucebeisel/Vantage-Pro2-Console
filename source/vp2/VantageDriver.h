@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef VANTAGE_PRO2_DRIVER_H
-#define VANTAGE_PRO2_DRIVER_H
+#ifndef VANTAGE_DRIVER_H
+#define VANTAGE_DRIVER_H
+
 #ifdef _WIN32
 #pragma warning(disable : 4512)
 #endif
@@ -25,31 +26,31 @@
 #include "ArchiveManager.h"
 #include "EventManager.h"
 #include "SensorStation.h"
-#include "VantagePro2Station.h"
+#include "VantageWeatherStation.h"
 
-namespace vp2 {
-class VP2Logger;
+namespace vws {
+class VantageLogger;
 class CurrentWeather;
 class CurrentWeatherPublisher;
 
 /**
- * Class that coordinates the communications with the Vantage Pro 2 console.
+ * Class that coordinates the communications with the Vantage console.
  */
-class VantagePro2Driver : public VantagePro2Station::Callback {
+class VantageDriver : public VantageWeatherStation::Callback {
 public:
     /**
      * Constructor.
      * 
      * @param archiveManager The archive manager that will maintain the file containing the raw archive packets
      * @param cwp            The publisher that will be called each time a current weather record has been received
-     * @param station        The object that handles the command protocols with the VP2 console
+     * @param station        The object that handles the command protocols with the Vantage console
      */
-    VantagePro2Driver(ArchiveManager & archiveManager, CurrentWeatherPublisher & cwp, VantagePro2Station & station, EventManager & eventManager);
+    VantageDriver(ArchiveManager & archiveManager, CurrentWeatherPublisher & cwp, VantageWeatherStation & station, EventManager & eventManager);
 
     /**
      * Destructor.
      */
-    virtual ~VantagePro2Driver();
+    virtual ~VantageDriver();
 
     /**
      * Initialize the driver.
@@ -102,7 +103,7 @@ private:
      */
     bool processCurrentWeather(const CurrentWeather & cw);
 
-    VantagePro2Station &      station;
+    VantageWeatherStation &   station;
     CurrentWeatherPublisher & currentWeatherPublisher;
     ArchiveManager &          archiveManager;
     EventManager &            eventManager;
@@ -113,8 +114,8 @@ private:
     DateTime                  consoleTimeSetTime;
     //DateTime                  sensorStationSendTime;
     //bool                      receivedFirstLoopPacket;
-    VP2Logger                 log;
+    VantageLogger             log;
 };
 
 }
-#endif /* VANTAGE_PRO2_DRIVER_H */
+#endif /* VANTAGE_DRIVER_H */

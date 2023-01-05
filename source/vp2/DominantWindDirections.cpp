@@ -21,11 +21,12 @@
 #include <vector>
 #include <algorithm>
 #include <iomanip>
-#include "VP2Logger.h"
+
+#include "VantageLogger.h"
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 const std::string DominantWindDirections::SLICE_NAMES[NUM_SLICES] = {
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
@@ -45,7 +46,7 @@ dateFormat(time_t t) {
 ////////////////////////////////////////////////////////////////////////////////
 DominantWindDirections::DominantWindDirections() : startOf10MinuteTimeWindow(0),
                                              endOf10MinuteTimeWindow(0),
-                                             log(VP2Logger::getLogger("DominantWindDirections")) {
+                                             log(VantageLogger::getLogger("DominantWindDirections")) {
     Heading heading = -HALF_SLICE;
     for (int i = 0; i < NUM_SLICES; i++) {
         windSlices[i].setValues(i, SLICE_NAMES[i], heading, heading + DEGREES_PER_SLICE);
@@ -96,7 +97,7 @@ DominantWindDirections::startWindow(DateTime time) {
         startOf10MinuteTimeWindow = time - (time % 60);
     }
     else if (endOf10MinuteTimeWindow + DOMINANT_DIR_DURATION < time) {
-        log.log(VP2Logger::VP2_DEBUG1) << "Resetting end window time due to large gap in samples" << endl;
+        log.log(VantageLogger::VANTAGE_DEBUG1) << "Resetting end window time due to large gap in samples" << endl;
         startOf10MinuteTimeWindow = time - (time % 60);
     }
     else {
@@ -106,19 +107,19 @@ DominantWindDirections::startWindow(DateTime time) {
 
     endOf10MinuteTimeWindow = startOf10MinuteTimeWindow + AGE_SPAN;
 
-    log.log(VP2Logger::VP2_DEBUG1) << "Starting new window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Starting new window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 DominantWindDirections::endWindow(DateTime time) {
-    log.log(VP2Logger::VP2_DEBUG1) << "Ending window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Ending window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
     WindDirectionSlice * slice = findDominantWindDirection();
 
     if (slice != NULL) {
         slice->setLast10MinuteDominantTime(endOf10MinuteTimeWindow);
-        log.log(VP2Logger::VP2_DEBUG1) << "Dominant wind direction is " << slice->getName() << endl;
+        log.log(VantageLogger::VANTAGE_DEBUG1) << "Dominant wind direction is " << slice->getName() << endl;
     }
 
     //
@@ -162,8 +163,8 @@ DominantWindDirections::checkForEndOfWindow(DateTime time) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 DominantWindDirections::processWindSample(DateTime time, Heading heading, Speed speed) {
-    log.log(VP2Logger::VP2_DEBUG1) << "Processing wind sample at time " << dateFormat(time) << " Heading = " << heading << " Speed = " << speed << endl;
-    log.log(VP2Logger::VP2_DEBUG1) << "Active window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Processing wind sample at time " << dateFormat(time) << " Heading = " << heading << " Speed = " << speed << endl;
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Active window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
     bool windowEnded = checkForEndOfWindow(time);
 
     //

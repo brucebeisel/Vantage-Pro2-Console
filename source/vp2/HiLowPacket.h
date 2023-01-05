@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,12 @@
 #define HILOW_PACKET_H
 
 #include <string>
-#include "VP2Logger.h"
-#include "Weather.h"
-#include "VP2Constants.h"
 
-namespace vp2 {
+#include "VantageConstants.h"
+#include "VantageLogger.h"
+#include "Weather.h"
+
+namespace vws {
 /**
  * Class that decodes and stores the data from the High/Low packet.
  */
@@ -215,14 +216,13 @@ private:
     HighValues<UvIndex>         uvIndex;
     HighValues<Rainfall>        rainRate;
     Rainfall                    highHourRainRate;
-    HighLowValues<Temperature>  extraTemperature[VP2Constants::MAX_EXTRA_TEMPERATURES];
-    HighLowValues<Temperature>  soilTemperature[VP2Constants::MAX_SOIL_TEMPERATURES];
-    HighLowValues<Temperature>  leafTemperature[VP2Constants::MAX_LEAF_TEMPERATURES];
-    HighLowValues<Humidity>     extraHumidity[VP2Constants::MAX_EXTRA_HUMIDITIES];
-    HighLowValues<SoilMoisture> soilMoisture[VP2Constants::MAX_SOIL_MOISTURES];
-    HighLowValues<LeafWetness>  leafWetness[VP2Constants::MAX_LEAF_WETNESSES];
-
-    VP2Logger          log;
+    HighLowValues<Temperature>  extraTemperature[VantageConstants::MAX_EXTRA_TEMPERATURES];
+    HighLowValues<Temperature>  soilTemperature[VantageConstants::MAX_SOIL_TEMPERATURES];
+    HighLowValues<Temperature>  leafTemperature[VantageConstants::MAX_LEAF_TEMPERATURES];
+    HighLowValues<Humidity>     extraHumidity[VantageConstants::MAX_EXTRA_HUMIDITIES];
+    HighLowValues<SoilMoisture> soilMoisture[VantageConstants::MAX_SOIL_MOISTURES];
+    HighLowValues<LeafWetness>  leafWetness[VantageConstants::MAX_LEAF_WETNESSES];
+    VantageLogger               log;
 };
 }
 #endif

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,11 @@
 
 #include <netinet/in.h>
 #include <string>
-#include "VP2Logger.h"
+
+#include "VantageLogger.h"
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 class CurrentWeather;
 
 /**
@@ -71,7 +72,7 @@ private:
     static const int         NO_SOCKET = -1;
     int                      socketId;
     struct sockaddr_in       groupAddr;
-    VP2Logger                log;
+    VantageLogger            log;
 };
 }
 

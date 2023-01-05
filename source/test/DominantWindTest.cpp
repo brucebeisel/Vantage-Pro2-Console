@@ -9,10 +9,10 @@
 #include <vector>
 
 #include "../vp2/DominantWindDirections.h"
+#include "../vp2/VantageLogger.h"
 #include "../vp2/Weather.h"
-#include "../vp2/VP2Logger.h"
 
-using namespace vp2;
+using namespace vws;
 using namespace std;
 
 int
@@ -20,7 +20,7 @@ main(int argc, char * argv[]) {
     vector<int> headings;
     struct tm tm;
 
-    VP2Logger::setLogLevel(VP2Logger::VP2_DEBUG3);
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     DominantWindDirections dominantWinds;
 
     memset(&tm, 0, sizeof(tm));

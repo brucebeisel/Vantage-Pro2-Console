@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 AlarmManager AlarmManager::instance;
 

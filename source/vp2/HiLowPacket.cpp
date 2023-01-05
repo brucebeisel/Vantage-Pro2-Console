@@ -1,16 +1,16 @@
 #include <sstream>
 #include "BitConverter.h"
 #include "Weather.h"
-#include "VP2Decoder.h"
 #include "HiLowPacket.h"
+#include "VantageDecoder.h"
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-HiLowPacket::HiLowPacket() : highHourRainRate(0.0), log(VP2Logger::getLogger("HiLowPacket")) {
+HiLowPacket::HiLowPacket() : highHourRainRate(0.0), log(VantageLogger::getLogger("HiLowPacket")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +150,7 @@ HiLowPacket::formatXML() const {
     ss << rainRate.formatXML(false);
     ss << "</rainfallRate>" << endl;
     ss << "<extraTemperatures>" << endl;
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_TEMPERATURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++) {
         if (extraTemperature[i].isValid()) {
             ss << "<extraTemperature>";
             ss << "    <index>" << i << "</index>" << endl;
@@ -191,215 +191,215 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     // Barometer section
     //
     bool valid;
-    barometer.lows.dayExtremeValue      = VP2Decoder::decodeBarometricPressure(buffer, 0);
-    barometer.highs.dayExtremeValue     = VP2Decoder::decodeBarometricPressure(buffer, 2);
-    barometer.lows.monthExtremeValue    = VP2Decoder::decodeBarometricPressure(buffer, 4);
-    barometer.highs.monthExtremeValue   = VP2Decoder::decodeBarometricPressure(buffer, 6);
-    barometer.lows.yearExtremeValue     = VP2Decoder::decodeBarometricPressure(buffer, 8);
-    barometer.highs.yearExtremeValue    = VP2Decoder::decodeBarometricPressure(buffer, 10);
-    barometer.lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 12);
-    barometer.highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 14);
+    barometer.lows.dayExtremeValue      = VantageDecoder::decodeBarometricPressure(buffer, 0);
+    barometer.highs.dayExtremeValue     = VantageDecoder::decodeBarometricPressure(buffer, 2);
+    barometer.lows.monthExtremeValue    = VantageDecoder::decodeBarometricPressure(buffer, 4);
+    barometer.highs.monthExtremeValue   = VantageDecoder::decodeBarometricPressure(buffer, 6);
+    barometer.lows.yearExtremeValue     = VantageDecoder::decodeBarometricPressure(buffer, 8);
+    barometer.highs.yearExtremeValue    = VantageDecoder::decodeBarometricPressure(buffer, 10);
+    barometer.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 12);
+    barometer.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 14);
 
     //
     // Wind section
     //
-    wind.dayExtremeValue     = VP2Decoder::decodeWindSpeed(buffer, 16);
-    wind.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 17);
-    wind.monthExtremeValue   = VP2Decoder::decodeWindSpeed(buffer, 19);
-    wind.yearExtremeValue    = VP2Decoder::decodeWindSpeed(buffer, 20);
+    wind.dayExtremeValue     = VantageDecoder::decodeWindSpeed(buffer, 16);
+    wind.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 17);
+    wind.monthExtremeValue   = VantageDecoder::decodeWindSpeed(buffer, 19);
+    wind.yearExtremeValue    = VantageDecoder::decodeWindSpeed(buffer, 20);
 
     //
     // Inside temperature section
     //
-    insideTemperature.highs.dayExtremeValue     = VP2Decoder::decode16BitTemperature(buffer, 21);
-    insideTemperature.lows.dayExtremeValue      = VP2Decoder::decode16BitTemperature(buffer, 23);
-    insideTemperature.highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 25);
-    insideTemperature.lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 27);
-    insideTemperature.lows.monthExtremeValue    = VP2Decoder::decode16BitTemperature(buffer, 29);
-    insideTemperature.highs.monthExtremeValue   = VP2Decoder::decode16BitTemperature(buffer, 31);
-    insideTemperature.lows.yearExtremeValue     = VP2Decoder::decode16BitTemperature(buffer, 33);
-    insideTemperature.highs.yearExtremeValue    = VP2Decoder::decode16BitTemperature(buffer, 35);
+    insideTemperature.highs.dayExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 21);
+    insideTemperature.lows.dayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 23);
+    insideTemperature.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 25);
+    insideTemperature.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 27);
+    insideTemperature.lows.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 29);
+    insideTemperature.highs.monthExtremeValue   = VantageDecoder::decode16BitTemperature(buffer, 31);
+    insideTemperature.lows.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 33);
+    insideTemperature.highs.yearExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 35);
 
     //
     // Indoor humidity section
     //
-    insideHumidity.highs.dayExtremeValue     = VP2Decoder::decodeHumidity(buffer, 37);
-    insideHumidity.lows.dayExtremeValue      = VP2Decoder::decodeHumidity(buffer, 38);
-    insideHumidity.highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 39);
-    insideHumidity.lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 41);
-    insideHumidity.highs.monthExtremeValue   = VP2Decoder::decodeHumidity(buffer, 43);
-    insideHumidity.lows.monthExtremeValue    = VP2Decoder::decodeHumidity(buffer, 44);
-    insideHumidity.highs.yearExtremeValue    = VP2Decoder::decodeHumidity(buffer, 45);
-    insideHumidity.lows.yearExtremeValue     = VP2Decoder::decodeHumidity(buffer, 46);
+    insideHumidity.highs.dayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 37);
+    insideHumidity.lows.dayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 38);
+    insideHumidity.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 39);
+    insideHumidity.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 41);
+    insideHumidity.highs.monthExtremeValue   = VantageDecoder::decodeHumidity(buffer, 43);
+    insideHumidity.lows.monthExtremeValue    = VantageDecoder::decodeHumidity(buffer, 44);
+    insideHumidity.highs.yearExtremeValue    = VantageDecoder::decodeHumidity(buffer, 45);
+    insideHumidity.lows.yearExtremeValue     = VantageDecoder::decodeHumidity(buffer, 46);
 
     //
     // Outside temperature section
     //
-    outsideTemperature.lows.dayExtremeValue      = VP2Decoder::decode16BitTemperature(buffer, 47);
-    outsideTemperature.highs.dayExtremeValue     = VP2Decoder::decode16BitTemperature(buffer, 49);
-    outsideTemperature.lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 51);
-    outsideTemperature.highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 53);
-    outsideTemperature.highs.monthExtremeValue   = VP2Decoder::decode16BitTemperature(buffer, 55);
-    outsideTemperature.lows.monthExtremeValue    = VP2Decoder::decode16BitTemperature(buffer, 57);
-    outsideTemperature.highs.yearExtremeValue    = VP2Decoder::decode16BitTemperature(buffer, 59);
-    outsideTemperature.lows.yearExtremeValue     = VP2Decoder::decode16BitTemperature(buffer, 61);
+    outsideTemperature.lows.dayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 47);
+    outsideTemperature.highs.dayExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 49);
+    outsideTemperature.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 51);
+    outsideTemperature.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 53);
+    outsideTemperature.highs.monthExtremeValue   = VantageDecoder::decode16BitTemperature(buffer, 55);
+    outsideTemperature.lows.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 57);
+    outsideTemperature.highs.yearExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 59);
+    outsideTemperature.lows.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 61);
 
     //
     // Dew point section
     //
-    dewPoint.lows.dayExtremeValue      = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 63);
-    dewPoint.highs.dayExtremeValue     = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 65);
-    dewPoint.lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 67);
-    dewPoint.highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 69);
-    dewPoint.highs.monthExtremeValue   = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 71);
-    dewPoint.lows.monthExtremeValue    = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 73);
-    dewPoint.highs.yearExtremeValue    = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 75);
-    dewPoint.lows.yearExtremeValue     = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 77);
+    dewPoint.lows.dayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 63);
+    dewPoint.highs.dayExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 65);
+    dewPoint.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 67);
+    dewPoint.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 69);
+    dewPoint.highs.monthExtremeValue   = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 71);
+    dewPoint.lows.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 73);
+    dewPoint.highs.yearExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 75);
+    dewPoint.lows.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 77);
 
     //
     // Wind chill section
     //
-    windChill.dayExtremeValue      = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 79);
-    windChill.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 81);
-    windChill.monthExtremeValue    = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 83);
-    windChill.yearExtremeValue     = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 85);
+    windChill.dayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 79);
+    windChill.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 81);
+    windChill.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 83);
+    windChill.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 85);
 
     //
     // Heat index section
     //
-    heatIndex.dayExtremeValue      = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 87);
-    heatIndex.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 89);
-    heatIndex.monthExtremeValue    = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 91);
-    heatIndex.yearExtremeValue     = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 93);
+    heatIndex.dayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 87);
+    heatIndex.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 89);
+    heatIndex.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 91);
+    heatIndex.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 93);
 
     //
     // THSW index section
     //
-    thsw.dayExtremeValue      = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 95);
-    thsw.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 97);
-    thsw.monthExtremeValue    = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 99);
-    thsw.yearExtremeValue     = VP2Decoder::decodeNonScaled16BitTemperature(buffer, 101);
+    thsw.dayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 95);
+    thsw.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 97);
+    thsw.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 99);
+    thsw.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 101);
 
     //
     // Solar radiation section
     //
-    solarRadiation.dayExtremeValue      = VP2Decoder::decodeSolarRadiation(buffer, 103);
-    solarRadiation.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 105);
-    solarRadiation.monthExtremeValue    = VP2Decoder::decodeSolarRadiation(buffer, 107);
-    solarRadiation.yearExtremeValue     = VP2Decoder::decodeSolarRadiation(buffer, 109);
+    solarRadiation.dayExtremeValue      = VantageDecoder::decodeSolarRadiation(buffer, 103);
+    solarRadiation.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 105);
+    solarRadiation.monthExtremeValue    = VantageDecoder::decodeSolarRadiation(buffer, 107);
+    solarRadiation.yearExtremeValue     = VantageDecoder::decodeSolarRadiation(buffer, 109);
 
     //
     // UV section
     //
-    uvIndex.dayExtremeValue      = VP2Decoder::decodeUvIndex(buffer, 111);
-    uvIndex.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 112);
-    uvIndex.monthExtremeValue    = VP2Decoder::decodeUvIndex(buffer, 114);
-    uvIndex.yearExtremeValue     = VP2Decoder::decodeUvIndex(buffer, 115);
+    uvIndex.dayExtremeValue      = VantageDecoder::decodeUvIndex(buffer, 111);
+    uvIndex.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 112);
+    uvIndex.monthExtremeValue    = VantageDecoder::decodeUvIndex(buffer, 114);
+    uvIndex.yearExtremeValue     = VantageDecoder::decodeUvIndex(buffer, 115);
 
     //
     // Rain rate section
     //
-    rainRate.dayExtremeValue      = VP2Decoder::decodeRain(buffer, 116);
-    rainRate.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 118);
-    highHourRainRate              = VP2Decoder::decodeRain(buffer, 120);
-    rainRate.monthExtremeValue    = VP2Decoder::decodeRain(buffer, 122);
-    rainRate.yearExtremeValue     = VP2Decoder::decodeRain(buffer, 124);
+    rainRate.dayExtremeValue      = VantageDecoder::decodeRain(buffer, 116);
+    rainRate.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 118);
+    highHourRainRate              = VantageDecoder::decodeRain(buffer, 120);
+    rainRate.monthExtremeValue    = VantageDecoder::decodeRain(buffer, 122);
+    rainRate.yearExtremeValue     = VantageDecoder::decodeRain(buffer, 124);
 
     //
     // Extra temperatures section
     //
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_TEMPERATURES; i++) {
-        extraTemperature[i].lows.dayExtremeValue      = VP2Decoder::decode8BitTemperature(buffer, 126 + i);
-        extraTemperature[i].highs.dayExtremeValue     = VP2Decoder::decode8BitTemperature(buffer, 141 + i);
-        extraTemperature[i].lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 156 + (i * 2));
-        extraTemperature[i].highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 186 + (i * 2));
-        extraTemperature[i].highs.monthExtremeValue   = VP2Decoder::decode8BitTemperature(buffer, 216 + i);
-        extraTemperature[i].lows.monthExtremeValue    = VP2Decoder::decode8BitTemperature(buffer, 231 + i);
-        extraTemperature[i].highs.yearExtremeValue    = VP2Decoder::decode8BitTemperature(buffer, 246 + i);
-        extraTemperature[i].lows.yearExtremeValue     = VP2Decoder::decode8BitTemperature(buffer, 261 + i);
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++) {
+        extraTemperature[i].lows.dayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + i);
+        extraTemperature[i].highs.dayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + i);
+        extraTemperature[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 156 + (i * 2));
+        extraTemperature[i].highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 186 + (i * 2));
+        extraTemperature[i].highs.monthExtremeValue   = VantageDecoder::decode8BitTemperature(buffer, 216 + i);
+        extraTemperature[i].lows.monthExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 231 + i);
+        extraTemperature[i].highs.yearExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 246 + i);
+        extraTemperature[i].lows.yearExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 261 + i);
     }
 
     //
     // Soil temperatures section
     //
-    int offset = VP2Constants::MAX_EXTRA_TEMPERATURES;
-    for (int i = 0; i < VP2Constants::MAX_SOIL_TEMPERATURES; i++) {
-        soilTemperature[i].lows.dayExtremeValue      = VP2Decoder::decode8BitTemperature(buffer, 126 + offset + i);
-        soilTemperature[i].highs.dayExtremeValue     = VP2Decoder::decode8BitTemperature(buffer, 141 + offset + i);
-        soilTemperature[i].lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 156 + (offset * 2) + (i * 2));
-        soilTemperature[i].highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 186 + (offset * 2) + (i * 2));
-        soilTemperature[i].highs.monthExtremeValue   = VP2Decoder::decode8BitTemperature(buffer, 216 + offset + i);
-        soilTemperature[i].lows.monthExtremeValue    = VP2Decoder::decode8BitTemperature(buffer, 231 + offset + i);
-        soilTemperature[i].highs.yearExtremeValue    = VP2Decoder::decode8BitTemperature(buffer, 246 + offset + i);
-        soilTemperature[i].lows.yearExtremeValue     = VP2Decoder::decode8BitTemperature(buffer, 261 + offset + i);
+    int offset = VantageConstants::MAX_EXTRA_TEMPERATURES;
+    for (int i = 0; i < VantageConstants::MAX_SOIL_TEMPERATURES; i++) {
+        soilTemperature[i].lows.dayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + offset + i);
+        soilTemperature[i].highs.dayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + offset + i);
+        soilTemperature[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 156 + (offset * 2) + (i * 2));
+        soilTemperature[i].highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 186 + (offset * 2) + (i * 2));
+        soilTemperature[i].highs.monthExtremeValue   = VantageDecoder::decode8BitTemperature(buffer, 216 + offset + i);
+        soilTemperature[i].lows.monthExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 231 + offset + i);
+        soilTemperature[i].highs.yearExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 246 + offset + i);
+        soilTemperature[i].lows.yearExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 261 + offset + i);
     }
 
     //
     // Leaf temperature
-    offset = VP2Constants::MAX_EXTRA_TEMPERATURES + VP2Constants::MAX_SOIL_TEMPERATURES;
-    for (int i = 0; i < VP2Constants::MAX_LEAF_TEMPERATURES; i++) {
-        leafTemperature[i].lows.dayExtremeValue      = VP2Decoder::decode8BitTemperature(buffer, 126 + offset + i);
-        leafTemperature[i].highs.dayExtremeValue     = VP2Decoder::decode8BitTemperature(buffer, 141 + offset + i);
-        leafTemperature[i].lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 156 + (offset * 2) + (i * 2));
-        leafTemperature[i].highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 186 + (offset * 2) + (i * 2));
-        leafTemperature[i].highs.monthExtremeValue   = VP2Decoder::decode8BitTemperature(buffer, 216 + offset + i);
-        leafTemperature[i].lows.monthExtremeValue    = VP2Decoder::decode8BitTemperature(buffer, 231 + offset + i);
-        leafTemperature[i].highs.yearExtremeValue    = VP2Decoder::decode8BitTemperature(buffer, 246 + offset + i);
-        leafTemperature[i].lows.yearExtremeValue     = VP2Decoder::decode8BitTemperature(buffer, 261 + offset + i);
+    offset = VantageConstants::MAX_EXTRA_TEMPERATURES + VantageConstants::MAX_SOIL_TEMPERATURES;
+    for (int i = 0; i < VantageConstants::MAX_LEAF_TEMPERATURES; i++) {
+        leafTemperature[i].lows.dayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + offset + i);
+        leafTemperature[i].highs.dayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + offset + i);
+        leafTemperature[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 156 + (offset * 2) + (i * 2));
+        leafTemperature[i].highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 186 + (offset * 2) + (i * 2));
+        leafTemperature[i].highs.monthExtremeValue   = VantageDecoder::decode8BitTemperature(buffer, 216 + offset + i);
+        leafTemperature[i].lows.monthExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 231 + offset + i);
+        leafTemperature[i].highs.yearExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 246 + offset + i);
+        leafTemperature[i].lows.yearExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 261 + offset + i);
     }
 
     //
     // Outdoor humidity section
     //
-    outsideHumidity.lows.dayExtremeValue      = VP2Decoder::decodeHumidity(buffer, 276);
-    outsideHumidity.highs.dayExtremeValue     = VP2Decoder::decodeHumidity(buffer, 284);
-    outsideHumidity.lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 308);
-    outsideHumidity.highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 292);
-    outsideHumidity.highs.monthExtremeValue   = VP2Decoder::decodeHumidity(buffer, 324);
-    outsideHumidity.lows.monthExtremeValue    = VP2Decoder::decodeHumidity(buffer, 332);
-    outsideHumidity.highs.yearExtremeValue    = VP2Decoder::decodeHumidity(buffer, 340);
-    outsideHumidity.lows.yearExtremeValue     = VP2Decoder::decodeHumidity(buffer, 348);
+    outsideHumidity.lows.dayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 276);
+    outsideHumidity.highs.dayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 284);
+    outsideHumidity.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 308);
+    outsideHumidity.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 292);
+    outsideHumidity.highs.monthExtremeValue   = VantageDecoder::decodeHumidity(buffer, 324);
+    outsideHumidity.lows.monthExtremeValue    = VantageDecoder::decodeHumidity(buffer, 332);
+    outsideHumidity.highs.yearExtremeValue    = VantageDecoder::decodeHumidity(buffer, 340);
+    outsideHumidity.lows.yearExtremeValue     = VantageDecoder::decodeHumidity(buffer, 348);
 
     //
     // Extra humidity section
     //
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_HUMIDITIES; i++) {
-        extraHumidity[i].lows.dayExtremeValue      = VP2Decoder::decodeHumidity(buffer, 277 + i);
-        extraHumidity[i].highs.dayExtremeValue     = VP2Decoder::decodeHumidity(buffer, 285 + i);
-        extraHumidity[i].lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 309 + i);
-        extraHumidity[i].highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 293 + i);
-        extraHumidity[i].highs.monthExtremeValue   = VP2Decoder::decodeHumidity(buffer, 325 + i);
-        extraHumidity[i].lows.monthExtremeValue    = VP2Decoder::decodeHumidity(buffer, 333 + i);
-        extraHumidity[i].highs.yearExtremeValue    = VP2Decoder::decodeHumidity(buffer, 341 + 1);
-        extraHumidity[i].lows.yearExtremeValue     = VP2Decoder::decodeHumidity(buffer, 349 + i);
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_HUMIDITIES; i++) {
+        extraHumidity[i].lows.dayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 277 + i);
+        extraHumidity[i].highs.dayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 285 + i);
+        extraHumidity[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 309 + i);
+        extraHumidity[i].highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 293 + i);
+        extraHumidity[i].highs.monthExtremeValue   = VantageDecoder::decodeHumidity(buffer, 325 + i);
+        extraHumidity[i].lows.monthExtremeValue    = VantageDecoder::decodeHumidity(buffer, 333 + i);
+        extraHumidity[i].highs.yearExtremeValue    = VantageDecoder::decodeHumidity(buffer, 341 + 1);
+        extraHumidity[i].lows.yearExtremeValue     = VantageDecoder::decodeHumidity(buffer, 349 + i);
     }
 
     //
     // Soil moisture section
     //
-    for (int i = 0; i < VP2Constants::MAX_SOIL_MOISTURES; i++) {
-        soilMoisture[i].highs.dayExtremeValue     = VP2Decoder::decodeSoilMoisture(buffer, 356 +i);
-        soilMoisture[i].highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 360 + i);
-        soilMoisture[i].lows.dayExtremeValue      = VP2Decoder::decodeSoilMoisture(buffer, 368 +i);
-        soilMoisture[i].lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 372 + i);
-        soilMoisture[i].lows.monthExtremeValue    = VP2Decoder::decodeSoilMoisture(buffer, 380 + i);
-        soilMoisture[i].highs.monthExtremeValue   = VP2Decoder::decodeSoilMoisture(buffer, 384 + i);
-        soilMoisture[i].lows.yearExtremeValue     = VP2Decoder::decodeSoilMoisture(buffer, 388 + i);
-        soilMoisture[i].highs.yearExtremeValue    = VP2Decoder::decodeSoilMoisture(buffer, 392 + 1);
+    for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++) {
+        soilMoisture[i].highs.dayExtremeValue     = VantageDecoder::decodeSoilMoisture(buffer, 356 +i);
+        soilMoisture[i].highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 360 + i);
+        soilMoisture[i].lows.dayExtremeValue      = VantageDecoder::decodeSoilMoisture(buffer, 368 +i);
+        soilMoisture[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 372 + i);
+        soilMoisture[i].lows.monthExtremeValue    = VantageDecoder::decodeSoilMoisture(buffer, 380 + i);
+        soilMoisture[i].highs.monthExtremeValue   = VantageDecoder::decodeSoilMoisture(buffer, 384 + i);
+        soilMoisture[i].lows.yearExtremeValue     = VantageDecoder::decodeSoilMoisture(buffer, 388 + i);
+        soilMoisture[i].highs.yearExtremeValue    = VantageDecoder::decodeSoilMoisture(buffer, 392 + 1);
     }
 
     //
     // Leaf wetness section
     //
-    for (int i = 0; i < VP2Constants::MAX_SOIL_MOISTURES; i++) {
-        leafWetness[i].highs.dayExtremeValue     = VP2Decoder::decodeLeafWetness(buffer, 396 +i);
-        leafWetness[i].highs.dayExtremeValueTime = VP2Decoder::decodeTime(buffer, 400 + i);
-        leafWetness[i].lows.dayExtremeValue      = VP2Decoder::decodeLeafWetness(buffer, 408 +i);
-        leafWetness[i].lows.dayExtremeValueTime  = VP2Decoder::decodeTime(buffer, 412 + i);
-        leafWetness[i].lows.monthExtremeValue    = VP2Decoder::decodeLeafWetness(buffer, 420 + i);
-        leafWetness[i].highs.monthExtremeValue   = VP2Decoder::decodeLeafWetness(buffer, 424 + i);
-        leafWetness[i].lows.yearExtremeValue     = VP2Decoder::decodeLeafWetness(buffer, 428 + i);
-        leafWetness[i].highs.yearExtremeValue    = VP2Decoder::decodeLeafWetness(buffer, 432 + 1);
+    for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++) {
+        leafWetness[i].highs.dayExtremeValue     = VantageDecoder::decodeLeafWetness(buffer, 396 +i);
+        leafWetness[i].highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 400 + i);
+        leafWetness[i].lows.dayExtremeValue      = VantageDecoder::decodeLeafWetness(buffer, 408 +i);
+        leafWetness[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 412 + i);
+        leafWetness[i].lows.monthExtremeValue    = VantageDecoder::decodeLeafWetness(buffer, 420 + i);
+        leafWetness[i].highs.monthExtremeValue   = VantageDecoder::decodeLeafWetness(buffer, 424 + i);
+        leafWetness[i].lows.yearExtremeValue     = VantageDecoder::decodeLeafWetness(buffer, 428 + i);
+        leafWetness[i].highs.yearExtremeValue    = VantageDecoder::decodeLeafWetness(buffer, 432 + 1);
     }
 
     return true;

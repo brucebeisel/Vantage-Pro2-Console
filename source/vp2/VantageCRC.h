@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef VANTAGE_PRO2_CRC_H
-#define VANTAGE_PRO2_CRC_H
+#ifndef VANTAGE_CRC_H
+#define VANTAGE_CRC_H
 
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 /**
- * Class to calculate and check the CRCs sent over the VP2 serial port.
+ * Class to calculate and check the CRCs sent over the console's serial port.
  */
-class VantagePro2CRC {
+class VantageCRC {
 public:
     /**
      * Calculate a CRC for a buffer.
@@ -46,12 +46,12 @@ private:
     /**
      * Constructor with no implementation.
      */
-    VantagePro2CRC();
+    VantageCRC();
 
     /**
      * Destructor with no implementation.
      */
-    virtual ~VantagePro2CRC();
+    virtual ~VantageCRC();
 };
 }
-#endif /* VANTAGE_PRO2_CRC_H */
+#endif /* VANTAGE_CRC_H */

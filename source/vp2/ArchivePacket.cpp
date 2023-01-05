@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,28 +18,28 @@
 #include <string>
 #include <ctime>
 #include <sstream>
-#include "VP2Logger.h"
-#include "VP2Constants.h"
-#include "VP2Decoder.h"
 #include "BitConverter.h"
 #include "UnitConverter.h"
 #include "ArchivePacket.h"
+#include "VantageConstants.h"
+#include "VantageDecoder.h"
+#include "VantageLogger.h"
 
 
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchivePacket::ArchivePacket() : packetTime(0), windSampleCount(0), buffer(""), log(&VP2Logger::getLogger("ArchivePacket")) {
+ArchivePacket::ArchivePacket() : packetTime(0), windSampleCount(0), buffer(""), log(&VantageLogger::getLogger("ArchivePacket")) {
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchivePacket::ArchivePacket(const byte buffer[], int offset) : log(&VP2Logger::getLogger("ArchivePacket")) {
+ArchivePacket::ArchivePacket(const byte buffer[], int offset) : log(&VantageLogger::getLogger("ArchivePacket")) {
     updateArchiveData(buffer, offset);
 }
 
@@ -125,44 +125,44 @@ ArchivePacket::formatMessage() const {
     ss << "<time>" << Weather::formatDateTime(archiveTime) << "</time>";
 
     Measurement<Temperature> temperature;
-    VP2Decoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET, temperature);
     ss << temperature.formatXML("avgOutdoorTemperature");
 
-    VP2Decoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
     ss << temperature.formatXML("highOutdoorTemperature");
 
-    VP2Decoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET, temperature);
     ss << temperature.formatXML("lowOutdoorTemperature");
 
-    Rainfall r = VP2Decoder::decodeRain(buffer, RAINFALL_OFFSET);
+    Rainfall r = VantageDecoder::decodeRain(buffer, RAINFALL_OFFSET);
     ss << "<rainfall>" << r << "</rainfall>";
 
-    r = VP2Decoder::decodeRain(buffer, HIGH_RAIN_RATE_OFFSET);
+    r = VantageDecoder::decodeRain(buffer, HIGH_RAIN_RATE_OFFSET);
     ss << "<highRainfallRate>" << r << "</highRainfallRate>";
 
     Measurement<Pressure> baroPressure;
-    VP2Decoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET, baroPressure);
+    VantageDecoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET, baroPressure);
     ss << baroPressure.formatXML("baroPressure");
 
     Measurement<SolarRadiation> solarRadiation;
-    VP2Decoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET, solarRadiation);
+    VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET, solarRadiation);
     ss << solarRadiation.formatXML("avgSolarRadiation");
   
-    VP2Decoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET, temperature);
+    VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET, temperature);
     ss << temperature.formatXML("indoorTemperature");
 
     Measurement<Humidity> humidity;
-    VP2Decoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET, humidity);
+    VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET, humidity);
     ss << humidity.formatXML("indoorHumidity");
 
-    VP2Decoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET, humidity);
+    VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET, humidity);
     ss << humidity.formatXML("outdoorHumidity");
 
     //
     // Both wind speed and direction must be valid to generate the XML
     //
-    Measurement<Speed> windSpeed = VP2Decoder::decodeWindSpeed(buffer, AVG_WIND_SPEED_OFFSET);
-    Measurement<Heading> windDir = VP2Decoder::decodeWindDirectionSlice(buffer, PREVAILING_WIND_DIRECTION_OFFSET);
+    Measurement<Speed> windSpeed = VantageDecoder::decodeWindSpeed(buffer, AVG_WIND_SPEED_OFFSET);
+    Measurement<Heading> windDir = VantageDecoder::decodeWindDirectionSlice(buffer, PREVAILING_WIND_DIRECTION_OFFSET);
 
     if (windSpeed.isValid() && windDir.isValid()) {
         ss << "<avgWind><speed>" << windSpeed << "</speed>"
@@ -170,8 +170,8 @@ ArchivePacket::formatMessage() const {
            << "</avgWind>";
     }
 
-    windSpeed = VP2Decoder::decodeWindSpeed(buffer, HIGH_WIND_SPEED_OFFSET);
-    windDir = VP2Decoder::decodeWindDirectionSlice(buffer, DIR_OF_HIGH_WIND_SPEED_OFFSET);
+    windSpeed = VantageDecoder::decodeWindSpeed(buffer, HIGH_WIND_SPEED_OFFSET);
+    windDir = VantageDecoder::decodeWindDirectionSlice(buffer, DIR_OF_HIGH_WIND_SPEED_OFFSET);
 
     if (windSpeed.isValid() && windDir.isValid()) {
         ss << "<highWind><speed>" << windSpeed << "</speed>"
@@ -180,21 +180,21 @@ ArchivePacket::formatMessage() const {
     }
 
     Measurement<UvIndex> uvIndex;
-    VP2Decoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET, uvIndex);
+    VantageDecoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET, uvIndex);
     ss << uvIndex.formatXML("avgUvIndex");
 
-    Measurement<Evapotranspiration> et = VP2Decoder::decodeDayET(buffer, ET_OFFSET);
+    Measurement<Evapotranspiration> et = VantageDecoder::decodeDayET(buffer, ET_OFFSET);
     ss <<  et.formatXML("evapotranspiration");
 
-    VP2Decoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET, solarRadiation);
+    VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET, solarRadiation);
     ss << solarRadiation.formatXML("highSolarRadiation");
 
-    VP2Decoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET, uvIndex);
+    VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET, uvIndex);
     ss << uvIndex.formatXML("highUvIndex");
 
     ss << "<extraHumidities>";
     for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++) {
-        VP2Decoder::decodeHumidity(buffer, EXTRA_HUMIDITIES_BASE_OFFSET + i, humidity);
+        VantageDecoder::decodeHumidity(buffer, EXTRA_HUMIDITIES_BASE_OFFSET + i, humidity);
         if (humidity.isValid()) {
             ss << "<humidity><index>" << i << "</index><value>" << humidity.getValue() << "</value></humidity>";
         }
@@ -203,7 +203,7 @@ ArchivePacket::formatMessage() const {
 
     ss << "<extraTemperatures>";
     for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
-        VP2Decoder::decode8BitTemperature(buffer, EXTRA_TEMPERATURES_BASE_OFFSET + i, temperature);
+        VantageDecoder::decode8BitTemperature(buffer, EXTRA_TEMPERATURES_BASE_OFFSET + i, temperature);
         if (temperature.isValid()) {
             ss << "<temperature><index>" << i << "</index><value>" << temperature.getValue() << "</value></temperature>";
         }
@@ -211,16 +211,16 @@ ArchivePacket::formatMessage() const {
     ss << "</extraTemperatures>";
 
 /*
-    for (int i = 0; i < VP2Constants::APB_MAX_LEAF_TEMPERATURES; i++) {
+    for (int i = 0; i < VantageConstants::APB_MAX_LEAF_TEMPERATURES; i++) {
         value8 = buffer[LEAF_TEMPERATURE_BASE_OFFSET + i];
-        if (value8 != VP2Constants::APB_INVALID_LEAF_TEMPERATURE)
+        if (value8 != VantageConstants::APB_INVALID_LEAF_TEMPERATURE)
             ss << ""; //leaf_temperature[{0}]={1};", i, value8 - EXTRA_TEMPERATURE_OFFSET);
     }
 
     ss << "<leafWetnessSensorEntries>";
-    for (int i = 0; i < VP2Constants::APB_MAX_LEAF_WETNESSES; i++) {
+    for (int i = 0; i < VantageConstants::APB_MAX_LEAF_WETNESSES; i++) {
         int leafWetness = BitConverter::toInt8(buffer, LEAF_WETNESS_BASE_OFFSET + i);
-        if (leafWetness != VP2Constants::APB_INVALID_LEAF_WETNESS) {
+        if (leafWetness != VantageConstants::APB_INVALID_LEAF_WETNESS) {
             ss << "<entry><key>" << (500 + i) << "</key><value><sensorId>" << (500 + i) << "</sensorId><sensorType>LEAF_WETNESS</sensorType>";
             ss << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"leafWetness\">";
             ss << leafWetness << "</measurement></value></entry>";
@@ -228,16 +228,16 @@ ArchivePacket::formatMessage() const {
     }
     ss << "</leafWetnessSensorEntries>";
 
-    for (int i = 0; i < VP2Constants::APB_MAX_SOIL_TEMPERATURES; i++) {
+    for (int i = 0; i < VantageConstants::APB_MAX_SOIL_TEMPERATURES; i++) {
         value8 = buffer[SOIL_TEMPERATURE_BASE_OFFSET + i];
-        if (value8 != VP2Constants::APB_INVALID_SOIL_TEMPERATURE)
+        if (value8 != VantageConstants::APB_INVALID_SOIL_TEMPERATURE)
             ss << "";//soil_temperature[{0}]={1};", i, value8 - EXTRA_TEMPERATURE_OFFSET);
     }
 
     ss << "<soilMoistureSensorEntries>";
-    for (int i = 0; i < VP2Constants::APB_MAX_SOIL_MOISTURES; i++) {
+    for (int i = 0; i < VantageConstants::APB_MAX_SOIL_MOISTURES; i++) {
         int soilMoisture = BitConverter::toInt8(buffer, SOIL_MOISTURES_BASE_OFFSET + i);
-        if (soilMoisture != VP2Constants::APB_INVALID_SOIL_MOISTURE) {
+        if (soilMoisture != VantageConstants::APB_INVALID_SOIL_MOISTURE) {
             ss << "<entry><key>" << (600 + i) << "</key><value><sensorId>" << (600 + i) << "</sensorId><sensorType>SOIL_MOISTURE</sensorType>";
             ss << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"soilMoisture\">";
             ss << soilMoisture << "</measurement></value></entry>";

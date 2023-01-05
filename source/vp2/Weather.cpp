@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 static const char *DATE_FORMAT = "%Y-%m-%d";
 static const char *DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S";

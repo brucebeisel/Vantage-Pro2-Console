@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,43 +18,44 @@
 #include <fstream>
 #include <stdio.h>
 #include <time.h>
+
+#include "VantageLogger.h"
 #include "Weather.h"
-#include "VP2Logger.h"
 
 using namespace std;
 
-namespace vp2 {
-VP2Logger::Level VP2Logger::currentLevel = VP2Logger::VP2_INFO;
-ostream * VP2Logger::loggerStream = &cerr;
-ostream VP2Logger::nullStream(0);
-map<string, VP2Logger *> VP2Logger::loggers;
-int VP2Logger::maxFileSize;
-int VP2Logger::maxFiles;
-string VP2Logger::logFilePattern;
+namespace vws {
+VantageLogger::Level VantageLogger::currentLevel = VantageLogger::VANTAGE_INFO;
+ostream * VantageLogger::loggerStream = &cerr;
+ostream VantageLogger::nullStream(0);
+map<string, VantageLogger *> VantageLogger::loggers;
+int VantageLogger::maxFileSize;
+int VantageLogger::maxFiles;
+string VantageLogger::logFilePattern;
 
 const static char *LEVEL_STRINGS[] = {"ERROR  ", "WARNING", "INFO   ", "DEBUG1 ", "DEBUG2 ", "DEBUG3 "};
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VP2Logger::VP2Logger(const string & name) : loggerName(name) {
+VantageLogger::VantageLogger(const string & name) : loggerName(name) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VP2Logger::~VP2Logger() {
+VantageLogger::~VantageLogger() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VP2Logger &
-VP2Logger::getLogger(const std::string & name) {
+VantageLogger &
+VantageLogger::getLogger(const std::string & name) {
     LogIterator logger = loggers.find(name);
 
     if (logger != loggers.end())
         return *(logger->second);
 
-    VP2Logger * newLogger = new VP2Logger(name);
-    loggers.insert(std::pair<string,VP2Logger *>(name, newLogger));
+    VantageLogger * newLogger = new VantageLogger(name);
+    loggers.insert(std::pair<string,VantageLogger *>(name, newLogger));
 
     return *newLogger;
 }
@@ -62,14 +63,14 @@ VP2Logger::getLogger(const std::string & name) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VP2Logger::setLogLevel(Level level) {
+VantageLogger::setLogLevel(Level level) {
     currentLevel = level;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VP2Logger::setLogStream(std::ostream &stream) {
+VantageLogger::setLogStream(std::ostream &stream) {
     loggerStream = &stream;
     maxFileSize = MAX_FILE_SIZE_INFINITE;
 }
@@ -77,23 +78,23 @@ VP2Logger::setLogStream(std::ostream &stream) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VP2Logger::setLogFilePattern(std::string& pattern, int maxFiles, int maxFileSizeMb) {
-    VP2Logger::logFilePattern = pattern;
-    VP2Logger::maxFiles = maxFiles;
-    VP2Logger::maxFileSize = maxFileSizeMb;
+VantageLogger::setLogFilePattern(std::string& pattern, int maxFiles, int maxFileSizeMb) {
+    VantageLogger::logFilePattern = pattern;
+    VantageLogger::maxFiles = maxFiles;
+    VantageLogger::maxFileSize = maxFileSizeMb;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VP2Logger::isLogEnabled(Level level) const {
+VantageLogger::isLogEnabled(Level level) const {
     return level <= currentLevel;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VP2Logger::openLogFile() {
+VantageLogger::openLogFile() {
     char filename[1024];
 
     snprintf(filename, sizeof(filename), logFilePattern.c_str(), 0);
@@ -103,14 +104,14 @@ VP2Logger::openLogFile() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VP2Logger::checkFileSize() {
+VantageLogger::checkFileSize() {
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ostream &
-VP2Logger::log(Level level) const {
+VantageLogger::log(Level level) const {
     char buffer[100];
     if (isLogEnabled(level)) {
         time_t now = time(0);

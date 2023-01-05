@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
 
-namespace vp2 {
+namespace vws {
 /**
- * Class that contains the data needed to create a current weather message. The Vantage Pro 2 has two packets that report the
+ * Class that contains the data needed to create a current weather message. The Vantage console has two packets that report the
  * current weather, the LOOP packet and the LOOP2 packet. This class combines those packets together with a set of wind directions
- * that mimic the recent wind direction indicators on the Vantage Pro 2 console.
+ * that mimic the recent wind direction indicators on the Vantage console.
  */
 class CurrentWeather {
 public:

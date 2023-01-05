@@ -1,6 +1,6 @@
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 class EepromManager {
 public:
     static constexpr int EEPROM_DATA_BLOCK_SIZE = 4096;

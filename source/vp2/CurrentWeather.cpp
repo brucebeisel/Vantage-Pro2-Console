@@ -22,7 +22,7 @@
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ CurrentWeather::formatXML() const {
         << "<forecast>" << loopPacket.getForecastIconString() << "</forecast>";
 
      ss << "<extraTemperatures>";
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_TEMPERATURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++) {
         if (loopPacket.getExtraTemperature(i).isValid()) {
             ss << "<temperature><index>" << i << "</index><value>" << loopPacket.getExtraTemperature(i).getValue() << "</value></temperature>";
         }
@@ -144,7 +144,7 @@ CurrentWeather::formatXML() const {
 
 
     ss << "<extraHumidities>";
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_HUMIDITIES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_HUMIDITIES; i++) {
         if (loopPacket.getExtraHumidity(i).isValid())
             ss << "<humidity><index>" << i << "</index><value>" << loopPacket.getExtraHumidity(i).getValue() << "</value></humidity>";
     }
@@ -152,7 +152,7 @@ CurrentWeather::formatXML() const {
 
     ss << "<soilMoistures>";
     /*
-    for (int i = 0; i < VP2Constants::MAX_SOIL_MOISTURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++) {
         if (loopPacket.isSoilMoistureValid(i)) {
             ss << "<entry><key>" << 600 + i << "</key><value><sensorId>" << 600 + i << "</sensorId><sensorType>SOIL_MOISTURE</sensorType>"
                << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"soilMoisture\">"
@@ -164,7 +164,7 @@ CurrentWeather::formatXML() const {
 
     ss << "<leafWetnesses>";
     /*
-    for (int i = 0; i < VP2Constants::MAX_LEAF_WETNESSES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_LEAF_WETNESSES; i++) {
         if (loopPacket.isLeafWetnessValid(i)) {
             ss << "<entry><key>" << 500 + i << "</key><value><sensorId>" << 500 + i << "</sensorId><sensorType>LEAF_WETNESS</sensorType>"
                << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"leafWetness\">"
@@ -237,7 +237,7 @@ CurrentWeather::formatJSON() const {
 
     /*
     ss << "<extraTemperatures>";
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_TEMPERATURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++) {
         if (loopPacket.getExtraTemperature(i).isValid()) {
             ss << "<temperature><index>" << i << "</index><value>" << loopPacket.getExtraTemperature(i).getValue() << "</value></temperature>";
         }
@@ -246,14 +246,14 @@ CurrentWeather::formatJSON() const {
 
 
     ss << "<extraHumidities>";
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_HUMIDITIES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_HUMIDITIES; i++) {
         if (loopPacket.getExtraHumidity(i).isValid())
             ss << "<humidity><index>" << i << "</index><value>" << loopPacket.getExtraHumidity(i).getValue() << "</value></humidity>";
     }
     ss << "</extraHumidities>";
 
     ss << "<soilMoistures>";
-    for (int i = 0; i < VP2Constants::MAX_SOIL_MOISTURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++) {
         if (loopPacket.isSoilMoistureValid(i)) {
             ss << "<entry><key>" << 600 + i << "</key><value><sensorId>" << 600 + i << "</sensorId><sensorType>SOIL_MOISTURE</sensorType>"
                << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"soilMoisture\">"
@@ -263,7 +263,7 @@ CurrentWeather::formatJSON() const {
     ss << "</soilMoistures>";
 
     ss << "<leafWetnesses>";
-    for (int i = 0; i < VP2Constants::MAX_LEAF_WETNESSES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_LEAF_WETNESSES; i++) {
         if (loopPacket.isLeafWetnessValid(i)) {
             ss << "<entry><key>" << 500 + i << "</key><value><sensorId>" << 500 + i << "</sensorId><sensorType>LEAF_WETNESS</sensorType>"
                << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"leafWetness\">"

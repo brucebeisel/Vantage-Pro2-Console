@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 static const char *SENSOR_NAMES[] = {
     "THERMOMETER",
@@ -60,32 +60,32 @@ Sensor::detectSensors(LoopPacket loop, vector<Sensor> & sensors) {
     if (loop.getSolarRadiation().isValid())
         sensors.push_back(Sensor(SOLAR_RADIATION, SOLAR_RADIATION_SENSOR_ID));
 
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_HUMIDITIES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_HUMIDITIES; i++) {
         if (loop.getExtraHumidity(i).isValid())
             sensors.push_back(Sensor(HYGROMETER, HYGROMETER_BASE_SENSOR_ID + i));
     }
 
-    for (int i = 0; i < VP2Constants::MAX_EXTRA_TEMPERATURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++) {
         if (loop.getExtraTemperature(i).isValid())
             sensors.push_back(Sensor(THERMOMETER, THERMOMETER_BASE_SENSOR_ID + i));
     }
 
-    for (int i = 0; i < VP2Constants::MAX_LEAF_WETNESSES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_LEAF_WETNESSES; i++) {
         if (loop.getLeafWetness(i).isValid())
             sensors.push_back(Sensor(LEAF_WETNESS, LEAF_WETNESS_BASE_SENSOR_ID + i));
     }
 
-    for (int i = 0; i < VP2Constants::MAX_SOIL_MOISTURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++) {
         if (loop.getSoilMoisture(i).isValid())
             sensors.push_back(Sensor(SOIL_MOISTURE, SOIL_MOISTURE_BASE_SENSOR_ID + i));
     }
 
-    for (int i = 0; i < VP2Constants::MAX_SOIL_TEMPERATURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_SOIL_TEMPERATURES; i++) {
         if (loop.getSoilTemperature(i).isValid())
             sensors.push_back(Sensor(SOIL_TEMPERATURE, SOIL_TEMPERATURE_BASE_SENSOR_ID + i));
     }
 
-    for (int i = 0; i < VP2Constants::MAX_LEAF_TEMPERATURES; i++) {
+    for (int i = 0; i < VantageConstants::MAX_LEAF_TEMPERATURES; i++) {
         if (loop.getLeafTemperature(i).isValid())
             sensors.push_back(Sensor(LEAF_TEMPERATURE, LEAF_TEMPERATURE_BASE_SENSOR_ID + i));
     }

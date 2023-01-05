@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ typedef long ssize_t;
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,12 +45,12 @@ WeatherSenseSocket::WeatherSenseSocket(const string & host, unsigned short port)
                                                                         host(host),
                                                                         port(port),
                                                                         socketId(NO_SOCKET),
-                                                                        logger(VP2Logger::getLogger("WeatherSenseSocket")) {
+                                                                        logger(VantageLogger::getLogger("WeatherSenseSocket")) {
 #ifdef _WIN32
 {
     WSAData data;
     if (WSAStartup(MAKEWORD(2,2), &data) != 0) {
-        logger.log(VP2Logger::VP2_ERROR) << "WSAStartup() failed" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "WSAStartup() failed" << endl;
     }
 }
 #endif
@@ -97,7 +97,7 @@ WeatherSenseSocket::writeString(const string & s) {
         const char * buffer = stringWithNewline.c_str();
         int bytesToWrite = stringWithNewline.size();
         if (send(socketId, buffer, bytesToWrite, 0) != bytesToWrite) {
-            logger.log(VP2Logger::VP2_ERROR) << "Send on collector socket failed" << endl;
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Send on collector socket failed" << endl;
             disconnectSocket();
         }
     }
@@ -119,7 +119,7 @@ WeatherSenseSocket::connectSocket() {
 #else
             int err = errno;
 #endif
-            logger.log(VP2Logger::VP2_ERROR) << "Failed to create socket to communicate with collector. Error = " << err << endl;
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to create socket to communicate with collector. Error = " << err << endl;
             return;
         }
 
@@ -135,7 +135,7 @@ WeatherSenseSocket::connectSocket() {
 #else
             int err = errno;
 #endif
-            logger.log(VP2Logger::VP2_ERROR) << "Failed to connect with the collector. Error = " << err << endl;
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to connect with the collector. Error = " << err << endl;
             disconnectSocket();
             return;
         }
@@ -162,7 +162,7 @@ WeatherSenseSocket::connectSocket() {
             byte buffer[100];
             ssize_t bytesRead = recv(socketId, buffer, sizeof(buffer), 0);
             buffer[bytesRead] = '\0';
-            logger.log(VP2Logger::VP2_DEBUG1) << "Read " << bytesRead << " bytes: '" << buffer << "' from collector" << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Read " << bytesRead << " bytes: '" << buffer << "' from collector" << endl;
             time_t now = ::time(0);
             struct tm tm;
             Weather::localtime(now, tm);
@@ -180,7 +180,7 @@ WeatherSenseSocket::connectSocket() {
         }
         else {
             disconnectSocket();
-            logger.log(VP2Logger::VP2_WARNING) << "No response received from collector. Closing socket." << endl;
+            logger.log(VantageLogger::VANTAGE_WARNING) << "No response received from collector. Closing socket." << endl;
         }
     }
 }

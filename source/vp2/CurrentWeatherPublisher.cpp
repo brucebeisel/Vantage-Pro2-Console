@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,18 +22,18 @@
 #include <ifaddrs.h>
 #include <string.h>
 #include <string>
-#include "VP2Logger.h"
 #include "CurrentWeatherPublisher.h"
 #include "CurrentWeather.h"
+#include "VantageLogger.h"
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 const std::string CurrentWeatherPublisher::MULTICAST_HOST = "224.0.0.120";
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeatherPublisher::CurrentWeatherPublisher() : log(VP2Logger::getLogger("CurrentWeatherPublisher")), socketId(NO_SOCKET)
+CurrentWeatherPublisher::CurrentWeatherPublisher() : log(VantageLogger::getLogger("CurrentWeatherPublisher")), socketId(NO_SOCKET)
 {
 }
 
@@ -58,10 +58,10 @@ CurrentWeatherPublisher::sendCurrentWeather(const CurrentWeather & cw)
     size_t length = strlen(data);
     if (sendto(socketId, data, length, 0, reinterpret_cast<struct sockaddr *>(&groupAddr), sizeof(groupAddr)) != length) {
         int e = errno;
-        log.log(VP2Logger::VP2_WARNING) <<  "sendto() for current weather failed. Errno = " << e << endl;
+        log.log(VantageLogger::VANTAGE_WARNING) <<  "sendto() for current weather failed. Errno = " << e << endl;
     }
     else
-        log.log(VP2Logger::VP2_INFO) << "Published current weather: " << data << endl;
+        log.log(VantageLogger::VANTAGE_INFO) << "Published current weather: " << data << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ CurrentWeatherPublisher::createSocket()
 
     struct sockaddr_in saddr;
     if (!getLocalIpAddress(saddr)) {
-        log.log(VP2Logger::VP2_ERROR) <<  "setsockopt() getting local IP address failed." << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() getting local IP address failed." << endl;
         close(socketId);
         socketId = NO_SOCKET;
         return false;
@@ -120,7 +120,7 @@ CurrentWeatherPublisher::createSocket()
 
     if (setsockopt(socketId, IPPROTO_IP, IP_MULTICAST_IF, reinterpret_cast<char *>(&saddr.sin_addr), sizeof(saddr.sin_addr)) < 0) {
         int e = errno;
-        log.log(VP2Logger::VP2_ERROR) <<  "setsockopt() for local interface failed. Errno = " << e << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() for local interface failed. Errno = " << e << endl;
         close(socketId);
         socketId = NO_SOCKET;
         return false;
@@ -129,13 +129,13 @@ CurrentWeatherPublisher::createSocket()
     unsigned char ttl = 2;
     if (setsockopt(socketId, IPPROTO_IP, IP_MULTICAST_TTL, reinterpret_cast<char *>(&ttl), sizeof(ttl)) < 0) {
         int e = errno;
-        log.log(VP2Logger::VP2_ERROR) <<  "setsockopt() for TTL failed. Errno = " << e << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() for TTL failed. Errno = " << e << endl;
         close(socketId);
         socketId = NO_SOCKET;
         return false;
     }
 
-    log.log(VP2Logger::VP2_INFO) << "Multicast socket created successfully" << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "Multicast socket created successfully" << endl;
     return true;
 }
 

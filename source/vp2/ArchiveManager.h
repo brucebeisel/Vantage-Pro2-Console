@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,16 @@
 
 #include <string>
 #include <vector>
-#include "VP2Logger.h"
+
+#include "VantageLogger.h"
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 class ArchivePacket;
-class VantagePro2Station;
+class VantageWeatherStation;
 
 /**
- * The ArchiveManager class manages a file that contains the raw data read from the DUMP and DMPAFT command of the Vantage Pro 2 weather console.
+ * The ArchiveManager class manages a file that contains the raw data read from the DUMP and DMPAFT command of the Vantage console.
  * This archive acts as a augmented storage for the console.
  */
 class ArchiveManager {
@@ -37,7 +38,7 @@ public:
      * 
      * @param archiveFilename The file in which the archive will be maintained
      */
-    ArchiveManager(const std::string & archiveFilename, VantagePro2Station & station);
+    ArchiveManager(const std::string & archiveFilename, VantageWeatherStation & station);
 
     /**
      * Destructor.
@@ -87,11 +88,11 @@ private:
      */
     void findPacketTimeRange();
 
-    std::string          archiveFile;
-    DateTime             newestPacketTime;
-    DateTime             oldestPacketTime;
-    VantagePro2Station & station;
-    VP2Logger            log;
+    std::string              archiveFile;
+    DateTime                 newestPacketTime;
+    DateTime                 oldestPacketTime;
+    VantageWeatherStation &  station;
+    VantageLogger            log;
 };
 }
 

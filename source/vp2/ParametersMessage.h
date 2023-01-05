@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@
 #define PARAMETERS_MESSAGE_H
 #include <string>
 
-namespace vp2 {
+namespace vws {
 
 /**
- * A class that is a container for various VP2 parameters and also builds the parameters response message.
+ * A class that is a container for various Vantage parameters and also builds the parameters response message.
  *
  * TBD Should this class even exist or do we let the client ask for each parameter separately?
  */

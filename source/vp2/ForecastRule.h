@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 
 #include <string>
 
-namespace vp2 {
+namespace vws {
 /**
- * Class the converts the integer representation of a forecast as reported by the VP2 into a string.
+ * Class the converts the integer representation of a forecast as reported by the Vantage console into a string.
  */
 class ForecastRule {
 public:

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include <string>
 #include <mutex>
 
-namespace vp2 {
+namespace vws {
 
 /**
  * Class to handle events from the HTTP threads.
@@ -73,6 +73,6 @@ private:
     mutable std::mutex mutex;             // The mutex to protect the queue against multi-threaded contention
 };
 
-} /* namespace vp2 */
+}
 
 #endif /* EVENT_MANAGER_H_ */

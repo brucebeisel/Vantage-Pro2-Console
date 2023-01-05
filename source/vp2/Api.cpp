@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +16,16 @@
  */
 #include <iostream>
 #include "Weather.h"
-#include "VantagePro2Station.h"
 #include "Api.h"
+#include "VantageWeatherStation.h"
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Api::Api(VantagePro2Station & station) : station(station) {
+Api::Api(VantageWeatherStation & station) : station(station) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ Api::requestSensorStationIds() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 Api::setSensorStationType(int id, const std::string & sensorStationTypeName) {
-    if (id < 0 || id >= VP2Constants::MAX_SENSOR_STATIONS) {
+    if (id < 0 || id >= VantageConstants::MAX_SENSOR_STATIONS) {
         // Send failure
     }
 }
@@ -181,7 +181,7 @@ Api::clearGraphData() {
 void
 Api::clearCumulativeValue(const std::string & which) {
 
-    VP2Constants::CumulativeValue cumValue = VP2Constants::DAILY_RAIN_CUM;
+    VantageConstants::CumulativeValue cumValue = VantageConstants::DAILY_RAIN_CUM;
 
     bool result = station.clearCumulativeValue(cumValue);
     sendCommandResponse("clear-cumulative-value", result);

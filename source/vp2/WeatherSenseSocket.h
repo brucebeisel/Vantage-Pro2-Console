@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,14 @@
 #define WEATHERSENSE_SOCKET_H
 
 #include <string>
-#include "VP2Logger.h"
+
+#include "VantageLogger.h"
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 /**
- * Class that communicates with a Vantage Pro 2 client using a TCP/IP socket.
- * The Vantage Pro 2 driver is the server socket.
+ * Class that communicates with a Vantage client using a TCP/IP socket.
+ * The Vantage driver is the server socket.
  */
 class WeatherSenseSocket {
 public:
@@ -102,7 +103,7 @@ private:
     unsigned short     port;
     int                socketId;
     HistoricalReader * reader;
-    VP2Logger          logger;
+    VantageLogger      logger;
 };
 }
 

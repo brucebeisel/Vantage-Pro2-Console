@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +20,21 @@
 #include <vector>
 #include "ArchivePacket.h"
 #include "ArchiveManager.h"
-#include "VantagePro2Station.h"
+
+#include "VantageWeatherStation.h"
 
 using namespace std;
 
-namespace vp2 {
+namespace vws {
 
 static constexpr int SYNC_RETRIES = 5;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchiveManager::ArchiveManager(const std::string & archiveFilename, VantagePro2Station & station) :
+ArchiveManager::ArchiveManager(const std::string & archiveFilename, VantageWeatherStation & station) :
                                                                     archiveFile(archiveFilename),
                                                                     station(station),
-                                                                    log(VP2Logger::getLogger("ArchiveManager")) {
+                                                                    log(VantageLogger::getLogger("ArchiveManager")) {
     findPacketTimeRange();
     
 }
@@ -69,7 +70,7 @@ ArchiveManager::synchronizeArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket>& list) {
-    log.log(VP2Logger::VP2_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
     DateTime timeOfLastRecord = 0;
     byte buffer[ArchivePacket::BYTES_PER_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
@@ -111,7 +112,7 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
     // If there are more records, then the caller needs to call this method until the
     // list returns empty.
     //
-    while (list.size() < VP2Constants::NUM_ARCHIVE_RECORDS) {
+    while (list.size() < VantageConstants::NUM_ARCHIVE_RECORDS) {
         stream.read(buffer, sizeof(buffer));
 
         if (stream.eof())
@@ -167,10 +168,10 @@ ArchiveManager::addPackets(const vector<ArchivePacket> & packets) {
         if (newestPacketTime < it->getDateTime()) {
             stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_PACKET);
             newestPacketTime = it->getDateTime();
-            log.log(VP2Logger::VP2_DEBUG1) << "Archived packet with time: " << Weather::formatDateTime(it->getDateTime()) << endl;
+            log.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: " << Weather::formatDateTime(it->getDateTime()) << endl;
         }
         else
-            log.log(VP2Logger::VP2_INFO) << "Skipping archive of packet with time " << Weather::formatDateTime(it->getDateTime()) << endl;
+            log.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time " << Weather::formatDateTime(it->getDateTime()) << endl;
     }
     stream.close();
 }

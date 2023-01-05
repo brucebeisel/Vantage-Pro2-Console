@@ -24,12 +24,12 @@ SRCS=\
 	SensorStation.cpp \
     SerialPort.cpp \
 	UnitConverter.cpp \
-	VantagePro2CRC.cpp \
-	VantagePro2Driver.cpp \
-	VantagePro2Station.cpp \
-	VP2Constants.cpp \
-	VP2Logger.cpp \
-    VP2Decoder.cpp \
+	VantageConstants.cpp \
+	VantageCRC.cpp \
+    VantageDecoder.cpp \
+	VantageDriver.cpp \
+	VantageLogger.cpp \
+	VantageWeatherStation.cpp \
 	Weather.cpp \
 	WeatherSenseSocket.cpp \
 	WindDirectionSlice.cpp

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@
  * Class(es) for the RESTful API for the Vantage weather station service.
  */
 
-namespace vp2 {
-class VantagePro2Station;
+namespace vws {
+class VantageWeatherStation;
 
 class Api {
 public:
-    Api(VantagePro2Station & station);
+    Api(VantageWeatherStation & station);
 
     void processCommand(std::string & command);
 
@@ -186,7 +186,7 @@ private:
     void sendCommandResponse(const std::string & command, const std::string & result);
     void sendCommandResponse(const std::string & command, bool success);
     void sendResponse(const std::string & response);
-    VantagePro2Station & station;
+    VantageWeatherStation & station;
 };
 
 }

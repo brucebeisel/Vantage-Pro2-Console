@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@
 #include <vector>
 #include "LoopPacket.h"
 
-namespace vp2 {
+namespace vws {
 
 class Sensor {
 public:
     /**
-     * The types of sensors supported by the VP2
+     * The types of sensors supported by the Vantage weather stations
      */
     enum SensorType {
         THERMOMETER,
@@ -55,7 +55,7 @@ public:
     virtual ~Sensor() {};
 
     /**
-     * Detect the sensors that are installed on the VP2 by inspecting the values in the LOOP packet.
+     * Detect the sensors that are installed on the weather station by inspecting the values in the LOOP packet.
      * 
      * @param loop The LOOP packet to inspect
      * @param sensors The list of detected sensors
@@ -73,7 +73,7 @@ public:
 private:
     static const int LAST_DEFAULT_SENSOR_ID = 99;
     //
-    // The VP2 can have a number of additional sensors that are reported by additional sensor stations.
+    // The weather station can have a number of additional sensors that are reported by additional sensor stations.
     // These are the base IDs for each sensor type.
     // The actual sensor ID is the base value + the location in the LOOP packet array for the sensor value type.
     //
@@ -96,7 +96,7 @@ private:
     static const int INDOOR_HYGROMETER_SENSOR_ID = 8;
     static const int OUTDOOR_HYGROMETER_SENSOR_ID = 9;
     SensorType sensorType;
-    int sensorId;
+    int        sensorId;
 };
 }
 #endif /* SENSOR_H */

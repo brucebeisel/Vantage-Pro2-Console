@@ -17,12 +17,13 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include "../VP2/VP2Constants.h"
+
+#include "../vp2/VantageConstants.h"
 #include "../VP2/Weather.h"
 #include "../VP2/ArchivePacket.h"
 
 using namespace std;
-using namespace vp2;
+using namespace vws;
 
 bool signalCaught;
 
@@ -33,7 +34,7 @@ main(int argc, char *argv[]) {
     }
 
     char *file = argv[1];
-    char buffer[vp2::ArchivePacket::BYTES_PER_PACKET];
+    char buffer[vws::ArchivePacket::BYTES_PER_PACKET];
 
     ifstream stream(file, ifstream::in | ios::binary);
 

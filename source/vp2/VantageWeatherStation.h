@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VANTAGE_PRO2_STATION_H
-#define VANTAGE_PRO2_STATION_H
+#ifndef VANTAGE_WEATHER_STATION_H
+#define VANTAGE_WEATHER_STATION_H
 
 #include <string>
 #include <vector>
-#include "VP2Logger.h"
 #include "ArchivePacket.h"
 #include "CurrentWeather.h"
 #include "LoopPacket.h"
@@ -30,8 +29,9 @@
 #include "BitConverter.h"
 #include "DominantWindDirections.h"
 #include "SerialPort.h"
+#include "VantageLogger.h"
 
-namespace vp2 {
+namespace vws {
 class HiLowPacket;
 
 struct TimeZoneData {
@@ -81,9 +81,9 @@ static const TimeZoneData TIME_ZONES[] = {
 };
 
 /**
- * Class that handles the command protocols with the VP2 console.
+ * Class that handles the command protocols with the Vantage console.
  */
-class VantagePro2Station {
+class VantageWeatherStation {
 public:
     /**
      * Interface class used to callback the current weather and archive pages.
@@ -119,12 +119,12 @@ public:
      * @param portName The name of he serial port to open
      * @param baudRate The baud rate to use on the serial port
      */
-    VantagePro2Station(const std::string & portName, int baudRate);
+    VantageWeatherStation(const std::string & portName, int baudRate);
 
     /**
      * Destructor.
      */
-    virtual ~VantagePro2Station();
+    virtual ~VantageWeatherStation();
 
     /**
      * Set the callback object that will be called when current weather, archive packets are received.
@@ -134,14 +134,14 @@ public:
     void setCallback(Callback & callback);
 
     /**
-     * Open the VP2 console.
+     * Open the Vantage console.
      * 
      * @return True if the console was opened
      */
     bool openStation();
 
     /**
-     * Close the VP2 console.
+     * Close the Vantage console.
      */
     void closeStation();
 
@@ -378,9 +378,9 @@ public:
     bool clearAlarmThresholds();
     bool clearTemperatureHumidityCalibrationOffsets();
     bool clearGraphPoints();
-    bool clearCumulativeValue(VP2Constants::CumulativeValue cumValue);
-    bool clearHighValues(VP2Constants::ExtremePeriod period);
-    bool clearLowValues(VP2Constants::ExtremePeriod period);
+    bool clearCumulativeValue(VantageConstants::CumulativeValue cumValue);
+    bool clearHighValues(VantageConstants::ExtremePeriod period);
+    bool clearLowValues(VantageConstants::ExtremePeriod period);
     bool clearActiveAlarms();
     bool clearCurrentData();
 
@@ -399,7 +399,7 @@ public:
      *
      * @return True if successful
      */
-    bool updateBaudRate(VP2Constants::BaudRate rate);
+    bool updateBaudRate(VantageConstants::BaudRate rate);
     
     /**
      * Update the console's time.
@@ -423,7 +423,7 @@ public:
      *
      * @return True if successful
      */
-    bool updateArchivePeriod(VP2Constants::ArchivePeriod period);
+    bool updateArchivePeriod(VantageConstants::ArchivePeriod period);
 
     bool startArchiving();
     bool stopArchiving();
@@ -568,7 +568,7 @@ private:
     /**
      * Send a command that expects on "OK" response.
 
-     * @param command The command to be sent to the VP2 console
+     * @param command The command to be sent to the Vantage console
      * @return True if the command was sent successfully
      */
     bool sendOKedCommand(const std::string & command);
@@ -576,7 +576,7 @@ private:
     /**
      * Send a command that expects on "OK" response followed by a "DONE" after a period of time.
 
-     * @param command The command to be sent to the VP2 console
+     * @param command The command to be sent to the Vantage console
      * @return True if the command was sent successfully
      */
     bool sendOKedWithDoneCommand(const std::string & command);
@@ -584,7 +584,7 @@ private:
     /**
      * Send a command that expects an ACK response.
      *
-     * @param command The command to be sent to the VP2 console
+     * @param command The command to be sent to the Vantage console
      * @return True if the command was sent successfully
      */
     bool sendAckedCommand(const std::string & command);
@@ -626,10 +626,10 @@ private:
     int                        windSensorStationId;      // The ID of the sensor station containing the anemometer
     Rainfall                   rainCollectorSize;        // The size of the rain collector that is needed for calculating rain amounts
     int                        archivePeriod;            // The archive period used to calculate reception percentage
-    VP2Logger                  log;
+    VantageLogger              log;
     //StationConfiguration       stationConfiguration;
     //std::vector<Sensor>        sensors;
 };
 }
 
-#endif /* VANTAGE_PRO2_STATION_H */
+#endif /* VANTAGE_WEATHER_STATION_H */

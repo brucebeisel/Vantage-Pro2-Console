@@ -18,11 +18,12 @@
 #define WIND_DIRECTION_SLICES_H
 
 #include <vector>
+
+#include "VantageLogger.h"
 #include "Weather.h"
-#include "VP2Logger.h"
 #include "WindDirectionSlice.h"
 
-namespace vp2 {
+namespace vws {
 /**
  * Class that keeps track of the most recent wind direction tendencies.
  * This algorithm does its best to approximate what the Vantage console is displaying.
@@ -148,10 +149,10 @@ private:
      */
     static const int DOMINANT_DIR_DURATION = 3600;
 
-    VP2Logger                log;
-    WindDirectionSlice                windSlices[NUM_SLICES];
-    time_t                   startOf10MinuteTimeWindow;
-    time_t                   endOf10MinuteTimeWindow;
+    VantageLogger      log;
+    WindDirectionSlice windSlices[NUM_SLICES];
+    time_t             startOf10MinuteTimeWindow;
+    time_t             endOf10MinuteTimeWindow;
 };
 }
 

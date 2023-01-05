@@ -1,5 +1,6 @@
+
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +25,13 @@
 #include <thread>
 #include <atomic>
 #include <fstream>
-#include "VP2Logger.h"
+#include "VantageLogger.h"
 #include "ArchiveManager.h"
-#include "VantagePro2Driver.h"
+#include "VantageDriver.h"
 #include "CurrentWeatherPublisher.h"
 
 using namespace std;
-using namespace vp2;
+using namespace vws;
 
 atomic<bool> signalCaught(false);
 
@@ -46,15 +47,15 @@ sigHandler(int sig) {
 
 void
 consoleThreadEntry(const string & archiveFile, const string & serialPortName, int baudRate) {
-    VP2Logger & log = VP2Logger::getLogger("VP2 Main");
-    log.log(VP2Logger::VP2_INFO) << "Starting console thread" << endl;
+    VantageLogger & log = VantageLogger::getLogger("Vantage Main");
+    log.log(VantageLogger::VANTAGE_INFO) << "Starting console thread" << endl;
 
     try {
         CurrentWeatherPublisher cwPublisher;
-        VantagePro2Station station(serialPortName, baudRate);
+        VantageWeatherStation station(serialPortName, baudRate);
         ArchiveManager archiveManager(archiveFile, station);
         EventManager eventManager;
-        VantagePro2Driver driver(archiveManager, cwPublisher, station, eventManager);
+        VantageDriver driver(archiveManager, cwPublisher, station, eventManager);
 
 
         if (!cwPublisher.createSocket())
@@ -63,18 +64,18 @@ consoleThreadEntry(const string & archiveFile, const string & serialPortName, in
         //if (!driver.initialize())
         //    return;
 
-        log.log(VP2Logger::VP2_INFO) << "Entering driver's main loop" << endl;
+        log.log(VantageLogger::VANTAGE_INFO) << "Entering driver's main loop" << endl;
         driver.mainLoop();
-        log.log(VP2Logger::VP2_INFO) << "Driver's main loop returned" << endl;
+        log.log(VantageLogger::VANTAGE_INFO) << "Driver's main loop returned" << endl;
     }
     catch (std::exception & e) {
-        log.log(VP2Logger::VP2_ERROR) << "Caught exception from driver's main loop " << e.what() << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Caught exception from driver's main loop " << e.what() << endl;
     }
     catch (...) {
-        log.log(VP2Logger::VP2_ERROR) << "Caught unknown exception from driver's main loop" << endl;
+        log.log(VantageLogger::VANTAGE_ERROR) << "Caught unknown exception from driver's main loop" << endl;
     }
 
-    log.log(VP2Logger::VP2_INFO) << "Ending console thread" << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "Ending console thread" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,10 +99,10 @@ main(int argc, char *argv[]) {
     if (argc == 4) {
         const string logFile(argv[3]);
         ofstream logStream(logFile.c_str(), ios::app | ios::ate | ios::out);
-        VP2Logger::setLogStream(logStream);
+        VantageLogger::setLogStream(logStream);
     }
 
-    VP2Logger::setLogLevel(VP2Logger::VP2_DEBUG3);
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     thread consoleThread(consoleThreadEntry, archiveFile, serialPortName, 19200);
 
     consoleThread.join();

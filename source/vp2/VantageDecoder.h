@@ -1,19 +1,19 @@
-#ifndef VP2_DECODER_H
-#define VP2_DECODER_H
+#ifndef VANTAGE_DECODER_H
+#define VANTAGE_DECODER_H
 
 #include "Weather.h"
 #include "Measurement.h"
-#include "VP2Logger.h"
+#include "VantageLogger.h"
 
-namespace vp2 {
+namespace vws {
 
 /**
  * Class that contains static methods for converting bytes in a buffer into measurement values
  */
-class VP2Decoder {
+class VantageDecoder {
 public:
     /**
-     * Decode a Vantage Pro 2 16 bit temperature.
+     * Decode a Vantage 16 bit temperature.
      *
      * @param buffer The buffer from which to decode the temperature
      * @param offset The offset into "buffer" from which to decode the temperature
@@ -23,7 +23,7 @@ public:
     static Measurement<Temperature> decode16BitTemperature(const byte buffer[], int offset);
 
     /**
-     * Decode a Vantage Pro 2 16 bit temperature.
+     * Decode a Vantage 16 bit temperature.
      *
      * @param buffer      The buffer from which to decode the temperature
      * @param offset      The offset into "buffer" from which to decode the temperature
@@ -34,13 +34,13 @@ public:
     static const Measurement<Temperature> & decode16BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement);
 
     /**
-     * Decode a Vantage Pro 2 16 bit temperature that is not scaled.
+     * Decode a Vantage 16 bit temperature that is not scaled.
      *
      * @param buffer The buffer from which to decode the temperature
      * @param offset The offset into "buffer" from which to decode the temperature
      * @param valid  Reference to a boolean that returns whether the temperature value is NOT the "dashed" value
      *
-     * @return The converted temperture or 0.0 if not valid
+     * @return The converted temperature or 0.0 if not valid
      */
     static Measurement<Temperature> decodeNonScaled16BitTemperature(const byte buffer[], int offset);
     static const Measurement<Temperature> & decodeNonScaled16BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement);
@@ -107,9 +107,9 @@ private:
     static Rainfall rainCollectorSize;
     static bool     rainCollectorSizeSet;
 
-    VP2Decoder();
-    ~VP2Decoder();
-    VP2Decoder(const VP2Decoder &);
+    VantageDecoder();
+    ~VantageDecoder();
+    VantageDecoder(const VantageDecoder &);
 };
 
 }

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 /*
  * This text for the forecast rules was obtained off the Internet. Using Google will turn up many references to the list.
  */
-namespace vp2 {
+namespace vws {
 const std::string ForecastRule::FORECAST[] = {
     "Mostly clear and cooler.",
     "Mostly clear with little temperature change.",

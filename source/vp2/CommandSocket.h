@@ -1,7 +1,7 @@
 #ifndef COMMAND_SOCKET_H_
 #define COMMAND_SOCKET_H_
 
-namespace vp2 {
+namespace vws {
 
 class EventManager;
 
@@ -15,6 +15,6 @@ private:
     EventManager & eventManager;
 };
 
-} /* namespace vp2 */
+} /* namespace vws */
 
 #endif /* COMMAND_SOCKET_H_ */

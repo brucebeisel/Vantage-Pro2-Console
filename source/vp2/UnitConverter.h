@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
 
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 
 /**
- * Class that contains utilty routines to convert from VP2 units to WeatherSense units.
+ * Class that contains utility routines to convert from Vantage weather console units to WeatherSense units.
  */
 class UnitConverter {
 public:

@@ -21,7 +21,7 @@
 #include <iostream>
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 /**
  * Class that keeps track of the number of wind samples that have occured in a given slice of wind direction.
  */

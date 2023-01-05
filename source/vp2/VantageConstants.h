@@ -14,19 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef VP2_CONSTANTS_H
-#define VP2_CONSTANTS_H
+#ifndef VANTAGE_CONSTANTS_H
+#define VANTAGE_CONSTANTS_H
 #include <string>
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 /**
  * This class contains all of the constants from the
- * Vantage Pro/Pro 2/Vue Serial Communications Reference Manual
+ * Vantage Pro, Vantage Pro2, Vantage Vue Serial Communications Reference Manual
  * Version 2.6.1
  * Date: 3/29/2013
  */
-namespace VP2Constants {
+namespace VantageConstants {
     //
     // Various values used generically in various command protocols
     //
@@ -196,4 +196,4 @@ namespace VP2Constants {
 };
 }
 
-#endif /* VP2_CONSTANTS_H */
+#endif /* VANTAGE_CONSTANTS_H */

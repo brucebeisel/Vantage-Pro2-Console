@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,12 @@
 #define LOOP_PACKET_H
 
 #include <string>
-#include "VP2Logger.h"
 #include "Weather.h"
 #include "Measurement.h"
-#include "VP2Constants.h"
+#include "VantageConstants.h"
+#include "VantageLogger.h"
 
-namespace vp2 {
+namespace vws {
 /**
  * Class that decodes and stores the data from the LOOP packet.
  */
@@ -123,8 +123,7 @@ private:
 
     static const int LOOP_PACKET_TYPE = 0;
 
-    VP2Logger                       log;
-
+    VantageLogger                   log;
     int                             nextRecord;
     Measurement<Temperature>        outsideTemperature;
     Measurement<Temperature>        insideTemperature;
@@ -146,12 +145,12 @@ private:
     Measurement<Evapotranspiration> dayET;
     Measurement<Evapotranspiration> monthET;
     Measurement<Evapotranspiration> yearET;
-    Measurement<SoilMoisture>       soilMoisture[VP2Constants::MAX_SOIL_MOISTURES];
-    Measurement<LeafWetness>        leafWetness[VP2Constants::MAX_LEAF_WETNESSES];
-    Measurement<Temperature>        leafTemperature[VP2Constants::MAX_LEAF_TEMPERATURES];
-    Measurement<Temperature>        soilTemperature[VP2Constants::MAX_SOIL_TEMPERATURES];
-    Measurement<Temperature>        extraTemperature[VP2Constants::MAX_EXTRA_TEMPERATURES];
-    Measurement<Humidity>           extraHumidity[VP2Constants::MAX_EXTRA_HUMIDITIES];
+    Measurement<SoilMoisture>       soilMoisture[VantageConstants::MAX_SOIL_MOISTURES];
+    Measurement<LeafWetness>        leafWetness[VantageConstants::MAX_LEAF_WETNESSES];
+    Measurement<Temperature>        leafTemperature[VantageConstants::MAX_LEAF_TEMPERATURES];
+    Measurement<Temperature>        soilTemperature[VantageConstants::MAX_SOIL_TEMPERATURES];
+    Measurement<Temperature>        extraTemperature[VantageConstants::MAX_EXTRA_TEMPERATURES];
+    Measurement<Humidity>           extraHumidity[VantageConstants::MAX_EXTRA_HUMIDITIES];
     Forecast                        forecastIcon;
     int                             forecastRuleIndex;
     DateTime                        sunriseTime;

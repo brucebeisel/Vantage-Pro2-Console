@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,14 @@
 #include <string>
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 /**
  * Class that represents a sensor station that reports data to the console.
  */
 class SensorStation {
 public:
     /**
-     * Sensor station types supported by the VP2, the enum integer values are from the VP2 serial protocol.
+     * Sensor station types supported by the Vantage weather station, the enum integer values are from the Vantage serial protocol.
      */
     enum SensorStationType {
         INTEGRATED_SENSOR_STATION = 0,
@@ -122,7 +122,7 @@ public:
     void setBatteryStatus(bool value);
 
     /**
-     * Get the link quality of this station. Not all sensor stations are monitored for link quality. The VP2 only
+     * Get the link quality of this station. Not all sensor stations are monitored for link quality. The Vantage only
      * monitors the link quality of the sensor station with the anemometer.
      * 
      * @return The quality of the link between 0 and 100

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
 #ifndef LOOP2_PACKET_H
 #define LOOP2_PACKET_H
 
-#include "VP2Logger.h"
+#include "VantageLogger.h"
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 
 /**
- * Class that decodes and holds the data from the VP2 LOOP 2 packet.
+ * Class that decodes and holds the data from the Vantage LOOP2 packet.
  */
 class Loop2Packet {
 public:
@@ -40,7 +40,7 @@ public:
     virtual ~Loop2Packet();
 
     /**
-     * Parse the LOOP 2 packet.
+     * Parse the LOOP2 packet.
      * 
      * @param The buffer from which to decode the packet
      * @return True if the buffer was decoded successfully
@@ -79,7 +79,7 @@ private:
     Measurement<Temperature> windChill;
     Measurement<Temperature> thsw;
     Measurement<Pressure>    atmPressure;
-    VP2Logger   log;
+    VantageLogger            log;
 };
 }
 #endif

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,29 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef VP2_LOGGER_H
-#define VP2_LOGGER_H
+#ifndef VANTAGE_LOGGER_H
+#define VANTAGE_LOGGER_H
 #include <map>
 #include <string>
 #include <iostream>
 
-namespace vp2 {
+namespace vws {
 /**
  * Home grown logger class that does not need any 3rd party libraries. It does not have the power of other available loggers, but
  * it is small and functional.
  */
-class VP2Logger {
+class VantageLogger {
 public:
     /**
      * The logger levels.
      */
     enum Level {
-        VP2_ERROR,
-        VP2_WARNING,
-        VP2_INFO,
-        VP2_DEBUG1,
-        VP2_DEBUG2,
-        VP2_DEBUG3
+        VANTAGE_ERROR,
+        VANTAGE_WARNING,
+        VANTAGE_INFO,
+        VANTAGE_DEBUG1,
+        VANTAGE_DEBUG2,
+        VANTAGE_DEBUG3
     };
     /**
      * Get a logger for the given name.
@@ -44,7 +44,7 @@ public:
      * @param name The logger name
      * @return The logger with the specified name
      */
-    static VP2Logger & getLogger(const std::string & name);
+    static VantageLogger & getLogger(const std::string & name);
 
     /**
      * Set the overall logging level.
@@ -72,7 +72,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~VP2Logger();
+    virtual ~VantageLogger();
 
     /**
      * Check if the specified level of logging is enabled.
@@ -97,7 +97,7 @@ private:
      * 
      * @param name The name of the logger to create
      */
-    VP2Logger(const std::string & name);
+    VantageLogger(const std::string & name);
 
     void openLogFile();
     void checkFileSize();
@@ -105,8 +105,8 @@ private:
     /**
      * Collection of loggers, so that only one is create per name.
      */
-    static std::map<std::string, VP2Logger *> loggers;
-    typedef std::map<std::string, VP2Logger *>::iterator LogIterator;
+    static std::map<std::string, VantageLogger *> loggers;
+    typedef std::map<std::string, VantageLogger *>::iterator LogIterator;
 
     /**
      * The current log level.
@@ -128,6 +128,6 @@ private:
 
     std::string loggerName;
 };
-} /* End namespace */
+}
 
-#endif /* VP2_LOGGER_H */
+#endif /* VANTAGE_LOGGER_H */

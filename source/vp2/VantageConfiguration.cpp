@@ -1,19 +1,19 @@
 #include "BitConverter.h"
-#include "VantagePro2Configuration.h"
+#include "VantageConfiguration.h"
 
-namespace vp2 {
+namespace vws {
 
-VantagePro2Configuration::VantagePro2Configuration() {
+VantageConfiguration::VantageConfiguration() {
     // TODO Auto-generated constructor stub
 
 }
 
-VantagePro2Configuration::~VantagePro2Configuration() {
+VantageConfiguration::~VantageConfiguration() {
     // TODO Auto-generated destructor stub
 }
 
 void
-VantagePro2Configuration::decodeData(const byte buffer[]) {
+VantageConfiguration::decodeData(const byte buffer[]) {
     issLatitude = static_cast<double>(BitConverter::toInt16(buffer, 11)) / 10.0;
     issLongitude = static_cast<double>(BitConverter::toInt16(buffer, 13)) / 10.0;
     issElevation = BitConverter::toInt16(buffer, 15);
@@ -46,7 +46,7 @@ VantagePro2Configuration::decodeData(const byte buffer[]) {
 
 /*
 bool
-VantagePro2Configuration::retrieveConfigurationParameters() {
+VantageConfiguration::retrieveConfigurationParameters() {
     byte buffer[EEPROMR::EEPROM_NON_]
     if (station.eepromBinaryRead(0, EEPROM_NON_GRAPH_DATA_SIZE)) {
         memcpy(eepromNonGraphData, buffer, EEPROM_NON_GRAPH_DATA_SIZE);

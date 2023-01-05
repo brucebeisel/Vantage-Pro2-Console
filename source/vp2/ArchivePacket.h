@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@
 #include <string>
 #include "Weather.h"
 
-namespace vp2 {
+namespace vws {
 
-class VP2Logger;
+class VantageLogger;
 
 /**
- * A class that represents a Vantage Pro 2 archive packet. Very little data is needed outside the construction of the archive
+ * A class that represents a Vantage archive packet. Very little data is needed outside the construction of the archive
  * message that is sent to the collector.
  */
 class ArchivePacket {
@@ -144,10 +144,10 @@ private:
     static const int MAX_LEAF_WETNESSES = 2;
     static const int MAX_LEAF_TEMPERATURES = 2;
 
-    DateTime    packetTime;
-    int         windSampleCount;
-    byte        buffer[BYTES_PER_PACKET];
-    VP2Logger * log;
+    DateTime        packetTime;
+    int             windSampleCount;
+    byte            buffer[BYTES_PER_PACKET];
+    VantageLogger * log;
 };
 
 }

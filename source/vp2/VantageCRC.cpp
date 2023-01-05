@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 Bruce Beisel
+ * Copyright (C) 2023 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "VP2Logger.h"
 #include "BitConverter.h"
-#include "VantagePro2CRC.h"
+#include "VantageCRC.h"
+#include "VantageLogger.h"
 
 using namespace std;
 
-namespace vp2 {
-VantagePro2CRC::~VantagePro2CRC() {
+namespace vws {
+VantageCRC::~VantageCRC() {
 }
 
 static int CRC_TABLE[] = {
@@ -63,7 +63,7 @@ static int CRC_TABLE[] = {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-VantagePro2CRC::calculateCRC(const byte * buffer, int length) {
+VantageCRC::calculateCRC(const byte * buffer, int length) {
     int crc = 0;
 
     for (int i = 0; i < length; i++)
@@ -75,11 +75,11 @@ VantagePro2CRC::calculateCRC(const byte * buffer, int length) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantagePro2CRC::checkCRC(const byte * buffer, int length) {
+VantageCRC::checkCRC(const byte * buffer, int length) {
     int sentCRC = BitConverter::toInt16(buffer, length, false) & 0xFFFF;
     int calculatedCRC = calculateCRC(buffer, length);
 
-    VP2Logger::getLogger("VantagePro2CRC").log(VP2Logger::VP2_DEBUG2) << "CRC Compare. Sent: " << sentCRC << "  Calculated: " << calculatedCRC << endl;
+    VantageLogger::getLogger("VantageCRC").log(VantageLogger::VANTAGE_DEBUG2) << "CRC Compare. Sent: " << sentCRC << "  Calculated: " << calculatedCRC << endl;
 
     return sentCRC == calculatedCRC;
 }
