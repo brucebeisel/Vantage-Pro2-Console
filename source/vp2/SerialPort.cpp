@@ -80,14 +80,17 @@ SerialPort::close() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+bool
 SerialPort::write(const void * buffer, int nbytes) {
     log.log(VantageLogger::VANTAGE_DEBUG2) << "Writing " << nbytes << " bytes" << endl;
     DWORD dwWritten;
     if (!WriteFile(commPort, static_cast<LPCVOID>(buffer), nbytes, &dwWritten, nullptr))
-        return -1;
-    else
-        return dwWritten;
+        return false;
+
+    if (dwWritten != nbytes)
+        return false;
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,14 +156,16 @@ SerialPort::close() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+bool
 SerialPort::write(const void * buffer, int nbytes) {
     ssize_t bytesWritten = ::write(commPort, buffer, nbytes);
 
-    if (bytesWritten != nbytes)
+    if (bytesWritten != nbytes) {
         log.log(VantageLogger::VANTAGE_WARNING) << "Write to station failed. Expected=" << nbytes << " Actual=" << bytesWritten << endl;
-
-    return bytesWritten;
+        return false;
+    }
+    else
+        return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +209,7 @@ SerialPort::discardInBuffer() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+bool
 SerialPort::write(const string & s) {
     return write(s.c_str(), s.length());
 }

@@ -21,18 +21,16 @@
 #include <string>
 #include <vector>
 #include "ArchivePacket.h"
-#include "CurrentWeather.h"
-#include "LoopPacket.h"
-#include "Loop2Packet.h"
 #include "SensorStation.h"
 #include "Sensor.h"
 #include "BitConverter.h"
-#include "DominantWindDirections.h"
 #include "SerialPort.h"
 #include "VantageLogger.h"
 
 namespace vws {
 class HiLowPacket;
+class LoopPacket;
+class Loop2Packet;
 
 struct TimeZoneData {
     int index;
@@ -77,7 +75,17 @@ static const TimeZoneData TIME_ZONES[] = {
     33,  500, "(GMT+05:00) Islamabad, Karachi, Ekaterinburg, Tashkent",
     34,  530, "(GMT+05:30) Bombay, Calcutta, Madras, New Delhi, Chennai",
     35,  600, "(GMT+06:00) Almaty, Dhaka, Colombo, Novosibirsk, Astana",
-    36,  700, "(GMT+07:00) Bangkok, Jakarta, Hanoi, Krasnoyarsk"
+    36,  700, "(GMT+07:00) Bangkok, Jakarta, Hanoi, Krasnoyarsk",
+    37,  800, "(GMT+08:00) Beijing, Chongqing, Urumqi, Irkutsk, Ulaan Bataar",
+    38,  800, "(GMT+08:00) Hong Kong, Perth, Singapore, Taipei, Kuala Lumpur",
+    39,  900, "(GMT+09:00) Tokyo, Osaka, Sapporo, Seoul, Yakutsk",
+    40,  930, "(GMT+09:30) Adelaide",
+    41,  930, "(GMT+09:30) Darwin",
+    42, 1000, "(GMT+10:00) Brisbane, Melbourne, Sydney, Canberra",
+    43, 1000, "(GMT+10.00) Hobart, Guam, Port Moresby, Vladivostok",
+    44, 1100, "(GMT+11:00) Magadan, Solomon Is, New Caledonia",
+    45, 1200, "(GMT+12:00) Fiji, Kamchatka, Marshall Is.",
+    46, 1200, "(GMT+12:00) Wellington, Auckland"
 };
 
 /**
@@ -85,14 +93,13 @@ static const TimeZoneData TIME_ZONES[] = {
  */
 class VantageWeatherStation {
 public:
-    /**
-     * Interface class used to callback the current weather and archive pages.
-     */
-    class Callback {
+    class LoopPacketListener {
     public:
-        virtual ~Callback() {}
-        virtual bool processCurrentWeather(const CurrentWeather & cw) = 0;
+        virtual ~LoopPacketListener() {}
+        virtual bool processLoopPacket(const LoopPacket & packet) = 0;
+        virtual bool processLoop2Packet(const Loop2Packet & packet) = 0;
     };
+
     static const int MAX_STATION_RECEPTION = 100;
 
     struct ConsoleDiagnosticReport {
@@ -101,6 +108,13 @@ public:
         int syncCount;
         int maxPacketSequence;
         int crcErrorCount;
+    };
+
+    struct SensorStationData {
+        SensorStation::RepeaterId        repeaterId;
+        SensorStation::SensorStationType stationType;
+        byte                             humiditySensorNumber;
+        byte                             temperatureSensorNumber;
     };
 
     /**
@@ -127,11 +141,18 @@ public:
     virtual ~VantageWeatherStation();
 
     /**
-     * Set the callback object that will be called when current weather, archive packets are received.
-     * 
-     * @param callback The callback object
+     * Add a loop packet listener.
+     *
+     * @param listener The listener to be added
      */
-    void setCallback(Callback & callback);
+    void addLoopPacketListener(LoopPacketListener & listener);
+
+    /**
+     * Remove a loop packet listener.
+     *
+     * @param listener The listener to be removed
+     */
+    void removeLoopPacketListener(LoopPacketListener & listener);
 
     /**
      * Open the Vantage console.
@@ -365,7 +386,7 @@ public:
     // Calibration Commands
     /////////////////////////////////////////////////////////////////////////////////
 
-    // Calibration commands are not supported at this time
+    bool putElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg);
 
     /////////////////////////////////////////////////////////////////////////////////
     // End Calibration Commands
@@ -462,15 +483,11 @@ public:
      */
     int calculateStationReceptionPercentage(int archivePacketWindSamples) const;
 
-    /**
-     * Get the current weather data.
-     *
-     * @return the current weather data
-     */
-    const CurrentWeather & getCurrentWeather() const;
-
     Rainfall getRainCollectorSize() const;
+
     const std::vector<SensorStation> & getSensorStations() const;
+
+    const std::string & getStationTypeString() const;
 
 private:
     static constexpr int WAKEUP_TRIES = 5;               // The number of times to try to wake up the console before performing a disconnect/reconnect cycle
@@ -486,7 +503,6 @@ private:
     static constexpr int TIME_RESPONSE_LENGTH = 6;
     static constexpr int TIME_LENGTH = 4;
     static constexpr int SET_TIME_LENGTH = 6;
-    static constexpr int LOOP_PACKET_WAIT = 2000;
     static constexpr int WAKEUP_WAIT = 1000;
     static constexpr int VANTAGE_YEAR_OFFSET = 2000;
     static constexpr int HILOW_PACKET_SIZE = 436;
@@ -609,16 +625,28 @@ private:
 public:
     bool retrieveSensorStationInfo();
 private:
-    Callback *                 callback;
-    StationType                stationType;
-    SerialPort                 serialPort;               // The serial port object that communicates with the console
-    //bool                       firstLoopPacketReceived;  // Whether a LOOP packet has been received
-    int                        baudRate;                 // The baud rate for communicating with the console
-    DominantWindDirections     dominantWindDirections;       // The past wind direction measurements used to determine the arrows on the wind display
-    CurrentWeather             currentWeather;           // The most recent current weather data
-    byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
-    float                      consoleBatteryVoltage;    // The console battery voltage received in the LOOP packet
+    typedef std::vector<LoopPacketListener *> LoopPacketListenerList;
 
+    VantageLogger              log;
+    SerialPort                 serialPort;               // The serial port object that communicates with the console
+    int                        baudRate;                 // The baud rate for communicating with the console
+    byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
+    LoopPacketListenerList     loopPacketListenerList;   // The list of Loop Packet listeners
+
+    StationType                stationType;
+
+
+    //
+    // TBD All of the member below are not required to communicate with the console
+    //     Question: Should all of this information be moved to a class that manages the weather station?
+    //               Noting that a weather station is comprised of all the the sensor stations, repeaters and sensors.
+    //               If another class is create, this class should probably be renamed to VantageConsole or similar.
+    //
+
+    //
+    // TBD Could add a ConsoleStatus class that hold various things, come of which change, others are static
+    //
+    float                      consoleBatteryVoltage;    // The console battery voltage received in the LOOP packet
     std::string                firmwareDate;             // TBD - Is this really needed?
     std::string                firmwareVersion;          // TBD - Is this really needed?
     std::vector<SensorStation> sensorStations;           // The sensor stations as reported by the console
@@ -626,7 +654,6 @@ private:
     int                        windSensorStationId;      // The ID of the sensor station containing the anemometer
     Rainfall                   rainCollectorSize;        // The size of the rain collector that is needed for calculating rain amounts
     int                        archivePeriod;            // The archive period used to calculate reception percentage
-    VantageLogger              log;
     //StationConfiguration       stationConfiguration;
     //std::vector<Sensor>        sensors;
 };

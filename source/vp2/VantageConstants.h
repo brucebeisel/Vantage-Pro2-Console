@@ -82,13 +82,44 @@ namespace VantageConstants {
 
     enum class RainCupSizeType : int {
         POINT_01_INCH = 0,
-        POINT_02_MM = 1,
-        POINT_01_MM = 2
+        POINT_2_MM = 1,
+        POINT_1_MM = 2
     };
 
     static constexpr Rainfall POINT_01_INCH_SIZE = 0.01;       // Inches
-    static constexpr Rainfall POINT_02_MM_SIZE   = 0.2 / 25.4; // Inches
-    static constexpr Rainfall POINT_01_MM_SIZE   = 0.1 / 25.4; // Inches
+    static constexpr Rainfall POINT_2_MM_SIZE   = 0.2 / 25.4; // Inches
+    static constexpr Rainfall POINT_1_MM_SIZE   = 0.1 / 25.4; // Inches
+
+    enum BarometerUnits {
+        BARO_UNITS_01_INCHES = 0,
+        BARO_UNITS_TENTH_MM = 1,
+        BARO_UNITS_TENTH_HPA = 2,
+        BARO_UNITS_TENTH_MILLIBAR = 3
+    };
+
+    enum TemperatureUnits {
+        TEMPERATURE_UNITS_DEGREES = 0,
+        TEMPERATURE_UNITS_TENTH_DEGREES = 1,
+        TEMPERATURE_UNITS_CELSIUS = 2,
+        TEMPERATURE_UNITS_TENTH_CELSIUS = 3
+    };
+
+    enum ElevationUnits {
+        ELEVATION_UNITS_FEET = 0,
+        ELEVATION_UNITS_METERS = 1
+    };
+
+    enum RainUnits {
+        RAIN_UNITS_INCHES = 0,
+        RAIN_UNITS_MILLIMETERS = 1
+    };
+
+    enum WindUnits {
+        WIND_UNITS_MPH = 0,
+        WIND_UNITS_MPS = 1,
+        WIND_UNITS_KPH = 2,
+        WIND_UNITS_KTS = 3
+    };
 
     //
     // LOOP packet forecast icons

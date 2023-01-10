@@ -36,7 +36,7 @@ class CurrentWeatherPublisher;
 /**
  * Class that coordinates the communications with the Vantage console.
  */
-class VantageDriver : public VantageWeatherStation::Callback {
+class VantageDriver : VantageWeatherStation::LoopPacketListener {
 public:
     /**
      * Constructor.
@@ -81,6 +81,22 @@ public:
      */
     void mainLoop();
 
+    /**
+     * Process a LOOP packet in a callback.
+     *
+     * @param packet The LOOP packet
+     * @return True if the loop packet processing loop should continue
+     */
+    bool processLoopPacket(const LoopPacket & packet);
+
+    /**
+     * Process a LOOP2 packet in a callback.
+     *
+     * @param packet The LOOP2 packet
+     * @return True if the loop packet processing loop should continue
+     */
+    bool processLoop2Packet(const Loop2Packet & packet);
+
 private:
     /**
      * The number of LOOP/LOOP2 packet pairs that are received in succession. Note that if a new archive record is available
@@ -95,14 +111,6 @@ private:
      */
     static const int TIME_SET_INTERVAL = 3600;
 
-    /**
-     * Called when a valid LOOP/LOOP2 packet pair is received.
-     * 
-     * @param cw The current weather
-     * @return True if the LOOP/LOOP2 processing should continue
-     */
-    bool processCurrentWeather(const CurrentWeather & cw);
-
     VantageWeatherStation &   station;
     CurrentWeatherPublisher & currentWeatherPublisher;
     ArchiveManager &          archiveManager;
@@ -113,7 +121,6 @@ private:
     DateTime                  lastArchivePacketTime;
     DateTime                  consoleTimeSetTime;
     //DateTime                  sensorStationSendTime;
-    //bool                      receivedFirstLoopPacket;
     VantageLogger             log;
 };
 

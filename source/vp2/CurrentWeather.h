@@ -37,15 +37,6 @@ public:
     CurrentWeather();
 
     /**
-     * Constructor.
-     * 
-     * @param loopPacket The LOOP packet that was read in the most recent loop through the current weather processor
-     * @param loop2Packet The LOOP2 packet that was read in the most recent loop through the current weather processor
-     * @param The dominant directions that the wind has been blowing over the last hour
-     */
-    CurrentWeather(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const DominantWindDirections & windDirectionSlices);
-
-    /**
      * Destuctor.
      */
     virtual ~CurrentWeather();
@@ -60,7 +51,7 @@ public:
     //void setData(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const WindDirectionSlices  & pastWindDirs);
     void setLoopData(const LoopPacket & loopPacket);
     void setLoop2Data(const Loop2Packet & loopPacket);
-    void setWindDirections(const DominantWindDirections & pastWindDirections);
+    void setDominantWindDirectionData(const std::vector<int> & windDirs);
 
     /**
      * Get the next packet field that was extracted from the LOOP packet.
@@ -88,7 +79,7 @@ public:
 private:
     LoopPacket             loopPacket;
     Loop2Packet            loop2Packet;
-    DominantWindDirections dominantWindDirections;
+    std::vector<int>       dominantWindDirections;
 
     //
     // Since wind data changes frequently, store the wind from both loop packets

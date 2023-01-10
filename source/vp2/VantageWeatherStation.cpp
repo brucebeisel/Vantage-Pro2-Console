@@ -25,8 +25,9 @@
 #include <sstream>
 #include <cstring>
 #include "VantageConstants.h"
-#include "CurrentWeather.h"
 #include "HiLowPacket.h"
+#include "LoopPacket.h"
+#include "Loop2Packet.h"
 #include "VantageCRC.h"
 #include "BitConverter.h"
 #include "ProtocolException.h"
@@ -83,7 +84,7 @@ static const std::string READ_EEPROM_AS_BINARY_CMD = "EEBRD";        // Read EEP
 //
 //static const std::string CALIBRATE_TEMPERATURE_HUMIDITY = "CALED";   // Send temperature and humidity calibration values
 //static const std::string CALIBRATE_TEMPERATURE_HUMIDITY2 = "CALFIX"; // Updates the display when calibration numbers have changed
-//static const std::string SET_BAROMETRIC_DATA_CMD = "BAR";            // Sets barometric offset using local reading and/or elevation
+static const std::string SET_BAROMETRIC_DATA_CMD = "BAR=";            // Sets barometric offset using local reading and/or elevation
 //static const std::string SET_BAROMETRIC_CAL_DATA_CMD = "BARDATA";    // Get the current barometer calibration parameters
 
 //
@@ -122,16 +123,17 @@ static const std::string DMP_RESEND_PAGE = std::string(1, VantageConstants::NACK
 // Generic strings for various command protocols
 //
 static const std::string COMMAND_TERMINATOR = std::string(1, VantageConstants::LINE_FEED);
-static const std::string RESPONSE_FRAME = std::string(1, VantageConstants::LINE_FEED) + std::string(1, VantageConstants::CARRIAGE_RETURN);;
+static const std::string RESPONSE_FRAME = std::string(1, VantageConstants::LINE_FEED) + std::string(1, VantageConstants::CARRIAGE_RETURN);
 static const std::string COMMAND_RECOGNIZED_RESPONSE = RESPONSE_FRAME + "OK" + RESPONSE_FRAME;
-static const std::string DONE_RESPONSE = "DONE" + std::string(1, VantageConstants::LINE_FEED) + std::string(1, VantageConstants::CARRIAGE_RETURN);;
-static const std::string TEST_RESPONSE = "TEST" + std::string(1, VantageConstants::LINE_FEED) + std::string(1, VantageConstants::CARRIAGE_RETURN);;
+static const std::string DONE_RESPONSE = "DONE" + std::string(1, VantageConstants::LINE_FEED) + std::string(1, VantageConstants::CARRIAGE_RETURN);
+static const std::string TEST_RESPONSE = "TEST" + std::string(1, VantageConstants::LINE_FEED) + std::string(1, VantageConstants::CARRIAGE_RETURN);
+
+const string STATION_TYPE_STRINGS[] = { "Vantage Pro2", "Vantage Vue", "Unknown" };
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 VantageWeatherStation::VantageWeatherStation(const string & portName, int baudRate) :
                                             serialPort(portName, baudRate),
-                                            callback(nullptr),
                                             stationType(VANTAGE_PRO_2),
                                             consoleBatteryVoltage(0.0),
                                             baudRate(baudRate),
@@ -149,8 +151,22 @@ VantageWeatherStation::~VantageWeatherStation() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantageWeatherStation::setCallback(Callback & callback) {
-    this->callback = &callback;
+VantageWeatherStation::addLoopPacketListener(LoopPacketListener & listener) {
+    loopPacketListenerList.push_back(&listener);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageWeatherStation::removeLoopPacketListener(LoopPacketListener & listener) {
+    for (LoopPacketListenerList::iterator it = loopPacketListenerList.begin();
+         it != loopPacketListenerList.end();
+         ++it) {
+        if (*it == &listener) {
+            loopPacketListenerList.erase(it);
+            break;
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +192,6 @@ VantageWeatherStation::wakeupStation() {
     for (int i = 0; i < WAKEUP_TRIES && !awake; i++) {
         log.log(VantageLogger::VANTAGE_DEBUG1) << "Attempting to wakeup console" << endl;
         serialPort.write(WAKEUP_COMMAND);
-        //Weather::sleep(WAKEUP_WAIT);
       
         //
         // After sending the wakeup command the console will respond with <LF><CR>
@@ -185,14 +200,14 @@ VantageWeatherStation::wakeupStation() {
             awake = true;
             log.log(VantageLogger::VANTAGE_INFO) << "Console is awake" << endl;
         }
-        else
+        else {
             serialPort.discardInBuffer();
+            Weather::sleep(WAKEUP_WAIT);
+        }
     }
 
     return awake;
 }
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -209,18 +224,22 @@ VantageWeatherStation::retrieveConfigurationData() {
 
     int setupBits = BitConverter::toInt8(buffer, 0);
 
-    VantageConstants::RainCupSizeType type = static_cast<VantageConstants::RainCupSizeType>((setupBits & 0x30) >> 4);
+    VantageConstants::RainCupSizeType rainCupType = static_cast<VantageConstants::RainCupSizeType>((setupBits & 0x30) >> 4);
 
-    switch (type) {
+    switch (rainCupType) {
         case VantageConstants::RainCupSizeType::POINT_01_INCH:
             rainCollectorSize = VantageConstants::POINT_01_INCH_SIZE;
             break;
-        case VantageConstants::RainCupSizeType::POINT_02_MM:
-            rainCollectorSize = VantageConstants::POINT_02_MM_SIZE;
+        case VantageConstants::RainCupSizeType::POINT_2_MM:
+            rainCollectorSize = VantageConstants::POINT_2_MM_SIZE;
             break;
-        case VantageConstants::RainCupSizeType::POINT_01_MM:
-            rainCollectorSize = VantageConstants::POINT_01_MM_SIZE;
+        case VantageConstants::RainCupSizeType::POINT_1_MM:
+            rainCollectorSize = VantageConstants::POINT_1_MM_SIZE;
             break;
+
+        default:
+            log.log(VantageLogger::VANTAGE_ERROR) << "Invalid rain cup size received from console: " << (int)rainCupType << endl;
+            return false;
     }
 
     if (!eepromBinaryRead(VantageConstants::EE_ARCHIVE_PERIOD, 1))
@@ -228,7 +247,7 @@ VantageWeatherStation::retrieveConfigurationData() {
 
     archivePeriod = BitConverter::toInt8(buffer, 0);
 
-    log.log(VantageLogger::VANTAGE_INFO) << "Initialize results: Rain Collector Size: " << rainCollectorSize << " Archive Period: " << archivePeriod << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "Configuration Data: " <<  " Rain Collector Size: " << rainCollectorSize << " Archive Period: " << archivePeriod << endl;
 
     return true;
 }
@@ -294,15 +313,7 @@ VantageWeatherStation::retrieveStationType() {
 
     stationType = static_cast<StationType>(stationTypeByte);
 
-    std::string stationTypeName;
-    if (stationType == VANTAGE_PRO_2)
-        stationTypeName = "Vantage Pro 2";
-    else if (stationType == VANTAGE_VUE)
-        stationTypeName = "Vantage Vue";
-    else
-        stationTypeName = "UNKNOWN";
-
-    log.log(VantageLogger::VANTAGE_INFO) << "Retrieved station type of " << stationTypeName << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "Retrieved station type of " << getStationTypeString() << endl;
 
 
     return true;
@@ -407,69 +418,41 @@ VantageWeatherStation::currentValuesLoop(int records) {
     if (!sendAckedCommand(command.str()))
         return;
 
-    currentWeather.setWindDirections(dominantWindDirections);
-
-    for (int i = 0; i < records && !terminateLoop; i++) {
-        log.log(VantageLogger::VANTAGE_DEBUG1) << "Getting Current Weather ---------------------------------" << endl;
+    for (int i = 0; i < records && !terminateLoop && !resetNeeded; i++) {
+        log.log(VantageLogger::VANTAGE_DEBUG1) << "Reading LOOP and LOOP2 Packets ---------------------------------" << endl;
         //
         // Loop packet comes first
         //
-        if (!readLoopPacket(loopPacket)) {
+        if (readLoopPacket(loopPacket)) {
+            //
+            // Send the LOOP packet to each listener
+            //
+            for (LoopPacketListenerList::iterator it = loopPacketListenerList.begin();
+                 it != loopPacketListenerList.end();
+                 ++it) {
+                terminateLoop = !(*it)->processLoopPacket(loopPacket);
+            }
+
+            if (!terminateLoop && readLoop2Packet(loop2Packet)) {
+                //
+                // Send the LOOP2 packet to each listener
+                //
+                for (LoopPacketListenerList::iterator it = loopPacketListenerList.begin();
+                     it != loopPacketListenerList.end();
+                     ++it) {
+                    terminateLoop = !(*it)->processLoop2Packet(loop2Packet);
+                }
+            }
+            else
+                resetNeeded = true;
+        }
+        else
             resetNeeded = true;
-            break;
-        }
-
-        //
-        // Build a list of past wind directions. This is to mimic what is shown on the
-        // console
-        //
-        dominantWindDirections.processWindSample(time(0), loopPacket.getWindDirection(), loopPacket.getWindSpeed());
-        dominantWindDirections.dumpData();
-
-        //
-        // After the first pass through the loop, send the current weather data
-        // after each loop packet and loop2 packet.
-        //
-        if (i > 0) {
-            currentWeather.setLoopData(loopPacket);
-            terminateLoop = callback->processCurrentWeather(currentWeather);
-        }
-
-        //
-        // Per the Vantage serial communication document, sleep 2 seconds between
-        // the loop the loop 2 packets
-        // TBD Removed the sleep as the read has a timeout built into it
-        //
-        //Weather::sleep(LOOP_PACKET_WAIT);
-        if (!readLoop2Packet(loop2Packet)) {
-            resetNeeded = true;
-            break;
-        }
-
-        //
-        // Build a current weather message from the loop packets
-        //
-        currentWeather.setLoop2Data(loop2Packet);
-        dominantWindDirections.processWindSample(time(0), loop2Packet.getWindDirection(), loop2Packet.getWindSpeed());
-
-        //
-        // Send the message for processing
-        //
-        terminateLoop = callback->processCurrentWeather(currentWeather);
-
-        //
-        // Per the Vantage serial communication document, sleep 2 seconds between
-        // the 2 the loop packets
-        // TBD Removed the sleep as the read has a timeout built into it
-        //
-        //if (!terminateLoop)
-        //    Weather::sleep(LOOP_PACKET_WAIT);
-       
-        log.log(VantageLogger::VANTAGE_INFO) << "Retrieved Current Weather" << endl;
     }
+
     //
     // If the callback wants to terminated the loop early or there was a problem use the Wakeup sequence to terminate the loop
-    // See the LPS command in the Vantage 2 Serial Protocol document
+    // See the LPS command in the Vantage Pro2, Vue Serial Protocol document
     //
     if (terminateLoop || resetNeeded)
         wakeupStation();
@@ -586,7 +569,10 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     int crc = VantageCRC::calculateCRC(dateTimeBytes, TIME_LENGTH);
     BitConverter::getBytes(crc, dateTimeBytes, TIME_LENGTH, CRC_BYTES, false);
 
-    serialPort.write(dateTimeBytes, TIME_LENGTH + CRC_BYTES);
+    if (!serialPort.write(dateTimeBytes, TIME_LENGTH + CRC_BYTES)) {
+        log.log(VantageLogger::VANTAGE_WARNING) << "Canceling DUMPAFT due to port write failure" << endl;
+        return false;
+    }
 
     //
     // Another ACK
@@ -712,14 +698,23 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
 
     BitConverter::getBytes(crc, writeBuffer, count, CRC_BYTES, false);
 
-    serialPort.write(writeBuffer, count + CRC_BYTES);
-
-    return true;
+    return serialPort.write(writeBuffer, count + CRC_BYTES);
 }
 
 //
 // Calibration Commands
 //
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageWeatherStation::putElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg) {
+    ostringstream command;
+    command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroOffsetInHg * 1000.0) << " " << elevationFeet;
+
+    //
+    // TBD This is the one "OK" response command that can also receive a NACK response.
+    return sendOKedCommand(command.str());
+}
 
 //
 // Clearing commands
@@ -821,6 +816,7 @@ VantageWeatherStation::updateBaudRate(VantageConstants::BaudRate baudRate) {
     //
     // First set the console's baud rate, then reopen the serial port with the
     // new baud rate
+    // TBD The console can respond with a "NO" to indicate failure
     //
     if (sendOKedCommand(CLEAR_CURRENT_DATA_VALUES_CMD)) {
         serialPort.close();
@@ -853,17 +849,14 @@ VantageWeatherStation::updateConsoleTime() {
     int crc = VantageCRC::calculateCRC(buffer, SET_TIME_LENGTH);
     BitConverter::getBytes(crc, buffer, SET_TIME_LENGTH, CRC_BYTES, false);
 
-    int nbytes = serialPort.write(buffer, SET_TIME_LENGTH + CRC_BYTES);
-
-    bool success = true;
-
-    if (nbytes != SET_TIME_LENGTH + CRC_BYTES)
-        success = false;
-    else
+    bool success = false;
+    if (serialPort.write(buffer, SET_TIME_LENGTH + CRC_BYTES)) {
         success = consumeAck();
-
-    if (!success)
+    }
+    else {
+        success = false;
         wakeupStation();
+    }
 
     return success;
 }
@@ -976,13 +969,6 @@ VantageStation::getSensors() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-struct StationData {
-    SensorStation::RepeaterId        repeaterId;
-    SensorStation::SensorStationType stationType;
-    int                              humiditySensorNumber;
-    int                              temperatureSensorNumber;
-};
-
 bool
 VantageWeatherStation::retrieveSensorStationInfo() {
     log.log(VantageLogger::VANTAGE_INFO) << "Retrieving sensor station information" << endl;
@@ -990,18 +976,27 @@ VantageWeatherStation::retrieveSensorStationInfo() {
     if (!eepromBinaryRead(VantageConstants::EE_STATION_LIST, STATION_DATA_SIZE))
         return false;
 
-    StationData data[MAX_STATION_ID];
+    SensorStationData data[MAX_STATION_ID];
     for (int i = 0; i < MAX_STATION_ID; i++) {
         data[i].repeaterId = static_cast<SensorStation::RepeaterId>(BitConverter::getUpperNibble(buffer[i * 2]));
         data[i].stationType = static_cast<SensorStation::SensorStationType>(BitConverter::getLowerNibble(buffer[i * 2]));
         data[i].humiditySensorNumber = BitConverter::getUpperNibble(buffer[(i * 2) + 1]);
         data[i].temperatureSensorNumber = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
+
+        //
+        // If there is an anemometer sensor station, it by definition is the sensor station that measures
+        // the wind. The ISS cannot measure the wind if an anemometer station exists.
+        //
         if (data[i].stationType == SensorStation::ANEMOMETER)
             windSensorStationId = i + 1;
         else if (data[i].stationType == SensorStation::INTEGRATED_SENSOR_STATION && windSensorStationId == 0)
             windSensorStationId = i + 1;
 
     }
+
+    //
+    // Assign the anemometer to the sensor station to which it is connected
+    //
     for (int i = 0; i < MAX_STATION_ID; i++) {
         if (data[i].stationType != SensorStation::NO_STATION) {
             bool hasAnemometer = (i + 1) == windSensorStationId;
@@ -1045,16 +1040,23 @@ VantageWeatherStation::calculateStationReceptionPercentage(int archivePacketWind
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const CurrentWeather &
-VantageWeatherStation::getCurrentWeather() const {
-    return currentWeather;
+Rainfall
+VantageWeatherStation::getRainCollectorSize() const {
+    return rainCollectorSize;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Rainfall
-VantageWeatherStation::getRainCollectorSize() const {
-    return rainCollectorSize;
+const std::string &
+VantageWeatherStation::getStationTypeString() const {
+    std::string stationTypeName;
+
+    if (stationType == VANTAGE_PRO_2)
+        return STATION_TYPE_STRINGS[0];
+    else if (stationType == VANTAGE_VUE)
+        return STATION_TYPE_STRINGS[1];
+    else
+        return STATION_TYPE_STRINGS[2];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1072,6 +1074,9 @@ VantageWeatherStation::readLoopPacket(LoopPacket & loopPacket) {
     if (!loopPacket.decodeLoopPacket(buffer))
         return false;
 
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "LOOP packet read successfully" << endl;
+    return true;
+
     //
     // First time through determine what sensors are attached to the weather station based on the valid data in
     // the LOOP packet.
@@ -1084,7 +1089,7 @@ VantageWeatherStation::readLoopPacket(LoopPacket & loopPacket) {
     //
     // Save the battery voltage of the console
     //
-    consoleBatteryVoltage = loopPacket.getConsoleBatteryVoltage();
+    //consoleBatteryVoltage = loopPacket.getConsoleBatteryVoltage();
 
     //
     // Pull out the battery status for the sensor stations
@@ -1093,8 +1098,6 @@ VantageWeatherStation::readLoopPacket(LoopPacket & loopPacket) {
     //    it->setBatteryStatus(loopPacket.isTransmitterBatteryGood(it->getSensorIndex()));
     //}
 
-    log.log(VantageLogger::VANTAGE_DEBUG1) << "LOOP packet read successfully" << endl;
-    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1102,6 +1105,10 @@ VantageWeatherStation::readLoopPacket(LoopPacket & loopPacket) {
 bool
 VantageWeatherStation::readLoop2Packet(Loop2Packet & loop2Packet) {
     log.log(VantageLogger::VANTAGE_DEBUG1) << "Reading LOOP2 Packet" << endl;
+
+    //
+    // Read and decode LOOP2 packet
+    //
     if (!serialPort.read(buffer, Loop2Packet::LOOP2_PACKET_SIZE))
         return false;
 
@@ -1137,7 +1144,8 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
         if (list.size() > 0)
             newestPacketTime = list.at(list.size() - 1).getDateTime();
 
-        serialPort.write(DMP_SEND_NEXT_PAGE);
+        if (!serialPort.write(DMP_SEND_NEXT_PAGE))
+            return false;
 
         firstRecord = 0;
     }
@@ -1246,13 +1254,19 @@ VantageWeatherStation::archivePacketContainsData(const byte * buffer, int offset
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::sendOKedCommand(const string & command) {
-    log.log(VantageLogger::VANTAGE_DEBUG1) << "Sending command '" << command << "' that expects and OK response" << endl;
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Sending command '" << command << "' that expects an OK response" << endl;
     bool success = false;
 
     for (int i = 0; i < COMMAND_RETRIES && !success; i++) {
-        serialPort.write(command);
-        serialPort.write(COMMAND_TERMINATOR);
-        if (!serialPort.read(buffer, COMMAND_RECOGNIZED_RESPONSE.length()))
+        if (!serialPort.write(command)) {
+            log.log(VantageLogger::VANTAGE_WARNING) << "Failed to write command: '" << command << "'" << endl;
+            success = false;
+        }
+        else if (!serialPort.write(COMMAND_TERMINATOR)) {
+            log.log(VantageLogger::VANTAGE_WARNING) << "Failed to write command terminator" << endl;
+            success = false;
+        }
+        else if (!serialPort.read(buffer, COMMAND_RECOGNIZED_RESPONSE.length()))
             success = false;
         else if (COMMAND_RECOGNIZED_RESPONSE != buffer)
             success = false;
@@ -1307,9 +1321,18 @@ VantageWeatherStation::sendAckedCommand(const string & command) {
     // try again.
     //
     for (int i = 0; i < COMMAND_RETRIES && !success; i++) {
-        serialPort.write(command);
-        serialPort.write(COMMAND_TERMINATOR);
-        success = consumeAck();
+        if (!serialPort.write(command)) {
+            log.log(VantageLogger::VANTAGE_WARNING) << "Failed to write command: '" << command << "'" << endl;
+            success = false;
+        }
+        else if (!serialPort.write(COMMAND_TERMINATOR)) {
+            log.log(VantageLogger::VANTAGE_WARNING) << "Failed to write command terminator" << endl;
+            success = false;
+            break;
+        }
+        else
+            success = consumeAck();
+
         if (!success)
             wakeupStation();
     }

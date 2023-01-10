@@ -33,7 +33,7 @@ const std::string CurrentWeatherPublisher::MULTICAST_HOST = "224.0.0.120";
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeatherPublisher::CurrentWeatherPublisher() : log(VantageLogger::getLogger("CurrentWeatherPublisher")), socketId(NO_SOCKET)
+CurrentWeatherPublisher::CurrentWeatherPublisher() : log(VantageLogger::getLogger("CurrentWeatherPublisher")), socketId(NO_SOCKET), firstLoop2PacketReceived(false)
 {
 }
 
@@ -43,6 +43,42 @@ CurrentWeatherPublisher::~CurrentWeatherPublisher()
 {
     if (socketId != NO_SOCKET)
         close(socketId);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+CurrentWeatherPublisher::processLoopPacket(const LoopPacket & packet) {
+    currentWeather.setLoopData(packet);
+    //
+    // Build a list of past wind directions. This is to mimic what is shown on the
+    // console
+    //
+    dominantWindDirections.processWindSample(time(0), packet.getWindDirection(), packet.getWindSpeed());
+    currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
+
+    if (firstLoop2PacketReceived)
+        sendCurrentWeather(currentWeather);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+CurrentWeatherPublisher::processLoop2Packet(const Loop2Packet & packet) {
+    firstLoop2PacketReceived = true;
+    currentWeather.setLoop2Data(packet);
+    //
+    // Build a list of past wind directions. This is to mimic what is shown on the
+    // console
+    //
+    dominantWindDirections.processWindSample(time(0), packet.getWindDirection(), packet.getWindSpeed());
+    currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
+    sendCurrentWeather(currentWeather);
+    dominantWindDirections.dumpData();
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

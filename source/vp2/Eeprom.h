@@ -45,7 +45,7 @@ static const EepromEntry entries[] = {
     { "HUM33",      "Humidity 33",       "07", 2, false,  "These are the factory inside humidity calibration values. Do not modify them!" },
     { "HUM80",      "Humidity 80",       "09", 2, false,  "These are the factory inside humidity calibration values. Do not modify them!" },
     { "LATITUDE",   "Station Latitude",  "0B", 2, true,   "Station Latitude in tenths of a degree. Negative values = southern hemisphere" },
-    { "LONGITUDE",  "Station Longitude", "0B", 2, true,   "Station Latitude in tenths of a degree. Negative values = southern hemisphere" }
+    { "LONGITUDE",  "Station Longitude", "0B", 2, true,   "Station Latitude in tenths of a degree. Negative values = western hemisphere" }
 };
 
 /*

@@ -76,6 +76,11 @@ VantageCRC::calculateCRC(const byte * buffer, int length) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageCRC::checkCRC(const byte * buffer, int length) {
+    //
+    // Note that length is not the length of the data in buffer. The data in buffer is
+    // actually 2 bytes longer.
+    // TBD - should this interface be changed so that length is the total length of the data in buffer?
+    //
     int sentCRC = BitConverter::toInt16(buffer, length, false) & 0xFFFF;
     int calculatedCRC = calculateCRC(buffer, length);
 

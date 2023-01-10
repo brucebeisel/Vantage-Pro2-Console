@@ -72,6 +72,7 @@ public:
      * @param headings The directions that the wind has been blowing most often in the last hour
      */
     void dominantDirectionsForPastHour(std::vector<int> & headings) const;
+    const std::vector<int> & dominantDirectionsForPastHour() const;
 
     /**
      * Dump the internal data to cout.
@@ -153,6 +154,7 @@ private:
     WindDirectionSlice windSlices[NUM_SLICES];
     time_t             startOf10MinuteTimeWindow;
     time_t             endOf10MinuteTimeWindow;
+    std::vector<int>   dominantWindDirectionList;
 };
 }
 

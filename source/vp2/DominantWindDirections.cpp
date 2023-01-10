@@ -45,8 +45,8 @@ dateFormat(time_t t) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DominantWindDirections::DominantWindDirections() : startOf10MinuteTimeWindow(0),
-                                             endOf10MinuteTimeWindow(0),
-                                             log(VantageLogger::getLogger("DominantWindDirections")) {
+                                                   endOf10MinuteTimeWindow(0),
+                                                   log(VantageLogger::getLogger("DominantWindDirections")) {
     Heading heading = -HALF_SLICE;
     for (int i = 0; i < NUM_SLICES; i++) {
         windSlices[i].setValues(i, SLICE_NAMES[i], heading, heading + DEGREES_PER_SLICE);
@@ -138,6 +138,12 @@ DominantWindDirections::endWindow(DateTime time) {
     if (getDominantDirectionsCount() == 0) {
         startOf10MinuteTimeWindow = 0;
         endOf10MinuteTimeWindow = 0;
+    }
+
+    dominantWindDirectionList.clear();
+    for (int i = 0; i < NUM_SLICES; i++) {
+        if (windSlices[i].getLast10MinuteDominantTime() != 0)
+            dominantWindDirectionList.push_back(static_cast<int>(windSlices[i].getCenter()));
     }
 }
 
@@ -252,9 +258,14 @@ DominantWindDirections::dominantDirectionsForPastHour(vector<int> & headings) co
     // Pull out the wind directions that have been dominant for a 10 minute period over the past hour
     //
     headings.clear();
-    for (int i = 0; i < NUM_SLICES; i++) {
-        if (windSlices[i].getLast10MinuteDominantTime() != 0)
-            headings.push_back(static_cast<int>(windSlices[i].getCenter()));
-    }
+    const std::vector<int> & dwd = dominantDirectionsForPastHour();
+    headings.assign(dwd.begin(), dwd.end());
+}
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+const std::vector<int> &
+DominantWindDirections::dominantDirectionsForPastHour() const {
+    return dominantWindDirectionList;
 }
 }

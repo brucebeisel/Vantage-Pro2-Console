@@ -130,7 +130,7 @@ public:
     int getLinkQuality() const;
 
     /**
-     * Set the link quality for this sensor station. If this station does have an anemometer, this call has no effect.
+     * Set the link quality for this sensor station. If this station does not have an anemometer, this call has no effect.
      * 
      * @param value The link quality between 0 and 100
      */

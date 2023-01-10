@@ -17,6 +17,7 @@
 #include <iostream>
 #include "Weather.h"
 #include "Api.h"
+#include "HiLowPacket.h"
 #include "VantageWeatherStation.h"
 
 using namespace std;
@@ -87,9 +88,9 @@ Api::requestSensorStationTypeChoices() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 Api::requestCurrentWeather() {
-    const CurrentWeather & cw = station.getCurrentWeather();
-    std::string response = cw.formatXML();
-    sendResponse(response);
+    //const CurrentWeather & cw = station.getCurrentWeather();
+    //std::string response = cw.formatXML();
+    //sendResponse(response);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,6 +137,14 @@ Api::updateYearlyRainfall(double yearlyRain) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 Api::requestHighLowData() {
+    HiLowPacket packet;
+
+    if (station.retrieveHiLowValues(packet)) {
+
+    }
+    else {
+
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

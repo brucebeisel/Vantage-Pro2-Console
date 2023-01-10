@@ -67,7 +67,8 @@ bool
 VantageDriver::initialize() {
     log.log(VantageLogger::VANTAGE_INFO) << "Initializing..." << endl;
 
-    station.setCallback(*this);
+    station.addLoopPacketListener(currentWeatherPublisher);
+    station.addLoopPacketListener(*this);
 
     if (!station.openStation()) {
         log.log(VantageLogger::VANTAGE_ERROR) << "Failed to open weather station" << endl;
@@ -89,14 +90,14 @@ VantageDriver::initialize() {
         return false;
     }
 
-    /*
+    log.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << station.getStationTypeString() << endl;
+
     if (!station.retrieveConfigurationData()) {
         log.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve configuration data for weather station" << endl;
         return false;
     }
 
-    AlarmManager::getInstance().initialize();
-    */
+    //AlarmManager::getInstance().initialize();
 
     log.log(VantageLogger::VANTAGE_INFO) << "Initialization complete." << endl;
 
@@ -142,28 +143,6 @@ void
 VantageDriver::stop() {
     exitLoop = true;
     station.closeStation();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-VantageDriver::processCurrentWeather(const CurrentWeather & cw) {
-    nextRecord = cw.getNextPacket();
-
-    currentWeatherPublisher.sendCurrentWeather(cw);
-
-    log.log(VantageLogger::VANTAGE_DEBUG1) << "Previous Next Record: " << previousNextRecord << " Next Record: " << nextRecord << endl;
-
-    bool sc = signalCaught.load();
-    bool em = eventManager.isEventAvailable();
-    bool nr = previousNextRecord != nextRecord;
-    bool stopCurrentWeatherLoop = sc || em || nr;
-
-    log.log(VantageLogger::VANTAGE_DEBUG1) << "Stop current weather loop: " << stopCurrentWeatherLoop
-                                   << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
-
-    //return signalCaught.load() || eventManager.isEventAvailable() || previousNextRecord != nextRecord;
-    return signalCaught.load();
 }
 
 /*
@@ -289,15 +268,6 @@ VantageDriver::mainLoop() {
             }
 
             //
-            // Get the high/low values
-            //
-            /*
-            HiLowPacket packet;
-            if (station.retrieveHiLowValues(packet))
-                cout << "Got hi/low packet" << endl;
-                */
-
-            //
             // Get the current weather values for about a minute
             //
             station.currentValuesLoop(LOOP_PACKET_CYCLES);
@@ -337,5 +307,31 @@ VantageDriver::mainLoop() {
             log.log(VantageLogger::VANTAGE_ERROR) << "Caught exception: " << e.what() << endl;     
         } 
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageDriver::processLoopPacket(const LoopPacket & packet) {
+    nextRecord = packet.getNextRecord();
+
+    bool sc = signalCaught.load();
+    bool em = eventManager.isEventAvailable();
+    bool nr = previousNextRecord != nextRecord;
+    bool continueLoopPacketProcessing = !sc && !em && !nr;
+
+    log.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop: " << continueLoopPacketProcessing
+                                   << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
+
+    return continueLoopPacketProcessing;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageDriver::processLoop2Packet(const Loop2Packet & packet) {
+    //
+    // This class has no interest in LOOP2 packet data
+    return true;
 }
 }

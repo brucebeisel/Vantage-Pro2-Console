@@ -22,6 +22,9 @@
 
 #include "VantageLogger.h"
 #include "Weather.h"
+#include "CurrentWeather.h"
+#include "DominantWindDirections.h"
+#include "VantageWeatherStation.h"
 
 namespace vws {
 class CurrentWeather;
@@ -29,7 +32,7 @@ class CurrentWeather;
 /**
  * Class that publishes the current weather using a UDP broadcast socket.
  */
-class CurrentWeatherPublisher {
+class CurrentWeatherPublisher : public VantageWeatherStation::LoopPacketListener {
 public:
 
     /**
@@ -42,6 +45,36 @@ public:
      */
     virtual ~CurrentWeatherPublisher();
 
+    //
+    // TBD move the loop packet processing to a LoopPacketManager class that will
+    // save 24 hours of loop packets. This way the past 24 hours of current weather
+    // records can be queried for display or analysis purposes.
+    //
+
+    /**
+     * Process a LOOP packet in a callback.
+     *
+     * @param packet The LOOP packet
+     * @return True if the loop packet processing loop should continue
+     */
+    virtual bool processLoopPacket(const LoopPacket & packet);
+
+    /**
+     * Process a LOOP2 packet in a callback.
+     *
+     * @param packet The LOOP2 packet
+     * @return True if the loop packet processing loop should continue
+     */
+    virtual bool processLoop2Packet(const Loop2Packet & packet);
+
+    /**
+     * Connect with the WeatherSense collector.
+     *
+     * @return True if the socket was created and configured successfully
+     */
+    bool createSocket();
+
+private:
     /**
      * Publish the current weather.
      * 
@@ -50,14 +83,6 @@ public:
      */
     void sendCurrentWeather(const CurrentWeather & cw);
 
-    /**
-     * Connect with the WeatherSense collector.
-     * 
-     * @return True if the socket was created and configured successfully
-     */
-    bool createSocket();
-
-private:
     /**
      * Get the local IP address for the multicast socket. Note that this
      * returns the first non-loopback interface found.
@@ -73,6 +98,9 @@ private:
     int                      socketId;
     struct sockaddr_in       groupAddr;
     VantageLogger            log;
+    CurrentWeather           currentWeather;
+    bool                     firstLoop2PacketReceived;
+    DominantWindDirections   dominantWindDirections;   // The past wind direction measurements used to determine the arrows on the wind display
 };
 }
 

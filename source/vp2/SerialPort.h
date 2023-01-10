@@ -82,20 +82,19 @@ public:
      * Write a string to the serial port.
      * 
      * @param s The string to be converted to bytes then written to the serial port
-     *
-     * @return The number of bytes that were written
+     * @return True if all bytes were successfully written
      */
-    int write(const std::string & s);
+    bool write(const std::string & s);
 
     /**
      * Write to the serial port.
      * 
      * @param buffer The bytes to write to the serial port
      * @param nbytes The number of bytes to write
+     * @return True if all bytes were successfully written
      *
-     * @return The number of bytes that were written
      */
-    int write(const void * buffer, int nbytes);
+    bool write(const void * buffer, int nbytes);
 
     /**
      * Discard any bytes in the read buffer.
