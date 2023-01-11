@@ -1,6 +1,7 @@
 #include "BitConverter.h"
 #include "Eeprom.h"
 #include "VantageConfiguration.h"
+#include "VantageConstants.h"
 
 namespace vws {
 
@@ -29,17 +30,17 @@ VantageConfiguration::decodeData(const byte buffer[]) {
     windCupLarge = (setupBits & 0x8) == 1;
     isLatitudeNorth = (setupBits & 0x40) == 1;
     isLongitudeEast = (setupBits & 0x80) == 1;
-    RainCupSizeType type = static_cast<RainCupSizeType>((setupBits & 0x30) >> 4);
+    VantageConstants::RainCupSizeType type = static_cast<VantageConstants::RainCupSizeType>((setupBits & 0x30) >> 4);
 
     switch (type) {
-        case POINT_01_INCH:
-            rainCollectorSize = POINT_01_INCH_SIZE;
+        case VantageConstants::RainCupSizeType::POINT_01_INCH:
+            rainCollectorSize = VantageConstants::POINT_01_INCH_SIZE;
             break;
-        case POINT_2_MM:
-            rainCollectorSize = POINT_2_MM_SIZE;
+        case VantageConstants::RainCupSizeType::POINT_2_MM:
+            rainCollectorSize = VantageConstants::POINT_2_MM_SIZE;
             break;
-        case POINT_1_MM:
-            rainCollectorSize = POINT_1_MM_SIZE;
+        case VantageConstants::RainCupSizeType::POINT_1_MM:
+            rainCollectorSize = VantageConstants::POINT_1_MM_SIZE;
             break;
     }
 }

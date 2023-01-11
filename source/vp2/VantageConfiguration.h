@@ -10,6 +10,52 @@
 namespace vws {
 
 /**
+ * This file will be use to evaluate the different types of data that the console contains so that
+ * the proper set of classes can be created to manage the data. This data does not include any real-time
+ * weather data. That is already handled by existing classes.
+ *
+ * Fast changing
+ * ---------------------------------------------------------
+ * Console battery voltage - LOOP
+ * Transmitter battery status - LOOP
+ * Number of wind samples - Archive
+ *
+ * Slow changing
+ * ---------------------------------------------------------
+ * Stations detected - RECEIVERS command
+ *
+ * Static, read-write (Data that can be changed, but does not change without user intervention and usually only changes when there are physical changes to the weather station network)
+ * ---------------------------------------------------------
+ * Barometric calibration data - BARDATA command
+ * Archive interval - SETPER command, EEPROM to read
+ * Lat/lon/elevation - EEPROM
+ * Time management (TZ, DST, etc.) EEPROM
+ * Transmitters to which to listen - EEPROM
+ * Retransmit setting - EEPROM
+ * Station list - EEPROM
+ * Units - EEPROM
+ * Setup Bits - EEPROM, contains wind cup size which is duplicated in the EEPROM data
+ * Rain season start - EEPROM
+ * Inside temperature calibration - EEPROM
+ * Outside temperature calibration - EEPROM
+ * Extra temperature calibration - EEPROM
+ * Inside humidity calibration - EEPROM
+ * Outside humidity calibration - EEPROM
+ * Extra humidity calibration - EEPROM
+ * Alarm thresholds - EEPROM
+ * Graph time span - EEPROM
+ * Graph data - EEPROM, Note that the graph data is different between the Pro2 and Vue
+ * Archive temperature calculation type (average vs end of time period)
+ *
+ * Static, read-only
+ * ---------------------------------------------------------
+ * Firmware Date - VER command
+ * Firmware Version - NVER command
+ * Console Type - WRD command
+ *
+ */
+
+/**
  * This class manages the configuration settings that are stored in the EEPROM of the Vantage consoles.
  * Most of these settings are changed using the EEPROM commands, but some have their own dedicated
  * commands to set the values.

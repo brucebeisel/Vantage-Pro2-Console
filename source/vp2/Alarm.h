@@ -18,6 +18,7 @@
 #define ALARM_H
 #include <string>
 #include <vector>
+#include "VantageWeatherStation.h"
 #include "Weather.h"
 
 namespace vws {
@@ -29,10 +30,12 @@ struct AlarmProperties {
     int         eepromThresholdOffset;
     int         eepromThresholdScale;
     int         eepromNotSetThreshold;
-    int         loopByte;
-    int         loopBit;
+    int         alarmBit;
 };
 
+/**
+ * Class to manage a single alarm monitored by the console.
+ */
 class Alarm {
 public:
     Alarm(const AlarmProperties & properties);
@@ -45,6 +48,8 @@ public:
 
     void setTriggered(bool triggered);
     bool isTriggered() const;
+
+
 private:
     AlarmProperties properties;
     int             eepromThreshold;
@@ -53,20 +58,24 @@ private:
     bool            alarmTriggered;    // Whether the alarm is currently triggered
 };
 
-class AlarmManager {
+/**
+ * Class to manage all of the alarms of the console.
+ */
+class AlarmManager : public VantageWeatherStation::LoopPacketListener {
 public:
     static const int NUM_ALARMS = 86;
 
-    static AlarmManager & getInstance();
     void initialize();
 
     void loadThresholds(const byte buffer[]);
-    void setAlarmStates(const byte buffer[]);
+    void setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits);
 
     void getTriggeredList(std::vector<Alarm> & triggeredList) const;
 
+    virtual bool processLoopPacket(const LoopPacket & packet);
+    virtual bool processLoop2Packet(const Loop2Packet & packet);
+
 private:
-    static AlarmManager instance;
     std::vector<Alarm>  alarms;
 };
 
