@@ -41,11 +41,12 @@ static const EepromEntry entries[] = {
     // These are the factory barometer calibration values.  Do not modify them!
     { "BAR_GAIN",   "Barometric gain",   "01", 2, false, "DO NOT CHANGE" },
     { "BAR_OFFSET", "Barometric offset", "03", 2, false, "DO NOT CHANGE" },
-    { "BAR_CAL",    "Barometric offset", "05", 2, true,  "Barometer Offset calibration.  Use the 'BAR=' command to set this value!" },
+    { "BAR_CAL",    "Barometric offset", "05", 2, false,  "Barometer Offset calibration.  Use the 'BAR=' command to set this value!" },
     { "HUM33",      "Humidity 33",       "07", 2, false,  "These are the factory inside humidity calibration values. Do not modify them!" },
     { "HUM80",      "Humidity 80",       "09", 2, false,  "These are the factory inside humidity calibration values. Do not modify them!" },
     { "LATITUDE",   "Station Latitude",  "0B", 2, true,   "Station Latitude in tenths of a degree. Negative values = southern hemisphere" },
-    { "LONGITUDE",  "Station Longitude", "0B", 2, true,   "Station Latitude in tenths of a degree. Negative values = western hemisphere" }
+    { "LONGITUDE",  "Station Longitude", "0D", 2, true,   "Station Latitude in tenths of a degree. Negative values = western hemisphere" },
+    { "ELEVATION",  "Console Elevation", "0F", 2, false,  "Station Latitude in tenths of a degree. Negative values = western hemisphere" }
 };
 
 /*

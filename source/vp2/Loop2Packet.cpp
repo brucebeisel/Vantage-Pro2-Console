@@ -31,6 +31,7 @@ namespace vws {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Loop2Packet::Loop2Packet() : log(VantageLogger::getLogger("Loop2Packet")),
+                             packetType(-1),
                              rain15Minute(0.0),
                              rainHour(0.0),
                              rain24Hour(0.0) {
@@ -39,6 +40,13 @@ Loop2Packet::Loop2Packet() : log(VantageLogger::getLogger("Loop2Packet")),
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Loop2Packet::~Loop2Packet() {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+int
+Loop2Packet::getPacketType() const {
+    return packetType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +166,8 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
         return false;
     }
 
-    int packetType = BitConverter::toInt8(buffer, 4);
+    packetType = BitConverter::toInt8(buffer, 4);
+
     if (packetType != LOOP2_PACKET_TYPE) {
         log.log(VantageLogger::VANTAGE_ERROR) << "Invalid packet type for LOOP2 packet. "
                                       << "Expected " << LOOP2_PACKET_TYPE << " Received: " << packetType << endl;

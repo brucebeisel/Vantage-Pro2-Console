@@ -45,11 +45,11 @@ public:
     /**
      * The forecast reported by the LOOP packet.
      */
-    unsigned int RAIN_BIT = 0x1;
-    unsigned int MOSTLY_CLOUDY_BIT = 0x2;
-    unsigned int PARTLY_CLOUDY_BIT = 0x6;
-    unsigned int SUNNY_BIT = 0x8;
-    unsigned int SNOW_BIT = 0x10;
+    static const unsigned int RAIN_BIT          = 0x1;
+    static const unsigned int MOSTLY_CLOUDY_BIT = 0x2;
+    static const unsigned int PARTLY_CLOUDY_BIT = 0x6;
+    static const unsigned int SUNNY_BIT         = 0x8;
+    static const unsigned int SNOW_BIT          = 0x10;
 
     enum Forecast {
         SUNNY =                                 SUNNY_BIT,

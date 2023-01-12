@@ -27,23 +27,23 @@ namespace vws {
  * Static, read-write (Data that can be changed, but does not change without user intervention and usually only changes when there are physical changes to the weather station network)
  * ---------------------------------------------------------
  * Barometric calibration data - BARDATA command
- * Archive interval - SETPER command, EEPROM to read
- * Lat/lon/elevation - EEPROM
- * Time management (TZ, DST, etc.) EEPROM
- * Transmitters to which to listen - EEPROM
- * Retransmit setting - EEPROM
- * Station list - EEPROM
- * Units - EEPROM
+ * Archive interval - SETPER command, EEPROM to read ----- User set, infrequently changed
+ * Lat/lon/elevation - EEPROM                        ----- Initialization: User set, should not change once set
+ * Time management (TZ, DST, etc.) EEPROM            ----- Initialization: User set, should not change once set
+ * Transmitters to which to listen - EEPROM          ----- Initialization: User set, changed when sensor stations are added or removed
+ * Retransmit setting - EEPROM                       ----- Initialization: User set, only changed when secondary consoles are added or removed
+ * Station list - EEPROM                             ----- Initialization: User set, changed when sensor stations are added or removed
+ * Units - EEPROM                                    ----- Initialization: User set, changed if user desires
  * Setup Bits - EEPROM, contains wind cup size which is duplicated in the EEPROM data
- * Rain season start - EEPROM
- * Inside temperature calibration - EEPROM
- * Outside temperature calibration - EEPROM
- * Extra temperature calibration - EEPROM
- * Inside humidity calibration - EEPROM
- * Outside humidity calibration - EEPROM
- * Extra humidity calibration - EEPROM
- * Alarm thresholds - EEPROM
- * Graph time span - EEPROM
+ * Rain season start - EEPROM                        ----- Initialization: User set, should not change once set
+ * Inside temperature calibration - EEPROM           ----- Change as needed
+ * Outside temperature calibration - EEPROM          ----- Change as needed
+ * Extra temperature calibration - EEPROM            ----- Change as needed
+ * Inside humidity calibration - EEPROM              ----- Change as needed
+ * Outside humidity calibration - EEPROM             ----- Change as needed
+ * Extra humidity calibration - EEPROM               ----- Change as needed
+ * Alarm thresholds - EEPROM                         ----- User changed as desired
+ * Graph time span - EEPROM                          ----- Unknown
  * Graph data - EEPROM, Note that the graph data is different between the Pro2 and Vue
  * Archive temperature calculation type (average vs end of time period)
  *
@@ -54,6 +54,14 @@ namespace vws {
  * Console Type - WRD command
  *
  */
+
+struct TimeSettings {
+    bool useGmtOffset;
+    int  timezoneIndex;               // Only used if useGmtOffset is false
+    int  gmtOffsetMinutes;            // Only used if useGmtOffset is true
+    bool manualDaylightSavingsTime;
+    bool manualDaylightSavingsTimeOn; // This will change twice a year, but only if manualDaylightSavingsTime is true
+};
 
 /**
  * This class manages the configuration settings that are stored in the EEPROM of the Vantage consoles.
@@ -68,7 +76,7 @@ public:
     /**
      * Read the configuration settings from the EEPROM.
      */
-    bool VantageConfiguration::retrieveConfigurationParameters();
+    bool retrieveConfigurationParameters();
 
     /**
      * Update the position of the weather station.
@@ -76,8 +84,19 @@ public:
      * @param latitude  The latitude of the station
      * @param longitude The longitude of the station
      * @param elevation The elevation of the console, not the station, as the barometer which uses this value is in the console.
+     * @return True if the position was updated
      */
     bool updatePosition(double latitude, double longitude, int elevation);
+
+    bool retrievePosition(double & latitude, double & longitude, int & elevation);
+
+
+    /**
+     * Update the DST and time zone settings.
+     */
+    bool updateTimeSettings(const TimeSettings & timeSettings);
+
+    bool retrieveTimeSettings(TimeSettings & timeSettings);
 
     /**
      * Update the units settings.
@@ -98,42 +117,21 @@ public:
                              VantageConstants::RainUnits rainUnits,
                              VantageConstants::WindUnits windUnits);
 
+    bool retrieveUnitsSettings(VantageConstants::BarometerUnits & baroUnits,
+                               VantageConstants::TemperatureUnits & temperatureUnits,
+                               VantageConstants::ElevationUnits & elevationUnits,
+                               VantageConstants::RainUnits & rainUnits,
+                               VantageConstants::WindUnits & windUnits);
+
+    bool updateSetupBits();
+
+    bool retrieveSetupBits();
+
 private:
     static const int EEPROM_CONFIG_SIZE = 46;
 
     VantageWeatherStation  &           station;
     VantageLogger                      log;
-    double                             issLatitude;
-    double                             issLongitude;
-    int                                consoleElevation;     // Use "BAR=0 <elevation in feet>" command to set this
-    int                                timezoneIndex;
-    bool                               manualDaylightSavingsTime;
-    bool                               manualDaylightSavingsTimeOn;
-    int                                gmtOffsetMinutes;
-    bool                               useGmtOffset;
-    int                                transmitterListenMask;
-    bool                               isConsoleRetransmitting;
-    int                                retransmitId;            // Only used if isConsoleRetransmitting = true
-    std::vector<SensorStation>         sensorStations; // TBD Should this be a list of SensorStation objects or a list of structure that represent the EEPROM data?
-    //
-    // Unit Bits
-    VantageConstants::BarometerUnits   barometerUnits;
-    VantageConstants::TemperatureUnits temperatureUnits;
-    VantageConstants::ElevationUnits   elevationUnits;
-    VantageConstants::RainUnits        rainUnits;
-    VantageConstants::WindUnits        windUnits;
-    //
-    // Setup Bits
-    //
-    bool                               amPmMode; // Logic reversed due to the name 24-hour
-    bool                               isAM;     // TBD Unsure what this is. Is it real-time AM or PM
-    bool                               dayMonthFormat;
-    bool                               windCupLarge;
-    VantageConstants::RainCupSizeType  rainCollectorSize;
-    bool                               isLatitudeNorth;
-    bool                               isLongitudeEast;
-    int                                rainSeasonStartMonth; // January = 1
-    VantageConstants::ArchivePeriod    archivePeriod;        // SETPER command used to set this value
 
     //std::string                firmwareDate;
     //std::string                firmwareVersion;

@@ -26,6 +26,7 @@ SRCS=\
 	UnitConverter.cpp \
 	VantageConstants.cpp \
 	VantageCRC.cpp \
+    VantageConfiguration.cpp \
     VantageDecoder.cpp \
 	VantageDriver.cpp \
 	VantageLogger.cpp \
