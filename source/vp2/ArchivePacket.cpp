@@ -19,7 +19,6 @@
 #include <ctime>
 #include <sstream>
 #include "BitConverter.h"
-#include "UnitConverter.h"
 #include "ArchivePacket.h"
 #include "VantageConstants.h"
 #include "VantageDecoder.h"

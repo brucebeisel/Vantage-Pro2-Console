@@ -182,6 +182,16 @@ public:
      */
     void requestTimeZoneChoices();
 
+    /**
+     * Return a list of sensor station types that are supported by this console.
+     */
+    void requestSensorStationTypes();
+
+    /**
+     * Get the current setting for measurement units.
+     */
+    void requestUnitsSettings();
+
 private:
     void sendCommandResponse(const std::string & command, const std::string & result);
     void sendCommandResponse(const std::string & command, bool success);

@@ -63,6 +63,16 @@ struct TimeSettings {
     bool manualDaylightSavingsTimeOn; // This will change twice a year, but only if manualDaylightSavingsTime is true
 };
 
+struct SetupBits {
+    bool is24HourMode;
+    bool isAMMode;
+    bool isDayMonthDisplay;
+    bool isWindCupLarge;
+    VantageConstants::RainCupSizeType rainCollectorSizeType;
+    bool isNorthLatitude;
+    bool isEastLongitude;
+};
+
 /**
  * This class manages the configuration settings that are stored in the EEPROM of the Vantage consoles.
  * Most of these settings are changed using the EEPROM commands, but some have their own dedicated
@@ -123,11 +133,13 @@ public:
                                VantageConstants::RainUnits & rainUnits,
                                VantageConstants::WindUnits & windUnits);
 
-    bool updateSetupBits();
+    bool updateSetupBits(const SetupBits & setupBits);
 
-    bool retrieveSetupBits();
+    bool retrieveSetupBits(SetupBits & setupBits);
 
 private:
+    void saveRainCollectorSize(VantageConstants::RainCupSizeType rainCupType);
+
     static const int EEPROM_CONFIG_SIZE = 46;
 
     VantageWeatherStation  &           station;

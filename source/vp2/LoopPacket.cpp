@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <time.h>
+#include <cstring>
 #include <iostream>
 #include "BitConverter.h"
 #include "UnitConverter.h"
@@ -29,7 +30,7 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-LoopPacket::LoopPacket(void) : log(VantageLogger::getLogger("LoopPacket")),
+LoopPacket::LoopPacket(void) : logger(VantageLogger::getLogger("LoopPacket")),
                                packetType(-1),
                                rainRate(0.0),
                                stormRain(0.0),
@@ -49,42 +50,50 @@ LoopPacket::LoopPacket(void) : log(VantageLogger::getLogger("LoopPacket")),
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-LoopPacket::~LoopPacket(void) {
+LoopPacket::~LoopPacket() {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const byte *
+LoopPacket::getPacketData() const {
+    return packetData;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
 LoopPacket::decodeLoopPacket(byte buffer[]) {
+    memcpy(packetData, buffer, LOOP_PACKET_SIZE);
     //
     // Perform a number of validation on the Loop packet before decoding all of the values
     //
-    if (buffer[0] != 'L' || buffer[1] != 'O' || buffer[2] != 'O') {
-        log.log(VantageLogger::VANTAGE_ERROR) << "LOOP buffer does not begin with LOO: "
-                                      << "[0] = " << buffer[0] << " [1] = " << buffer[1] << " [2] = " << buffer[2] << endl;
+    if (packetData[0] != 'L' || packetData[1] != 'O' || packetData[2] != 'O') {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP packet data does not begin with LOO: "
+                                      << "[0] = " << packetData[0] << " [1] = " << packetData[1] << " [2] = " << packetData[2] << endl;
         return false;
     }
 
-    if (!VantageCRC::checkCRC(buffer, 97)) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "LOOP packet failed CRC check" << endl;
+    if (!VantageCRC::checkCRC(packetData, 97)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP packet failed CRC check" << endl;
         return false;
     }
 
-    packetType = BitConverter::toInt8(buffer, 4);
+    packetType = BitConverter::toInt8(packetData, 4);
     if (packetType != LOOP_PACKET_TYPE) {
-        log.log(VantageLogger::VANTAGE_ERROR)<< "Invalid packet type for LOOP packet. Expected: "
+        logger.log(VantageLogger::VANTAGE_ERROR)<< "Invalid packet type for LOOP packet. Expected: "
                                      << LOOP_PACKET_TYPE << " Received: " << packetType << endl;
         return false;
     }
 
-    if (buffer[95] != VantageConstants::LINE_FEED || buffer[96] != VantageConstants::CARRIAGE_RETURN) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
+    if (packetData[95] != VantageConstants::LINE_FEED || packetData[96] != VantageConstants::CARRIAGE_RETURN) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
         return false;
     }
 
 
-    if (buffer[3] != 'P') {
-        int baroTrendValue = BitConverter::toInt8(buffer, 3);
+    if (packetData[3] != 'P') {
+        int baroTrendValue = BitConverter::toInt8(packetData, 3);
 
         switch (baroTrendValue) {
             case UNKNOWN:
@@ -96,7 +105,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
                 baroTrend = static_cast<BaroTrend>(baroTrendValue);
                 break;
             default:
-                log.log(VantageLogger::VANTAGE_ERROR) << "Invalid barometer trend 0x" << hex << (int)buffer[3] << dec << endl;
+                logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid barometer trend 0x" << hex << (int)packetData[3] << dec << endl;
                 baroTrend = UNKNOWN;
                 return false;
         }
@@ -104,72 +113,72 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     else
         baroTrend = UNKNOWN;
 
-    nextRecord = BitConverter::toInt16(buffer,5);
+    nextRecord = BitConverter::toInt16(packetData,5);
 
-    VantageDecoder::decodeBarometricPressure(buffer, 7, barometricPressure);
-    VantageDecoder::decode16BitTemperature(buffer, 9, insideTemperature);
-    VantageDecoder::decodeHumidity(buffer, 11, insideHumidity);
-    VantageDecoder::decode16BitTemperature(buffer, 12, outsideTemperature);
+    VantageDecoder::decodeBarometricPressure(packetData, 7, barometricPressure);
+    VantageDecoder::decode16BitTemperature(packetData, 9, insideTemperature);
+    VantageDecoder::decodeHumidity(packetData, 11, insideHumidity);
+    VantageDecoder::decode16BitTemperature(packetData, 12, outsideTemperature);
 
-    windSpeed = VantageDecoder::decodeWindSpeed(buffer, 14);
-    windSpeed10MinuteAverage = VantageDecoder::decodeWindSpeed(buffer, 15);
-    windDirection = VantageDecoder::decodeWindDirection(buffer, 16);
+    windSpeed = VantageDecoder::decodeWindSpeed(packetData, 14);
+    windSpeed10MinuteAverage = VantageDecoder::decodeWindSpeed(packetData, 15);
+    windDirection = VantageDecoder::decodeWindDirection(packetData, 16);
 
     for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(buffer, 18 + i, extraTemperature[i]);
+        VantageDecoder::decode8BitTemperature(packetData, 18 + i, extraTemperature[i]);
 
     for (int i = 0; i < VantageConstants::MAX_SOIL_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(buffer, 25 + i, soilTemperature[i]);
+        VantageDecoder::decode8BitTemperature(packetData, 25 + i, soilTemperature[i]);
 
     for (int i = 0; i < VantageConstants::MAX_LEAF_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(buffer, 29 + i, leafTemperature[i]);
+        VantageDecoder::decode8BitTemperature(packetData, 29 + i, leafTemperature[i]);
 
-    VantageDecoder::decodeHumidity(buffer, 33, outsideHumidity);
+    VantageDecoder::decodeHumidity(packetData, 33, outsideHumidity);
 
     for (int i = 0; i < VantageConstants::MAX_EXTRA_HUMIDITIES; i++)
-        VantageDecoder::decodeHumidity(buffer, 34 + i, extraHumidity[i]);
+        VantageDecoder::decodeHumidity(packetData, 34 + i, extraHumidity[i]);
 
-    rainRate = VantageDecoder::decodeRain(buffer, 41);
+    rainRate = VantageDecoder::decodeRain(packetData, 41);
 
-    VantageDecoder::decodeUvIndex(buffer, 43, uvIndex);
-    VantageDecoder::decodeSolarRadiation(buffer, 44, solarRadiation);
+    VantageDecoder::decodeUvIndex(packetData, 43, uvIndex);
+    VantageDecoder::decodeSolarRadiation(packetData, 44, solarRadiation);
 
-    stormRain = VantageDecoder::decodeStormRain(buffer, 46);
-    stormStart = VantageDecoder::decodeStormStartDate(buffer, 48);
+    stormRain = VantageDecoder::decodeStormRain(packetData, 46);
+    stormStart = VantageDecoder::decodeStormStartDate(packetData, 48);
 
-    dayRain = VantageDecoder::decodeRain(buffer, 50);
-    monthRain = VantageDecoder::decodeRain(buffer, 52);
-    yearRain = VantageDecoder::decodeRain(buffer, 54);
+    dayRain = VantageDecoder::decodeRain(packetData, 50);
+    monthRain = VantageDecoder::decodeRain(packetData, 52);
+    yearRain = VantageDecoder::decodeRain(packetData, 54);
 
-    dayET = VantageDecoder::decodeDayET(buffer, 56);
-    monthET = VantageDecoder::decodeMonthYearET(buffer, 58);
-    yearET = VantageDecoder::decodeMonthYearET(buffer, 60);
+    dayET = VantageDecoder::decodeDayET(packetData, 56);
+    monthET = VantageDecoder::decodeMonthYearET(packetData, 58);
+    yearET = VantageDecoder::decodeMonthYearET(packetData, 60);
 
     for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++)
-        VantageDecoder::decodeSoilMoisture(buffer, 62 + i, soilMoisture[i]);
+        VantageDecoder::decodeSoilMoisture(packetData, 62 + i, soilMoisture[i]);
 
     for (int i = 0; i < VantageConstants::MAX_LEAF_WETNESSES; i++)
-        VantageDecoder::decodeLeafWetness(buffer, 66 + i, leafWetness[i]);
+        VantageDecoder::decodeLeafWetness(packetData, 66 + i, leafWetness[i]);
 
     for (int i = 0; i < 16; i++) {
-        int alarms = BitConverter::toInt8(buffer, 70 + i);
+        int alarms = BitConverter::toInt8(packetData, 70 + i);
         for (int j = 0; j < 8; j++) {
             int bit = (i * 8) + j;
             alarmBits[bit] = (alarms & (1 << j)) == 0 ? 0 : 1;
         }
     }
 
-    transmitterBatteryStatus = BitConverter::toInt8(buffer, 86);
-    log.log(VantageLogger::VANTAGE_DEBUG2) << "Transmitter Battery Status: " << transmitterBatteryStatus << endl;
+    transmitterBatteryStatus = BitConverter::toInt8(packetData, 86);
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Transmitter Battery Status: " << transmitterBatteryStatus << endl;
 
-    consoleBatteryVoltage = VantageDecoder::decodeConsoleBatteryVoltage(buffer, 87);
-    log.log(VantageLogger::VANTAGE_DEBUG2) << "Console Battery Voltage: " << consoleBatteryVoltage << endl;
+    consoleBatteryVoltage = VantageDecoder::decodeConsoleBatteryVoltage(packetData, 87);
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Console Battery Voltage: " << consoleBatteryVoltage << endl;
 
-    forecastIcon = static_cast<Forecast>(BitConverter::toInt8(buffer, 89));
-    forecastRuleIndex = BitConverter::toInt8(buffer, 90);
+    forecastIcon = static_cast<Forecast>(BitConverter::toInt8(packetData, 89));
+    forecastRuleIndex = BitConverter::toInt8(packetData, 90);
 
-    sunriseTime = VantageDecoder::decodeTime(buffer, 91);
-    sunsetTime = VantageDecoder::decodeTime(buffer, 93);
+    sunriseTime = VantageDecoder::decodeTime(packetData, 91);
+    sunsetTime = VantageDecoder::decodeTime(packetData, 93);
 
     return true;
 }

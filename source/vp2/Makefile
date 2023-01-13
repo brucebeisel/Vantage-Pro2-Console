@@ -10,7 +10,8 @@ SRCS=\
 	BitConverter.cpp \
 	CommandSocket.cpp \
 	CurrentWeather.cpp \
-	CurrentWeatherPublisher.cpp \
+	CurrentWeatherManager.cpp \
+	CurrentWeatherSocket.cpp \
 	DominantWindDirections.cpp \
 	EventManager.cpp \
 	ForecastRule.cpp \

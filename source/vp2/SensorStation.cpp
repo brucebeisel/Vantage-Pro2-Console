@@ -38,7 +38,8 @@ static const char *STATION_TYPES[] = {
 //SensorStation::SensorStation(SensorStation::SensorStationType type, int sensorIndex, RepeaterId repeaterId)
 SensorStation::SensorStation(SensorStationType type, int sensorTransmitterChannel, RepeaterId repeaterId, bool hasAnemometer) : type(type),
                                                                                                                                 sensorTransmitterChannel(sensorTransmitterChannel),
-                                                                                                                                repeaterId(repeaterId),
+                                                                                                                                connectedRepeaterId(NO_REPEATER),
+                                                                                                                                terminatingRepeaterId(repeaterId),
                                                                                                                                 batteryStatus(true),
                                                                                                                                 isAnemometerConnected(false),
                                                                                                                                 temperatureSensorIndex(-1),
@@ -64,7 +65,7 @@ SensorStation::getSensorTransmitterChannel() const {
 ////////////////////////////////////////////////////////////////////////////////
 SensorStation::RepeaterId
 SensorStation::getRepeaterId() const {
-    return repeaterId;
+    return terminatingRepeaterId;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

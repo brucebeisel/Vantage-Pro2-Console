@@ -28,7 +28,9 @@
 #include "VantageLogger.h"
 #include "ArchiveManager.h"
 #include "VantageDriver.h"
-#include "CurrentWeatherPublisher.h"
+#include "VantageConfiguration.h"
+#include "CurrentWeatherSocket.h"
+#include "CurrentWeatherManager.h"
 
 using namespace std;
 using namespace vws;
@@ -45,37 +47,54 @@ sigHandler(int sig) {
 }
 //#endif
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
 consoleThreadEntry(const string & archiveFile, const string & serialPortName, int baudRate) {
-    VantageLogger & log = VantageLogger::getLogger("Vantage Main");
-    log.log(VantageLogger::VANTAGE_INFO) << "Starting console thread" << endl;
+    VantageLogger & logger = VantageLogger::getLogger("Vantage Main");
+    logger.log(VantageLogger::VANTAGE_INFO) << "Starting console thread" << endl;
 
     try {
-        CurrentWeatherPublisher cwPublisher;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Creating runtime objects" << endl;
+        //
+        // Create all of the runtime object that never get destroyed
+        //
+        CurrentWeatherSocket currentWeatherPublisher;
+        CurrentWeatherManager currentWeatherManager(currentWeatherPublisher);
         VantageWeatherStation station(serialPortName, baudRate);
         ArchiveManager archiveManager(archiveFile, station);
         EventManager eventManager;
-        VantageDriver driver(archiveManager, cwPublisher, station, eventManager);
+        VantageConfiguration configuration(station);
+        VantageDriver driver(station, configuration, archiveManager, eventManager);
 
+        //
+        // Perform configuration
+        //
+        logger.log(VantageLogger::VANTAGE_INFO) << "Configuring runtime objects" << endl;
+        station.addLoopPacketListener(currentWeatherManager);
 
-        if (!cwPublisher.createSocket())
+        //
+        // Initialize objects that require it before entering the main loop
+        //
+        logger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
+        if (!currentWeatherPublisher.initialize())
             return;
 
-        //if (!driver.initialize())
-        //    return;
+        if (!driver.initialize())
+            return;
 
-        log.log(VantageLogger::VANTAGE_INFO) << "Entering driver's main loop" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Entering driver's main loop" << endl;
         driver.mainLoop();
-        log.log(VantageLogger::VANTAGE_INFO) << "Driver's main loop returned" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Driver's main loop returned" << endl;
     }
     catch (std::exception & e) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Caught exception from driver's main loop " << e.what() << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Caught exception from driver's main loop " << e.what() << endl;
     }
     catch (...) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Caught unknown exception from driver's main loop" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Caught unknown exception from driver's main loop" << endl;
     }
 
-    log.log(VantageLogger::VANTAGE_INFO) << "Ending console thread" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Ending console thread" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

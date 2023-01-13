@@ -2,7 +2,10 @@
 #include "BitConverter.h"
 #include "Eeprom.h"
 #include "VantageConfiguration.h"
+#include "VantageDecoder.h"
 #include "VantageConstants.h"
+
+using namespace std;
 
 namespace vws {
 
@@ -29,14 +32,14 @@ VantageConfiguration::updatePosition(double latitude, double longitude, int elev
     bool success = false;
     char buffer[4];
 
-    int value = std::lround(latitude * 10.0);
+    int value = std::lround(latitude * VantageConstants::LAT_LON_SCALE);
     BitConverter::getBytes(value, buffer, 0, 2);
 
-    value = std::lround(longitude * 10.0);
+    value = std::lround(longitude * VantageConstants::LAT_LON_SCALE);
     BitConverter::getBytes(value, buffer, 2, 2);
 
     if (station.eepromBinaryWrite(EEPROM_LATITUDE_ADDRESS, buffer, 4)) {
-        if (station.putElevationAndBarometerOffset(elevation, 0.0)) {
+        if (station.updateElevationAndBarometerOffset(elevation, 0.0)) {
             success = true;
         }
     }
@@ -53,8 +56,8 @@ VantageConfiguration::retrievePosition(double & latitude, double & longitude, in
     byte positionData[6];
 
     if (station.eepromBinaryRead(EEPROM_LATITUDE_ADDRESS, 6, positionData)) {
-        latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / 10.0;  // TBD Does BitConverter::toInt16 handle signed values?
-        longitude = static_cast<double>(BitConverter::toInt16(positionData, 2)) / 10.0;
+        latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / VantageConstants::LAT_LON_SCALE;  // TBD Does BitConverter::toInt16 handle signed values?
+        longitude = static_cast<double>(BitConverter::toInt16(positionData, 2)) / VantageConstants::LAT_LON_SCALE;
         consoleElevation = BitConverter::toInt16(positionData, 4);
         success = true;
     }
@@ -116,7 +119,7 @@ VantageConfiguration::updateUnitsSettings(VantageConstants::BarometerUnits baroU
     buffer |= (rainUnits & 0x1) << 5;
     buffer |= (windUnits & 0x3) << 6;
 
-    byte invertedBuffer = buffer ^ 0xFF;
+    byte invertedBuffer = ~buffer;
     if (station.eepromBinaryWrite(EEPROM_UNIT_BITS_ADDRESS, &buffer, 1) &&
         station.eepromBinaryWrite(EEPROM_UNIT_BITS_ADDRESS + 1, &invertedBuffer, 1)) {
             success = true;
@@ -150,18 +153,58 @@ VantageConfiguration::retrieveUnitsSettings(VantageConstants::BarometerUnits & b
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::updateSetupBits() {
-    /*
-    int setupBits = BitConverter::toInt8(buffer, 43);
-    amPmMode = (setupBits & 0x1) == 0;
-    isAM = (setupBits & 0x2) == 1;
-    dayMonthFormat = (setupBits & 0x4) == 1;
-    windCupLarge = (setupBits & 0x8) == 1;
-    isLatitudeNorth = (setupBits & 0x40) == 1;
-    isLongitudeEast = (setupBits & 0x80) == 1;
-    VantageConstants::RainCupSizeType type = static_cast<VantageConstants::RainCupSizeType>((setupBits & 0x30) >> 4);
+VantageConfiguration::updateSetupBits(const SetupBits & setupBits) {
+    bool success = false;
+    byte buffer;
 
-    switch (type) {
+    buffer = setupBits.is24HourMode ?  0x1 : 0;
+    buffer |= setupBits.isAMMode ? 0x2 : 0;
+    buffer |= setupBits.isDayMonthDisplay ? 0x4 : 0;
+    buffer |= setupBits.isWindCupLarge ? 0x8 : 0;
+    buffer |= setupBits.isNorthLatitude ? 0x40 : 0;
+    buffer |= setupBits.isEastLongitude ? 0x80 : 0;
+    buffer |= (static_cast<int>(setupBits.rainCollectorSizeType) & 0x3) << 4;
+    if (station.eepromBinaryWrite(EEPROM_SETUP_BITS, &buffer, 1)) {
+        saveRainCollectorSize(setupBits.rainCollectorSizeType);
+
+        //
+        // Per the serial protocol documentation, when the setup bits byte is changed, the
+        // console must be reinitialized.
+        success = station.initializeSetup();
+    }
+
+    return success;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
+    bool success = false;
+    char buffer;
+
+    if (station.eepromBinaryRead(EEPROM_SETUP_BITS, 1, &buffer)) {
+        setupBits.is24HourMode = (buffer & 0x1) == 0;
+        setupBits.isAMMode = (buffer & 0x2) == 1;
+        setupBits.isDayMonthDisplay = (buffer & 0x4) == 1;
+        setupBits.isWindCupLarge = (buffer & 0x8) == 1;
+        setupBits.isNorthLatitude = (buffer & 0x40) == 1;
+        setupBits.isEastLongitude = (buffer & 0x80) == 1;
+        setupBits.rainCollectorSizeType = static_cast<VantageConstants::RainCupSizeType>((buffer & 0x30) >> 4);
+        success = true;
+        saveRainCollectorSize(setupBits.rainCollectorSizeType);
+    }
+
+    return success;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageConfiguration::saveRainCollectorSize(VantageConstants::RainCupSizeType rainCupType) {
+    Rainfall rainCollectorSize = 0.01;
+
+    switch (rainCupType) {
         case VantageConstants::RainCupSizeType::POINT_01_INCH:
             rainCollectorSize = VantageConstants::POINT_01_INCH_SIZE;
             break;
@@ -171,16 +214,12 @@ VantageConfiguration::updateSetupBits() {
         case VantageConstants::RainCupSizeType::POINT_1_MM:
             rainCollectorSize = VantageConstants::POINT_1_MM_SIZE;
             break;
+        default:
+            log.log(VantageLogger::VANTAGE_WARNING) << "Rain collector size type not valid. Using .01 inches as default" << endl;
+            break;
     }
-    */
-    return true;
-}
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-VantageConfiguration::retrieveSetupBits() {
-    return true;
+    VantageDecoder::setRainCollectorSize(rainCollectorSize);
 }
 
 }

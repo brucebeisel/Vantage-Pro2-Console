@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "CurrentWeatherSocket.h"
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -22,25 +24,22 @@
 #include <ifaddrs.h>
 #include <string.h>
 #include <string>
-#include "CurrentWeatherPublisher.h"
 #include "CurrentWeather.h"
 #include "VantageLogger.h"
 
 using namespace std;
 
 namespace vws {
-const std::string CurrentWeatherPublisher::MULTICAST_HOST = "224.0.0.120";
+const std::string CurrentWeatherSocket::MULTICAST_HOST = "224.0.0.120";
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeatherPublisher::CurrentWeatherPublisher() : log(VantageLogger::getLogger("CurrentWeatherPublisher")), socketId(NO_SOCKET), firstLoop2PacketReceived(false)
-{
+CurrentWeatherSocket::CurrentWeatherSocket() : logger(VantageLogger::getLogger("CurrentWeatherSocket")), socketId(NO_SOCKET) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeatherPublisher::~CurrentWeatherPublisher()
-{
+CurrentWeatherSocket::~CurrentWeatherSocket() {
     if (socketId != NO_SOCKET)
         close(socketId);
 }
@@ -48,43 +47,14 @@ CurrentWeatherPublisher::~CurrentWeatherPublisher()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CurrentWeatherPublisher::processLoopPacket(const LoopPacket & packet) {
-    currentWeather.setLoopData(packet);
-    //
-    // Build a list of past wind directions. This is to mimic what is shown on the
-    // console
-    //
-    dominantWindDirections.processWindSample(time(0), packet.getWindDirection(), packet.getWindSpeed());
-    currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
-
-    if (firstLoop2PacketReceived)
-        sendCurrentWeather(currentWeather);
-
-    return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-CurrentWeatherPublisher::processLoop2Packet(const Loop2Packet & packet) {
-    firstLoop2PacketReceived = true;
-    currentWeather.setLoop2Data(packet);
-    //
-    // Build a list of past wind directions. This is to mimic what is shown on the
-    // console
-    //
-    dominantWindDirections.processWindSample(time(0), packet.getWindDirection(), packet.getWindSpeed());
-    currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
-    sendCurrentWeather(currentWeather);
-    dominantWindDirections.dumpData();
-
-    return true;
+CurrentWeatherSocket::initialize() {
+    return createSocket();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CurrentWeatherPublisher::sendCurrentWeather(const CurrentWeather & cw)
+CurrentWeatherSocket::publishCurrentWeather(const CurrentWeather & cw)
 {
     if (socketId == NO_SOCKET)
         return;
@@ -94,16 +64,16 @@ CurrentWeatherPublisher::sendCurrentWeather(const CurrentWeather & cw)
     size_t length = strlen(data);
     if (sendto(socketId, data, length, 0, reinterpret_cast<struct sockaddr *>(&groupAddr), sizeof(groupAddr)) != length) {
         int e = errno;
-        log.log(VantageLogger::VANTAGE_WARNING) <<  "sendto() for current weather failed. Errno = " << e << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) <<  "sendto() for current weather failed. Errno = " << e << endl;
     }
     else
-        log.log(VantageLogger::VANTAGE_INFO) << "Published current weather: " << data << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Published current weather: " << data << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CurrentWeatherPublisher::getLocalIpAddress(struct sockaddr_in & saddr)
+CurrentWeatherSocket::getLocalIpAddress(struct sockaddr_in & saddr)
 {
     bool rv = false;
     struct ifaddrs *addrs;
@@ -134,7 +104,7 @@ CurrentWeatherPublisher::getLocalIpAddress(struct sockaddr_in & saddr)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CurrentWeatherPublisher::createSocket()
+CurrentWeatherSocket::createSocket()
 {
     if ((socketId = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         socketId = NO_SOCKET;
@@ -148,7 +118,7 @@ CurrentWeatherPublisher::createSocket()
 
     struct sockaddr_in saddr;
     if (!getLocalIpAddress(saddr)) {
-        log.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() getting local IP address failed." << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() getting local IP address failed." << endl;
         close(socketId);
         socketId = NO_SOCKET;
         return false;
@@ -156,7 +126,7 @@ CurrentWeatherPublisher::createSocket()
 
     if (setsockopt(socketId, IPPROTO_IP, IP_MULTICAST_IF, reinterpret_cast<char *>(&saddr.sin_addr), sizeof(saddr.sin_addr)) < 0) {
         int e = errno;
-        log.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() for local interface failed. Errno = " << e << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() for local interface failed. Errno = " << e << endl;
         close(socketId);
         socketId = NO_SOCKET;
         return false;
@@ -165,13 +135,13 @@ CurrentWeatherPublisher::createSocket()
     unsigned char ttl = 2;
     if (setsockopt(socketId, IPPROTO_IP, IP_MULTICAST_TTL, reinterpret_cast<char *>(&ttl), sizeof(ttl)) < 0) {
         int e = errno;
-        log.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() for TTL failed. Errno = " << e << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) <<  "setsockopt() for TTL failed. Errno = " << e << endl;
         close(socketId);
         socketId = NO_SOCKET;
         return false;
     }
 
-    log.log(VantageLogger::VANTAGE_INFO) << "Multicast socket created successfully" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Multicast socket created successfully" << endl;
     return true;
 }
 

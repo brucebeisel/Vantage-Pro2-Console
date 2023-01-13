@@ -47,6 +47,7 @@ public:
      */
     bool decodeLoop2Packet(const byte[]);
 
+    const byte *                     getPacketData() const;
     int                              getPacketType() const;
     const Measurement<Speed> &       getWindSpeed() const;
     const Measurement<Heading> &     getWindDirection() const;
@@ -66,6 +67,7 @@ public:
 private:
     static const int LOOP2_PACKET_TYPE = 1;
 
+    byte                     packetData[LOOP2_PACKET_SIZE];
     int                      packetType;
     Measurement<Speed>       windSpeed;
     Measurement<Heading>     windDirection;
@@ -81,7 +83,7 @@ private:
     Rainfall                 rainHour;
     Rainfall                 rain24Hour;
     Measurement<Pressure>    atmPressure;
-    VantageLogger            log;
+    VantageLogger            logger;
 };
 }
 #endif

@@ -132,7 +132,7 @@ private:
     /**
      * The number of degrees each wind slice occupies.
      */
-    static constexpr Heading DEGREES_PER_SLICE = 22.0;
+    static constexpr Heading DEGREES_PER_SLICE = MAX_HEADING / static_cast<Heading>(NUM_SLICES);
     static constexpr Heading HALF_SLICE = DEGREES_PER_SLICE / 2.0;
 
     /**

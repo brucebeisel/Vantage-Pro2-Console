@@ -86,6 +86,7 @@ public:
      */
     bool                                    decodeLoopPacket(byte buffer[]);
 
+    const byte *                            getPacketData() const;
     BaroTrend                               getBaroTrend() const;
     std::string                             getBaroTrendString() const;
     int                                     getPacketType() const;
@@ -128,7 +129,7 @@ public:
 private:
     static const int LOOP_PACKET_TYPE = 0;
 
-    VantageLogger                   log;
+    byte                            packetData[LOOP_PACKET_SIZE];
     BaroTrend                       baroTrend;
     int                             packetType;
     int                             nextRecord;
@@ -164,6 +165,7 @@ private:
     int                             forecastRuleIndex;
     DateTime                        sunriseTime;
     DateTime                        sunsetTime;
+    VantageLogger                   logger;
 };
 }
 #endif

@@ -1,12 +1,11 @@
 #include <iostream>
 #include "BitConverter.h"
-#include "UnitConverter.h"
 #include "VantageConstants.h"
 #include "VantageDecoder.h"
 
 namespace vws {
 
-Rainfall VantageDecoder::rainCollectorSize = static_cast<Rainfall>(0.0);
+Rainfall VantageDecoder::rainCollectorSizeInches = static_cast<Rainfall>(0.0);
 bool VantageDecoder::rainCollectorSizeSet = false;
 VantageLogger * log = nullptr;
 
@@ -17,7 +16,7 @@ VantageDecoder::decode16BitTemperature(const byte buffer[], int offset, Measurem
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != VantageConstants::INVALID_16BIT_TEMPERATURE)
-        measurement.setValue(UnitConverter::toCelsius(static_cast<Temperature>(value16) / VantageConstants::TEMPERATURE_16BIT_SCALE));
+        measurement.setValue(static_cast<Temperature>(value16) / VantageConstants::TEMPERATURE_16BIT_SCALE);
     else
         measurement.invalidate();
 
@@ -39,7 +38,7 @@ VantageDecoder::decodeNonScaled16BitTemperature(const byte buffer[], int offset,
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != VantageConstants::INVALID_16BIT_TEMPERATURE)
-        measurement.setValue(UnitConverter::toCelsius(static_cast<Temperature>(value16)));
+        measurement.setValue(static_cast<Temperature>(value16));
     else
         measurement.invalidate();
 
@@ -61,7 +60,7 @@ VantageDecoder::decode8BitTemperature(const byte buffer[], int offset, Measureme
     int value8 = BitConverter::toInt8(buffer, offset);
 
     if (value8 != VantageConstants::INVALID_8BIT_TEMPERATURE)
-        measurement.setValue(UnitConverter::toCelsius(static_cast<Temperature>(value8 - VantageConstants::TEMPERATURE_8BIT_OFFSET)));
+        measurement.setValue(static_cast<Temperature>(value8 - VantageConstants::TEMPERATURE_8BIT_OFFSET));
     else
         measurement.invalidate();
 
@@ -82,7 +81,7 @@ const Measurement<Pressure> &
 VantageDecoder::decodeBarometricPressure(const byte buffer[], int offset, Measurement<Pressure> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    measurement = UnitConverter::toMillibars(static_cast<Pressure>(value16) / VantageConstants::BAROMETER_SCALE);
+    measurement = static_cast<Pressure>(value16) / VantageConstants::BAROMETER_SCALE;
 
     return measurement;
 }
@@ -146,7 +145,7 @@ VantageDecoder::decodeDayET(const byte buffer[], int offset, Measurement<Evapotr
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != VantageConstants::INVALID_ET)
-        measurement.setValue(UnitConverter::toMillimeter(static_cast<Evapotranspiration>(value16) / VantageConstants::DAY_ET_SCALE));
+        measurement.setValue(static_cast<Evapotranspiration>(value16) / VantageConstants::DAY_ET_SCALE);
     else
         measurement.invalidate();
 
@@ -169,7 +168,7 @@ VantageDecoder::decodeMonthYearET(const byte buffer[], int offset, Measurement<E
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != VantageConstants::INVALID_ET)
-        measurement.setValue(UnitConverter::toMillimeter(static_cast<Evapotranspiration>(value16) / VantageConstants::MONTH_YEAR_ET_SCALE));
+        measurement.setValue(static_cast<Evapotranspiration>(value16) / VantageConstants::MONTH_YEAR_ET_SCALE);
     else
         measurement.invalidate();
 
@@ -213,7 +212,7 @@ VantageDecoder::decodeWindSpeed(const byte buffer[], int offset, Measurement<Spe
     int value8 = BitConverter::toInt8(buffer, offset);
 
     if (value8 != VantageConstants::INVALID_WIND_SPEED)
-        measurement.setValue(UnitConverter::toMetersPerSecond(static_cast<Speed>(value8)));
+        measurement.setValue(static_cast<Speed>(value8));
     else
         measurement.invalidate();
 
@@ -234,7 +233,7 @@ const Measurement<Speed> &
 VantageDecoder::decode16BitWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    measurement.setValue(UnitConverter::toMetersPerSecond(static_cast<Speed>(value16)));
+    measurement.setValue(static_cast<Speed>(value16));
 
     return measurement;
 }
@@ -254,7 +253,7 @@ VantageDecoder::decodeAverageWindSpeed(const byte buffer[], int offset, Measurem
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != VantageConstants::INVALID_16BIT_AVG_WIND_SPEED)
-        measurement.setValue(UnitConverter::toMetersPerSecond(static_cast<Speed>(value16) / VantageConstants::AVG_WIND_SPEED_SCALE));
+        measurement.setValue(static_cast<Speed>(value16) / VantageConstants::AVG_WIND_SPEED_SCALE);
     else
         measurement.invalidate();
 
@@ -325,7 +324,7 @@ VantageDecoder::decodeWindDirection(const byte buffer[], int offset) {
 Rainfall
 VantageDecoder::decodeStormRain(const byte buffer[], int offset) {
     int value16 = BitConverter::toInt16(buffer, offset);
-    Rainfall rain = UnitConverter::toMillimeter(static_cast<Rainfall>(value16) / VantageConstants::STORM_RAIN_SCALE);
+    Rainfall rain = static_cast<Rainfall>(value16) / VantageConstants::STORM_RAIN_SCALE;
 
     return rain;
 }
@@ -334,7 +333,7 @@ VantageDecoder::decodeStormRain(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageDecoder::setRainCollectorSize(Rainfall collectorSize) {
-    rainCollectorSize = collectorSize;
+    rainCollectorSizeInches = collectorSize;
     rainCollectorSizeSet = true;
 }
 
@@ -347,10 +346,10 @@ VantageDecoder::decodeRain(const byte buffer[], int offset) {
         log = &VantageLogger::getLogger("VantageDecoder");
 
     if (!rainCollectorSizeSet)
-        log->log(VantageLogger::VANTAGE_WARNING) << "Decoding rain value before rain collector size has been set" << std::endl;
+        log->log(VantageLogger::VANTAGE_WARNING) << "Decoding rain value before rain collector size has been set. Using .01 inches" << std::endl;
     
     int value16 = BitConverter::toInt16(buffer, offset);
-    Rainfall rain = UnitConverter::toMillimeter(static_cast<Rainfall>(value16) * rainCollectorSize);
+    Rainfall rain = static_cast<Rainfall>(value16) * rainCollectorSizeInches;
 
     return rain;
 }

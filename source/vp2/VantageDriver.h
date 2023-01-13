@@ -26,12 +26,13 @@
 #include "ArchiveManager.h"
 #include "EventManager.h"
 #include "SensorStation.h"
+#include "VantageConfiguration.h"
 #include "VantageWeatherStation.h"
 
 namespace vws {
 class VantageLogger;
 class CurrentWeather;
-class CurrentWeatherPublisher;
+class CurrentWeatherSocket;
 
 /**
  * Class that coordinates the communications with the Vantage console.
@@ -45,7 +46,7 @@ public:
      * @param cwp            The publisher that will be called each time a current weather record has been received
      * @param station        The object that handles the command protocols with the Vantage console
      */
-    VantageDriver(ArchiveManager & archiveManager, CurrentWeatherPublisher & cwp, VantageWeatherStation & station, EventManager & eventManager);
+    VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager, EventManager & eventManager);
 
     /**
      * Destructor.
@@ -112,7 +113,7 @@ private:
     static const int TIME_SET_INTERVAL = 3600;
 
     VantageWeatherStation &   station;
-    CurrentWeatherPublisher & currentWeatherPublisher;
+    VantageConfiguration &    configuration;
     ArchiveManager &          archiveManager;
     EventManager &            eventManager;
     bool                      exitLoop;
@@ -121,7 +122,7 @@ private:
     DateTime                  lastArchivePacketTime;
     DateTime                  consoleTimeSetTime;
     //DateTime                  sensorStationSendTime;
-    VantageLogger             log;
+    VantageLogger             logger;
 };
 
 }

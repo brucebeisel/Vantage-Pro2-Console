@@ -20,6 +20,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "Sensor.h"
 #include "Weather.h"
 
 namespace vws {
@@ -174,14 +175,18 @@ public:
     friend std::ostream & operator<<(std::ostream & os, const SensorStation & ss);
 
 private:
-    SensorStationType type;                     // The type of this sensor station
-    RepeaterId        repeaterId;               // ID of the repeater, if any
-    int               sensorTransmitterChannel; // Sensor index, 1-8
-    bool              isAnemometerConnected;    // True if this sensor station has the anemometer
-    int               humiditySensorIndex;      // The index into the "extra humidities" that this station's values are reported (1 - 8)
-    int               temperatureSensorIndex;   // The index into the "extra temperatures" that this station's values are reported (0 - 7)
-    bool              batteryStatus;            // Battery status
-    int               linkQuality;              // Only reported if this is an ISS or an Anemometer station
+    SensorStationType   type;                     // The type of this sensor station
+    RepeaterId          connectedRepeaterId;      // ID of the repeater to which this sensor station is directly connected (Note this cannot be determined except in a single repeater chain)
+    RepeaterId          terminatingRepeaterId;    // ID of the repeater that is sending this sensor station data to a console (Available from EEPROM)
+    int                 sensorTransmitterChannel; // Sensor index, 1-8
+    bool                isAnemometerConnected;    // True if this sensor station has the anemometer
+    int                 humiditySensorIndex;      // The index into the "extra humidities" that this station's values are reported (1 - 8)
+    int                 temperatureSensorIndex;   // The index into the "extra temperatures" that this station's values are reported (0 - 7)
+    bool                batteryStatus;            // Battery status
+    int                 linkQuality;              // Only reported if this is an ISS or an Anemometer station
+    std::vector<Sensor> connectedSensors;         // The sensors that are connected to this sensor station
+                                                  // The connected sensors can be derived from the humidity and temperature index and the
+                                                  // data in the loop packet. TBD need to determine how soil and leaf sensors work.
 
 };
 }

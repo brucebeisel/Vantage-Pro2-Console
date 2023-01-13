@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef CURRENT_WEATHER_PUBLISHER_H
-#define CURRENT_WEATHER_PUBLISHER_H
+#ifndef CURRENT_WEATHER_SOCKET_H
+#define CURRENT_WEATHER_SOCKET_H
 
 #include <netinet/in.h>
 #include <string>
@@ -23,6 +23,7 @@
 #include "VantageLogger.h"
 #include "Weather.h"
 #include "CurrentWeather.h"
+#include "CurrentWeatherPublisher.h"
 #include "DominantWindDirections.h"
 #include "VantageWeatherStation.h"
 
@@ -32,56 +33,39 @@ class CurrentWeather;
 /**
  * Class that publishes the current weather using a UDP broadcast socket.
  */
-class CurrentWeatherPublisher : public VantageWeatherStation::LoopPacketListener {
+class CurrentWeatherSocket : public CurrentWeatherPublisher {
 public:
 
     /**
      * Constructor that creates and configures the UDP multicast socket.
      */
-    CurrentWeatherPublisher();
+    CurrentWeatherSocket();
 
     /**
      * Destructor that closes the socket.
      */
-    virtual ~CurrentWeatherPublisher();
-
-    //
-    // TBD move the loop packet processing to a LoopPacketManager class that will
-    // save 24 hours of loop packets. This way the past 24 hours of current weather
-    // records can be queried for display or analysis purposes.
-    //
+    virtual ~CurrentWeatherSocket();
 
     /**
-     * Process a LOOP packet in a callback.
-     *
-     * @param packet The LOOP packet
-     * @return True if the loop packet processing loop should continue
+     * Initialize this class.
      */
-    virtual bool processLoopPacket(const LoopPacket & packet);
+    bool initialize();
 
     /**
-     * Process a LOOP2 packet in a callback.
+     * Publish the current weather.
      *
-     * @param packet The LOOP2 packet
-     * @return True if the loop packet processing loop should continue
+     * @param cw The current weather to publish
+     *
      */
-    virtual bool processLoop2Packet(const Loop2Packet & packet);
+    virtual void publishCurrentWeather(const CurrentWeather & cw);
 
+private:
     /**
      * Connect with the WeatherSense collector.
      *
      * @return True if the socket was created and configured successfully
      */
     bool createSocket();
-
-private:
-    /**
-     * Publish the current weather.
-     * 
-     * @param cw The current weather to publish
-     * 
-     */
-    void sendCurrentWeather(const CurrentWeather & cw);
 
     /**
      * Get the local IP address for the multicast socket. Note that this
@@ -97,10 +81,7 @@ private:
     static const int         NO_SOCKET = -1;
     int                      socketId;
     struct sockaddr_in       groupAddr;
-    VantageLogger            log;
-    CurrentWeather           currentWeather;
-    bool                     firstLoop2PacketReceived;
-    DominantWindDirections   dominantWindDirections;   // The past wind direction measurements used to determine the arrows on the wind display
+    VantageLogger            logger;
 };
 }
 

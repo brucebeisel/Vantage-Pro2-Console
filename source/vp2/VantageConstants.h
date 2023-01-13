@@ -121,6 +121,21 @@ namespace VantageConstants {
         WIND_UNITS_KTS = 3
     };
 
+    enum Month {
+        JANUARY = 1,
+        FEBRUARY = 2,
+        MARCH = 3,
+        APRIL = 4,
+        MAY = 5,
+        JUNE = 6,
+        JULY = 7,
+        AUGUST = 8,
+        SEPTEMBER = 9,
+        OCTOBER = 10,
+        NOVEMBER = 11,
+        DECEMBER = 12
+    };
+
     //
     // LOOP packet forecast icons
     //
@@ -161,12 +176,13 @@ namespace VantageConstants {
     //
     // Maximum counts
     //
+    static constexpr int MAX_STATION_ID = 8;
     static constexpr int MAX_INTEGRATED_SENSOR_STATIONS = 1;
     static constexpr int MAX_ANEMOMETER_STATIONS = 1;
     //
     // Per the serial protocol ICD, you cannot have two stations with both leaf and soil moisture sensors.
     // One can have both, but if there are two stations, one must be leaf, the other soil.
-    // I am not sure how the console knows this and how it would handle the unsupported configuration.
+    // It is not clear how the console knows this and how it would handle the unsupported configuration.
     //
     static constexpr int MAX_LEAF_SOIL_MOISTURE_TEMPERATURE_STATIONS = 2;
     static constexpr int MAX_TEMPERATURE_STATIONS = 8;
@@ -194,6 +210,7 @@ namespace VantageConstants {
     static constexpr Evapotranspiration DAY_ET_SCALE = 1000.0;
     static constexpr Evapotranspiration MONTH_YEAR_ET_SCALE = 100.0;
     static constexpr Rainfall           STORM_RAIN_SCALE = 100.0;
+    static constexpr double             LAT_LON_SCALE = 10.0;
 
     static const int NORTH_HEADING_VALUE = 360;
 

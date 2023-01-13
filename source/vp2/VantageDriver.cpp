@@ -21,7 +21,6 @@
 #include <vector>
 #include <atomic>
 #include "CurrentWeather.h"
-#include "CurrentWeatherPublisher.h"
 #include "HiLowPacket.h"
 #include "SensorStation.h"
 #include "Alarm.h"
@@ -37,16 +36,16 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageDriver::VantageDriver(ArchiveManager & archiveManager, CurrentWeatherPublisher & cwp, VantageWeatherStation & station, EventManager & evtMgr) :
+VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager,  EventManager & evtMgr) :
                                                                 station(station),
-                                                                currentWeatherPublisher(cwp),
+                                                                configuration(configuration),
                                                                 archiveManager(archiveManager),
                                                                 eventManager(evtMgr),
                                                                 exitLoop(false),
                                                                 nextRecord(-1),
                                                                 previousNextRecord(-1),
                                                                 lastArchivePacketTime(0),
-                                                                log(VantageLogger::getLogger("VantageDriver")) {
+                                                                logger(VantageLogger::getLogger("VantageDriver")) {
     //
     // Indicate the the console time needs to be set in the near future. 
     // We do not want the console time to be set immediately in case the computer has just started and
@@ -65,41 +64,38 @@ VantageDriver::~VantageDriver() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageDriver::initialize() {
-    log.log(VantageLogger::VANTAGE_INFO) << "Initializing..." << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Initializing..." << endl;
 
-    station.addLoopPacketListener(currentWeatherPublisher);
     station.addLoopPacketListener(*this);
 
     if (!station.openStation()) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to open weather station" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open weather station" << endl;
         return false;
     }
 
-    log.log(VantageLogger::VANTAGE_INFO) << "Port is open" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Port is open" << endl;
 
     if (!station.wakeupStation()) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to wake up weather station" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to wake up weather station" << endl;
         return false;
     }
     else {
-        log.log(VantageLogger::VANTAGE_INFO) << "Weather Station is awake" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station is awake" << endl;
     }
 
     if (!station.retrieveStationType()) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve station type for weather station" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve station type for weather station" << endl;
         return false;
     }
 
-    log.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << station.getStationTypeString() << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << station.getStationTypeString() << endl;
 
-    if (!station.retrieveConfigurationData()) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve configuration data for weather station" << endl;
+    if (!retrieveConfiguration())
         return false;
-    }
 
     //AlarmManager::getInstance().initialize();
 
-    log.log(VantageLogger::VANTAGE_INFO) << "Initialization complete." << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Initialization complete." << endl;
 
     return true;
 }
@@ -109,14 +105,12 @@ VantageDriver::initialize() {
 bool
 VantageDriver::retrieveConfiguration() {
 
-    VantageDecoder::setRainCollectorSize(station.getRainCollectorSize()); // TBD, this should come from VantageConfiguration class
 
-    /*
-    if (!station.retrieveConfigurationParameters()) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve configuration parameters" << endl;
+    SetupBits setupBits;
+    if (!configuration.retrieveSetupBits(setupBits)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve setup bits" << endl;
         return false;
     }
-    */
 
     //
     // Get one LOOP packet weather so that the sensors are detected
@@ -128,7 +122,7 @@ VantageDriver::retrieveConfiguration() {
     }
 
     if (!loopPacketReceived) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to receive a LOOP packet needed to determine current sensor suite" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to receive a LOOP packet needed to determine current sensor suite" << endl;
         return false;
     }
 
@@ -195,7 +189,7 @@ VantageDriver::reopenStation() {
     bool success = station.openStation();
 
     if (!success)
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to reopen weather station" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to reopen weather station" << endl;
 
     return success;
 }
@@ -207,12 +201,7 @@ VantageDriver::mainLoop() {
     vector<ArchivePacket> list;
     list.reserve(VantageConstants::NUM_ARCHIVE_RECORDS);
 
-    if (!initialize())
-        return;
-
     /*
-    if (!retrieveConfiguration())
-        return;
 
     if (!archiveManager.synchronizeArchive()) {
         log.log(VantageLogger::VANTAGE_ERROR) << "Failed to read the archive during initialization" << endl;
@@ -227,18 +216,6 @@ VantageDriver::mainLoop() {
 
     while (!exitLoop) {
         try {
-            /*
-            usleep(500000);
-            VantageWeatherStation::ConsoleDiagnosticReport report;
-            station.retrieveConsoleDiagnosticsReport(report);
-            log.log(VantageLogger::VANTAGE_INFO) << "Diagnostic Report: " << "Packets: " << report.packetCount << "       Missed Packets: " << report.missedPacketCount
-                                         << "      CRC Errors: " << report.crcErrorCount << endl;
-            if (signalCaught.load()) {
-                exitLoop = true;
-            }
-            */
-            //exitLoop = true;
-
             //
             // If the weather station could not be woken, then close and open
             // the console. It has been observed that on a rare occasion the console
@@ -252,9 +229,9 @@ VantageDriver::mainLoop() {
 
             DateTime consoleTime;
             if (station.retrieveConsoleTime(consoleTime))
-                log.log(VantageLogger::VANTAGE_INFO) << "Station Time: " << Weather::formatDateTime(consoleTime) << endl;
+                logger.log(VantageLogger::VANTAGE_INFO) << "Station Time: " << Weather::formatDateTime(consoleTime) << endl;
             else
-                log.log(VantageLogger::VANTAGE_INFO) << "Station Time retrieval failed" << endl;
+                logger.log(VantageLogger::VANTAGE_INFO) << "Station Time retrieval failed" << endl;
 
             //
             // If it has been a while since the time was set, set the time
@@ -262,7 +239,7 @@ VantageDriver::mainLoop() {
             DateTime now = time(0);
             if (consoleTimeSetTime + TIME_SET_INTERVAL < now) {
                 if (!station.updateConsoleTime())
-                    log.log(VantageLogger::VANTAGE_ERROR) << "Failed to set station time " << endl;
+                    logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to set station time " << endl;
 
                 consoleTimeSetTime = now;
             }
@@ -289,8 +266,10 @@ VantageDriver::mainLoop() {
             // If the LOOP packet data indicates that a new archive packet is available
             // go get it.
             //
-            /*
             if (previousNextRecord != nextRecord) {
+                logger.log(VantageLogger::VANTAGE_INFO) << "New archive record available. Record ID = " << nextRecord << endl;
+                previousNextRecord = nextRecord;
+            /*
                 if (archiveManager.synchronizeArchive()) {
                     ArchivePacket packet;
                     // TBD What if multiple archive packets are received?
@@ -300,11 +279,11 @@ VantageDriver::mainLoop() {
                                                            << " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
                     previousNextRecord = nextRecord;
                 }
-            }
             */
+            }
         }
         catch (std::exception & e) {
-            log.log(VantageLogger::VANTAGE_ERROR) << "Caught exception: " << e.what() << endl;     
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Caught exception: " << e.what() << endl;     
         } 
     }
 }
@@ -320,7 +299,7 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
     bool nr = previousNextRecord != nextRecord;
     bool continueLoopPacketProcessing = !sc && !em && !nr;
 
-    log.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop: " << continueLoopPacketProcessing
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop: " << continueLoopPacketProcessing
                                    << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
 
     return continueLoopPacketProcessing;

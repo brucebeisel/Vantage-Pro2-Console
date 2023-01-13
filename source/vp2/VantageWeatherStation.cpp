@@ -137,7 +137,6 @@ VantageWeatherStation::VantageWeatherStation(const string & portName, int baudRa
                                             stationType(VANTAGE_PRO_2),
                                             consoleBatteryVoltage(0.0),
                                             baudRate(baudRate),
-                                            rainCollectorSize(0.0),
                                             archivePeriod(0),
                                             windSensorStationId(0),
                                             log(VantageLogger::getLogger("VantageWeatherStation")) {
@@ -216,38 +215,12 @@ VantageWeatherStation::retrieveConfigurationData() {
     if (!wakeupStation())
         return false;
 
-    if (!retrieveSensorStationInfo())
-        return false;
-
-    if (!eepromBinaryRead(VantageConstants::EE_SETUP_BITS, 1))
-        return false;
-
-    int setupBits = BitConverter::toInt8(buffer, 0);
-
-    VantageConstants::RainCupSizeType rainCupType = static_cast<VantageConstants::RainCupSizeType>((setupBits & 0x30) >> 4);
-
-    switch (rainCupType) {
-        case VantageConstants::RainCupSizeType::POINT_01_INCH:
-            rainCollectorSize = VantageConstants::POINT_01_INCH_SIZE;
-            break;
-        case VantageConstants::RainCupSizeType::POINT_2_MM:
-            rainCollectorSize = VantageConstants::POINT_2_MM_SIZE;
-            break;
-        case VantageConstants::RainCupSizeType::POINT_1_MM:
-            rainCollectorSize = VantageConstants::POINT_1_MM_SIZE;
-            break;
-
-        default:
-            log.log(VantageLogger::VANTAGE_ERROR) << "Invalid rain cup size received from console: " << (int)rainCupType << endl;
-            return false;
-    }
-
     if (!eepromBinaryRead(VantageConstants::EE_ARCHIVE_PERIOD, 1))
         return false;
 
     archivePeriod = BitConverter::toInt8(buffer, 0);
 
-    log.log(VantageLogger::VANTAGE_INFO) << "Configuration Data: " <<  " Rain Collector Size: " << rainCollectorSize << " Archive Period: " << archivePeriod << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "Configuration Data: " <<  " Archive Period: " << archivePeriod << endl;
 
     return true;
 }
@@ -365,7 +338,7 @@ VantageWeatherStation::retrieveReceiverList(std::vector<StationId> * sensorStati
 
     stationIds.clear();
 
-    for (int i = 0; i < MAX_STATION_ID; i++) {
+    for (int i = 0; i < VantageConstants::MAX_STATION_ID; i++) {
         if (stations & (1 << i) != 0) {
             if (sensorStations != nullptr)
                 sensorStations->push_back(i + 1);
@@ -707,7 +680,7 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::putElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg) {
+VantageWeatherStation::updateElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg) {
     ostringstream command;
     command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroOffsetInHg * 1000.0) << " " << elevationFeet;
 
@@ -932,7 +905,9 @@ VantageWeatherStation::stopArchiving() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::initializeSetup() {
-    log.log(VantageLogger::VANTAGE_INFO) << "Reinitializing console" << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "**************************" << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "* Reinitializing console *" << endl;
+    log.log(VantageLogger::VANTAGE_INFO) << "**************************" << endl;
     return sendAckedCommand(REINITIALIZE_CMD);
 }
 
@@ -951,12 +926,6 @@ VantageWeatherStation::controlConsoleLamp(bool on) {
 // EEPROM retrieval commands
 //
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const vector<SensorStation> &
-VantageWeatherStation::getSensorStations() const {
-    return sensorStations;
-}
 
 /*
 ////////////////////////////////////////////////////////////////////////////////
@@ -966,60 +935,6 @@ VantageStation::getSensors() const {
     return sensors;
 }
  */
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-VantageWeatherStation::retrieveSensorStationInfo() {
-    log.log(VantageLogger::VANTAGE_INFO) << "Retrieving sensor station information" << endl;
-
-    if (!eepromBinaryRead(VantageConstants::EE_STATION_LIST, STATION_DATA_SIZE))
-        return false;
-
-    SensorStationData data[MAX_STATION_ID];
-    for (int i = 0; i < MAX_STATION_ID; i++) {
-        data[i].repeaterId = static_cast<SensorStation::RepeaterId>(BitConverter::getUpperNibble(buffer[i * 2]));
-        data[i].stationType = static_cast<SensorStation::SensorStationType>(BitConverter::getLowerNibble(buffer[i * 2]));
-        data[i].humiditySensorNumber = BitConverter::getUpperNibble(buffer[(i * 2) + 1]);
-        data[i].temperatureSensorNumber = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
-
-        //
-        // If there is an anemometer sensor station, it by definition is the sensor station that measures
-        // the wind. The ISS cannot measure the wind if an anemometer station exists.
-        //
-        if (data[i].stationType == SensorStation::ANEMOMETER)
-            windSensorStationId = i + 1;
-        else if (data[i].stationType == SensorStation::INTEGRATED_SENSOR_STATION && windSensorStationId == 0)
-            windSensorStationId = i + 1;
-
-    }
-
-    //
-    // Assign the anemometer to the sensor station to which it is connected
-    //
-    for (int i = 0; i < MAX_STATION_ID; i++) {
-        if (data[i].stationType != SensorStation::NO_STATION) {
-            bool hasAnemometer = (i + 1) == windSensorStationId;
-            sensorStations.push_back(SensorStation(data[i].stationType, i + 1, data[i].repeaterId, hasAnemometer));
-        }
-    }
-
-    cout << "@@@@@@@@@@ Station Data:" << endl;
-    cout << "@@@@@@@@@@ Wind Sensor Station ID: " << windSensorStationId << endl;
-    for (int i = 0; i < MAX_STATION_ID; i++) {
-        cout << "@@@@@@@@@@ [" << i << "] Repeater ID: " << data[i].repeaterId
-             << " Station Type: " << data[i].stationType
-             << " Humidity Sensor: " << data[i].humiditySensorNumber
-             << " Temperature Sensor: " << data[i].temperatureSensorNumber << endl;
-
-    }
-    /*
-    for (vector<SensorStation>::iterator it = sensorStations.begin(); it != sensorStations.end(); ++it)
-        log.log(VantageLogger::VANTAGE_DEBUG1) << *it << endl;
-    */
-
-    return true;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -1036,13 +951,6 @@ VantageWeatherStation::calculateStationReceptionPercentage(int archivePacketWind
         stationReception = MAX_STATION_RECEPTION;
 
     return stationReception;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-Rainfall
-VantageWeatherStation::getRainCollectorSize() const {
-    return rainCollectorSize;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

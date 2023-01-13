@@ -110,13 +110,6 @@ public:
         int crcErrorCount;
     };
 
-    struct SensorStationData {
-        SensorStation::RepeaterId        repeaterId;
-        SensorStation::SensorStationType stationType;
-        byte                             humiditySensorNumber;
-        byte                             temperatureSensorNumber;
-    };
-
     /**
      * The station types supported by this software. Note that there are many more
      * legacy value that include the Vantage Pro, which reports the same value as
@@ -386,7 +379,7 @@ public:
     // Calibration Commands
     /////////////////////////////////////////////////////////////////////////////////
 
-    bool putElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg);
+    bool updateElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg);
 
     /////////////////////////////////////////////////////////////////////////////////
     // End Calibration Commands
@@ -446,10 +439,29 @@ public:
      */
     bool updateArchivePeriod(VantageConstants::ArchivePeriod period);
 
+    /**
+     * Retrieve the archive period.
+     *
+     * @param period The interval at which the archive data is being saved
+     *
+     * @return True if successful
+     */
+    bool retrieveArchivePeriod(VantageConstants::ArchivePeriod  & period);
+
+    /**
+     * Start archiving the weather data.
+     *
+     * @return True if successful
+     */
     bool startArchiving();
+
+    /**
+     * Stop archiving the weather data.
+     *
+     * @return True if successful
+     */
     bool stopArchiving();
 
-private:
     /**
      * Reinitialize the console after making any of the following changes to the configuration:
      *      1. Lat/Lon
@@ -461,7 +473,6 @@ private:
      */
     bool initializeSetup();
 
-public:
     /**
      * Turn the console lamp on or off.
      *
@@ -470,6 +481,53 @@ public:
      * @return True if successful
      */
     bool controlConsoleLamp(bool on);
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // End Configuration Commands
+    /////////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // Configuration Commands for data stored in the EEPROM
+    /////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Update the rain season start month.
+     * The console will automatically clear the yearly rain total on the 1st of the specified month.
+     *
+     * @param month The month in which the rain season starts
+     * @return True if successful
+     */
+    bool updateRainSeasonStart(VantageConstants::Month month);
+
+    /**
+     * Retrieve the rain season start month.
+     *
+     * @param month The month in which the rain season starts
+     * @return True if successful
+     */
+    bool retrieveRainSeasonStart(VantageConstants::Month & month);
+
+    /**
+     * Set the whether the console will retransmit the data it receives and the retransmit station ID it will use if on.
+     *
+     * @param isRetransmitOn True if the console is to retransmit
+     * @param retransmitStationId The station ID used for retransmission which is only used if isRetransmitOn is true
+     * @return True if the successful
+     */
+    bool updateConsoleRetransmitMode(bool isRetransmitOn, StationId retransmitStationId);
+
+    /**
+     * Retrieve the retransmission mode of the console.
+     *
+     * @param isRetransmitOn True if the console is retransmitting
+     * @param retransmitStationId The station ID being used for retransmission which is only valid if isRetransmitOn is true
+     * @return True if the successful
+     */
+    bool retrieveConsoleRetransmitMode(bool & isTransmitOn, StationId & retransmitStationId);
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // End Configuration Commands for data stored in the EEPROM
+    /////////////////////////////////////////////////////////////////////////////////
 
     /////////////////////////////////////////////////////////////////////////////////
     // End of Configuration Commands
@@ -482,10 +540,6 @@ public:
      * @param archivePacketWindSamples The number of samples as reported by the Archive packet
      */
     int calculateStationReceptionPercentage(int archivePacketWindSamples) const;
-
-    Rainfall getRainCollectorSize() const;
-
-    const std::vector<SensorStation> & getSensorStations() const;
 
     const std::string & getStationTypeString() const;
 
@@ -511,8 +565,6 @@ private:
     static constexpr int EEPROM_NON_GRAPH_DATA_SIZE = 176;
 
     static constexpr int ALARM_THRESHOLDS_SIZE = 94; 
-    static constexpr int MAX_STATION_ID = 8;
-    static constexpr int STATION_DATA_SIZE = 16;
 
     static constexpr int COMMAND_RETRIES = 5;
     static constexpr int ARCHIVE_PAGE_READ_RETRIES = 3;
@@ -621,9 +673,6 @@ private:
      */
     bool consumeAck();
 
-
-public:
-    bool retrieveSensorStationInfo();
 private:
     typedef std::vector<LoopPacketListener *> LoopPacketListenerList;
 
@@ -649,10 +698,8 @@ private:
     float                      consoleBatteryVoltage;    // The console battery voltage received in the LOOP packet
     std::string                firmwareDate;             // TBD - Is this really needed?
     std::string                firmwareVersion;          // TBD - Is this really needed?
-    std::vector<SensorStation> sensorStations;           // The sensor stations as reported by the console
     std::vector<StationId>     stationIds;               // The ID of the stations that the console can hear
     int                        windSensorStationId;      // The ID of the sensor station containing the anemometer
-    Rainfall                   rainCollectorSize;        // The size of the rain collector that is needed for calculating rain amounts
     int                        archivePeriod;            // The archive period used to calculate reception percentage
     //StationConfiguration       stationConfiguration;
     //std::vector<Sensor>        sensors;

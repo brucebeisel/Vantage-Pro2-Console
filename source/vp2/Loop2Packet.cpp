@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <cstring>
 #include "BitConverter.h"
-#include "UnitConverter.h"
 #include "Loop2Packet.h"
 #include "VantageConstants.h"
 #include "VantageCRC.h"
@@ -30,7 +30,7 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Loop2Packet::Loop2Packet() : log(VantageLogger::getLogger("Loop2Packet")),
+Loop2Packet::Loop2Packet() : logger(VantageLogger::getLogger("Loop2Packet")),
                              packetType(-1),
                              rain15Minute(0.0),
                              rainHour(0.0),
@@ -40,6 +40,13 @@ Loop2Packet::Loop2Packet() : log(VantageLogger::getLogger("Loop2Packet")),
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Loop2Packet::~Loop2Packet() {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const byte *
+Loop2Packet::getPacketData() const {
+    return packetData;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,50 +159,51 @@ Loop2Packet::getAtmPressure() const {
 bool
 Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
 
+    memcpy(packetData, buffer, LOOP2_PACKET_SIZE);
     //
     // Perform packet validation before decoding the actual data
     //
-    if (!VantageCRC::checkCRC(buffer, 97)) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "LOOP2 packet failed CRC check" << endl;
+    if (!VantageCRC::checkCRC(packetData, 97)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP2 packet failed CRC check" << endl;
         return false;
     }
 
-    if (buffer[0] != 'L' || buffer[1] != 'O' || buffer[2] != 'O') {
-        log.log(VantageLogger::VANTAGE_ERROR) << "LOOP2 buffer does not begin with LOO: "
-                                      << "[0] = " << buffer[0] << " [1] = " << buffer[1] << " [2] = " << buffer[2] << endl;
+    if (packetData[0] != 'L' || packetData[1] != 'O' || packetData[2] != 'O') {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP2 packet data does not begin with LOO: "
+                                      << "[0] = " << packetData[0] << " [1] = " << packetData[1] << " [2] = " << packetData[2] << endl;
         return false;
     }
 
-    packetType = BitConverter::toInt8(buffer, 4);
+    packetType = BitConverter::toInt8(packetData, 4);
 
     if (packetType != LOOP2_PACKET_TYPE) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Invalid packet type for LOOP2 packet. "
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid packet type for LOOP2 packet. "
                                       << "Expected " << LOOP2_PACKET_TYPE << " Received: " << packetType << endl;
         return false;
     }
 
-    if (buffer[95] != VantageConstants::LINE_FEED || buffer[96] != VantageConstants::CARRIAGE_RETURN) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
+    if (packetData[95] != VantageConstants::LINE_FEED || packetData[96] != VantageConstants::CARRIAGE_RETURN) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
         return false;
     }
 
-    windSpeed = VantageDecoder::decodeWindSpeed(buffer, 14);
-    windDirection = VantageDecoder::decodeWindDirection(buffer, 16);
-    windSpeed10MinuteAverage = VantageDecoder::decodeAverageWindSpeed(buffer, 18);
-    windSpeed2MinuteAverage = VantageDecoder::decodeAverageWindSpeed(buffer, 20);
-    windGust10Minute = VantageDecoder::decode16BitWindSpeed(buffer, 22);
-    windGustDirection10Minute = VantageDecoder::decodeWindDirection(buffer, 24);
+    windSpeed = VantageDecoder::decodeWindSpeed(packetData, 14);
+    windDirection = VantageDecoder::decodeWindDirection(packetData, 16);
+    windSpeed10MinuteAverage = VantageDecoder::decodeAverageWindSpeed(packetData, 18);
+    windSpeed2MinuteAverage = VantageDecoder::decodeAverageWindSpeed(packetData, 20);
+    windGust10Minute = VantageDecoder::decode16BitWindSpeed(packetData, 22);
+    windGustDirection10Minute = VantageDecoder::decodeWindDirection(packetData, 24);
 
-    rain15Minute = VantageDecoder::decodeRain(buffer, 52);
-    rainHour = VantageDecoder::decodeRain(buffer, 54);
-    rain24Hour = VantageDecoder::decodeRain(buffer, 58);
+    rain15Minute = VantageDecoder::decodeRain(packetData, 52);
+    rainHour = VantageDecoder::decodeRain(packetData, 54);
+    rain24Hour = VantageDecoder::decodeRain(packetData, 58);
 
-    VantageDecoder::decodeNonScaled16BitTemperature(buffer, 30, dewPoint);
-    VantageDecoder::decodeNonScaled16BitTemperature(buffer, 35, heatIndex);
-    VantageDecoder::decodeNonScaled16BitTemperature(buffer, 37, windChill);
-    VantageDecoder::decodeNonScaled16BitTemperature(buffer, 39, thsw);
+    VantageDecoder::decodeNonScaled16BitTemperature(packetData, 30, dewPoint);
+    VantageDecoder::decodeNonScaled16BitTemperature(packetData, 35, heatIndex);
+    VantageDecoder::decodeNonScaled16BitTemperature(packetData, 37, windChill);
+    VantageDecoder::decodeNonScaled16BitTemperature(packetData, 39, thsw);
 
-    VantageDecoder::decodeBarometricPressure(buffer, 65, atmPressure);
+    VantageDecoder::decodeBarometricPressure(packetData, 65, atmPressure);
 
     return true;
 }

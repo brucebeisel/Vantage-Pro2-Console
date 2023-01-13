@@ -104,7 +104,7 @@ public:
     static DateTime decodeDateTime(const byte buffer[], int dateOffset, int timeOffset);
 
 private:
-    static Rainfall rainCollectorSize;
+    static Rainfall rainCollectorSizeInches;
     static bool     rainCollectorSizeSet;
 
     VantageDecoder();
