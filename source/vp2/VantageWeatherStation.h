@@ -676,7 +676,7 @@ private:
 private:
     typedef std::vector<LoopPacketListener *> LoopPacketListenerList;
 
-    VantageLogger              log;
+    VantageLogger              logger;
     SerialPort                 serialPort;               // The serial port object that communicates with the console
     int                        baudRate;                 // The baud rate for communicating with the console
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads

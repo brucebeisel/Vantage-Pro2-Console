@@ -92,7 +92,7 @@ private:
     DateTime                 newestPacketTime;
     DateTime                 oldestPacketTime;
     VantageWeatherStation &  station;
-    VantageLogger            log;
+    VantageLogger            logger;
 };
 }
 

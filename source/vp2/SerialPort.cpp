@@ -35,7 +35,7 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-SerialPort::SerialPort(const std::string & device, int baudRate) : commPort(INVALID_HANDLE_VALUE), device(device), baudRate(baudRate), log(VantageLogger::getLogger("SerialPort")) {
+SerialPort::SerialPort(const std::string & device, int baudRate) : commPort(INVALID_HANDLE_VALUE), device(device), baudRate(baudRate), logger(VantageLogger::getLogger("SerialPort")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ SerialPort::close() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 SerialPort::write(const void * buffer, int nbytes) {
-    log.log(VantageLogger::VANTAGE_DEBUG2) << "Writing " << nbytes << " bytes" << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Writing " << nbytes << " bytes" << endl;
     DWORD dwWritten;
     if (!WriteFile(commPort, static_cast<LPCVOID>(buffer), nbytes, &dwWritten, nullptr))
         return false;
@@ -99,11 +99,11 @@ int
 SerialPort::read(byte buffer[], int index, int nbytes, int timeoutMillis) {
     DWORD dwRead;
     if (!ReadFile(commPort, &buffer[index], nbytes, &dwRead, nullptr)) {
-        log.log(VantageLogger::VANTAGE_INFO) << "Read " << dwRead << " bytes (failed)" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Read " << dwRead << " bytes (failed)" << endl;
         return -1;
     }
     else {
-        log.log(VantageLogger::VANTAGE_DEBUG3) << "Read " << dwRead << " bytes" << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Read " << dwRead << " bytes" << endl;
         return dwRead;
     }
 }
@@ -125,7 +125,7 @@ SerialPort::open() {
 
     struct termios tio;
     if (tcgetattr(commPort, &tio) != 0) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "tcgetattr() failed" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "tcgetattr() failed" << endl;
         return false;
     }
 
@@ -137,7 +137,7 @@ SerialPort::open() {
     int rv = tcsetattr(commPort, 0, &tio);
 
     if (rv != 0) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "tcsetattr() failed" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "tcsetattr() failed" << endl;
         return false;
     }
 
@@ -161,7 +161,7 @@ SerialPort::write(const void * buffer, int nbytes) {
     ssize_t bytesWritten = ::write(commPort, buffer, nbytes);
 
     if (bytesWritten != nbytes) {
-        log.log(VantageLogger::VANTAGE_WARNING) << "Write to station failed. Expected=" << nbytes << " Actual=" << bytesWritten << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Write to station failed. Expected=" << nbytes << " Actual=" << bytesWritten << endl;
         return false;
     }
     else
@@ -184,15 +184,15 @@ SerialPort::read(byte buffer[], int index, int nbytes, int timeoutMillis) {
     int numFdsSet = select(commPort + 1, &readSet, nullptr, nullptr, &timeout);
     if (numFdsSet < 0) {
         int err = errno;
-        log.log(VantageLogger::VANTAGE_WARNING) << "Select() failed. Errno = " << err << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Select() failed. Errno = " << err << endl;
     }
     else if (numFdsSet == 0) {
-        log.log(VantageLogger::VANTAGE_DEBUG1) << "Select() timed out" << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Select() timed out" << endl;
     }
     else {
         if (FD_ISSET(commPort, &readSet)) {
             bytesRead = ::read(commPort, &buffer[index], nbytes);
-            log.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << bytesRead << " bytes" << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << bytesRead << " bytes" << endl;
         }
     }
 
@@ -218,7 +218,7 @@ SerialPort::write(const string & s) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 SerialPort::read(byte buffer[], int expectedBytes) {
-    log.log(VantageLogger::VANTAGE_DEBUG2) << "Attempting to read " << expectedBytes << " bytes" << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Attempting to read " << expectedBytes << " bytes" << endl;
     int readIndex = 0;
     
     //
@@ -228,7 +228,7 @@ SerialPort::read(byte buffer[], int expectedBytes) {
         int nbytes = this->read(buffer, readIndex, expectedBytes - readIndex);
         if (nbytes > 0) {
             readIndex += nbytes;
-            log.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << readIndex << " bytes of " << expectedBytes << " bytes" << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << readIndex << " bytes of " << expectedBytes << " bytes" << endl;
         }
         else if (nbytes < 0) {
             break;
@@ -237,11 +237,11 @@ SerialPort::read(byte buffer[], int expectedBytes) {
 
     if (readIndex < expectedBytes) {
         this->discardInBuffer();
-        log.log(VantageLogger::VANTAGE_INFO) << "Failed to read requested bytes. Expected=" << expectedBytes << ", Actual=" << readIndex << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read requested bytes. Expected=" << expectedBytes << ", Actual=" << readIndex << endl;
         return false;
     }
     else {
-        log.log(VantageLogger::VANTAGE_DEBUG3) << Weather::dumpBuffer(buffer, expectedBytes);
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << Weather::dumpBuffer(buffer, expectedBytes);
         return true;
     }
 }

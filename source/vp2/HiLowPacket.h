@@ -222,7 +222,7 @@ private:
     HighLowValues<Humidity>     extraHumidity[VantageConstants::MAX_EXTRA_HUMIDITIES];
     HighLowValues<SoilMoisture> soilMoisture[VantageConstants::MAX_SOIL_MOISTURES];
     HighLowValues<LeafWetness>  leafWetness[VantageConstants::MAX_LEAF_WETNESSES];
-    VantageLogger               log;
+    VantageLogger               logger;
 };
 }
 #endif

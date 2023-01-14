@@ -120,7 +120,7 @@ private:
     HANDLE        commPort;    // The file descriptor of the open port
     std::string   device;     // The name of the serial port to be opened
     int           baudRate;   // The baud rate used to communicate over the serial port
-    VantageLogger log;
+    VantageLogger logger;
 };
 }
 #endif

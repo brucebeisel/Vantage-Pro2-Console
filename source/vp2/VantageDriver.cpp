@@ -145,7 +145,7 @@ VantageDriver::stop() {
 bool
 VantageDriver::processArchive(const vector<ArchivePacket> & archive) {
 
-    log.log(VantageLogger::VANTAGE_DEBUG1) << "Processing " << archive.size() << " archive packets" << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Processing " << archive.size() << " archive packets" << endl;
 
     for (vector<ArchivePacket>::const_iterator it = archive.begin(); it != archive.end(); ++it) {
         DateTime now = time(0);
@@ -157,7 +157,7 @@ VantageDriver::processArchive(const vector<ArchivePacket> & archive) {
             if (issReception > 100)
                 issReception = 100;
 
-            log.log(VantageLogger::VANTAGE_DEBUG2) << "IIS Reception for archive interval ending at " << it->getDateTime()
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "IIS Reception for archive interval ending at " << it->getDateTime()
                                            << " is " << issReception
                                            << ". Max Packets = " << maxPackets
                                            << ", Actual Packets - " << actualPackets << endl;
@@ -173,7 +173,7 @@ VantageDriver::processArchive(const vector<ArchivePacket> & archive) {
         }
 
         string message = it->formatMessage();
-        log.log(VantageLogger::VANTAGE_INFO) << "=== Archive === " << Weather::formatDateTime(it->getDateTime()) << " =============" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "=== Archive === " << Weather::formatDateTime(it->getDateTime()) << " =============" << endl;
         socket.sendData(message);
     }
 
@@ -204,12 +204,12 @@ VantageDriver::mainLoop() {
     /*
 
     if (!archiveManager.synchronizeArchive()) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to read the archive during initialization" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read the archive during initialization" << endl;
         return;
     }
 
     if (!station.wakeupStation()) {
-        log.log(VantageLogger::VANTAGE_ERROR) << "Failed to wake up console after initialization" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to wake up console after initialization" << endl;
         return;
     }
     */
@@ -274,7 +274,7 @@ VantageDriver::mainLoop() {
                     ArchivePacket packet;
                     // TBD What if multiple archive packets are received?
                     archiveManager.getNewestRecord(packet);
-                    log.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: "
+                    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: "
                                                            << Weather::formatDateTime(packet.getDateTime())
                                                            << " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
                     previousNextRecord = nextRecord;

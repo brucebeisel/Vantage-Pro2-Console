@@ -34,7 +34,7 @@ static constexpr int SYNC_RETRIES = 5;
 ArchiveManager::ArchiveManager(const std::string & archiveFilename, VantageWeatherStation & station) :
                                                                     archiveFile(archiveFilename),
                                                                     station(station),
-                                                                    log(VantageLogger::getLogger("ArchiveManager")) {
+                                                                    logger(VantageLogger::getLogger("ArchiveManager")) {
     findPacketTimeRange();
     
 }
@@ -70,7 +70,7 @@ ArchiveManager::synchronizeArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket>& list) {
-    log.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
     DateTime timeOfLastRecord = 0;
     byte buffer[ArchivePacket::BYTES_PER_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
@@ -168,10 +168,10 @@ ArchiveManager::addPackets(const vector<ArchivePacket> & packets) {
         if (newestPacketTime < it->getDateTime()) {
             stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_PACKET);
             newestPacketTime = it->getDateTime();
-            log.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: " << Weather::formatDateTime(it->getDateTime()) << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: " << Weather::formatDateTime(it->getDateTime()) << endl;
         }
         else
-            log.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time " << Weather::formatDateTime(it->getDateTime()) << endl;
+            logger.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time " << Weather::formatDateTime(it->getDateTime()) << endl;
     }
     stream.close();
 }

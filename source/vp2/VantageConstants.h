@@ -155,17 +155,26 @@ namespace VantageConstants {
     static const int PARTLY_CLOUDY_CHANCE_OF_RAIN_OR_SNOW_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT;
 
     //
-    // EEPROM Addresses
+    // EEPROM Addresses and sizes
     //
-    static const unsigned EE_LATITUDE = 0x0B;
-    static const unsigned EE_LONGITUDE = 0x0D;
-    static const unsigned EE_ELEVATION = 0x0F;
-    static const unsigned EE_TIMEZONE = 0x11;
-    static const unsigned EE_STATION_LIST = 0x19;
-    static const unsigned EE_SETUP_BITS = 0x2B;
-    static const unsigned EE_RAIN_SEASON_START = 0x2C;
-    static const unsigned EE_ARCHIVE_PERIOD = 0x2D;
-    static const unsigned EE_ALARM_THRESHOLDS = 0x52;
+    static constexpr unsigned EE_LATITUDE_ADDRESS = 0x0B;
+    static constexpr unsigned EE_LONGITUDE_ADDRESS = 0x0D;
+    static constexpr unsigned EE_ELEVATION_ADDRESS = 0x0F;
+    static constexpr unsigned EE_TIMEZONE_ADDRESS = 0x11;
+    static constexpr unsigned EE_TIME_FIELDS_START_ADDRESS = 0x11;
+    static constexpr unsigned EE_STATION_LIST_ADDRESS = 0x19;
+    static constexpr unsigned EE_UNIT_BITS_ADDRESS = 0x29;
+    static constexpr unsigned EE_SETUP_BITS_ADDRESS = 0x2B;
+    static constexpr unsigned EE_RAIN_SEASON_START_ADDRESS = 0x2C;
+    static constexpr unsigned EE_ARCHIVE_PERIOD_ADDRESS = 0x2D;
+    static constexpr unsigned EE_ALARM_THRESHOLDS_ADDRESS = 0x52;
+    static constexpr unsigned EE_GRAPH_DATA_ADDRESS = 0x145;
+
+    static constexpr int      EE_DATA_BLOCK_SIZE = 4096;
+    static constexpr int      EE_NON_GRAPH_DATA_SIZE = 176;
+    static constexpr int      EE_GRAPH_DATA_SIZE = EE_DATA_BLOCK_SIZE - EE_GRAPH_DATA_ADDRESS;
+    static constexpr int      EE_ALARM_THRESHOLDS_SIZE = 94;
+
 
     static const int NUM_ARCHIVE_RECORDS = 2560;
 

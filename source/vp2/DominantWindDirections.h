@@ -150,7 +150,7 @@ private:
      */
     static const int DOMINANT_DIR_DURATION = 3600;
 
-    VantageLogger      log;
+    VantageLogger      logger;
     WindDirectionSlice windSlices[NUM_SLICES];
     time_t             startOf10MinuteTimeWindow;
     time_t             endOf10MinuteTimeWindow;

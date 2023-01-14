@@ -72,7 +72,7 @@
 ../../target/VP2/VantageCRC.o: VantageCRC.cpp BitConverter.h Weather.h \
  Measurement.h VantageCRC.h VantageLogger.h
 ../../target/VP2/VantageConfiguration.o: VantageConfiguration.cpp \
- BitConverter.h Weather.h Measurement.h Eeprom.h VantageConfiguration.h \
+ BitConverter.h Weather.h Measurement.h VantageConfiguration.h \
  SensorStation.h Sensor.h LoopPacket.h VantageConstants.h VantageLogger.h \
  VantageWeatherStation.h ArchivePacket.h SerialPort.h VantageDecoder.h
 ../../target/VP2/VantageDecoder.o: VantageDecoder.cpp BitConverter.h \
