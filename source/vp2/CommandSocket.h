@@ -16,6 +16,7 @@
  */
 #ifndef COMMAND_SOCKET_H_
 #define COMMAND_SOCKET_H_
+#include <string>
 
 namespace vws {
 
@@ -25,6 +26,8 @@ class CommandSocket {
 public:
     CommandSocket(EventManager & evtMgr);
     virtual ~CommandSocket();
+
+    void processCommand(const std::string & commandJson);
 
 private:
     int            listenFd;

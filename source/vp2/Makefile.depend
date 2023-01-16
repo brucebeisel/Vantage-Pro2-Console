@@ -15,8 +15,8 @@
  VantageConstants.h VantageDecoder.h VantageLogger.h
 ../../target/VP2/BitConverter.o: BitConverter.cpp BitConverter.h \
  Weather.h Measurement.h WeatherTypes.h
-../../target/VP2/CommandSocket.o: CommandSocket.cpp EventManager.h \
- CommandSocket.h
+../../target/VP2/CommandSocket.o: CommandSocket.cpp ../3rdParty/json.hpp \
+ EventManager.h CommandSocket.h
 ../../target/VP2/CurrentWeather.o: CurrentWeather.cpp ForecastRule.h \
  CurrentWeather.h DominantWindDirections.h VantageLogger.h Weather.h \
  Measurement.h WeatherTypes.h WindDirectionSlice.h LoopPacket.h \

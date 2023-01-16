@@ -300,7 +300,7 @@ public:
     /**
      * Dump the entire archive.
      *
-     * @param list The list that will contain the entire archive
+     * @param list The list that will contain the entire archive in sequential order
      */
     void dump(std::vector<ArchivePacket> & list);
 
@@ -308,7 +308,7 @@ public:
      * Perform a dump of the archive after the specified time.
      * 
      * @param time    The time after which to dump the archive
-     * @param archive The vector into which the dumped archive packets will be returned
+     * @param archive The vector into which the dumped archive packets will be returned sorted by time
      *
      * @return True if successful
      */

@@ -222,6 +222,8 @@ VantageDriver::mainLoop() {
             // never wakes up. Only restarting this driver fixes the issue. Reopening
             // the serial port will hopefully fix this issue.
             //
+            // TODO does this need to be here or can we rely on errors to trigger the
+            // wake up sequence?
             if (!station.wakeupStation()) {
                 reopenStation();
                 continue;
@@ -231,17 +233,18 @@ VantageDriver::mainLoop() {
             if (station.retrieveConsoleTime(consoleTime))
                 logger.log(VantageLogger::VANTAGE_INFO) << "Station Time: " << Weather::formatDateTime(consoleTime) << endl;
             else
-                logger.log(VantageLogger::VANTAGE_INFO) << "Station Time retrieval failed" << endl;
+                logger.log(VantageLogger::VANTAGE_WARNING) << "Station Time retrieval failed" << endl;
 
             //
             // If it has been a while since the time was set, set the time
             //
             DateTime now = time(0);
             if (consoleTimeSetTime + TIME_SET_INTERVAL < now) {
-                if (!station.updateConsoleTime())
+                if (station.updateConsoleTime())
+                    consoleTimeSetTime = now;
+                else
                     logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to set station time " << endl;
 
-                consoleTimeSetTime = now;
             }
 
             //

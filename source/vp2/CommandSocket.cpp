@@ -15,10 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
+#include <iostream>
+#include "json.hpp"
 #include "EventManager.h"
 #include "CommandSocket.h"
 
+using json = nlohmann::json;
+using namespace std;
+
 namespace vws {
+
+void
+jsonKeyValue(json object, std::string & key, std::string & value) {
+    auto iterator = object.begin();
+    key = iterator.key();
+    value = iterator.value();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,6 +45,42 @@ CommandSocket::~CommandSocket() {
         close(listenFd);
         listenFd = -1;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandSocket::processCommand(const std::string & commandJson) {
+
+    try {
+        json command = json::parse(commandJson.begin(), commandJson.end());
+        string commandName = command.value("command", "unknown");
+        json args = command.at("arguments");
+        vector<pair<string,string>> argumentList;
+        for (int i = 0; i < args.size(); i++) {
+            json arg = args[i];
+            std::string key, value;
+            pair<string,string> argument;
+            jsonKeyValue(arg, argument.first, argument.second);
+            argumentList.push_back(argument);
+        }
+
+        cout <<     "Command: " << commandName << endl;
+        cout <<     "    Arguments:" << endl;
+        for (int i = 0; i < argumentList.size(); i++) {
+            cout << "          [" << i << "]: " << argumentList[i].first << "=" << argumentList[i].second << endl;
+        }
+
+        switch (commandName) {
+            case "backlight":
+                break;
+
+        }
+    }
+    catch (const std::exception & e) {
+        cout << "Exception: " << e.what() << endl;
+    }
+
 }
 
 }

@@ -27,6 +27,7 @@
 #include <fstream>
 #include "VantageLogger.h"
 #include "ArchiveManager.h"
+#include "CommandSocket.h"
 #include "VantageDriver.h"
 #include "VantageConfiguration.h"
 #include "CurrentWeatherSocket.h"
@@ -106,6 +107,11 @@ main(int argc, char *argv[]) {
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 #endif
+
+    const char jsonCommand[] = "{ \"command\"  : \"backlight\", \"arguments\" : [ { \"state\" : \"on\" } ] }";
+    EventManager em;
+    CommandSocket socket(em);
+    socket.processCommand(jsonCommand);
 
     if (argc < 3 || argc > 4) {
         cerr << "Usage: vp2 <port> <archive file> [log file]" << endl;

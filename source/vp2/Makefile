@@ -38,11 +38,12 @@ SRCS=\
 
 
 OBJDIR=../../target/VP2
+INCDIRS=-I../3rdParty
 OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
 $(OBJDIR)/%.o : %.cpp
-	$(CC) $(CXXFLAGS) -c $< -o $@
+	$(CC) $(CXXFLAGS) $(INCDIRS) -c $< -o $@
 	
 all: vp2
 
@@ -58,7 +59,7 @@ $(OBJDIR):
 depend:
 	rm -f Makefile.depend; \
 	for i in $(SRCS); do \
-		$(CC) -MM -MT "$(OBJDIR)/`basename $$i .cpp`.o" $$i >> Makefile.depend; \
+		$(CC) $(INCDIRS) -MM -MT "$(OBJDIR)/`basename $$i .cpp`.o" $$i >> Makefile.depend; \
 	done;
 
 include Makefile.depend
