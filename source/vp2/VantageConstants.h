@@ -17,7 +17,7 @@
 #ifndef VANTAGE_CONSTANTS_H
 #define VANTAGE_CONSTANTS_H
 #include <string>
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

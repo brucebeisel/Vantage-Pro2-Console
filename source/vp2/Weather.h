@@ -20,25 +20,9 @@
 #include <time.h>
 #include <string>
 #include "Measurement.h"
+#include "WeatherTypes.h"
 
 namespace vws {
-//
-// Typedefs for the various weather types
-//
-using Speed = double;
-using Rainfall = double;
-using Temperature = double;
-using Pressure = double;
-using Humidity = double;
-using SolarRadiation = double;
-using UvIndex = float;
-using LeafWetness = int;
-using SoilMoisture = int;
-using Heading = float;
-using byte = char;
-using DateTime = time_t;
-using Evapotranspiration = double;
-using StationId = unsigned;
 
 const int SECONDS_PER_HOUR = 3600;
 const int TIME_STRUCT_YEAR_OFFSET = 1900;

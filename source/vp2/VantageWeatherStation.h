@@ -594,34 +594,34 @@ private:
     /**
      * Read the archive pages that occur after the specified time.
      *
-     * @param afterTime   The time after which the archive records will be saved
-     * @param list        The list into which the archive records will be saved
-     * @param firstRecord The first record in the first page that is part of the dump
-     * @param numPages    The number of pages in the archive that are after the specified time
+     * @param afterTime                       The time after which the archive records will be saved
+     * @param list                            The list into which the archive records will be saved
+     * @param firstRecordInFirstPageToProcess The first record in the first page that is part of the dump
+     * @param numPages                        The number of pages in the archive that are after the specified time
      *
      * @return True if successful
      */
-    bool readAfterArchivePages(DateTime afterTime, std::vector<ArchivePacket> & list, int firstRecord, int numPages);
+    bool readAfterArchivePages(DateTime afterTime, std::vector<ArchivePacket> & list, int firstRecordInFirstPageToProcess, int numPages);
 
     /**
      * Read the next archive page that is part of the one of the dump commands.
      *
-     * @param packets          The vector into which the processed archive packets will be returned
-     * @param firstRecord      The first record to process, which may not be zero if this is the first page that is being dumped
-     * @param newestPacketTime The newest packet used to detect if the page contains the end of the ring buffer
+     * @param packets                    The vector into which the processed archive packets will be returned
+     * @param firstRecordInPageToProcess The first record in the page to process, which may not be zero if this is the first page that is being dumped by a DMPAFT command
+     * @param newestPacketTime           The newest packet used to detect if the page contains the end of the ring buffer
      *
      * @return True if the page was read successfully
      */
-    bool readNextArchivePage(std::vector<ArchivePacket> & packets, int firstRecord, DateTime newestPacketTime);
+    bool readNextArchivePage(std::vector<ArchivePacket> & packets, int firstRecordInPageToProcess, DateTime newestPacketTime);
 
     /**
      * Decode an archive page that contains up to 5 packets.
      *
-     * @param packets          The vector into which the processed archive packets will be returned
-     * @param firstRecord      The first record to process, which may not be zero if this is the first page that is being dumped
-     * @param newestPacketTime The newest packet used to detect if the page contains the end of the ring buffer
+     * @param packets                    The vector into which the processed archive packets will be returned
+     * @param firstRecordInPageToProcess The first record in the page to process, which may not be zero if this is the first page that is being dumped by a DMPAFT command
+     * @param newestPacketTime           The newest packet used to detect if the page contains the end of the ring buffer
      */
-    void decodeArchivePage(std::vector<ArchivePacket> &, const byte * buffer, int firstRecord, DateTime newestPacketTime);
+    void decodeArchivePage(std::vector<ArchivePacket> &, const byte * buffer, int firstRecordInPageToProcess, DateTime newestPacketTime);
 
     /**
      * Checks if an archive packet contains data.

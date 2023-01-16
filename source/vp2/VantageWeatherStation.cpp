@@ -520,7 +520,7 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping after " << Weather::formatDateTime(time) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << Weather::formatDateTime(time) << endl;
     list.clear();
 
     //
@@ -563,12 +563,12 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     // dumped and which record in the first page is valid for the date specified
     //
     if (!serialPort.read(buffer, DUMP_AFTER_RESPONSE_LENGTH + CRC_BYTES)) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read response to DMPAFT command" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read response to DMPAFT time data command" << endl;
         return false;
     }
 
     if (!VantageCRC::checkCRC(buffer, DUMP_AFTER_RESPONSE_LENGTH)) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Response to DMPAFT command failed CRC check" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "DMPAFT response to time data failed CRC check" << endl;
         return false;
     }
 
@@ -576,7 +576,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
 
     int numPages = BitConverter::toInt16(buffer, 0);
     int firstRecord = BitConverter::toInt16(buffer, 2);
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping " << numPages << " pages. First Record = " << firstRecord << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping " << numPages << " archive pages. First record in page with new data = " << firstRecord << endl;
 
     if (numPages == 0)
         return true;
@@ -1040,15 +1040,16 @@ VantageWeatherStation::readLoop2Packet(Loop2Packet & loop2Packet) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchivePacket> & list, int firstRecord, int numPages) {
+VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchivePacket> & list, int firstRecordInFirstPageToProcess, int numPages) {
     DateTime newestPacketTime = afterTime;
+    int firstRecordInPageToProcess = firstRecordInFirstPageToProcess;
 
     bool success = true;
     for (int i = 0; i < numPages; i++) {
         //
         // Process a single page. This will return 1 - 5 packets
         //
-        if (!readNextArchivePage(list, firstRecord, newestPacketTime)) {
+        if (!readNextArchivePage(list, firstRecordInPageToProcess, newestPacketTime)) {
             serialPort.write(DMP_CANCEL_DOWNLOAD);
             success = false;
             break;
@@ -1062,16 +1063,21 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
         if (list.size() > 0)
             newestPacketTime = list.at(list.size() - 1).getDateTime();
 
-        if (!serialPort.write(DMP_SEND_NEXT_PAGE))
-            return false;
+        if (!serialPort.write(DMP_SEND_NEXT_PAGE)) {
+            success = false;
+            break;
+        }
 
-        firstRecord = 0;
+        //
+        // After the first page, the first valid record in each page is the first record
+        //
+        firstRecordInPageToProcess = 0;
     }
 
     if (success)
         logger.log(VantageLogger::VANTAGE_INFO) << "Received " << list.size() << " records from DMPAFT " << Weather::formatDateTime(afterTime) << endl;
     else {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Read of archive after " << Weather::formatDateTime(afterTime) << " failed" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "DMPAFT " << Weather::formatDateTime(afterTime) << " failed" << endl;
         wakeupStation();
     }
 
@@ -1082,7 +1088,7 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int firstRecord, DateTime newestPacketTime) {
+VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int firstRecordInPageToProcess, DateTime newestPacketTime) {
     bool success = true;
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Processing archive page. Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
 
@@ -1092,7 +1098,7 @@ VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int fir
     for (int i = 0; i < ARCHIVE_PAGE_READ_RETRIES; i++) {
         if (serialPort.read(buffer, ARCHIVE_PAGE_SIZE + CRC_BYTES)) {
             if (VantageCRC::checkCRC(buffer, ARCHIVE_PAGE_SIZE)) {
-                decodeArchivePage(list, buffer, firstRecord, newestPacketTime);
+                decodeArchivePage(list, buffer, firstRecordInPageToProcess, newestPacketTime);
                 success = true;
                 break;
             }
@@ -1115,22 +1121,26 @@ VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int fir
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byte * buffer, int firstRecord, DateTime newestPacketTime) {
+VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byte * buffer, int firstRecordInPageToProcess, DateTime newestPacketTime) {
     int recordCount = 0;
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Parsing archive page. Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
 
     //
     // Which page this is in a DMP or DMPAFT command
     //
     int pageSequence = BitConverter::toInt8(buffer, 0);
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Decoding archive page " << pageSequence << ". Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
 
     //
     // The first record value may not be zero in the case of a dump after command. The first record after the specified time may not be at the
     // beginning of a page so the others must be skipped.
     //
-    for (int i = firstRecord; i < RECORDS_PER_ARCHIVE_PAGE; i++) {
-        if (archivePacketContainsData(buffer, 1 + (BYTES_PER_ARCHIVE_RECORD * i))) {
-            ArchivePacket packet(buffer, 1 + (BYTES_PER_ARCHIVE_RECORD * i));
+    for (int i = firstRecordInPageToProcess; i < RECORDS_PER_ARCHIVE_PAGE; i++) {
+        //
+        // The record offset accounts for the page sequence byte and the previous records in the page
+        //
+        int recordOffset = 1 + (BYTES_PER_ARCHIVE_RECORD * i);
+        if (archivePacketContainsData(buffer, recordOffset)) {
+            ArchivePacket packet(buffer, recordOffset);
            
             //
             // In the case of a dump after command the last page may contain packets from the beginning of the circular
@@ -1142,7 +1152,7 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
                 recordCount++;
             }
             else
-                logger.log(VantageLogger::VANTAGE_DEBUG1) << "Skipping page with date " << Weather::formatDateTime(packet.getDateTime()) << endl;
+                logger.log(VantageLogger::VANTAGE_DEBUG1) << "Skipping archive record " << i << " in page " << pageSequence << " with date " << Weather::formatDateTime(packet.getDateTime()) << endl;
         }
     }
 
