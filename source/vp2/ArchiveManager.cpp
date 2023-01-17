@@ -27,16 +27,13 @@ using namespace std;
 
 namespace vws {
 
-static constexpr int SYNC_RETRIES = 5;
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ArchiveManager::ArchiveManager(const std::string & archiveFilename, VantageWeatherStation & station) :
                                                                     archiveFile(archiveFilename),
                                                                     station(station),
                                                                     logger(VantageLogger::getLogger("ArchiveManager")) {
-    findPacketTimeRange();
-    
+    findArchivePacketTimeRange();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,13 +45,14 @@ ArchiveManager::~ArchiveManager() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 ArchiveManager::synchronizeArchive() {
+    logger.log(VANTAGE_INFO) << "Synchronizing local archive from Vantage console's archive" << endl;
     vector<ArchivePacket> list;
     bool result = false;
 
     for (int i = 0; i < SYNC_RETRIES && !result; i++) {
         list.clear();
         if (station.wakeupStation() && station.dumpAfter(newestPacketTime, list)) {
-            addPackets(list);
+            addPacketsToArchive(list);
             result = true;
             break;
         }
@@ -70,48 +68,18 @@ ArchiveManager::synchronizeArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket>& list) {
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
-    DateTime timeOfLastRecord = 0;
-    byte buffer[ArchivePacket::BYTES_PER_PACKET];
+    logger.log(VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
+    byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
-    stream.seekg(-ArchivePacket::BYTES_PER_PACKET, ios::end);
-    streampos streamPosition;
-    DateTime packetTime;
-
+    positionStream(stream, afterTime, true);
     list.clear();
-
-    //
-    // If the start time is newer than the oldest packet in the archive, look for the packet that is after the specified time.
-    // Otherwise the start time is before the beginning of the file, so just start at the beginning.
-    //
-    if (afterTime > oldestPacketTime) {
-        do {
-            streamPosition = stream.tellg();
-            stream.read(buffer, sizeof(buffer));
-            ArchivePacket packet(buffer, 0);
-            stream.seekg(-(ArchivePacket::BYTES_PER_PACKET * 2), ios::cur);
-            packetTime = packet.getDateTime();
-        } while (afterTime < packetTime && streamPosition > 0);
-
-        //
-        // The stream will not be good if the final seekg() call went past the beginning of the file.
-        // Clear the error and position the next to be the beginning of the file.
-        //
-        if (!stream.good()) {
-            stream.clear();
-            stream.seekg(0, ios::beg);
-        }
-        else
-            stream.seekg(ArchivePacket::BYTES_PER_PACKET * 2, ios::cur);
-    }
-    else
-        stream.seekg(0, ios::beg);
     
     //
     // Cap the number of records to the number of archive records that the console holds.
     // If there are more records, then the caller needs to call this method until the
     // list returns empty.
     //
+    DateTime timeOfLastRecord = 0;
     while (list.size() < VantageConstants::NUM_ARCHIVE_RECORDS) {
         stream.read(buffer, sizeof(buffer));
 
@@ -130,16 +98,100 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+DateTime
+ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::vector<ArchivePacket> & list) {
+    logger.log(VANTAGE_DEBUG1) << "Querying archive records between " << Weather::formatDateTime(startTime) << " and " << Weather::formatDateTime(endTime) << endl;
+    byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
+    ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
+    positionStream(stream, startTime, false);
+    list.clear();
+
+    //
+    // Cap the number of records to the number of archive records that the console holds.
+    // If there are more records, then the caller needs to call this method until the
+    // list returns empty.
+    //
+    DateTime packetTime = 0;
+    DateTime timeOfLastRecord = 0;
+    do {
+        stream.read(buffer, sizeof(buffer));
+
+        if (!stream.eof()) {
+            ArchivePacket packet(buffer, 0);
+            packetTime = packet.getDateTime();
+            if (packetTime <= endTime) {
+                list.push_back(packet);
+                timeOfLastRecord = packetTime;
+            }
+        }
+    } while (!stream.eof() && packetTime < endTime);
+
+    stream.close();
+
+    logger.log(VANTAGE_DEBUG1) << "Query found " << list.size() << " items. Time of last record is " << Weather::formatDateTime(timeOfLastRecord) << endl;
+    return timeOfLastRecord;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool afterTime) {
+    byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
+    streampos streamPosition;
+
+    stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
+
+    //
+    // If we are only looking for records after the specified time, then increment the
+    // search time so we can use <= in the time comparisons.
+    //
+    if (afterTime)
+        searchTime++;
+
+    //
+    // If the start time is newer than the oldest packet in the archive, look for the packet that is after the specified time.
+    // Otherwise the start time is before the beginning of the file, so just start at the beginning.
+    // This a linear search from the end of the archive. A binary search would be more efficient.
+    //
+    if (searchTime >= oldestPacketTime) {
+        DateTime packetTime;
+        do {
+            streamPosition = stream.tellg();
+            stream.read(buffer, sizeof(buffer));
+            ArchivePacket packet(buffer, 0);
+            stream.seekg(-(ArchivePacket::BYTES_PER_ARCHIVE_PACKET * 2), ios::cur);
+            packetTime = packet.getDateTime();
+        } while (searchTime <= packetTime && streamPosition > 0);
+
+        //
+        // The stream will not be good if the final seekg() call went past the beginning of the file.
+        // Clear the error and position the next to be the beginning of the file.
+        //
+        if (!stream.good()) {
+            stream.clear();
+            stream.seekg(0, ios::beg);
+        }
+        else
+            stream.seekg(ArchivePacket::BYTES_PER_ARCHIVE_PACKET * 2, ios::cur);
+    }
+    else
+        stream.seekg(0, ios::beg);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
 ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary | ios::ate);
     streampos fileSize = stream.tellg();
 
-    if (fileSize >= ArchivePacket::BYTES_PER_PACKET) {
-        byte buffer[ArchivePacket::BYTES_PER_PACKET];
-        stream.seekg(-ArchivePacket::BYTES_PER_PACKET, ios::end);
+    if (fileSize >= ArchivePacket::BYTES_PER_ARCHIVE_PACKET) {
+        byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
+        stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
         stream.read(buffer, sizeof(buffer));
-        packet.updateArchiveData(buffer, 0);
+        packet.updateArchivePacketData(buffer, 0);
         return true;
     }
     else
@@ -149,16 +201,16 @@ ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-ArchiveManager::addPacket(const ArchivePacket & packet) {
+ArchiveManager::addPacketToArchive(const ArchivePacket & packet) {
     vector<ArchivePacket> list;
     list.push_back(packet);
-    addPackets(list);
+    addPacketsToArchive(list);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-ArchiveManager::addPackets(const vector<ArchivePacket> & packets) {
+ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
     if (packets.size() == 0)
         return;
 
@@ -166,12 +218,12 @@ ArchiveManager::addPackets(const vector<ArchivePacket> & packets) {
     stream.open(archiveFile.c_str(), ofstream::out | ios::app | ios::binary);
     for (vector<ArchivePacket>::const_iterator it = packets.begin(); it != packets.end(); ++it) {
         if (newestPacketTime < it->getDateTime()) {
-            stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_PACKET);
+            stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
             newestPacketTime = it->getDateTime();
-            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: " << Weather::formatDateTime(it->getDateTime()) << endl;
+            logger.log(VANTAGE_DEBUG1) << "Archived packet with time: " << Weather::formatDateTime(it->getDateTime()) << endl;
         }
         else
-            logger.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time " << Weather::formatDateTime(it->getDateTime()) << endl;
+            logger.log(VANTAGE_INFO) << "Skipping archive of packet with time " << Weather::formatDateTime(it->getDateTime()) << endl;
     }
     stream.close();
 }
@@ -179,12 +231,12 @@ ArchiveManager::addPackets(const vector<ArchivePacket> & packets) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-ArchiveManager::findPacketTimeRange() {
+ArchiveManager::findArchivePacketTimeRange() {
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary | ios::ate);
 
     streampos fileSize = stream.tellg();
-    if (fileSize >= ArchivePacket::BYTES_PER_PACKET) {
-        byte buffer[ArchivePacket::BYTES_PER_PACKET];
+    if (fileSize >= ArchivePacket::BYTES_PER_ARCHIVE_PACKET) {
+        byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
 
         //
         // Read the packet at the beginning of the file
@@ -197,9 +249,9 @@ ArchiveManager::findPacketTimeRange() {
         //
         // Read the packet at the end of the file
         //
-        stream.seekg(-ArchivePacket::BYTES_PER_PACKET, ios::end);
+        stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
         stream.read(buffer, sizeof(buffer));
-        packet.updateArchiveData(buffer, 0);
+        packet.updateArchivePacketData(buffer, 0);
         newestPacketTime = packet.getDateTime();
     }
     else {

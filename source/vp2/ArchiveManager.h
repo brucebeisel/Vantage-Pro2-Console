@@ -62,6 +62,16 @@ public:
     DateTime getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket> & list);
 
     /**
+     * Query the archive records that occur between the specified times (inclusive).
+     *
+     * @param startTime The time that is used as the lower bound for the query
+     * @param endTime   The time that is used as the upper bound for the query
+     * @param list      The list into which any found archive records will be added
+     * @return The time of the last record in the list
+     */
+    DateTime queryArchiveRecords(DateTime startTime, DateTime endTime, std::vector<ArchivePacket> & list);
+
+    /**
      * Get the newest record from the archive.
      *
      * @param packet The packet to which the newest record will be written
@@ -70,23 +80,35 @@ public:
     bool getNewestRecord(ArchivePacket & packet) const;
 
 private:
+    static constexpr int SYNC_RETRIES = 5;
+
+    /**
+     * Position the stream to begin reading the archive based on the time.
+     *
+     * @param is         The stream that has the archive open
+     * @param searchTime The time to search within the archive
+     * @param afterTime  Whether the stream will be position on or after the search time
+     * @return True if the stream was positioned successfully
+     */
+    bool positionStream(std::istream & is, DateTime searchTime, bool afterTime);
+
     /**
      * Add a single packet to the archive.
      * @param packet The packet to add to the archive
      */
-    void addPacket(const ArchivePacket & packet);
+    void addPacketToArchive(const ArchivePacket & packet);
 
     /**
      * Add a list of packets to the archive.
      * 
      * @param packets The list packets to be added to the archive
      */
-    void addPackets(const std::vector<ArchivePacket> & packets);
+    void addPacketsToArchive(const std::vector<ArchivePacket> & packets);
 
     /**
      * Finds the time range of the archive and set the packet time members.
      */
-    void findPacketTimeRange();
+    void findArchivePacketTimeRange();
 
     std::string              archiveFile;
     DateTime                 newestPacketTime;

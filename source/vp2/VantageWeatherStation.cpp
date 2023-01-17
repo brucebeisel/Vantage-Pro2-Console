@@ -1138,8 +1138,8 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
         //
         // The record offset accounts for the page sequence byte and the previous records in the page
         //
-        int recordOffset = 1 + (BYTES_PER_ARCHIVE_RECORD * i);
-        if (archivePacketContainsData(buffer, recordOffset)) {
+        int recordOffset = 1 + (ArchivePacket::BYTES_PER_ARCHIVE_PACKET * i);
+        if (ArchivePacket::archivePacketContainsData(buffer, recordOffset)) {
             ArchivePacket packet(buffer, recordOffset);
            
             //
@@ -1157,25 +1157,6 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
     }
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Page " << pageSequence << " contained " << recordCount << " records" << endl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-VantageWeatherStation::archivePacketContainsData(const byte * buffer, int offset) {
-    bool containsData = false;
-
-    //
-    // Any bytes that is not equal to 0xFF means that there is data
-    //
-    for (int i = 0; i < BYTES_PER_ARCHIVE_RECORD; i++) {
-        if (BitConverter::toInt8(buffer, offset + i) != NO_VALUE) {
-            containsData = true;
-            break;
-        }
-    }
-
-    return containsData;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

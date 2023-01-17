@@ -39,7 +39,7 @@ ArchivePacket::ArchivePacket() : packetTime(0), windSampleCount(0), buffer(""), 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ArchivePacket::ArchivePacket(const byte buffer[], int offset) : log(&VantageLogger::getLogger("ArchivePacket")) {
-    updateArchiveData(buffer, offset);
+    updateArchivePacketData(buffer, offset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,11 +50,11 @@ ArchivePacket::~ArchivePacket() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-ArchivePacket::updateArchiveData(const byte buffer[], int offset) {
+ArchivePacket::updateArchivePacketData(const byte buffer[], int offset) {
     //
     // Copy the packet from the passed in buffer to the buffer member
     //
-    for (int i = 0; i < BYTES_PER_PACKET; i++) {
+    for (int i = 0; i < BYTES_PER_ARCHIVE_PACKET; i++) {
         this->buffer[i] = buffer[offset + i];
     }
 
@@ -88,6 +88,25 @@ ArchivePacket::getDateTime() const {
 bool ArchivePacket::isEmptyPacket() const {
     return packetTime == EMPTY_ARCHIVE_PACKET_TIME;
 }
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchivePacket::archivePacketContainsData(const byte * buffer, int offset) {
+    bool containsData = false;
+
+    //
+    // Any bytes that is not equal to 0xFF means that there is data
+    //
+    for (int i = 0; i < BYTES_PER_ARCHIVE_PACKET; i++) {
+        if (BitConverter::toInt8(buffer, offset + i) != PACKET_NO_VALUE) {
+            containsData = true;
+            break;
+        }
+    }
+
+    return containsData;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

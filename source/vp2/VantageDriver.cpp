@@ -276,6 +276,9 @@ VantageDriver::mainLoop() {
                 if (archiveManager.synchronizeArchive()) {
                     ArchivePacket packet;
                     // TBD What if multiple archive packets are received?
+                    //     What is the concern of the above question? Multiple archive packets should never be returned.
+                    //     It may have been a hold over from when this program would asynchronously send archive packets
+                    //     to the connected client.
                     archiveManager.getNewestRecord(packet);
                     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: "
                                                            << Weather::formatDateTime(packet.getDateTime())
@@ -302,7 +305,7 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
     bool nr = previousNextRecord != nextRecord;
     bool continueLoopPacketProcessing = !sc && !em && !nr;
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop: " << continueLoopPacketProcessing
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop: " << std::boolalpha << continueLoopPacketProcessing
                                    << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
 
     return continueLoopPacketProcessing;

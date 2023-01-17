@@ -549,7 +549,6 @@ private:
 
     static constexpr int NUM_ARCHIVE_PAGES = 512;        // The total number of pages in the console's memory
     static constexpr int ARCHIVE_PAGE_SIZE = 265;        // 1 sequence byte, 5 52 byte records (260 bytes) and 4 spare bytes. 1 + 260 + 4 = 265 bytes
-    static constexpr int BYTES_PER_ARCHIVE_RECORD = 52;  // The size of each archive record
     static constexpr int RECORDS_PER_ARCHIVE_PAGE = 5;   // The number of archive records per archive page
     static constexpr int DUMP_AFTER_RESPONSE_LENGTH = 4; // The length of the response to the DUMP AFTER command
     static constexpr int EEPROM_READ_LINE_LENGTH = 4;    // The length of the response to the EEPROM READ command
@@ -560,7 +559,6 @@ private:
     static constexpr int WAKEUP_WAIT = 1000;
     static constexpr int VANTAGE_YEAR_OFFSET = 2000;
     static constexpr int HILOW_PACKET_SIZE = 436;
-    static constexpr int NO_VALUE = 0xFF;
     static constexpr int EEPROM_DATA_BLOCK_SIZE = 4096;
     static constexpr int EEPROM_NON_GRAPH_DATA_SIZE = 176;
 

@@ -130,4 +130,11 @@ private:
 };
 }
 
+using vws::VantageLogger::Level::VANTAGE_ERROR;
+using vws::VantageLogger::Level::VANTAGE_WARNING;
+using vws::VantageLogger::Level::VANTAGE_INFO;
+using vws::VantageLogger::Level::VANTAGE_DEBUG1;
+using vws::VantageLogger::Level::VANTAGE_DEBUG2;
+using vws::VantageLogger::Level::VANTAGE_DEBUG3;
+
 #endif /* VANTAGE_LOGGER_H */

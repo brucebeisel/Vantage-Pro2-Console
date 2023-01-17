@@ -29,7 +29,8 @@ class VantageLogger;
  */
 class ArchivePacket {
 public:
-    static constexpr int BYTES_PER_PACKET = 52;
+    static constexpr int BYTES_PER_ARCHIVE_PACKET = 52;
+    static constexpr int PACKET_NO_VALUE = 0xFF;
 
     /**
      * Default constructor required for STL containers and arrays.
@@ -55,7 +56,7 @@ public:
      * @param buffer The buffer with which to update the archive data
      * @param offset The offset within the specified buffer from which to copy the data
      */
-    void updateArchiveData(const byte buffer[], int offset);
+    void updateArchivePacketData(const byte buffer[], int offset);
 
     /**
      * Get the raw packet data used to extract the archive data.
@@ -85,6 +86,16 @@ public:
      */
     bool isEmptyPacket() const;
     
+    /**
+     * Checks if an archive packet contains data.
+     *
+     * @param buffer The buffer containing the packet
+     * @param offset The offset within the buffer where the packet starts
+     *
+     * @return True if the packet contains data
+     */
+    static bool archivePacketContainsData(const byte * buffer, int offset);
+
     /**
      * Format the WeatherSense message for an archive packet.
      * 
@@ -146,7 +157,7 @@ private:
 
     DateTime        packetTime;
     int             windSampleCount;
-    byte            buffer[BYTES_PER_PACKET];
+    byte            buffer[BYTES_PER_ARCHIVE_PACKET];
     VantageLogger * log;
 };
 
