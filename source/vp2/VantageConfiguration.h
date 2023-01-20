@@ -20,8 +20,9 @@
 #include "SensorStation.h"
 #include "Sensor.h"
 #include "VantageWeatherStation.h"
-#include "VantageConstants.h"
+#include "VantageProtocolConstants.h"
 #include "Weather.h"
+
 
 namespace vws {
 
@@ -84,7 +85,7 @@ struct SetupBits {
     bool isAMMode;
     bool isDayMonthDisplay;
     bool isWindCupLarge;
-    VantageConstants::RainCupSizeType rainCollectorSizeType;
+    ProtocolConstants::RainCupSizeType rainCollectorSizeType;
     bool isNorthLatitude;
     bool isEastLongitude;
 };
@@ -137,49 +138,43 @@ public:
      * @param windUnits        The units for wind speed
      * @return True if the EEPROM was updated successfully
      */
-    bool updateUnitsSettings(VantageConstants::BarometerUnits baroUnits,
-                             VantageConstants::TemperatureUnits temperatureUnits,
-                             VantageConstants::ElevationUnits elevationUnits,
-                             VantageConstants::RainUnits rainUnits,
-                             VantageConstants::WindUnits windUnits);
+    bool updateUnitsSettings(BarometerUnits baroUnits,
+                             TemperatureUnits temperatureUnits,
+                             ElevationUnits elevationUnits,
+                             RainUnits rainUnits,
+                             WindUnits windUnits);
 
-    bool retrieveUnitsSettings(VantageConstants::BarometerUnits & baroUnits,
-                               VantageConstants::TemperatureUnits & temperatureUnits,
-                               VantageConstants::ElevationUnits & elevationUnits,
-                               VantageConstants::RainUnits & rainUnits,
-                               VantageConstants::WindUnits & windUnits);
+    bool retrieveUnitsSettings(BarometerUnits & baroUnits,
+                               TemperatureUnits & temperatureUnits,
+                               ElevationUnits & elevationUnits,
+                               RainUnits & rainUnits,
+                               WindUnits & windUnits);
 
     bool updateSetupBits(const SetupBits & setupBits);
 
     bool retrieveSetupBits(SetupBits & setupBits);
 
 private:
-    void saveRainCollectorSize(VantageConstants::RainCupSizeType rainCupType);
+    void saveRainCollectorSize(ProtocolConstants::RainCupSizeType rainCupType);
 
-    static const int EEPROM_CONFIG_SIZE = 46;
+    //static const int EEPROM_CONFIG_SIZE = 46;
 
     VantageWeatherStation  &           station;
     VantageLogger                      logger;
-
-    //std::string                firmwareDate;
-    //std::string                firmwareVersion;
 
     /**
      * Get the list of sensor stations.
      *
      * @return the list of sensor stations
      */
-    const std::vector<SensorStation> & getSensorStations() const;
+    //const std::vector<SensorStation> & getSensorStations() const;
 
     /**
      * Get the list of sensors attached to the sensor stations.
      *
      * @return The list of sensors
      */
-    const std::vector<Sensor> & getSensors() const;
-
-    void decodeData(const byte buffer[]);
-
+    //const std::vector<Sensor> & getSensors() const;
 };
 
 }

@@ -18,7 +18,7 @@
 #include <cstring>
 #include "BitConverter.h"
 #include "Loop2Packet.h"
-#include "VantageConstants.h"
+#include "VantageProtocolConstants.h"
 #include "VantageCRC.h"
 #include "VantageDecoder.h"
 
@@ -182,7 +182,7 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
         return false;
     }
 
-    if (packetData[95] != VantageConstants::LINE_FEED || packetData[96] != VantageConstants::CARRIAGE_RETURN) {
+    if (packetData[95] != ProtocolConstants::LINE_FEED || packetData[96] != ProtocolConstants::CARRIAGE_RETURN) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
         return false;
     }

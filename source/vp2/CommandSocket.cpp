@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
+#include <sys/socket.h>
+#include <sys/select.h>
 #include <iostream>
 #include "json.hpp"
 #include "EventManager.h"
@@ -34,7 +36,7 @@ jsonKeyValue(json object, std::string & key, std::string & value) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CommandSocket::CommandSocket(EventManager & evtMgr) : listenFd(-1), eventManager(evtMgr) {
+CommandSocket::CommandSocket(EventManager & evtMgr) : listenFd(-1), eventManager(evtMgr), maxSocket(-1) {
 
 }
 
@@ -49,9 +51,32 @@ CommandSocket::~CommandSocket() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+bool
+CommandSocket::dataAvailable() {
+    fd_set fd_read;
+    fd_set fd_write;
+    fd_set fd_except;
+    int nfds = maxSocket + 1;
+
+    int n = select(nfds, &fd_read, &fd_write, &fd_except, NULL);
+
+    for (int i = 0; i < socketFdList.size(); i++) {
+        if (FD_ISSET(socketFdList[i], &fd_read)) {
+
+        }
+
+    }
+
+    //return n == 1 && FD_ISSET(socketFd, &fd_read);
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::processCommand(const std::string & commandJson) {
 
+    /*
     try {
         json command = json::parse(commandJson.begin(), commandJson.end());
         string commandName = command.value("command", "unknown");
@@ -80,7 +105,22 @@ CommandSocket::processCommand(const std::string & commandJson) {
     catch (const std::exception & e) {
         cout << "Exception: " << e.what() << endl;
     }
+    */
 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandSocket::acceptConnection() {
+    int fd = accept(listenFd, NULL, NULL);
+
+    if (fd < 0)
+        return;
+
+    socketFdList.push_back(fd);
+    std::sort(socketFdList.begin(), socketFdList.end());
+    maxSocket = socketFdList[socketFdList.size() - 1];
 }
 
 }

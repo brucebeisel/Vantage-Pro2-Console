@@ -23,14 +23,14 @@ Backlight command:
 
 Date/Time command:
 { "command"  : "set-date-time", "arguments" : [ { "date" : "YYYY-MM-DD" }, { "time" : "HH:MM:SS" } ] }
-{ "response" : "set-date-time", "result" : "success", "info" : "Date/time set to 2023-03-21 14:23:58" }
+{ "response" : "set-date-time", "result" : "success", "data" : "Date/time set to 2023-03-21 14:23:58" }
 
 { "command"  : "get-date-time", "arguments" }
-{ "response" : "get-date-time", "result" : "success", "info" : "2023-03-21 14:23:58" }
+{ "response" : "get-date-time", "result" : "success", "data" : "2023-03-21 14:23:58" }
 
 Firmware query:
 { "command"  : "firmware-query" }
-{ "response" : "firmware-query", "result" : "success", "info" : "2.54 Apr 23, 2022" }
+{ "response" : "firmware-query", "result" : "success", "data" : "2.54 Apr 23, 2022" }
 
 Console diagnostics:
 { "command"  : "console-diagnostics" }
@@ -40,6 +40,10 @@ Console diagnostics:
 Console recovery and clear CRC error count
 { "command"  : "console-recovery-clear-crc-error-count" }
 { "response" : "console-recovery-clear-crc-error-count", "result" : "success" }
+
+Receiver list query
+{ "command"  : "receiver-list-query" }
+{ "response"  : "receiver-list-query", "result" : "success", "data" : { "receiver-list" : [ 1, 2, 4] } }
 
 
 1. Test Commands

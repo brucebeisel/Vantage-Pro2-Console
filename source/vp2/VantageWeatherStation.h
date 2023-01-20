@@ -26,6 +26,9 @@
 #include "BitConverter.h"
 #include "SerialPort.h"
 #include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
+
+using namespace vws::ProtocolConstants;
 
 namespace vws {
 class HiLowPacket;
@@ -392,9 +395,9 @@ public:
     bool clearAlarmThresholds();
     bool clearTemperatureHumidityCalibrationOffsets();
     bool clearGraphPoints();
-    bool clearCumulativeValue(VantageConstants::CumulativeValue cumValue);
-    bool clearHighValues(VantageConstants::ExtremePeriod period);
-    bool clearLowValues(VantageConstants::ExtremePeriod period);
+    bool clearCumulativeValue(ProtocolConstants::CumulativeValue cumValue);
+    bool clearHighValues(ProtocolConstants::ExtremePeriod period);
+    bool clearLowValues(ProtocolConstants::ExtremePeriod period);
     bool clearActiveAlarms();
     bool clearCurrentData();
 
@@ -413,7 +416,7 @@ public:
      *
      * @return True if successful
      */
-    bool updateBaudRate(VantageConstants::BaudRate rate);
+    bool updateBaudRate(BaudRate rate);
     
     /**
      * Update the console's time.
@@ -437,7 +440,7 @@ public:
      *
      * @return True if successful
      */
-    bool updateArchivePeriod(VantageConstants::ArchivePeriod period);
+    bool updateArchivePeriod(ProtocolConstants::ArchivePeriod period);
 
     /**
      * Retrieve the archive period.
@@ -446,7 +449,7 @@ public:
      *
      * @return True if successful
      */
-    bool retrieveArchivePeriod(VantageConstants::ArchivePeriod  & period);
+    bool retrieveArchivePeriod(ProtocolConstants::ArchivePeriod  & period);
 
     /**
      * Start archiving the weather data.
@@ -497,7 +500,7 @@ public:
      * @param month The month in which the rain season starts
      * @return True if successful
      */
-    bool updateRainSeasonStart(VantageConstants::Month month);
+    bool updateRainSeasonStart(ProtocolConstants::Month month);
 
     /**
      * Retrieve the rain season start month.
@@ -505,7 +508,7 @@ public:
      * @param month The month in which the rain season starts
      * @return True if successful
      */
-    bool retrieveRainSeasonStart(VantageConstants::Month & month);
+    bool retrieveRainSeasonStart(ProtocolConstants::Month & month);
 
     /**
      * Set the whether the console will retransmit the data it receives and the retransmit station ID it will use if on.

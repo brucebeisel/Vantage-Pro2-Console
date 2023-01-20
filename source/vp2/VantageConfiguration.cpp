@@ -19,10 +19,12 @@
 #include "VantageConfiguration.h"
 #include "VantageDecoder.h"
 #include "VantageConstants.h"
+#include "VantageProtocolConstants.h"
 
 using namespace std;
 
 namespace vws {
+using namespace ProtocolConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,18 +118,18 @@ VantageConfiguration::retrieveTimeSettings(TimeSettings & timeSettings) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::updateUnitsSettings(VantageConstants::BarometerUnits baroUnits,
-                                          VantageConstants::TemperatureUnits temperatureUnits,
-                                          VantageConstants::ElevationUnits elevationUnits,
-                                          VantageConstants::RainUnits rainUnits,
-                                          VantageConstants::WindUnits windUnits) {
+VantageConfiguration::updateUnitsSettings(BarometerUnits baroUnits,
+                                          TemperatureUnits temperatureUnits,
+                                          ElevationUnits elevationUnits,
+                                          RainUnits rainUnits,
+                                          WindUnits windUnits) {
     bool success = false;
     byte buffer;
-    buffer = baroUnits & 0x3;
-    buffer |= (temperatureUnits & 0x3) << 2;
-    buffer |= (elevationUnits & 0x1) << 4;
-    buffer |= (rainUnits & 0x1) << 5;
-    buffer |= (windUnits & 0x3) << 6;
+    buffer = static_cast<int>(baroUnits) & 0x3;
+    buffer |= (static_cast<int>(temperatureUnits) & 0x3) << 2;
+    buffer |= (static_cast<int>(elevationUnits) & 0x1) << 4;
+    buffer |= (static_cast<int>(rainUnits) & 0x1) << 5;
+    buffer |= (static_cast<int>(windUnits) & 0x3) << 6;
 
     byte invertedBuffer = ~buffer;
     if (station.eepromBinaryWrite(VantageConstants::EE_UNIT_BITS_ADDRESS, &buffer, 1) &&
@@ -141,19 +143,19 @@ VantageConfiguration::updateUnitsSettings(VantageConstants::BarometerUnits baroU
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::retrieveUnitsSettings(VantageConstants::BarometerUnits & baroUnits,
-                                            VantageConstants::TemperatureUnits & temperatureUnits,
-                                            VantageConstants::ElevationUnits & elevationUnits,
-                                            VantageConstants::RainUnits & rainUnits,
-                                            VantageConstants::WindUnits & windUnits) {
+VantageConfiguration::retrieveUnitsSettings(BarometerUnits & baroUnits,
+                                            TemperatureUnits & temperatureUnits,
+                                            ElevationUnits & elevationUnits,
+                                            RainUnits & rainUnits,
+                                            WindUnits & windUnits) {
     bool success = false;
     byte buffer;
     if (station.eepromBinaryRead(VantageConstants::EE_UNIT_BITS_ADDRESS, 1, &buffer)) {
-        baroUnits = static_cast<VantageConstants::BarometerUnits>(buffer & 0x3);
-        temperatureUnits = static_cast<VantageConstants::TemperatureUnits>((buffer >> 2) & 0x3);
-        elevationUnits = static_cast<VantageConstants::ElevationUnits>((buffer >> 4) & 0x1);
-        rainUnits = static_cast<VantageConstants::RainUnits>((buffer >> 5) & 0x1);
-        windUnits = static_cast<VantageConstants::WindUnits>((buffer >> 6) & 0x3);
+        baroUnits = static_cast<BarometerUnits>(buffer & 0x3);
+        temperatureUnits = static_cast<TemperatureUnits>((buffer >> 2) & 0x3);
+        elevationUnits = static_cast<ElevationUnits>((buffer >> 4) & 0x1);
+        rainUnits = static_cast<RainUnits>((buffer >> 5) & 0x1);
+        windUnits = static_cast<WindUnits>((buffer >> 6) & 0x3);
         success = true;
     }
 
@@ -200,7 +202,7 @@ VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
         setupBits.isWindCupLarge = (buffer & 0x8) == 1;
         setupBits.isNorthLatitude = (buffer & 0x40) == 1;
         setupBits.isEastLongitude = (buffer & 0x80) == 1;
-        setupBits.rainCollectorSizeType = static_cast<VantageConstants::RainCupSizeType>((buffer & 0x30) >> 4);
+        setupBits.rainCollectorSizeType = static_cast<RainCupSizeType>((buffer & 0x30) >> 4);
         success = true;
         saveRainCollectorSize(setupBits.rainCollectorSizeType);
     }
@@ -211,17 +213,17 @@ VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantageConfiguration::saveRainCollectorSize(VantageConstants::RainCupSizeType rainCupType) {
+VantageConfiguration::saveRainCollectorSize(RainCupSizeType rainCupType) {
     Rainfall rainCollectorSize = 0.01;
 
     switch (rainCupType) {
-        case VantageConstants::RainCupSizeType::POINT_01_INCH:
+        case RainCupSizeType::POINT_01_INCH:
             rainCollectorSize = VantageConstants::POINT_01_INCH_SIZE;
             break;
-        case VantageConstants::RainCupSizeType::POINT_2_MM:
+        case ProtocolConstants::RainCupSizeType::POINT_2_MM:
             rainCollectorSize = VantageConstants::POINT_2_MM_SIZE;
             break;
-        case VantageConstants::RainCupSizeType::POINT_1_MM:
+        case RainCupSizeType::POINT_1_MM:
             rainCollectorSize = VantageConstants::POINT_1_MM_SIZE;
             break;
         default:

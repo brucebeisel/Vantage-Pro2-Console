@@ -30,6 +30,7 @@ namespace VantageConstants {
     //
     // Various values used generically in various command protocols
     //
+/*
     static constexpr char NULLCHAR = '\0';
     static constexpr char LINE_FEED = '\n';
     static constexpr char CARRIAGE_RETURN = '\r';
@@ -38,103 +39,12 @@ namespace VantageConstants {
     static constexpr char CANCEL = 0x18;
     static constexpr char CRC_FAILURE = CANCEL;
     static constexpr char ESCAPE = 0x15;
+    */
 
-    //
-    // Cumulative Values that can be cleared using CLRVAR
-    //
-    enum CumulativeValue {
-        DAILY_RAIN_CUM = 13,
-        STORM_RAIN_CUM = 14,
-        MONTH_RAIN_CUM = 16,
-        YEAR_RAIN_CUM = 17,
-        DAY_ET_CUM = 26,
-        MONTH_ET_CUM = 25,
-        YEAR_ET_CUM = 27
-    };
-
-    //
-    // High/Low Clear Types
-    //
-    enum ExtremePeriod {
-        DAILY_EXTREMES = 0,
-        MONTHLY_EXTREMES = 1,
-        YEARLY_EXTREMES = 2
-    };
-
-    enum ArchivePeriod {
-        ONE_MINUTE = 1,
-        FIVE_MINUTES = 5,
-        TEN_MINUTES = 10,
-        FIFTEEN_MINUTES = 15,
-        THIRTY_MINUTES = 30,
-        ONE_HOUR = 60,
-        TWO_HOURS = 120,
-    };
-
-    enum class BaudRate : int {
-        BAUD_1200 = 1200,
-        BAUD_2400 = 2400,
-        BAUD_4800 = 4800,
-        BAUD_9600 = 9600,
-        BAUD_14400 = 14400,
-        BAUD_19200 = 19200
-    };
-
-    enum class RainCupSizeType : int {
-        POINT_01_INCH = 0,
-        POINT_2_MM = 1,
-        POINT_1_MM = 2
-    };
 
     static constexpr Rainfall POINT_01_INCH_SIZE = 0.01;       // Inches
     static constexpr Rainfall POINT_2_MM_SIZE   = 0.2 / 25.4; // Inches
     static constexpr Rainfall POINT_1_MM_SIZE   = 0.1 / 25.4; // Inches
-
-    enum BarometerUnits {
-        BARO_UNITS_01_INCHES = 0,
-        BARO_UNITS_TENTH_MM = 1,
-        BARO_UNITS_TENTH_HPA = 2,
-        BARO_UNITS_TENTH_MILLIBAR = 3
-    };
-
-    enum TemperatureUnits {
-        TEMPERATURE_UNITS_DEGREES = 0,
-        TEMPERATURE_UNITS_TENTH_DEGREES = 1,
-        TEMPERATURE_UNITS_CELSIUS = 2,
-        TEMPERATURE_UNITS_TENTH_CELSIUS = 3
-    };
-
-    enum ElevationUnits {
-        ELEVATION_UNITS_FEET = 0,
-        ELEVATION_UNITS_METERS = 1
-    };
-
-    enum RainUnits {
-        RAIN_UNITS_INCHES = 0,
-        RAIN_UNITS_MILLIMETERS = 1
-    };
-
-    enum WindUnits {
-        WIND_UNITS_MPH = 0,
-        WIND_UNITS_MPS = 1,
-        WIND_UNITS_KPH = 2,
-        WIND_UNITS_KTS = 3
-    };
-
-    enum Month {
-        JANUARY = 1,
-        FEBRUARY = 2,
-        MARCH = 3,
-        APRIL = 4,
-        MAY = 5,
-        JUNE = 6,
-        JULY = 7,
-        AUGUST = 8,
-        SEPTEMBER = 9,
-        OCTOBER = 10,
-        NOVEMBER = 11,
-        DECEMBER = 12
-    };
 
     //
     // LOOP packet forecast icons

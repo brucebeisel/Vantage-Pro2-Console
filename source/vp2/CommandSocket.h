@@ -28,10 +28,15 @@ public:
     virtual ~CommandSocket();
 
     void processCommand(const std::string & commandJson);
+    bool dataAvailable();
 
 private:
-    int            listenFd;
-    EventManager & eventManager;
+    void acceptConnection();
+
+    int              listenFd;
+    std::vector<int> socketFdList;
+    int              maxSocket;
+    EventManager &   eventManager;
 };
 
 } /* namespace vws */

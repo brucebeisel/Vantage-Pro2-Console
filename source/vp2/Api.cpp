@@ -190,7 +190,7 @@ Api::clearGraphData() {
 void
 Api::clearCumulativeValue(const std::string & which) {
 
-    VantageConstants::CumulativeValue cumValue = VantageConstants::DAILY_RAIN_CUM;
+    ProtocolConstants::CumulativeValue cumValue = ProtocolConstants::CumulativeValue::DAILY_RAIN_CUM;
 
     bool result = station.clearCumulativeValue(cumValue);
     sendCommandResponse("clear-cumulative-value", result);

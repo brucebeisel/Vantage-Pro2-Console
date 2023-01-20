@@ -8,6 +8,7 @@ SRCS=\
 	ArchiveManager.cpp \
 	ArchivePacket.cpp \
 	BitConverter.cpp \
+	CommandHandler.cpp \
 	CommandSocket.cpp \
 	CurrentWeather.cpp \
 	CurrentWeatherManager.cpp \
@@ -43,7 +44,7 @@ OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
 $(OBJDIR)/%.o : %.cpp
-	$(CC) $(CXXFLAGS) $(INCDIRS) -c $< -o $@
+	$(CC) $(CXXFLAGS) $(INCDIRS) -std=c++20 -c $< -o $@
 	
 all: vp2
 

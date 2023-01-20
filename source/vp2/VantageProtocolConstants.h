@@ -17,7 +17,7 @@
 #ifndef VANTAGE_PROTOCOL_CONSTANTS
 #define VANTAGE_PROTOCOL_CONSTANTS
 #include <string>
-#include <Weather.h>
+#include "Weather.h"
 
 namespace vws::ProtocolConstants {
 
@@ -34,10 +34,10 @@ static constexpr char CRC_FAILURE = CANCEL;
 static constexpr char ESCAPE = 0x15;
 
 //
-// Wakeup command/response
+// Wake up command/response
 //
-static constexpr std::string WAKEUP_COMMAND = std::string(1, LINE_FEED);
-static constexpr std::string WAKEUP_RESPONSE = std::string(1, LINE_FEED) + std::string(1, CARRIAGE_RETURN);
+static const std::string WAKEUP_COMMAND = std::string(1, LINE_FEED);
+static const std::string WAKEUP_RESPONSE = std::string(1, LINE_FEED) + std::string(1, CARRIAGE_RETURN);
 
 //
 // Testing Commands
@@ -46,85 +46,85 @@ static const std::string TEST_CMD = "TEST";                          // Sends th
 static constexpr char WRD_BYTE1 = 0x12;
 static constexpr char WRD_BYTE2 = 0x4D;
 static constexpr char WRD_BUFFER[] = {'W', 'R', 'D', WRD_BYTE1, WRD_BYTE2};
-static constexpr std::string STATION_TYPE_CMD(WRD_BUFFER);               // Responds with the weather station type. This command is backward compatible with earlier Davis weather products.
-static constexpr std::string RECEIVE_CHECK_CMD = "RXCHECK";              // Console diagnostics report
-static constexpr std::string RXTEST_CMD = "RXTEST";                      // Move console to main current conditions screen
-static constexpr std::string FIRMWARE_DATE_CMD = "VER";                  // Firmware date
-static constexpr std::string RECEIVER_LIST_CMD = "RECEIVERS";            // Get the list of receivers as a bitmap, bit 0 represents station ID 1
-static constexpr std::string FIRMWARE_VERSION_CMD = "NVER";              // Get the firmware version
+static const std::string STATION_TYPE_CMD(WRD_BUFFER);               // Responds with the weather station type. This command is backward compatible with earlier Davis weather products.
+static const std::string RECEIVE_CHECK_CMD = "RXCHECK";              // Console diagnostics report
+static const std::string RXTEST_CMD = "RXTEST";                      // Move console to main current conditions screen
+static const std::string FIRMWARE_DATE_CMD = "VER";                  // Firmware date
+static const std::string RECEIVER_LIST_CMD = "RECEIVERS";            // Get the list of receivers as a bitmap, bit 0 represents station ID 1
+static const std::string FIRMWARE_VERSION_CMD = "NVER";              // Get the firmware version
 
 //
 // Current Data Commands
 //
-static constexpr std::string LOOP_CMD = "LOOP";                          // Get the current data values, alarms, battery status, etc. through the LOOP packet. Note that the LPS command renders this superfluous.
-static constexpr std::string LPS_CMD = "LPS 3";                          // Get the current values through both the LOOP and LOOP2 packets
-static constexpr std::string HIGH_LOW_CMD = "HILOWS";                    // Get the high and low that includes daily, monthly and yearly
-static constexpr std::string PUT_YEARLY_RAIN_CMD = "PUTRAIN";            // Set the yearly rainfall
-static constexpr std::string PUT_YEARLY_ET_CMD = "PUTET";                // Set the yearly ET
+static const std::string LOOP_CMD = "LOOP";                          // Get the current data values, alarms, battery status, etc. through the LOOP packet. Note that the LPS command renders this superfluous.
+static const std::string LPS_CMD = "LPS 3";                          // Get the current values through both the LOOP and LOOP2 packets
+static const std::string HIGH_LOW_CMD = "HILOWS";                    // Get the high and low that includes daily, monthly and yearly
+static const std::string PUT_YEARLY_RAIN_CMD = "PUTRAIN";            // Set the yearly rainfall
+static const std::string PUT_YEARLY_ET_CMD = "PUTET";                // Set the yearly ET
 
 //
 // Download Commands
 //
-static constexpr std::string DUMP_ARCHIVE_CMD = "DMP";                   // Dump the entire archive
-static constexpr std::string DUMP_AFTER_CMD = "DMPAFT";                  // Dump the archive after a given date/time
+static const std::string DUMP_ARCHIVE_CMD = "DMP";                   // Dump the entire archive
+static const std::string DUMP_AFTER_CMD = "DMPAFT";                  // Dump the archive after a given date/time
 
 //
 // EEPROM Commands
 //
-static constexpr std::string DUMP_EEPROM_CMD = "GETEE";                  // Read the entire EEPROM data block
-static constexpr std::string WRITE_EEPROM_CMD = "EEWR";                  // Write a single byte to EEPROM as hex strings
-static constexpr std::string READ_EEPROM_CMD = "EERD";                   // Read EEPROM address as hex strings
-static constexpr std::string WRITE_EEPROM_AS_BINARY_CMD = "EEBWR";       // Write to EEPROM as binary
-static constexpr std::string READ_EEPROM_AS_BINARY_CMD = "EEBRD";        // Read EEPROM address as binary
+static const std::string DUMP_EEPROM_CMD = "GETEE";                  // Read the entire EEPROM data block
+static const std::string WRITE_EEPROM_CMD = "EEWR";                  // Write a single byte to EEPROM as hex strings
+static const std::string READ_EEPROM_CMD = "EERD";                   // Read EEPROM address as hex strings
+static const std::string WRITE_EEPROM_AS_BINARY_CMD = "EEBWR";       // Write to EEPROM as binary
+static const std::string READ_EEPROM_AS_BINARY_CMD = "EEBRD";        // Read EEPROM address as binary
 
 //
 // Calibration Commands
 //
-static constexpr std::string CALIBRATE_TEMPERATURE_HUMIDITY = "CALED";   // Send temperature and humidity calibration values
-static constexpr std::string CALIBRATE_TEMPERATURE_HUMIDITY2 = "CALFIX"; // Updates the display when calibration numbers have changed
-static constexpr std::string SET_BAROMETRIC_DATA_CMD = "BAR=";            // Sets barometric offset using local reading and/or elevation
-static constexpr std::string SET_BAROMETRIC_CAL_DATA_CMD = "BARDATA";    // Get the current barometer calibration parameters
+static const std::string CALIBRATE_TEMPERATURE_HUMIDITY = "CALED";   // Send temperature and humidity calibration values
+static const std::string CALIBRATE_TEMPERATURE_HUMIDITY2 = "CALFIX"; // Updates the display when calibration numbers have changed
+static const std::string SET_BAROMETRIC_DATA_CMD = "BAR=";            // Sets barometric offset using local reading and/or elevation
+static const std::string SET_BAROMETRIC_CAL_DATA_CMD = "BARDATA";    // Get the current barometer calibration parameters
 
 //
 // Clearing Commands
 //
-static constexpr std::string CLEAR_ARCHIVE_CMD = "CLRLOG";               // Clear the archived data
-static constexpr std::string CLEAR_ALARM_THRESHOLDS_CMD = "CLRALM";      // Clear the alarm thresholds
-static constexpr std::string CLEAR_TEMP_HUMID_CAL_CMD = "CLRCAL";        // Set temperature and humidity calibration offsets to zero
-static constexpr std::string CLEAR_GRAPH_POINTS_CMD = "CLRGRA";          // Clear the graph points
-static constexpr std::string CLEAR_CUMULATIVE_VALUE_CMD = "CLRVAR";      // Clear the specified cumulative value
-static constexpr std::string CLEAR_HIGH_VALUES_CMD = "CLRHIGHS";         // Clear the daily, monthly or yearly high values
-static constexpr std::string CLEAR_LOW_VALUES_CMD = "CLRLOWS";           // Clear the daily, monthly or yearly low values
-static constexpr std::string CLEAR_ACTIVE_ALARMS_CMD = "CLRBITS";        // Clear active alarms
-static constexpr std::string CLEAR_CURRENT_DATA_VALUES_CMD = "CLRDATA";  // Clear all current data values
+static const std::string CLEAR_ARCHIVE_CMD = "CLRLOG";               // Clear the archived data
+static const std::string CLEAR_ALARM_THRESHOLDS_CMD = "CLRALM";      // Clear the alarm thresholds
+static const std::string CLEAR_TEMP_HUMID_CAL_CMD = "CLRCAL";        // Set temperature and humidity calibration offsets to zero
+static const std::string CLEAR_GRAPH_POINTS_CMD = "CLRGRA";          // Clear the graph points
+static const std::string CLEAR_CUMULATIVE_VALUE_CMD = "CLRVAR";      // Clear the specified cumulative value
+static const std::string CLEAR_HIGH_VALUES_CMD = "CLRHIGHS";         // Clear the daily, monthly or yearly high values
+static const std::string CLEAR_LOW_VALUES_CMD = "CLRLOWS";           // Clear the daily, monthly or yearly low values
+static const std::string CLEAR_ACTIVE_ALARMS_CMD = "CLRBITS";        // Clear active alarms
+static const std::string CLEAR_CURRENT_DATA_VALUES_CMD = "CLRDATA";  // Clear all current data values
 
 //
 // Configuration Commands
 //
-static constexpr std::string SET_BAUD_RATE_CMD = "BAUD";                 // Sets the console to a new baud rate. Valid values are 1200, 2400, 4800, 9600, 14400 and 19200
-static constexpr std::string SET_TIME_CMD = "SETTIME";                   // Sets the time and date on the console
-static constexpr std::string GET_TIME_CMD = "GETTIME";                   // Retrieves the current time and date on the Vantage console. Data is sent in binary format
-static constexpr std::string SET_ARCHIVE_PERIOD_CMD = "SETPER";          // Set how often the console saves an archive record
-static constexpr std::string STOP_ARCHIVING_CMD = "STOP";                // Disables the creation of archive records
-static constexpr std::string START_ARCHIVING_CMD = "START";              // Enables the create of archive records
-static constexpr std::string REINITIALIZE_CMD = "NEWSETUP";              // Reinitialize the console after making any significant changes to the console's configuration
-static constexpr std::string CONTROL_LAMP_CMD = "LAMPS";                 // Turn on/off the console's light
+static const std::string SET_BAUD_RATE_CMD("BAUD");                 // Sets the console to a new baud rate. Valid values are 1200, 2400, 4800, 9600, 14400 and 19200
+static const std::string SET_TIME_CMD = "SETTIME";                   // Sets the time and date on the console
+static const std::string GET_TIME_CMD = "GETTIME";                   // Retrieves the current time and date on the Vantage console. Data is sent in binary format
+static const std::string SET_ARCHIVE_PERIOD_CMD = "SETPER";          // Set how often the console saves an archive record
+static const std::string STOP_ARCHIVING_CMD = "STOP";                // Disables the creation of archive records
+static const std::string START_ARCHIVING_CMD = "START";              // Enables the create of archive records
+static const std::string REINITIALIZE_CMD = "NEWSETUP";              // Reinitialize the console after making any significant changes to the console's configuration
+static const std::string CONTROL_LAMP_CMD = "LAMPS";                 // Turn on/off the console's light
 
 //
 // Dump/Dump After responses
 //
-static constexpr std::string DMP_SEND_NEXT_PAGE = std::string(1, ACK);
-static constexpr std::string DMP_CANCEL_DOWNLOAD = std::string(1, ESCAPE);
-static constexpr std::string DMP_RESEND_PAGE = std::string(1, NACK);
+static const std::string DMP_SEND_NEXT_PAGE = std::string(1, ACK);
+static const std::string DMP_CANCEL_DOWNLOAD = std::string(1, ESCAPE);
+static const std::string DMP_RESEND_PAGE = std::string(1, NACK);
 
 //
 // Generic strings for various command protocols
 //
-static constexpr std::string COMMAND_TERMINATOR = std::string(1, LINE_FEED);
-static constexpr std::string RESPONSE_FRAME = std::string(1, LINE_FEED) + std::string(1, CARRIAGE_RETURN);
-static constexpr std::string COMMAND_RECOGNIZED_RESPONSE = RESPONSE_FRAME + "OK" + RESPONSE_FRAME;
-static constexpr std::string DONE_RESPONSE = "DONE" + std::string(1, LINE_FEED) + std::string(1, CARRIAGE_RETURN);
-static constexpr std::string TEST_RESPONSE = "TEST" + std::string(1, LINE_FEED) + std::string(1, CARRIAGE_RETURN);
+static const std::string COMMAND_TERMINATOR = std::string(1, LINE_FEED);
+static const std::string RESPONSE_FRAME = std::string(1, LINE_FEED) + std::string(1, CARRIAGE_RETURN);
+static const std::string COMMAND_RECOGNIZED_RESPONSE = RESPONSE_FRAME + "OK" + RESPONSE_FRAME;
+static const std::string DONE_RESPONSE = "DONE" + std::string(1, LINE_FEED) + std::string(1, CARRIAGE_RETURN);
+static const std::string TEST_RESPONSE = "TEST" + std::string(1, LINE_FEED) + std::string(1, CARRIAGE_RETURN);
 
 //
 // Types values that are used for command values or response data
@@ -132,7 +132,7 @@ static constexpr std::string TEST_RESPONSE = "TEST" + std::string(1, LINE_FEED) 
 //
 // Cumulative Values that can be cleared using CLRVAR
 //
-enum CumulativeValue {
+enum class CumulativeValue {
     DAILY_RAIN_CUM = 13,
     STORM_RAIN_CUM = 14,
     MONTH_RAIN_CUM = 16,
@@ -145,13 +145,13 @@ enum CumulativeValue {
 //
 // High/Low Clear Types
 //
-enum ExtremePeriod : int {
-    DAILY_EXTREMES = 0,
-    MONTHLY_EXTREMES = 1,
-    YEARLY_EXTREMES = 2
+enum class ExtremePeriod {
+    DAILY = 0,
+    MONTHLY = 1,
+    YEARLY = 2
 };
 
-enum ArchivePeriod : int {
+enum class ArchivePeriod {
     ONE_MINUTE = 1,
     FIVE_MINUTES = 5,
     TEN_MINUTES = 10,
@@ -161,16 +161,16 @@ enum ArchivePeriod : int {
     TWO_HOURS = 120,
 };
 
-enum class BaudRate : int {
-    BAUD_1200 = 1200,
-    BAUD_2400 = 2400,
-    BAUD_4800 = 4800,
-    BAUD_9600 = 9600,
-    BAUD_14400 = 14400,
-    BAUD_19200 = 19200
+enum class BaudRate {
+    BAUDRATE_1200 = 1200,
+    BAUDRATE_2400 = 2400,
+    BAUDRATE_4800 = 4800,
+    BAUDRATE_9600 = 9600,
+    BAUDRATE_14400 = 14400,
+    BAUDRATE_19200 = 19200
 };
 
-enum class RainCupSizeType : int {
+enum class RainCupSizeType {
     POINT_01_INCH = 0,
     POINT_2_MM = 1,
     POINT_1_MM = 2
@@ -180,38 +180,38 @@ static constexpr double POINT_01_INCH_SIZE = 0.01;       // Inches
 static constexpr double POINT_2_MM_SIZE   = 0.2 / 25.4; // Inches
 static constexpr double POINT_1_MM_SIZE   = 0.1 / 25.4; // Inches
 
-enum BarometerUnits : int {
-    BARO_UNITS_01_INCHES = 0,
-    BARO_UNITS_TENTH_MM = 1,
-    BARO_UNITS_TENTH_HPA = 2,
-    BARO_UNITS_TENTH_MILLIBAR = 3
+enum class BarometerUnits {
+    IN_HG = 0,
+    MILLIMETER = 1,
+    HPA = 2,
+    MILLIBAR = 3
 };
 
-enum TemperatureUnits : int {
-    TEMPERATURE_UNITS_DEGREES = 0,
-    TEMPERATURE_UNITS_TENTH_DEGREES = 1,
-    TEMPERATURE_UNITS_CELSIUS = 2,
-    TEMPERATURE_UNITS_TENTH_CELSIUS = 3
+enum class TemperatureUnits {
+    DEGREES = 0,
+    TENTH_DEGREES = 1,
+    CELSIUS = 2,
+    TENTH_CELSIUS = 3
 };
 
-enum ElevationUnits : int {
-    ELEVATION_UNITS_FEET = 0,
-    ELEVATION_UNITS_METERS = 1
+enum class ElevationUnits {
+    FEET = 0,
+    METERS = 1
 };
 
-enum RainUnits : int {
-    RAIN_UNITS_INCHES = 0,
-    RAIN_UNITS_MILLIMETERS = 1
+enum class RainUnits {
+    INCHES = 0,
+    MILLIMETERS = 1
 };
 
-enum WindUnits : int {
-    WIND_UNITS_MPH = 0,
-    WIND_UNITS_MPS = 1,
-    WIND_UNITS_KPH = 2,
-    WIND_UNITS_KTS = 3
+enum class WindUnits {
+    MPH = 0,
+    MPS = 1,
+    KPH = 2,
+    KTS = 3
 };
 
-enum Month : int {
+enum class Month {
     JANUARY = 1,
     FEBRUARY = 2,
     MARCH = 3,
@@ -274,18 +274,18 @@ static constexpr int MAX_LEAF_WETNESSES = 4;
 //
 // Scales
 //
-static constexpr Temperature        TEMPERATURE_16BIT_SCALE = 10.0;
-static constexpr int                TEMPERATURE_16BIT_INVALID_VALUE = 32767;
-static constexpr Temperature        TEMPERATURE_8BIT_OFFSET = 90.0;
-static constexpr int                TEMPERATURE_8BIT_INVALID_VALUE = 255;
-static constexpr Pressure           BAROMETER_SCALE = 1000.0;
-static constexpr Speed              AVG_WIND_SPEED_SCALE = 10.0;
-static constexpr int                YEAR_OFFSET = 2000;
-static constexpr UvIndex            UV_INDEX_SCALE = 10.0;
-static constexpr Evapotranspiration DAY_ET_SCALE = 1000.0;
-static constexpr Evapotranspiration MONTH_YEAR_ET_SCALE = 100.0;
-static constexpr Rainfall           STORM_RAIN_SCALE = 100.0;
-static constexpr double             LAT_LON_SCALE = 10.0;
+static const vws::Temperature        TEMPERATURE_16BIT_SCALE = 10.0;
+static const int                     TEMPERATURE_16BIT_INVALID_VALUE = 32767;
+static const vws::Temperature        TEMPERATURE_8BIT_OFFSET = 90.0;
+static const int                     TEMPERATURE_8BIT_INVALID_VALUE = 255;
+static const vws::Pressure           BAROMETER_SCALE = 1000.0;
+static const vws::Speed              AVG_WIND_SPEED_SCALE = 10.0;
+static const int                     YEAR_OFFSET = 2000;
+static const vws::UvIndex            UV_INDEX_SCALE = 10.0;
+static const vws::Evapotranspiration DAY_ET_SCALE = 1000.0;
+static const vws::Evapotranspiration MONTH_YEAR_ET_SCALE = 100.0;
+static const vws::Rainfall           STORM_RAIN_SCALE = 100.0;
+static const double                  LAT_LON_SCALE = 10.0;
 
 static constexpr int NORTH_HEADING_VALUE = 360;
 static constexpr int NO_STORM_ACTIVE_DATE = -1;
