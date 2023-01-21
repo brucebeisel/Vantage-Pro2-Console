@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "VantageLogger.h"
-#include "Weather.h"
+#include "WeatherTypes.h"
 #include "WindDirectionSlice.h"
 
 namespace vws {

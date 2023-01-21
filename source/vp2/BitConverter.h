@@ -17,7 +17,7 @@
 #ifndef BIT_CONVERTER_H
 #define BIT_CONVERTER_H
 
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

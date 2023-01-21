@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 #include "VantageWeatherStation.h"
-#include "Weather.h"
 
 namespace vws {
 

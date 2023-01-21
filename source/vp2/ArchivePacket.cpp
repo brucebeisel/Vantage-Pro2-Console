@@ -20,9 +20,9 @@
 #include <sstream>
 #include "BitConverter.h"
 #include "ArchivePacket.h"
-#include "VantageConstants.h"
 #include "VantageDecoder.h"
 #include "VantageLogger.h"
+#include "Weather.h"
 
 
 

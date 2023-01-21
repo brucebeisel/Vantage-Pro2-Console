@@ -17,7 +17,6 @@
 #ifndef API_H
 #define API_H
 
-#include "Weather.h"
 #include "SensorStation.h"
 /**
  * Class(es) for the RESTful API for the Vantage weather station service.

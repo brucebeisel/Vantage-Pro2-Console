@@ -24,10 +24,11 @@
 #include "HiLowPacket.h"
 #include "SensorStation.h"
 #include "Alarm.h"
-#include "VantageConstants.h"
+#include "VantageProtocolConstants.h"
 #include "VantageDecoder.h"
 #include "VantageDriver.h"
 #include "VantageLogger.h"
+#include "Weather.h"
 
 using namespace std;
 extern atomic_bool signalCaught;
@@ -199,7 +200,7 @@ VantageDriver::reopenStation() {
 void
 VantageDriver::mainLoop() {
     vector<ArchivePacket> list;
-    list.reserve(VantageConstants::NUM_ARCHIVE_RECORDS);
+    list.reserve(ProtocolConstants::NUM_ARCHIVE_RECORDS);
 
     /*
 

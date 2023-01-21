@@ -72,7 +72,7 @@ Api::requestSensorStationIds() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 Api::setSensorStationType(int id, const std::string & sensorStationTypeName) {
-    if (id < 0 || id >= VantageConstants::MAX_SENSOR_STATIONS) {
+    if (id < 0 || id >= ProtocolConstants::MAX_SENSOR_STATIONS) {
         // Send failure
     }
 }

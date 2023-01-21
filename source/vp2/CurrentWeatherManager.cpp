@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include "CurrentWeatherManager.h"
 #include "CurrentWeatherPublisher.h"
+#include "Weather.h"
 
 using namespace std;
 

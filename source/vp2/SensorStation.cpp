@@ -17,6 +17,7 @@
 #include <iostream>
 #include <sstream>
 #include "SensorStation.h"
+#include "Weather.h"
 
 using namespace std;
 

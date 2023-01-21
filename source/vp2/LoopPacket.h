@@ -19,9 +19,9 @@
 
 #include <string>
 #include <bitset>
-#include "Weather.h"
+#include "WeatherTypes.h"
 #include "Measurement.h"
-#include "VantageConstants.h"
+#include "VantageProtocolConstants.h"
 #include "VantageLogger.h"
 
 namespace vws {
@@ -140,11 +140,11 @@ private:
     Measurement<Speed>              windSpeed;
     Measurement<Speed>              windSpeed10MinuteAverage;
     Measurement<Heading>            windDirection;
-    Measurement<Temperature>        extraTemperature[VantageConstants::MAX_EXTRA_TEMPERATURES];
-    Measurement<Temperature>        soilTemperature[VantageConstants::MAX_SOIL_TEMPERATURES];
-    Measurement<Temperature>        leafTemperature[VantageConstants::MAX_LEAF_TEMPERATURES];
+    Measurement<Temperature>        extraTemperature[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
+    Measurement<Temperature>        soilTemperature[ProtocolConstants::MAX_SOIL_TEMPERATURES];
+    Measurement<Temperature>        leafTemperature[ProtocolConstants::MAX_LEAF_TEMPERATURES];
     Measurement<Humidity>           outsideHumidity;
-    Measurement<Humidity>           extraHumidity[VantageConstants::MAX_EXTRA_HUMIDITIES];
+    Measurement<Humidity>           extraHumidity[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
     Rainfall                        rainRate;
     Measurement<UvIndex>            uvIndex;
     Measurement<SolarRadiation>     solarRadiation;
@@ -156,8 +156,8 @@ private:
     Measurement<Evapotranspiration> dayET;
     Measurement<Evapotranspiration> monthET;
     Measurement<Evapotranspiration> yearET;
-    Measurement<SoilMoisture>       soilMoisture[VantageConstants::MAX_SOIL_MOISTURES];
-    Measurement<LeafWetness>        leafWetness[VantageConstants::MAX_LEAF_WETNESSES];
+    Measurement<SoilMoisture>       soilMoisture[ProtocolConstants::MAX_SOIL_MOISTURES];
+    Measurement<LeafWetness>        leafWetness[ProtocolConstants::MAX_LEAF_WETNESSES];
     AlarmBitSet                     alarmBits;
     int                             transmitterBatteryStatus;
     float                           consoleBatteryVoltage;

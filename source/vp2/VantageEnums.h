@@ -169,6 +169,85 @@ operator<<(std::ostream & os, ProtocolConstants::BarometerUnits value) {
     return os;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static const NameValuePair<ProtocolConstants::TemperatureUnits> tuMappings[] = {
+    { "F", ProtocolConstants::TemperatureUnits::FAHRENHEIT },
+    { ".1F", ProtocolConstants::TemperatureUnits::TENTH_FAHRENHEIT },
+    { "C", ProtocolConstants::TemperatureUnits::CELSIUS },
+    { ".1C", ProtocolConstants::TemperatureUnits::TENTH_CELSIUS }
+};
+
+class TemperatureUnitsEnum : public VantageEnum<ProtocolConstants::TemperatureUnits,sizeof(tuMappings)/sizeof(tuMappings[0])>  {
+public:
+    TemperatureUnitsEnum() {};
+    virtual ~TemperatureUnitsEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::TemperatureUnits> * getMappings() const {
+        return tuMappings;
+    }
+};
+
+static TemperatureUnitsEnum temperatureUnitsEnum;
+
+std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::TemperatureUnits value) {
+    os << temperatureUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static const NameValuePair<ProtocolConstants::WindUnits> wuMappings[] = {
+    { "mph", ProtocolConstants::WindUnits::MPH },
+    { "mps", ProtocolConstants::WindUnits::MPS },
+    { "kph", ProtocolConstants::WindUnits::KPH },
+    { "kts", ProtocolConstants::WindUnits::KTS }
+};
+
+class WindUnitsEnum : public VantageEnum<ProtocolConstants::WindUnits,sizeof(wuMappings)/sizeof(wuMappings[0])>  {
+public:
+    WindUnitsEnum() {};
+    virtual ~WindUnitsEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::WindUnits> * getMappings() const {
+        return wuMappings;
+    }
+};
+
+static WindUnitsEnum windUnitsEnum;
+
+std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::WindUnits value) {
+    os << windUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static const NameValuePair<ProtocolConstants::ElevationUnits> euMappings[] = {
+    { "feet", ProtocolConstants::ElevationUnits::FEET },
+    { "meters", ProtocolConstants::ElevationUnits::METERS }
+};
+
+class ElevationUnitsEnum : public VantageEnum<ProtocolConstants::ElevationUnits,sizeof(euMappings)/sizeof(euMappings[0])>  {
+public:
+    ElevationUnitsEnum() {};
+    virtual ~ElevationUnitsEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::ElevationUnits> * getMappings() const {
+        return euMappings;
+    }
+};
+
+static ElevationUnitsEnum elevationUnitsEnum;
+
+std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::ElevationUnits value) {
+    os << elevationUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
 }
 
 #endif

@@ -16,10 +16,12 @@
  */
 #include <iostream>
 #include "BitConverter.h"
-#include "VantageConstants.h"
+#include "VantageProtocolConstants.h"
 #include "VantageDecoder.h"
+#include "Weather.h"
 
 namespace vws {
+using namespace ProtocolConstants;
 
 Rainfall VantageDecoder::rainCollectorSizeInches = static_cast<Rainfall>(0.0);
 bool VantageDecoder::rainCollectorSizeSet = false;
@@ -31,8 +33,8 @@ const Measurement<Temperature> &
 VantageDecoder::decode16BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VantageConstants::INVALID_16BIT_TEMPERATURE)
-        measurement.setValue(static_cast<Temperature>(value16) / VantageConstants::TEMPERATURE_16BIT_SCALE);
+    if (value16 != INVALID_16BIT_TEMPERATURE)
+        measurement.setValue(static_cast<Temperature>(value16) / TEMPERATURE_16BIT_SCALE);
     else
         measurement.invalidate();
 
@@ -53,7 +55,7 @@ const Measurement<Temperature> &
 VantageDecoder::decodeNonScaled16BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VantageConstants::INVALID_16BIT_TEMPERATURE)
+    if (value16 != INVALID_16BIT_TEMPERATURE)
         measurement.setValue(static_cast<Temperature>(value16));
     else
         measurement.invalidate();
@@ -75,8 +77,8 @@ const Measurement<Temperature> &
 VantageDecoder::decode8BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
     int value8 = BitConverter::toInt8(buffer, offset);
 
-    if (value8 != VantageConstants::INVALID_8BIT_TEMPERATURE)
-        measurement.setValue(static_cast<Temperature>(value8 - VantageConstants::TEMPERATURE_8BIT_OFFSET));
+    if (value8 != INVALID_8BIT_TEMPERATURE)
+        measurement.setValue(static_cast<Temperature>(value8 - TEMPERATURE_8BIT_OFFSET));
     else
         measurement.invalidate();
 
@@ -97,7 +99,7 @@ const Measurement<Pressure> &
 VantageDecoder::decodeBarometricPressure(const byte buffer[], int offset, Measurement<Pressure> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    measurement = static_cast<Pressure>(value16) / VantageConstants::BAROMETER_SCALE;
+    measurement = static_cast<Pressure>(value16) / BAROMETER_SCALE;
 
     return measurement;
 }
@@ -116,7 +118,7 @@ const Measurement<Humidity> &
 VantageDecoder::decodeHumidity(const byte buffer[], int offset, Measurement<Humidity> & measurement) {
     int value8 = BitConverter::toInt8(buffer, offset);
 
-    if (value8 != VantageConstants::INVALID_HUMIDITY)
+    if (value8 != INVALID_HUMIDITY)
         measurement.setValue(static_cast<Humidity>(value8));
     else
         measurement.invalidate();
@@ -138,8 +140,8 @@ const Measurement<UvIndex> &
 VantageDecoder::decodeUvIndex(const byte buffer[], int offset, Measurement<UvIndex> & measurement) {
     int value8 = BitConverter::toInt8(buffer, offset);
 
-    if (value8 != VantageConstants::INVALID_UV_INDEX)
-        measurement.setValue(static_cast<UvIndex>(value8) / VantageConstants::UV_INDEX_SCALE);
+    if (value8 != INVALID_UV_INDEX)
+        measurement.setValue(static_cast<UvIndex>(value8) / UV_INDEX_SCALE);
     else
         measurement.invalidate();
 
@@ -160,8 +162,8 @@ const Measurement<Evapotranspiration> &
 VantageDecoder::decodeDayET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VantageConstants::INVALID_ET)
-        measurement.setValue(static_cast<Evapotranspiration>(value16) / VantageConstants::DAY_ET_SCALE);
+    if (value16 != INVALID_ET)
+        measurement.setValue(static_cast<Evapotranspiration>(value16) / DAY_ET_SCALE);
     else
         measurement.invalidate();
 
@@ -183,8 +185,8 @@ const Measurement<Evapotranspiration> &
 VantageDecoder::decodeMonthYearET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VantageConstants::INVALID_ET)
-        measurement.setValue(static_cast<Evapotranspiration>(value16) / VantageConstants::MONTH_YEAR_ET_SCALE);
+    if (value16 != INVALID_ET)
+        measurement.setValue(static_cast<Evapotranspiration>(value16) / MONTH_YEAR_ET_SCALE);
     else
         measurement.invalidate();
 
@@ -205,7 +207,7 @@ const Measurement<SolarRadiation> &
 VantageDecoder::decodeSolarRadiation(const byte buffer[], int offset, Measurement<SolarRadiation> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VantageConstants::INVALID_SOLAR_RADIATION)
+    if (value16 != INVALID_SOLAR_RADIATION)
         measurement.setValue(static_cast<SolarRadiation>(value16));
     else
         measurement.invalidate();
@@ -227,7 +229,7 @@ const Measurement<Speed> &
 VantageDecoder::decodeWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
     int value8 = BitConverter::toInt8(buffer, offset);
 
-    if (value8 != VantageConstants::INVALID_WIND_SPEED)
+    if (value8 != INVALID_WIND_SPEED)
         measurement.setValue(static_cast<Speed>(value8));
     else
         measurement.invalidate();
@@ -268,8 +270,8 @@ const Measurement<Speed> &
 VantageDecoder::decodeAverageWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VantageConstants::INVALID_16BIT_AVG_WIND_SPEED)
-        measurement.setValue(static_cast<Speed>(value16) / VantageConstants::AVG_WIND_SPEED_SCALE);
+    if (value16 != INVALID_16BIT_AVG_WIND_SPEED)
+        measurement.setValue(static_cast<Speed>(value16) / AVG_WIND_SPEED_SCALE);
     else
         measurement.invalidate();
 
@@ -290,8 +292,8 @@ const Measurement<Heading> &
 VantageDecoder::decodeWindDirectionSlice(const byte buffer[], int offset, Measurement<Heading> & measurement) {
     int value8 = BitConverter::toInt8(buffer, offset);
 
-    if (value8 != VantageConstants::INVALID_WIND_DIRECTION_SLICE)
-        measurement.setValue(static_cast<Heading>(value8) * VantageConstants::DEGREES_PER_SLICE);
+    if (value8 != INVALID_WIND_DIRECTION_SLICE)
+        measurement.setValue(static_cast<Heading>(value8) * DEGREES_PER_SLICE);
     else
         measurement.invalidate();
 
@@ -312,9 +314,9 @@ const Measurement<Heading> &
 VantageDecoder::decodeWindDirection(const byte buffer[], int offset, Measurement<Heading> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VantageConstants::INVALID_WIND_DIRECTION) {
+    if (value16 != INVALID_WIND_DIRECTION) {
         Heading heading;
-        if (value16 == VantageConstants::NORTH_HEADING_VALUE)
+        if (value16 == NORTH_HEADING_VALUE)
             heading = 0.0;
         else
             heading = static_cast<Heading>(value16);
@@ -340,7 +342,7 @@ VantageDecoder::decodeWindDirection(const byte buffer[], int offset) {
 Rainfall
 VantageDecoder::decodeStormRain(const byte buffer[], int offset) {
     int value16 = BitConverter::toInt16(buffer, offset);
-    Rainfall rain = static_cast<Rainfall>(value16) / VantageConstants::STORM_RAIN_SCALE;
+    Rainfall rain = static_cast<Rainfall>(value16) / STORM_RAIN_SCALE;
 
     return rain;
 }
@@ -377,8 +379,8 @@ VantageDecoder::decodeStormStartDate(const byte buffer[], int offset) {
     DateTime stormStart = 0;
     int value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != VantageConstants::NO_STORM_ACTIVE_DATE) {
-        int year = (value16 & 0x3F) + VantageConstants::YEAR_OFFSET;
+    if (value16 != NO_STORM_ACTIVE_DATE) {
+        int year = (value16 & 0x3F) + YEAR_OFFSET;
         int day = (value16 >> 7) & 0x1F;
         int month = (value16 >> 12) & 0xF;
 
@@ -411,7 +413,7 @@ const Measurement<LeafWetness> &
 VantageDecoder::decodeLeafWetness(const byte buffer[], int offset, Measurement<LeafWetness> & measurement) {
     int value8 = BitConverter::toInt8(buffer, offset);
 
-    if (value8 != VantageConstants::INVALID_LEAF_WETNESS && value8 >= VantageConstants::MIN_LEAF_WETNESS && value8 <= VantageConstants::MAX_LEAF_WETNESS)
+    if (value8 != INVALID_LEAF_WETNESS && value8 >= MIN_LEAF_WETNESS && value8 <= MAX_LEAF_WETNESS)
         measurement.setValue(static_cast<LeafWetness>(value8));
     else
         measurement.invalidate();
@@ -433,7 +435,7 @@ const Measurement<SoilMoisture> &
 VantageDecoder::decodeSoilMoisture(const byte buffer[], int offset, Measurement<SoilMoisture> & measurement) {
     int value8 = BitConverter::toInt8(buffer, offset);
 
-    if (value8 != VantageConstants::INVALID_SOIL_MOISTURE)
+    if (value8 != INVALID_SOIL_MOISTURE)
         measurement.setValue(static_cast<SoilMoisture>(value8));
     else
         measurement.invalidate();

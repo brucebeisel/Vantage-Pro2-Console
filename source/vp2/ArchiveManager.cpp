@@ -18,10 +18,11 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "VantageProtocolConstants.h"
 #include "ArchivePacket.h"
 #include "ArchiveManager.h"
-
 #include "VantageWeatherStation.h"
+#include "Weather.h"
 
 using namespace std;
 
@@ -80,7 +81,7 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
     // list returns empty.
     //
     DateTime timeOfLastRecord = 0;
-    while (list.size() < VantageConstants::NUM_ARCHIVE_RECORDS) {
+    while (list.size() < ProtocolConstants::NUM_ARCHIVE_RECORDS) {
         stream.read(buffer, sizeof(buffer));
 
         if (stream.eof())

@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "VantageLogger.h"
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 class ArchivePacket;

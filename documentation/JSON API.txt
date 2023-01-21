@@ -29,8 +29,8 @@ Date/Time command:
 { "response" : "get-date-time", "result" : "success", "data" : "2023-03-21 14:23:58" }
 
 Firmware query:
-{ "command"  : "firmware-query" }
-{ "response" : "firmware-query", "result" : "success", "data" : "2.54 Apr 23, 2022" }
+{ "command"  : "query-firmware" }
+{ "response" : "query-firmware", "result" : "success", "data" : "2.54 Apr 23, 2022" }
 
 Console diagnostics:
 { "command"  : "console-diagnostics" }
@@ -42,8 +42,20 @@ Console recovery and clear CRC error count
 { "response" : "console-recovery-clear-crc-error-count", "result" : "success" }
 
 Receiver list query
-{ "command"  : "receiver-list-query" }
-{ "response"  : "receiver-list-query", "result" : "success", "data" : { "receiver-list" : [ 1, 2, 4] } }
+{ "command"  : "query-receiver-list" }
+{ "response"  : "query-receiver-list", "result" : "success", "data" : { "receiver-list" : [ 1, 2, 4] } }
+
+Units command
+{ "command"  : "update-units" }
+{ "response"  : "update-units", "result" : "success", "data" : { "receiver-list" : [ 1, 2, 4] } }
+
+Units command
+{ "command"  : "query-units" }
+{ "response"  : "query-units", "result" : "success", "data" : { "receiver-list" : [ 1, 2, 4] } }
+
+Archive query
+{ "command"  : "query-archive", "arguments" { "start-date" : "2021-12-13T13:53:00", "end-date" :  "2021-12-13T14:53:00" } }
+{ "response"  : "query-archive", "result" : "success", "data" :  [{lots of data 1},{lots of data 2}, ...] }
 
 
 1. Test Commands

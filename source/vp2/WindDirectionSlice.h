@@ -19,7 +19,7 @@
 
 #include <vector>
 #include <iostream>
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

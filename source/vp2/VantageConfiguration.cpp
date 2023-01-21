@@ -44,10 +44,10 @@ VantageConfiguration::updatePosition(double latitude, double longitude, int elev
     bool success = false;
     char buffer[4];
 
-    int value = std::lround(latitude * VantageConstants::LAT_LON_SCALE);
+    int value = std::lround(latitude * LAT_LON_SCALE);
     BitConverter::getBytes(value, buffer, 0, 2);
 
-    value = std::lround(longitude * VantageConstants::LAT_LON_SCALE);
+    value = std::lround(longitude * LAT_LON_SCALE);
     BitConverter::getBytes(value, buffer, 2, 2);
 
     if (station.eepromBinaryWrite(VantageConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
@@ -68,8 +68,8 @@ VantageConfiguration::retrievePosition(double & latitude, double & longitude, in
     byte positionData[6];
 
     if (station.eepromBinaryRead(VantageConstants::EE_LATITUDE_ADDRESS, 6, positionData)) {
-        latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / VantageConstants::LAT_LON_SCALE;  // TBD Does BitConverter::toInt16 handle signed values?
-        longitude = static_cast<double>(BitConverter::toInt16(positionData, 2)) / VantageConstants::LAT_LON_SCALE;
+        latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / LAT_LON_SCALE;  // TBD Does BitConverter::toInt16 handle signed values?
+        longitude = static_cast<double>(BitConverter::toInt16(positionData, 2)) / LAT_LON_SCALE;
         consoleElevation = BitConverter::toInt16(positionData, 4);
         success = true;
     }
@@ -218,13 +218,13 @@ VantageConfiguration::saveRainCollectorSize(RainCupSizeType rainCupType) {
 
     switch (rainCupType) {
         case RainCupSizeType::POINT_01_INCH:
-            rainCollectorSize = VantageConstants::POINT_01_INCH_SIZE;
+            rainCollectorSize = ProtocolConstants::POINT_01_INCH_SIZE;
             break;
         case ProtocolConstants::RainCupSizeType::POINT_2_MM:
-            rainCollectorSize = VantageConstants::POINT_2_MM_SIZE;
+            rainCollectorSize = ProtocolConstants::POINT_2_MM_SIZE;
             break;
         case RainCupSizeType::POINT_1_MM:
-            rainCollectorSize = VantageConstants::POINT_1_MM_SIZE;
+            rainCollectorSize = ProtocolConstants::POINT_1_MM_SIZE;
             break;
         default:
             logger.log(VantageLogger::VANTAGE_WARNING) << "Rain collector size type not valid. Using .01 inches as default" << endl;

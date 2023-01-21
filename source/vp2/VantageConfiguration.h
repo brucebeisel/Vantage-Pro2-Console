@@ -21,7 +21,7 @@
 #include "Sensor.h"
 #include "VantageWeatherStation.h"
 #include "VantageProtocolConstants.h"
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 
 namespace vws {

@@ -166,7 +166,7 @@ HiLowPacket::formatXML() const {
     ss << rainRate.formatXML(false);
     ss << "</rainfallRate>" << endl;
     ss << "<extraTemperatures>" << endl;
-    for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++) {
+    for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++) {
         if (extraTemperature[i].isValid()) {
             ss << "<extraTemperature>";
             ss << "    <index>" << i << "</index>" << endl;
@@ -324,7 +324,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     // Extra temperatures section
     //
-    for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++) {
+    for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++) {
         extraTemperature[i].lows.dayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + i);
         extraTemperature[i].highs.dayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + i);
         extraTemperature[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 156 + (i * 2));
@@ -338,8 +338,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     // Soil temperatures section
     //
-    int offset = VantageConstants::MAX_EXTRA_TEMPERATURES;
-    for (int i = 0; i < VantageConstants::MAX_SOIL_TEMPERATURES; i++) {
+    int offset = ProtocolConstants::MAX_EXTRA_TEMPERATURES;
+    for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++) {
         soilTemperature[i].lows.dayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + offset + i);
         soilTemperature[i].highs.dayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + offset + i);
         soilTemperature[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 156 + (offset * 2) + (i * 2));
@@ -352,8 +352,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
 
     //
     // Leaf temperature
-    offset = VantageConstants::MAX_EXTRA_TEMPERATURES + VantageConstants::MAX_SOIL_TEMPERATURES;
-    for (int i = 0; i < VantageConstants::MAX_LEAF_TEMPERATURES; i++) {
+    offset = ProtocolConstants::MAX_EXTRA_TEMPERATURES + ProtocolConstants::MAX_SOIL_TEMPERATURES;
+    for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++) {
         leafTemperature[i].lows.dayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + offset + i);
         leafTemperature[i].highs.dayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + offset + i);
         leafTemperature[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 156 + (offset * 2) + (i * 2));
@@ -379,7 +379,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     // Extra humidity section
     //
-    for (int i = 0; i < VantageConstants::MAX_EXTRA_HUMIDITIES; i++) {
+    for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++) {
         extraHumidity[i].lows.dayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 277 + i);
         extraHumidity[i].highs.dayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 285 + i);
         extraHumidity[i].lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 309 + i);
@@ -393,7 +393,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     // Soil moisture section
     //
-    for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++) {
+    for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         soilMoisture[i].highs.dayExtremeValue     = VantageDecoder::decodeSoilMoisture(buffer, 356 +i);
         soilMoisture[i].highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 360 + i);
         soilMoisture[i].lows.dayExtremeValue      = VantageDecoder::decodeSoilMoisture(buffer, 368 +i);
@@ -407,7 +407,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     // Leaf wetness section
     //
-    for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++) {
+    for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         leafWetness[i].highs.dayExtremeValue     = VantageDecoder::decodeLeafWetness(buffer, 396 +i);
         leafWetness[i].highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 400 + i);
         leafWetness[i].lows.dayExtremeValue      = VantageDecoder::decodeLeafWetness(buffer, 408 +i);

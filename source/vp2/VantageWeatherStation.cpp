@@ -23,6 +23,7 @@
 #include <math.h>
 #include <sstream>
 #include <cstring>
+#include "VantageProtocolConstants.h"
 #include "VantageConstants.h"
 #include "HiLowPacket.h"
 #include "LoopPacket.h"
@@ -31,6 +32,7 @@
 #include "BitConverter.h"
 #include "ProtocolException.h"
 #include "VantageWeatherStation.h"
+#include "Weather.h"
 
 using namespace std;
 
@@ -248,7 +250,7 @@ VantageWeatherStation::retrieveReceiverList(std::vector<StationId> * sensorStati
 
     stationIds.clear();
 
-    for (int i = 0; i < VantageConstants::MAX_STATION_ID; i++) {
+    for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
         if (stations & (1 << i) != 0) {
             if (sensorStations != nullptr)
                 sensorStations->push_back(i + 1);
@@ -396,7 +398,7 @@ bool
 VantageWeatherStation::putYearlyET(Evapotranspiration et) {
     ostringstream ss;
 
-    int argument = round(et * VantageConstants::MONTH_YEAR_ET_SCALE);
+    int argument = round(et * MONTH_YEAR_ET_SCALE);
 
     ss << PUT_YEARLY_ET_CMD << " " << argument;
 

@@ -17,7 +17,7 @@
 #ifndef VANTAGE_DECODER_H
 #define VANTAGE_DECODER_H
 
-#include "Weather.h"
+#include "WeatherTypes.h"
 #include "Measurement.h"
 #include "VantageLogger.h"
 

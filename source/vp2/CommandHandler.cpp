@@ -79,6 +79,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "update-units") {
             handleUpdateUnitsCommand(commandName, argumentList, responseJson);
         }
+        else if (commandName == "query-units") {
+            handleQueryUnitsCommand(commandName, responseJson);
+        }
     }
     catch (const std::exception & e) {
         cout << "Exception: " << e.what() << endl;
@@ -140,11 +143,11 @@ CommandHandler::handleQueryReceiverListCommand(const std::string & commandName, 
 void
 CommandHandler::handleUpdateUnitsCommand(const std::string & commandName, const vector<pair<string,string>> & argumentList, std::string & response) {
 
-    BarometerUnits baroUnits = BarometerUnits::IN_HG;
-    TemperatureUnits temperatureUnits = TemperatureUnits::TENTH_DEGREES;
-    ElevationUnits elevationUnits = ElevationUnits::FEET;
-    RainUnits rainUnits = RainUnits::INCHES;
-    WindUnits windUnits = WindUnits::MPH;
+    BarometerUnits baroUnits;
+    TemperatureUnits temperatureUnits;
+    ElevationUnits elevationUnits;
+    RainUnits rainUnits;
+    WindUnits windUnits;
 
     //
     // First get the current units settings, then change the ones in the JSON command
@@ -153,21 +156,64 @@ CommandHandler::handleUpdateUnitsCommand(const std::string & commandName, const 
 
     for (pair<string,string> arg : argumentList) {
         if (arg.first == "baro-units") {
+            baroUnits = barometerUnitsEnum.stringToValue(arg.second);
         }
         else if (arg.first == "temperature-units") {
+            temperatureUnits = temperatureUnitsEnum.stringToValue(arg.second);
         }
         else if (arg.first == "elevation-units") {
+            elevationUnits = elevationUnitsEnum.stringToValue(arg.second);
         }
         else if (arg.first == "rain-units") {
             rainUnits = rainUnitsEnum.stringToValue(arg.second);
         }
         else if (arg.first == "wind-units") {
+            windUnits = windUnitsEnum.stringToValue(arg.second);
         }
         else {
              // Error
         }
     }
 
-    configurator.updateUnitsSettings(baroUnits, temperatureUnits, elevationUnits, rainUnits, windUnits);
+    ostringstream oss;
+    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    if (configurator.updateUnitsSettings(baroUnits, temperatureUnits, elevationUnits, rainUnits, windUnits))
+        oss << " \"success\"";
+    else
+        oss << " \"failure\"";
+
+    oss << " }";
+
+    response = oss.str();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryUnitsCommand(const std::string & commandName, std::string & response) {
+    BarometerUnits baroUnits;
+    TemperatureUnits temperatureUnits;
+    ElevationUnits elevationUnits;
+    RainUnits rainUnits;
+    WindUnits windUnits;
+
+    ostringstream oss;
+    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+
+    if (configurator.retrieveUnitsSettings(baroUnits, temperatureUnits, elevationUnits, rainUnits, windUnits)) {
+        oss << "\"success\", \"data\" : { ";
+        oss << "\"baro-units\" : \"" << barometerUnitsEnum.valueToString(baroUnits) << "\", ";
+        oss << "\"temperature-units\" : \"" << temperatureUnitsEnum.valueToString(temperatureUnits) << "\", ";
+        oss << "\"elevation-units\" : \"" << elevationUnitsEnum.valueToString(elevationUnits) << "\", ";
+        oss << "\"rain-units\" : \"" << rainUnitsEnum.valueToString(rainUnits) << "\", ";
+        oss << "\"wind-units\" : \"" << windUnitsEnum.valueToString(windUnits) << "\" }";
+    }
+    else
+        oss << " \"failure\"";
+
+    oss << " }";
+
+    response = oss.str();
 }
+
+} // End namespace

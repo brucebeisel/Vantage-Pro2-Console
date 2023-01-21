@@ -19,9 +19,10 @@
 
 #include <string>
 
-#include "VantageConstants.h"
+#include "VantageProtocolConstants.h"
 #include "VantageLogger.h"
-#include "Weather.h"
+#include "WeatherTypes.h"
+#include "Measurement.h"
 
 namespace vws {
 /**
@@ -216,12 +217,12 @@ private:
     HighValues<UvIndex>         uvIndex;
     HighValues<Rainfall>        rainRate;
     Rainfall                    highHourRainRate;
-    HighLowValues<Temperature>  extraTemperature[VantageConstants::MAX_EXTRA_TEMPERATURES];
-    HighLowValues<Temperature>  soilTemperature[VantageConstants::MAX_SOIL_TEMPERATURES];
-    HighLowValues<Temperature>  leafTemperature[VantageConstants::MAX_LEAF_TEMPERATURES];
-    HighLowValues<Humidity>     extraHumidity[VantageConstants::MAX_EXTRA_HUMIDITIES];
-    HighLowValues<SoilMoisture> soilMoisture[VantageConstants::MAX_SOIL_MOISTURES];
-    HighLowValues<LeafWetness>  leafWetness[VantageConstants::MAX_LEAF_WETNESSES];
+    HighLowValues<Temperature>  extraTemperature[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
+    HighLowValues<Temperature>  soilTemperature[ProtocolConstants::MAX_SOIL_TEMPERATURES];
+    HighLowValues<Temperature>  leafTemperature[ProtocolConstants::MAX_LEAF_TEMPERATURES];
+    HighLowValues<Humidity>     extraHumidity[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
+    HighLowValues<SoilMoisture> soilMoisture[ProtocolConstants::MAX_SOIL_MOISTURES];
+    HighLowValues<LeafWetness>  leafWetness[ProtocolConstants::MAX_LEAF_WETNESSES];
     VantageLogger               logger;
 };
 }

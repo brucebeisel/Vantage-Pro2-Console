@@ -52,6 +52,8 @@ private:
 
     void handleUpdateUnitsCommand(const std::string & commandName, const std::vector<std::pair<std::string,std::string>> & argumentList, std::string & response);
 
+    void handleQueryUnitsCommand(const std::string & commandName, std::string & response);
+
     VantageWeatherStation & station;
     VantageConfiguration & configurator;
 };

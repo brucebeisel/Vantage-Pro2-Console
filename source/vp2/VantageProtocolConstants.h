@@ -17,7 +17,7 @@
 #ifndef VANTAGE_PROTOCOL_CONSTANTS
 #define VANTAGE_PROTOCOL_CONSTANTS
 #include <string>
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 namespace vws::ProtocolConstants {
 
@@ -188,8 +188,8 @@ enum class BarometerUnits {
 };
 
 enum class TemperatureUnits {
-    DEGREES = 0,
-    TENTH_DEGREES = 1,
+    FAHRENHEIT = 0,
+    TENTH_FAHRENHEIT = 1,
     CELSIUS = 2,
     TENTH_CELSIUS = 3
 };
@@ -247,6 +247,7 @@ static constexpr int PARTLY_CLOUDY_CHANCE_OF_RAIN_OR_SNOW_FORECAST = PARTLY_CLOU
 //
 // Maximum counts
 //
+static constexpr int NUM_ARCHIVE_RECORDS = 2560;
 static constexpr int MAX_STATION_ID = 8;
 static constexpr int MAX_INTEGRATED_SENSOR_STATIONS = 1;
 static constexpr int MAX_ANEMOMETER_STATIONS = 1;
@@ -268,10 +269,6 @@ static constexpr int MAX_LEAF_TEMPERATURES = 4;
 static constexpr int MAX_LEAF_WETNESSES = 4;
 
 //
-// Common constants
-//
-
-//
 // Scales
 //
 static const vws::Temperature        TEMPERATURE_16BIT_SCALE = 10.0;
@@ -286,11 +283,6 @@ static const vws::Evapotranspiration DAY_ET_SCALE = 1000.0;
 static const vws::Evapotranspiration MONTH_YEAR_ET_SCALE = 100.0;
 static const vws::Rainfall           STORM_RAIN_SCALE = 100.0;
 static const double                  LAT_LON_SCALE = 10.0;
-
-static constexpr int NORTH_HEADING_VALUE = 360;
-static constexpr int NO_STORM_ACTIVE_DATE = -1;
-static constexpr int MIN_LEAF_WETNESS = 0;
-static constexpr int MAX_LEAF_WETNESS = 15;
 
 //
 // Invalid values, that is the value that is reported when the console has no value
@@ -313,7 +305,21 @@ static constexpr int INVALID_SOLAR_RADIATION = 32767;
 static constexpr int INVALID_THSW = 32767;
 static constexpr int INVALID_ET = 0;
 
+//
+// Limits
+//
+static constexpr int NORTH_HEADING_VALUE = 360;
+static constexpr int NO_STORM_ACTIVE_DATE = -1;
+static constexpr int MIN_LEAF_WETNESS = 0;
+static constexpr int MAX_LEAF_WETNESS = 15;
 
+
+//
+// The Vantage protocol has no concept of a wind slice.
+// TODO Move this elsewhere
+//
+static constexpr int NUM_WIND_DIR_SLICES = 16;
+static constexpr double DEGREES_PER_SLICE = 360.0 / NUM_WIND_DIR_SLICES;
 }
 
 #endif

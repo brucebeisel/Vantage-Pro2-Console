@@ -18,7 +18,8 @@
 #define LOOP2_PACKET_H
 
 #include "VantageLogger.h"
-#include "Weather.h"
+#include "WeatherTypes.h"
+#include "Measurement.h"
 
 namespace vws {
 
@@ -28,6 +29,24 @@ namespace vws {
 class Loop2Packet {
 public:
     static const int LOOP2_PACKET_SIZE = 99;
+    //
+    // LOOP packet forecast icons
+    //
+    static const short RAIN_BIT = 0x1;
+    static const short CLOUDY_BIT = 0x2;
+    static const short PARTLY_CLOUDY_BIT = 0x4;
+    static const short SUNNY_BIT = 0x8;
+    static const short SNOW_BIT = 0x10;
+
+    static const int MOSTLY_CLEAR_FORECAST = SUNNY_BIT;
+    static const int PARTLY_CLOUDY_FORECAST = PARTLY_CLOUDY_BIT | CLOUDY_BIT;
+    static const int MOSTLY_CLOUDY_FORECAST = CLOUDY_BIT;
+    static const int MOSTLY_CLOUDY_CHANCE_OF_RAIN_FORECAST = CLOUDY_BIT | RAIN_BIT;
+    static const int MOSTLY_CLOUDY_CHANCE_OF_SNOW_FORECAST = CLOUDY_BIT | SNOW_BIT;
+    static const int PARTLY_CLOUDY_CHANCE_OF_RAIN_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT;
+    static const int PARTLY_CLOUDY_CHANCE_OF_SNOW_FORECAST = PARTLY_CLOUDY_BIT | SNOW_BIT;
+    static const int PARTLY_CLOUDY_CHANCE_OF_RAIN_OR_SNOW_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT;
+
 
     /**
      * Constructor.

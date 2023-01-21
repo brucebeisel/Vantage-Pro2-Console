@@ -20,7 +20,6 @@
 #include "BitConverter.h"
 #include "UnitConverter.h"
 #include "LoopPacket.h"
-#include "VantageConstants.h"
 #include "VantageProtocolConstants.h"
 #include "VantageCRC.h"
 #include "VantageDecoder.h"
@@ -125,18 +124,18 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     windSpeed10MinuteAverage = VantageDecoder::decodeWindSpeed(packetData, 15);
     windDirection = VantageDecoder::decodeWindDirection(packetData, 16);
 
-    for (int i = 0; i < VantageConstants::MAX_EXTRA_TEMPERATURES; i++)
+    for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++)
         VantageDecoder::decode8BitTemperature(packetData, 18 + i, extraTemperature[i]);
 
-    for (int i = 0; i < VantageConstants::MAX_SOIL_TEMPERATURES; i++)
+    for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++)
         VantageDecoder::decode8BitTemperature(packetData, 25 + i, soilTemperature[i]);
 
-    for (int i = 0; i < VantageConstants::MAX_LEAF_TEMPERATURES; i++)
+    for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++)
         VantageDecoder::decode8BitTemperature(packetData, 29 + i, leafTemperature[i]);
 
     VantageDecoder::decodeHumidity(packetData, 33, outsideHumidity);
 
-    for (int i = 0; i < VantageConstants::MAX_EXTRA_HUMIDITIES; i++)
+    for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++)
         VantageDecoder::decodeHumidity(packetData, 34 + i, extraHumidity[i]);
 
     rainRate = VantageDecoder::decodeRain(packetData, 41);
@@ -155,10 +154,10 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     monthET = VantageDecoder::decodeMonthYearET(packetData, 58);
     yearET = VantageDecoder::decodeMonthYearET(packetData, 60);
 
-    for (int i = 0; i < VantageConstants::MAX_SOIL_MOISTURES; i++)
+    for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++)
         VantageDecoder::decodeSoilMoisture(packetData, 62 + i, soilMoisture[i]);
 
-    for (int i = 0; i < VantageConstants::MAX_LEAF_WETNESSES; i++)
+    for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++)
         VantageDecoder::decodeLeafWetness(packetData, 66 + i, leafWetness[i]);
 
     for (int i = 0; i < 16; i++) {

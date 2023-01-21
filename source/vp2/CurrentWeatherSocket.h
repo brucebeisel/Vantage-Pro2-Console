@@ -21,7 +21,6 @@
 #include <string>
 
 #include "VantageLogger.h"
-#include "Weather.h"
 #include "CurrentWeather.h"
 #include "CurrentWeatherPublisher.h"
 #include "DominantWindDirections.h"

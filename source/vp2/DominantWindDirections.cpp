@@ -23,6 +23,7 @@
 #include <iomanip>
 
 #include "VantageLogger.h"
+#include "Weather.h"
 
 using namespace std;
 

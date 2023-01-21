@@ -20,7 +20,7 @@
 #include <string>
 
 #include "VantageLogger.h"
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

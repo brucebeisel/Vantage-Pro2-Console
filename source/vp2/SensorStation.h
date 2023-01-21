@@ -21,7 +21,7 @@
 #include <vector>
 #include <string>
 #include "Sensor.h"
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

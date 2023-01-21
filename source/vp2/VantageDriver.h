@@ -22,7 +22,7 @@
 #endif
 
 #include <string>
-#include "Weather.h"
+#include "WeatherTypes.h"
 #include "ArchiveManager.h"
 #include "EventManager.h"
 #include "SensorStation.h"

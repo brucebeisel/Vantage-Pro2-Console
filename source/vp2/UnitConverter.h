@@ -17,7 +17,7 @@
 #ifndef UNIT_CONVERTER_H
 #define UNIT_CONVERTER_H
 
-#include "Weather.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 
