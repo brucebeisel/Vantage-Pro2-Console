@@ -20,7 +20,7 @@ main(int argc, char * argv[]) {
     vector<int> headings;
     struct tm tm;
 
-    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
+    VantageLogger::setLogLevel(VANTAGE_DEBUG3);
     DominantWindDirections dominantWinds;
 
     memset(&tm, 0, sizeof(tm));

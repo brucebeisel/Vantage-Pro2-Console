@@ -1,6 +1,6 @@
 CC= g++
 #CXXFLAGS= -g -std=c++11
-CXXFLAGS= -g -Wno-psabi
+CXXFLAGS= -g -I../vp2 -std=c++20 -Wno-psabi
 
 SRCS=\
 	DominantWindTest.cpp
@@ -17,13 +17,19 @@ $(OBJDIR)/%.o : %.cpp
 DOMWINDOBJS=\
 	$(VP2TESTOBJDIR)/DominantWindDirections.o \
 	$(VP2TESTOBJDIR)/WindDirectionSlice.o \
-	$(VP2TESTOBJDIR)/VP2Logger.o \
+	$(VP2TESTOBJDIR)/VantageLogger.o \
 	$(VP2TESTOBJDIR)/Weather.o 
 	
-all: DominantWindTest
+ENUMOBJS=\
+	$(VP2TESTOBJDIR)/Weather.o 
+	
+all: DominantWindTest EnumTest
 
 DominantWindTest: $(OBJDIR) $(OBJDIR)/DominantWindTest.o
-	$(CC) -g -o DominantWindTest $(OBJS) $(DOMWINDOBJS)
+	$(CC) -g -o DominantWindTest $(OBJDIR)/DominantWindTest.o $(DOMWINDOBJS)
+	
+EnumTest: $(OBJDIR) $(OBJDIR)/EnumTest.o
+	$(CC) -g -o EnumTest $(OBJDIR)/EnumTest.o $(ENUMOBJS)
 
 clean:
 	rm $(OBJS)

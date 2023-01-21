@@ -1,6 +1,6 @@
 CC= g++
 #CXXFLAGS= -g -std=c++11
-CXXFLAGS= -g -Wno-psabi
+CXXFLAGS= -g -std=c++20 -Wno-psabi
 
 SRCS=\
 	Alarm.cpp \
@@ -44,7 +44,7 @@ OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
 $(OBJDIR)/%.o : %.cpp
-	$(CC) $(CXXFLAGS) $(INCDIRS) -std=c++20 -c $< -o $@
+	$(CC) $(CXXFLAGS) $(INCDIRS) -c $< -o $@
 	
 all: vp2
 

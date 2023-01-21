@@ -19,9 +19,21 @@ template<typename T, int Count>
 class VantageEnum {
 public:
 
+    /**
+     * Constructor.
+     */
     VantageEnum() {}
+
+    /**
+     * Destructor.
+     */
     virtual ~VantageEnum() {};
 
+    /**
+     * Return the list of valid enum values for an enumeration.
+     *
+     * @param value A list into which the values will be copied
+     */
     void enumValues(std::vector<T> & values) {
         const NameValuePair<T> * mappings = getMappings();
         values.clear();
@@ -30,6 +42,11 @@ public:
         }
     }
 
+    /**
+     * Return the list of valid enum strings for an enumeration.
+     *
+     * @param value A list into which the strings will be copied
+     */
     void enumStrings(std::vector<std::string> & strings) {
         const NameValuePair<T> * mappings = getMappings();
         strings.clear();
@@ -46,7 +63,7 @@ public:
      * @param value The enum value
      * @return The string representation of the enum value, or "Invalid Enum Value"
      */
-    const std::string & valueToString(T value) const {
+    std::string valueToString(T value) const {
         const NameValuePair<T> * mappings = getMappings();
         for (int i = 0; i < Count; i++) {
             if (mappings[i].second == value)
@@ -63,18 +80,15 @@ public:
      * @return The enumerated value
      * @throw invalid_argument The provided string did not map to an enumerated value
      */
-    T stringToValue(const std::string & valueString) const { //throw (std::invalid_argument){
+    T stringToValue(const std::string & valueString) const {
         const NameValuePair<T> * mappings = getMappings();
         for (int i = 0; i < Count; i++) {
             if (mappings[i].first == valueString)
                 return mappings[i].second;
         }
 
-        throw std::invalid_argument("Invalid enum value");
+        throw std::invalid_argument("Invalid enum value string");
     }
-
-
-private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,11 +111,16 @@ public:
 
 static ExtremePeriodEnum extremePeriodEnum;
 
+std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::ExtremePeriod value) {
+    os << extremePeriodEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 static const NameValuePair<ProtocolConstants::RainUnits> ruMappings[] = {
-    { "inches", RainUnits::INCHES },
-    { "millimeters", RainUnits::MILLIMETERS }
+    { "inches", ProtocolConstants::RainUnits::INCHES },
+    { "millimeters", ProtocolConstants::RainUnits::MILLIMETERS }
 };
 
 class RainUnitsEnum : public VantageEnum<ProtocolConstants::RainUnits,sizeof(ruMappings)/sizeof(ruMappings[0])>  {
@@ -116,27 +135,39 @@ public:
 
 static RainUnitsEnum rainUnitsEnum;
 
+std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::RainUnits value) {
+    os << rainUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 static const NameValuePair<ProtocolConstants::BarometerUnits> buMappings[] = {
-    { "inHg", BarometerUnits::IN_HG },
-    { "mm", BarometerUnits::MILLIMETER },
-    { "hPa", BarometerUnits::HPA },
-    { "mbar", BarometerUnits::MILLIBAR }
+    { "inHg", ProtocolConstants::BarometerUnits::IN_HG },
+    { "mm", ProtocolConstants::BarometerUnits::MILLIMETER },
+    { "hPa", ProtocolConstants::BarometerUnits::HPA },
+    { "mbar", ProtocolConstants::BarometerUnits::MILLIBAR }
 };
 
-class BarometerUnitsEnum : public VantageEnum<ProtocolConstants::BarometerUnits,sizeof(ruMappings)/sizeof(ruMappings[0])>  {
+class BarometerUnitsEnum : public VantageEnum<ProtocolConstants::BarometerUnits,sizeof(buMappings)/sizeof(buMappings[0])>  {
 public:
     BarometerUnitsEnum() {};
     virtual ~BarometerUnitsEnum() {};
 
-    virtual const NameValuePair<BarometerUnits> * getMappings() const {
+    virtual const NameValuePair<ProtocolConstants::BarometerUnits> * getMappings() const {
         return buMappings;
     }
 };
 
 static BarometerUnitsEnum barometerUnitsEnum;
+
+std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::BarometerUnits value) {
+    os << barometerUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
 
 }
 
