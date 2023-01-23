@@ -52,7 +52,8 @@
  VantageProtocolConstants.h VantageCRC.h VantageDecoder.h
 ../../target/VP2/LoopPacket.o: LoopPacket.cpp BitConverter.h \
  WeatherTypes.h UnitConverter.h LoopPacket.h Measurement.h \
- VantageProtocolConstants.h VantageLogger.h VantageCRC.h VantageDecoder.h
+ VantageProtocolConstants.h VantageLogger.h VantageEnums.h VantageCRC.h \
+ VantageDecoder.h
 ../../target/VP2/main.o: main.cpp VantageLogger.h ArchiveManager.h \
  WeatherTypes.h CommandSocket.h VantageDriver.h EventManager.h \
  SensorStation.h Sensor.h LoopPacket.h Measurement.h \

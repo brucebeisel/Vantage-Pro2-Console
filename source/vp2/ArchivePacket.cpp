@@ -135,7 +135,7 @@ ArchivePacket::extractArchiveDate() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-ArchivePacket::formatMessage() const {
+ArchivePacket::formatXML() const {
     ostringstream ss;
     ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
     ss << "<historicalRecord>";

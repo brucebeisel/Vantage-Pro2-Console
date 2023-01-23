@@ -30,39 +30,6 @@ namespace vws {
  */
 class LoopPacket {
 public:
-    /**
-     * The trend of the barometer as reported in the LOOP packet
-     */
-    enum BaroTrend {
-        STEADY =            0,
-        RISING_SLOWLY =    20,
-        RISING_RAPIDLY =   60,
-        FALLING_RAPIDLY = 196,
-        FALLING_SLOWLY =  236,
-        UNKNOWN =         255
-    };
-
-    /**
-     * The forecast reported by the LOOP packet.
-     */
-    static const unsigned int RAIN_BIT          = 0x1;
-    static const unsigned int MOSTLY_CLOUDY_BIT = 0x2;
-    static const unsigned int PARTLY_CLOUDY_BIT = 0x6;
-    static const unsigned int SUNNY_BIT         = 0x8;
-    static const unsigned int SNOW_BIT          = 0x10;
-
-    enum Forecast {
-        SUNNY =                                 SUNNY_BIT,
-        PARTLY_CLOUDY =                         PARTLY_CLOUDY_BIT,
-        MOSTLY_CLOUDY =                         MOSTLY_CLOUDY_BIT,
-        MOSTLY_CLOUDY_WITH_RAIN =               MOSTLY_CLOUDY_BIT | RAIN_BIT,
-        MOSTLY_CLOUDY_WITH_SNOW =               MOSTLY_CLOUDY_BIT | SNOW_BIT,
-        MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW =       MOSTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT,
-        PARTLY_CLOUDY_WITH_RAIN_LATER =         PARTLY_CLOUDY_BIT | RAIN_BIT,
-        PARTLY_CLOUDY_WITH_SNOW_LATER =         PARTLY_CLOUDY_BIT | SNOW_BIT,
-        PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT
-    };
-
     static const size_t ALARM_BITS = 16 * 8;
     typedef std::bitset<ALARM_BITS> AlarmBitSet;
 
@@ -87,8 +54,8 @@ public:
     bool                                    decodeLoopPacket(byte buffer[]);
 
     const byte *                            getPacketData() const;
-    BaroTrend                               getBaroTrend() const;
-    std::string                             getBaroTrendString() const;
+    ProtocolConstants::BarometerTrend       getBarometerTrend() const;
+    std::string                             getBarometerTrendString() const;
     int                                     getPacketType() const;
     int                                     getNextRecord() const;
     const Measurement<Pressure> &           getBarometricPressure() const;
@@ -120,7 +87,7 @@ public:
     const AlarmBitSet &                     getAlarmBits() const;
     bool                                    isTransmitterBatteryGood(int index) const;
     float                                   getConsoleBatteryVoltage() const;
-    Forecast                                getForecastIcon() const;
+    ProtocolConstants::Forecast             getForecastIcon() const;
     std::string                             getForecastIconString() const;
     int                                     getForecastRuleIndex() const;
     DateTime                                getSunriseTime() const;
@@ -129,43 +96,86 @@ public:
 private:
     static const int LOOP_PACKET_TYPE = 0;
 
-    byte                            packetData[LOOP_PACKET_SIZE];
-    BaroTrend                       baroTrend;
-    int                             packetType;
-    int                             nextRecord;
-    Measurement<Pressure>           barometricPressure;
-    Measurement<Temperature>        insideTemperature;
-    Measurement<Humidity>           insideHumidity;
-    Measurement<Temperature>        outsideTemperature;
-    Measurement<Speed>              windSpeed;
-    Measurement<Speed>              windSpeed10MinuteAverage;
-    Measurement<Heading>            windDirection;
-    Measurement<Temperature>        extraTemperature[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
-    Measurement<Temperature>        soilTemperature[ProtocolConstants::MAX_SOIL_TEMPERATURES];
-    Measurement<Temperature>        leafTemperature[ProtocolConstants::MAX_LEAF_TEMPERATURES];
-    Measurement<Humidity>           outsideHumidity;
-    Measurement<Humidity>           extraHumidity[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
-    Rainfall                        rainRate;
-    Measurement<UvIndex>            uvIndex;
-    Measurement<SolarRadiation>     solarRadiation;
-    Rainfall                        stormRain;
-    DateTime                        stormStart;
-    Rainfall                        dayRain;
-    Rainfall                        monthRain;
-    Rainfall                        yearRain;
-    Measurement<Evapotranspiration> dayET;
-    Measurement<Evapotranspiration> monthET;
-    Measurement<Evapotranspiration> yearET;
-    Measurement<SoilMoisture>       soilMoisture[ProtocolConstants::MAX_SOIL_MOISTURES];
-    Measurement<LeafWetness>        leafWetness[ProtocolConstants::MAX_LEAF_WETNESSES];
-    AlarmBitSet                     alarmBits;
-    int                             transmitterBatteryStatus;
-    float                           consoleBatteryVoltage;
-    Forecast                        forecastIcon;
-    int                             forecastRuleIndex;
-    DateTime                        sunriseTime;
-    DateTime                        sunsetTime;
-    VantageLogger                   logger;
+    static constexpr int L_OFFSET = 0;
+    static constexpr int FIRST_O_OFFSET = 1;
+    static constexpr int SECOND_O_OFFSET = 2;
+    static constexpr int BAROMETER_TREND_OFFSET = 3;
+    static constexpr int PACKET_TYPE_OFFSET = 4;
+    static constexpr int NEXT_RECORD_OFFSET = 5;
+    static constexpr int BAROMETER_OFFSET = 7;
+    static constexpr int INSIDE_TEMPERATURE_OFFSET = 9;
+    static constexpr int INSIDE_HUMIDITY_OFFSET = 11;
+    static constexpr int OUTSIDE_TEMPERATURE_OFFSET = 12;
+    static constexpr int WIND_SPEED_OFFSET = 14;
+    static constexpr int TEN_MINUTE_AVG_WIND_SPEED_OFFSET = 15;
+    static constexpr int WIND_DIRECTION_OFFSET = 16;
+    static constexpr int EXTRA_TEMPERATURES_OFFSET = 18;
+    static constexpr int SOIL_TEMPERATURES_OFFSET = 25;
+    static constexpr int LEAF_TEMPERATURES_OFFSET = 29;
+    static constexpr int OUTSIDE_HUMIDITY_OFFSET = 33;
+    static constexpr int EXTRA_HUMIDITIES_OFFSET = 34;
+    static constexpr int RAIN_RATE_OFFSET = 41;
+    static constexpr int UV_INDEX_OFFSET = 43;
+    static constexpr int SOLAR_RADIATION_OFFSET = 44;
+    static constexpr int STORM_RAIN_OFFSET = 46;
+    static constexpr int STORM_START_DATE_OFFSET = 48;
+    static constexpr int DAY_RAIN_OFFSET = 50;
+    static constexpr int MONTH_RAIN_OFFSET = 52;
+    static constexpr int YEAR_RAIN_OFFSET = 54;
+    static constexpr int DAY_ET_OFFSET = 56;
+    static constexpr int MONTH_ET_OFFSET = 58;
+    static constexpr int YEAR_ET_OFFSET = 60;
+    static constexpr int SOIL_MOISTURES_OFFSET = 62;
+    static constexpr int LEAF_WETNESSES_OFFSET = 66;
+    static constexpr int ALARMS_OFFSET = 70;
+    static constexpr int TRANSMITTER_BATTERY_STATUS_OFFSET = 86;
+    static constexpr int CONSOLE_BATTERY_VOLTAGE_OFFSET = 87;
+    static constexpr int FORECAST_ICONS_OFFSET = 89;
+    static constexpr int FORECAST_RULE_NUMBER_OFFSET = 90;
+    static constexpr int SUNRISE_TIME_OFFSET = 91;
+    static constexpr int SUNSET_TIME_OFFSET = 93;
+    static constexpr int LINE_FEED_OFFSET = 95;
+    static constexpr int CARRIAGE_RETURN_OFFSET = 96;
+    static constexpr int CRC_OFFSET = 97;
+
+
+    byte                              packetData[LOOP_PACKET_SIZE];
+    ProtocolConstants::BarometerTrend barometerTrend;
+    int                               packetType;
+    int                               nextRecord;
+    Measurement<Pressure>             barometricPressure;
+    Measurement<Temperature>          insideTemperature;
+    Measurement<Humidity>             insideHumidity;
+    Measurement<Temperature>          outsideTemperature;
+    Measurement<Speed>                windSpeed;
+    Measurement<Speed>                windSpeed10MinuteAverage;
+    Measurement<Heading>              windDirection;
+    Measurement<Temperature>          extraTemperature[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
+    Measurement<Temperature>          soilTemperature[ProtocolConstants::MAX_SOIL_TEMPERATURES];
+    Measurement<Temperature>          leafTemperature[ProtocolConstants::MAX_LEAF_TEMPERATURES];
+    Measurement<Humidity>             outsideHumidity;
+    Measurement<Humidity>             extraHumidity[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
+    Rainfall                          rainRate;
+    Measurement<UvIndex>              uvIndex;
+    Measurement<SolarRadiation>       solarRadiation;
+    Rainfall                          stormRain;
+    DateTime                          stormStart;
+    Rainfall                          dayRain;
+    Rainfall                          monthRain;
+    Rainfall                          yearRain;
+    Measurement<Evapotranspiration>   dayET;
+    Measurement<Evapotranspiration>   monthET;
+    Measurement<Evapotranspiration>   yearET;
+    Measurement<SoilMoisture>         soilMoisture[ProtocolConstants::MAX_SOIL_MOISTURES];
+    Measurement<LeafWetness>          leafWetness[ProtocolConstants::MAX_LEAF_WETNESSES];
+    AlarmBitSet                       alarmBits;
+    int                               transmitterBatteryStatus;
+    float                             consoleBatteryVoltage;
+    ProtocolConstants::Forecast       forecastIcon;
+    int                               forecastRuleIndex;
+    DateTime                          sunriseTime;
+    DateTime                          sunsetTime;
+    VantageLogger                     logger;
 };
 }
 #endif

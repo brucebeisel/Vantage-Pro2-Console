@@ -60,7 +60,7 @@ ArchiveManager::synchronizeArchive() {
     }
 
     if (list.size() > 0)
-        cout << "Archive: " << list[list.size() - 1].formatMessage() << endl;
+        cout << "Archive: " << list[list.size() - 1].formatXML() << endl;
 
     return result;
 }

@@ -225,24 +225,39 @@ enum class Month {
     NOVEMBER = 11,
     DECEMBER = 12
 };
+/**
+ * The trend of the barometer as reported in the LOOP packet
+ */
+enum class BarometerTrend {
+    STEADY =            0,
+    RISING_SLOWLY =    20,
+    RISING_RAPIDLY =   60,
+    FALLING_RAPIDLY = 196,
+    FALLING_SLOWLY =  236,
+    UNKNOWN =         255
+};
+
 
 //
 // LOOP packet forecast icons
 //
 static constexpr short RAIN_BIT = 0x1;
-static constexpr short CLOUDY_BIT = 0x2;
+static constexpr short MOSTLY_CLOUDY_BIT = 0x2;
 static constexpr short PARTLY_CLOUDY_BIT = 0x4;
 static constexpr short SUNNY_BIT = 0x8;
 static constexpr short SNOW_BIT = 0x10;
 
-static constexpr int MOSTLY_CLEAR_FORECAST = SUNNY_BIT;
-static constexpr int PARTLY_CLOUDY_FORECAST = PARTLY_CLOUDY_BIT | CLOUDY_BIT;
-static constexpr int MOSTLY_CLOUDY_FORECAST = CLOUDY_BIT;
-static constexpr int MOSTLY_CLOUDY_CHANCE_OF_RAIN_FORECAST = CLOUDY_BIT | RAIN_BIT;
-static constexpr int MOSTLY_CLOUDY_CHANCE_OF_SNOW_FORECAST = CLOUDY_BIT | SNOW_BIT;
-static constexpr int PARTLY_CLOUDY_CHANCE_OF_RAIN_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT;
-static constexpr int PARTLY_CLOUDY_CHANCE_OF_SNOW_FORECAST = PARTLY_CLOUDY_BIT | SNOW_BIT;
-static constexpr int PARTLY_CLOUDY_CHANCE_OF_RAIN_OR_SNOW_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT;
+enum class Forecast {
+    SUNNY =                                 SUNNY_BIT,
+    PARTLY_CLOUDY =                         PARTLY_CLOUDY_BIT,
+    MOSTLY_CLOUDY =                         MOSTLY_CLOUDY_BIT,
+    MOSTLY_CLOUDY_WITH_RAIN =               MOSTLY_CLOUDY_BIT | RAIN_BIT,
+    MOSTLY_CLOUDY_WITH_SNOW =               MOSTLY_CLOUDY_BIT | SNOW_BIT,
+    MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW =       MOSTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT,
+    PARTLY_CLOUDY_WITH_RAIN_LATER =         PARTLY_CLOUDY_BIT | RAIN_BIT,
+    PARTLY_CLOUDY_WITH_SNOW_LATER =         PARTLY_CLOUDY_BIT | SNOW_BIT,
+    PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT
+};
 
 //
 // Maximum counts

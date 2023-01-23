@@ -100,7 +100,7 @@ CurrentWeather::formatXML() const {
    
     ss << loopPacket.getBarometricPressure().formatXML("baroPressure")
        << loop2Packet.getAtmPressure().formatXML("atmPressure")
-       << "<baroTrend>" << loopPacket.getBaroTrendString() << "</baroTrend>"
+       << "<baroTrend>" << loopPacket.getBarometerTrendString() << "</baroTrend>"
        << "<rainRate>" << loopPacket.getRainRate() << "</rainRate>"
        << "<rainToday>" << loopPacket.getDayRain() << "</rainToday>"
        << "<rain15Minute>" << loop2Packet.getRain15Minute() << "</rain15Minute>"
@@ -200,7 +200,7 @@ CurrentWeather::formatJSON() const {
 
     ss << loopPacket.getBarometricPressure().formatJSON("baroPressure") << ", "
        << loop2Packet.getAtmPressure().formatJSON("atmPressure") << "}, "
-       << "{ \"baroTrend\" : \"" << loopPacket.getBaroTrendString() << "\" }, "
+       << "{ \"barometerTrend\" : \"" << loopPacket.getBarometerTrendString() << "\" }, "
        << "{ \"rainRate\" : " << loopPacket.getRainRate() << "}, "
        << "{ \"rainToday\" : " << loopPacket.getDayRain() << "}, "
        << "{ \"rain15Minute\" : " << loop2Packet.getRain15Minute() << "}, "
@@ -229,43 +229,37 @@ CurrentWeather::formatJSON() const {
     ss << "{ \"forecastRule\" : \"" << ForecastRule::forecastString(loopPacket.getForecastRuleIndex()) << "\" }, "
         << "{ \"forecast\" : \"" << loopPacket.getForecastIconString() << "\" }";
 
-    /*
-    ss << "<extraTemperatures>";
+    ss << "{ \"extraTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++) {
         if (loopPacket.getExtraTemperature(i).isValid()) {
-            ss << "<temperature><index>" << i << "</index><value>" << loopPacket.getExtraTemperature(i).getValue() << "</value></temperature>";
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraTemperature(i).getValue() << " },";
         }
     }
-    ss << "</extraTemperatures>";
+    ss << "] }";
 
-
-    ss << "<extraHumidities>";
+    ss << "{ \"extraHumidities\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++) {
-        if (loopPacket.getExtraHumidity(i).isValid())
-            ss << "<humidity><index>" << i << "</index><value>" << loopPacket.getExtraHumidity(i).getValue() << "</value></humidity>";
+        if (loopPacket.getExtraHumidity(i).isValid()) {
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraHumidity(i).getValue() << " },";
+        }
     }
-    ss << "</extraHumidities>";
+    ss << "] }";
 
-    ss << "<soilMoistures>";
+    ss << "{ \"soilMoistures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
-        if (loopPacket.isSoilMoistureValid(i)) {
-            ss << "<entry><key>" << 600 + i << "</key><value><sensorId>" << 600 + i << "</sensorId><sensorType>SOIL_MOISTURE</sensorType>"
-               << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"soilMoisture\">"
-               << loopPacket.getSoilMoisture(i) << "</measurement></value></entry>";
+        if (loopPacket.getSoilMoisture(i).isValid()) {
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getSoilMoisture(i).getValue() << " },";
         }
     }
-    ss << "</soilMoistures>";
+    ss << "] }";
 
-    ss << "<leafWetnesses>";
-    for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++) {
-        if (loopPacket.isLeafWetnessValid(i)) {
-            ss << "<entry><key>" << 500 + i << "</key><value><sensorId>" << 500 + i << "</sensorId><sensorType>LEAF_WETNESS</sensorType>"
-               << "<measurement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"leafWetness\">"
-               << loopPacket.getLeafWetness(i) << "</measurement></value></entry>";
+    ss << "{ \"leafWetnesses\" : [ ";
+    for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
+        if (loopPacket.getLeafWetness(i).isValid()) {
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getLeafWetness(i).getValue() << " },";
         }
     }
-    ss << "</leafWetnesses>";
-    */
+    ss << "] }";
 
     ss << "}";
 

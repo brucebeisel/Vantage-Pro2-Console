@@ -97,11 +97,18 @@ public:
     static bool archivePacketContainsData(const byte * buffer, int offset);
 
     /**
-     * Format the WeatherSense message for an archive packet.
-     * 
-     * @return The formatted messages
+     * Format the Archive packet as XML.
+     *
+     * @return The formatted message
      */
-    std::string formatMessage() const;
+    std::string formatXML() const;
+
+    /**
+     * Format the Archive packet as JSON.
+     * 
+     * @return The formatted message
+     */
+    std::string formatJSON() const;
 
 private:
     DateTime extractArchiveDate() const;
@@ -115,6 +122,7 @@ private:
     //
     static constexpr int REV_A_RECORD_TYPE = 0xFF;
     static constexpr int REV_B_RECORD_TYPE = 0;
+
     static constexpr int DATE_STAMP_OFFSET = 0;
     static constexpr int TIME_STAMP_OFFSET = 2;
     static constexpr int OUTSIDE_TEMPERATURE_OFFSET = 4;

@@ -21,12 +21,14 @@
 #include "UnitConverter.h"
 #include "LoopPacket.h"
 #include "VantageProtocolConstants.h"
+#include "VantageEnums.h"
 #include "VantageCRC.h"
 #include "VantageDecoder.h"
 
 using namespace std;
 
 namespace vws {
+using namespace ProtocolConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,8 +46,8 @@ LoopPacket::LoopPacket(void) : logger(VantageLogger::getLogger("LoopPacket")),
                                sunsetTime(0),
                                transmitterBatteryStatus(0),
                                nextRecord(-1),
-                               baroTrend(STEADY),
-                               forecastIcon(SUNNY) {
+                               barometerTrend(BarometerTrend::STEADY),
+                               forecastIcon(Forecast::SUNNY) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -68,117 +70,120 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     //
     // Perform a number of validation on the Loop packet before decoding all of the values
     //
-    if (packetData[0] != 'L' || packetData[1] != 'O' || packetData[2] != 'O') {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP packet data does not begin with LOO: "
-                                      << "[0] = " << packetData[0] << " [1] = " << packetData[1] << " [2] = " << packetData[2] << endl;
+    if (packetData[L_OFFSET] != 'L' || packetData[FIRST_O_OFFSET] != 'O' || packetData[SECOND_O_OFFSET] != 'O') {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP packet data does not begin with LOO:"
+                                                 << " [0] = " << packetData[L_OFFSET]
+                                                 << " [1] = " << packetData[FIRST_O_OFFSET]
+                                                 << " [2] = " << packetData[SECOND_O_OFFSET] << endl;
         return false;
     }
 
-    if (!VantageCRC::checkCRC(packetData, 97)) {
+    if (!VantageCRC::checkCRC(packetData, CRC_OFFSET)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP packet failed CRC check" << endl;
         return false;
     }
 
-    packetType = BitConverter::toInt8(packetData, 4);
+    packetType = BitConverter::toInt8(packetData, PACKET_TYPE_OFFSET);
+
     if (packetType != LOOP_PACKET_TYPE) {
         logger.log(VantageLogger::VANTAGE_ERROR)<< "Invalid packet type for LOOP packet. Expected: "
                                      << LOOP_PACKET_TYPE << " Received: " << packetType << endl;
         return false;
     }
 
-    if (packetData[95] != ProtocolConstants::LINE_FEED || packetData[96] != ProtocolConstants::CARRIAGE_RETURN) {
+    if (packetData[LINE_FEED_OFFSET] != ProtocolConstants::LINE_FEED || packetData[CARRIAGE_RETURN_OFFSET] != ProtocolConstants::CARRIAGE_RETURN) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
         return false;
     }
 
 
-    if (packetData[3] != 'P') {
-        int baroTrendValue = BitConverter::toInt8(packetData, 3);
+    if (packetData[BAROMETER_TREND_OFFSET] != 'P') {
+        BarometerTrend baroTrendValue = static_cast<BarometerTrend>(BitConverter::toInt8(packetData, BAROMETER_TREND_OFFSET));
 
         switch (baroTrendValue) {
-            case UNKNOWN:
-            case FALLING_RAPIDLY:
-            case FALLING_SLOWLY:
-            case STEADY:
-            case RISING_SLOWLY:
-            case RISING_RAPIDLY:
-                baroTrend = static_cast<BaroTrend>(baroTrendValue);
+            case BarometerTrend::UNKNOWN:
+            case BarometerTrend::FALLING_RAPIDLY:
+            case BarometerTrend::FALLING_SLOWLY:
+            case BarometerTrend::STEADY:
+            case BarometerTrend::RISING_SLOWLY:
+            case BarometerTrend::RISING_RAPIDLY:
+                barometerTrend = static_cast<BarometerTrend>(baroTrendValue);
                 break;
             default:
-                logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid barometer trend 0x" << hex << (int)packetData[3] << dec << endl;
-                baroTrend = UNKNOWN;
+                logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid barometer trend 0x" << hex << (int)packetData[BAROMETER_TREND_OFFSET] << dec << endl;
+                barometerTrend = BarometerTrend::UNKNOWN;
                 return false;
         }
     }
     else
-        baroTrend = UNKNOWN;
+        barometerTrend = BarometerTrend::UNKNOWN;
 
-    nextRecord = BitConverter::toInt16(packetData,5);
+    nextRecord = BitConverter::toInt16(packetData, NEXT_RECORD_OFFSET);
 
-    VantageDecoder::decodeBarometricPressure(packetData, 7, barometricPressure);
-    VantageDecoder::decode16BitTemperature(packetData, 9, insideTemperature);
-    VantageDecoder::decodeHumidity(packetData, 11, insideHumidity);
-    VantageDecoder::decode16BitTemperature(packetData, 12, outsideTemperature);
+    VantageDecoder::decodeBarometricPressure(packetData, BAROMETER_OFFSET, barometricPressure);
+    VantageDecoder::decode16BitTemperature(packetData, INSIDE_TEMPERATURE_OFFSET, insideTemperature);
+    VantageDecoder::decodeHumidity(packetData, INSIDE_HUMIDITY_OFFSET, insideHumidity);
+    VantageDecoder::decode16BitTemperature(packetData, OUTSIDE_TEMPERATURE_OFFSET, outsideTemperature);
 
-    windSpeed = VantageDecoder::decodeWindSpeed(packetData, 14);
-    windSpeed10MinuteAverage = VantageDecoder::decodeWindSpeed(packetData, 15);
-    windDirection = VantageDecoder::decodeWindDirection(packetData, 16);
+    windSpeed = VantageDecoder::decodeWindSpeed(packetData, WIND_SPEED_OFFSET);
+    windSpeed10MinuteAverage = VantageDecoder::decodeWindSpeed(packetData, TEN_MINUTE_AVG_WIND_SPEED_OFFSET);
+    windDirection = VantageDecoder::decodeWindDirection(packetData, WIND_DIRECTION_OFFSET);
 
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(packetData, 18 + i, extraTemperature[i]);
+        VantageDecoder::decode8BitTemperature(packetData, EXTRA_TEMPERATURES_OFFSET + i, extraTemperature[i]);
 
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(packetData, 25 + i, soilTemperature[i]);
+        VantageDecoder::decode8BitTemperature(packetData, SOIL_TEMPERATURES_OFFSET + i, soilTemperature[i]);
 
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(packetData, 29 + i, leafTemperature[i]);
+        VantageDecoder::decode8BitTemperature(packetData, LEAF_TEMPERATURES_OFFSET + i, leafTemperature[i]);
 
-    VantageDecoder::decodeHumidity(packetData, 33, outsideHumidity);
+    VantageDecoder::decodeHumidity(packetData, OUTSIDE_HUMIDITY_OFFSET, outsideHumidity);
 
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++)
-        VantageDecoder::decodeHumidity(packetData, 34 + i, extraHumidity[i]);
+        VantageDecoder::decodeHumidity(packetData, EXTRA_HUMIDITIES_OFFSET + i, extraHumidity[i]);
 
-    rainRate = VantageDecoder::decodeRain(packetData, 41);
+    rainRate = VantageDecoder::decodeRain(packetData, RAIN_RATE_OFFSET);
 
-    VantageDecoder::decodeUvIndex(packetData, 43, uvIndex);
-    VantageDecoder::decodeSolarRadiation(packetData, 44, solarRadiation);
+    VantageDecoder::decodeUvIndex(packetData, UV_INDEX_OFFSET, uvIndex);
+    VantageDecoder::decodeSolarRadiation(packetData, SOLAR_RADIATION_OFFSET, solarRadiation);
 
-    stormRain = VantageDecoder::decodeStormRain(packetData, 46);
-    stormStart = VantageDecoder::decodeStormStartDate(packetData, 48);
+    stormRain = VantageDecoder::decodeStormRain(packetData, STORM_RAIN_OFFSET);
+    stormStart = VantageDecoder::decodeStormStartDate(packetData, STORM_START_DATE_OFFSET);
 
-    dayRain = VantageDecoder::decodeRain(packetData, 50);
-    monthRain = VantageDecoder::decodeRain(packetData, 52);
-    yearRain = VantageDecoder::decodeRain(packetData, 54);
+    dayRain = VantageDecoder::decodeRain(packetData, DAY_RAIN_OFFSET);
+    monthRain = VantageDecoder::decodeRain(packetData, MONTH_RAIN_OFFSET);
+    yearRain = VantageDecoder::decodeRain(packetData, YEAR_RAIN_OFFSET);
 
-    dayET = VantageDecoder::decodeDayET(packetData, 56);
-    monthET = VantageDecoder::decodeMonthYearET(packetData, 58);
-    yearET = VantageDecoder::decodeMonthYearET(packetData, 60);
+    dayET = VantageDecoder::decodeDayET(packetData, DAY_ET_OFFSET);
+    monthET = VantageDecoder::decodeMonthYearET(packetData, MONTH_ET_OFFSET);
+    yearET = VantageDecoder::decodeMonthYearET(packetData, YEAR_ET_OFFSET);
 
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++)
-        VantageDecoder::decodeSoilMoisture(packetData, 62 + i, soilMoisture[i]);
+        VantageDecoder::decodeSoilMoisture(packetData, SOIL_MOISTURES_OFFSET + i, soilMoisture[i]);
 
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++)
-        VantageDecoder::decodeLeafWetness(packetData, 66 + i, leafWetness[i]);
+        VantageDecoder::decodeLeafWetness(packetData, LEAF_WETNESSES_OFFSET + i, leafWetness[i]);
 
     for (int i = 0; i < 16; i++) {
-        int alarms = BitConverter::toInt8(packetData, 70 + i);
+        int alarms = BitConverter::toInt8(packetData, ALARMS_OFFSET + i);
         for (int j = 0; j < 8; j++) {
             int bit = (i * 8) + j;
             alarmBits[bit] = (alarms & (1 << j)) == 0 ? 0 : 1;
         }
     }
 
-    transmitterBatteryStatus = BitConverter::toInt8(packetData, 86);
+    transmitterBatteryStatus = BitConverter::toInt8(packetData, TRANSMITTER_BATTERY_STATUS_OFFSET);
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Transmitter Battery Status: " << transmitterBatteryStatus << endl;
 
-    consoleBatteryVoltage = VantageDecoder::decodeConsoleBatteryVoltage(packetData, 87);
+    consoleBatteryVoltage = VantageDecoder::decodeConsoleBatteryVoltage(packetData, CONSOLE_BATTERY_VOLTAGE_OFFSET);
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Console Battery Voltage: " << consoleBatteryVoltage << endl;
 
-    forecastIcon = static_cast<Forecast>(BitConverter::toInt8(packetData, 89));
-    forecastRuleIndex = BitConverter::toInt8(packetData, 90);
+    forecastIcon = static_cast<Forecast>(BitConverter::toInt8(packetData, FORECAST_ICONS_OFFSET));
+    forecastRuleIndex = BitConverter::toInt8(packetData, FORECAST_RULE_NUMBER_OFFSET);
 
-    sunriseTime = VantageDecoder::decodeTime(packetData, 91);
-    sunsetTime = VantageDecoder::decodeTime(packetData, 93);
+    sunriseTime = VantageDecoder::decodeTime(packetData, SUNRISE_TIME_OFFSET);
+    sunsetTime = VantageDecoder::decodeTime(packetData, SUNSET_TIME_OFFSET);
 
     return true;
 }
@@ -192,9 +197,9 @@ LoopPacket::getNextRecord() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-LoopPacket::BaroTrend
-LoopPacket::getBaroTrend() const {
-    return baroTrend;
+ProtocolConstants::BarometerTrend
+LoopPacket::getBarometerTrend() const {
+    return barometerTrend;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -347,7 +352,7 @@ LoopPacket::getConsoleBatteryVoltage() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-LoopPacket::Forecast
+ProtocolConstants::Forecast
 LoopPacket::getForecastIcon() const {
     return forecastIcon;
 }
@@ -424,63 +429,15 @@ LoopPacket::isStormOngoing() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 string
-LoopPacket::getBaroTrendString() const {
-    switch(baroTrend) {
-        case FALLING_RAPIDLY:
-            return "Falling Rapidly";
-
-        case FALLING_SLOWLY:
-            return "Falling Slowly";
-
-        case STEADY:
-            return "Steady";
-
-        case RISING_SLOWLY:
-            return "Rising Slowly";
-
-        case RISING_RAPIDLY:
-            return "Rising Rapidly";
-
-        default:
-            return "Steady";
-    }
+LoopPacket::getBarometerTrendString() const {
+    return barometerTrendEnum.valueToString(barometerTrend);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 string
 LoopPacket::getForecastIconString() const {
-    switch (forecastIcon) {
-        case SUNNY:
-            return "Sunny";
-
-        case PARTLY_CLOUDY:
-            return "Partly Cloudy";
-
-        case MOSTLY_CLOUDY:
-            return "Mostly Cloudy";
-
-        case MOSTLY_CLOUDY_WITH_RAIN:
-            return "Mostly Cloudy With Rain";
-
-        case MOSTLY_CLOUDY_WITH_SNOW:
-            return "Mostly Cloudy With Snow";
-
-        case MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW:
-            return "Mostly Cloudy With Rain or Snow";
-
-        case PARTLY_CLOUDY_WITH_RAIN_LATER:
-            return "Partly Cloudy With Rain Later";
-
-        case PARTLY_CLOUDY_WITH_SNOW_LATER:
-            return "Partly Cloudy With Snow Later";
-
-        case PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER:
-            return "Partly Cloudy With Snow Later";
-
-        default:
-            return "Sunny";
-    }
+    return forecastEnum.valueToString(forecastIcon);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -111,7 +111,7 @@ public:
 
 static ExtremePeriodEnum extremePeriodEnum;
 
-std::ostream &
+static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::ExtremePeriod value) {
     os << extremePeriodEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
@@ -135,7 +135,7 @@ public:
 
 static RainUnitsEnum rainUnitsEnum;
 
-std::ostream &
+static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::RainUnits value) {
     os << rainUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
@@ -163,7 +163,7 @@ public:
 
 static BarometerUnitsEnum barometerUnitsEnum;
 
-std::ostream &
+static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::BarometerUnits value) {
     os << barometerUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
@@ -190,7 +190,7 @@ public:
 
 static TemperatureUnitsEnum temperatureUnitsEnum;
 
-std::ostream &
+static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::TemperatureUnits value) {
     os << temperatureUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
@@ -217,7 +217,7 @@ public:
 
 static WindUnitsEnum windUnitsEnum;
 
-std::ostream &
+static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::WindUnits value) {
     os << windUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
@@ -242,12 +242,74 @@ public:
 
 static ElevationUnitsEnum elevationUnitsEnum;
 
-std::ostream &
+static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::ElevationUnits value) {
     os << elevationUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static const NameValuePair<ProtocolConstants::BarometerTrend> btMappings[] = {
+    { "Steady", ProtocolConstants::BarometerTrend::STEADY },
+    { "Rising Slowly", ProtocolConstants::BarometerTrend::RISING_SLOWLY },
+    { "Rising Rapidly", ProtocolConstants::BarometerTrend::RISING_RAPIDLY },
+    { "Falling Rapidly", ProtocolConstants::BarometerTrend::FALLING_RAPIDLY },
+    { "Falling Slowly", ProtocolConstants::BarometerTrend::FALLING_SLOWLY },
+    { "Unknown", ProtocolConstants::BarometerTrend::UNKNOWN }
+};
+
+class BarometerTrendEnum : public VantageEnum<ProtocolConstants::BarometerTrend,sizeof(btMappings)/sizeof(btMappings[0])>  {
+public:
+    BarometerTrendEnum() {};
+    virtual ~BarometerTrendEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::BarometerTrend> * getMappings() const {
+        return btMappings;
+    }
+};
+
+static BarometerTrendEnum barometerTrendEnum;
+
+static std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::BarometerTrend value) {
+    os << barometerTrendEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static const NameValuePair<ProtocolConstants::Forecast> fcMappings[] = {
+    { "Sunny", ProtocolConstants::Forecast::SUNNY },
+    { "Party cloudy", ProtocolConstants::Forecast::PARTLY_CLOUDY },
+    { "Mostly cloudy", ProtocolConstants::Forecast::MOSTLY_CLOUDY },
+    { "Mostly cloudy with rain within 12 hours", ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_RAIN },
+    { "Mostly cloudy with snow within 12 hours", ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_SNOW },
+    { "Mostly cloudy with rain or snow within 12 hours", ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW },
+    { "Partly cloudy with rain within 12 hours", ProtocolConstants::Forecast::PARTLY_CLOUDY_WITH_RAIN_LATER },
+    { "Partly cloudy with snow within 12 hours", ProtocolConstants::Forecast::PARTLY_CLOUDY_WITH_SNOW_LATER },
+    { "Partly cloudy with rain or snow within 12 hours", ProtocolConstants::Forecast::PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER }
+};
+
+class ForecastEnum : public VantageEnum<ProtocolConstants::Forecast,sizeof(fcMappings)/sizeof(fcMappings[0])>  {
+public:
+    ForecastEnum() {};
+    virtual ~ForecastEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::Forecast> * getMappings() const {
+        return fcMappings;
+    }
+};
+
+static ForecastEnum forecastEnum;
+
+static std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::Forecast value) {
+    os << forecastEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
+}
+
 
 #endif
