@@ -13,7 +13,7 @@
  Weather.h
 ../../target/VP2/ArchivePacket.o: ArchivePacket.cpp BitConverter.h \
  WeatherTypes.h ArchivePacket.h VantageDecoder.h Measurement.h \
- VantageLogger.h Weather.h
+ VantageLogger.h Weather.h VantageProtocolConstants.h
 ../../target/VP2/BitConverter.o: BitConverter.cpp BitConverter.h \
  WeatherTypes.h
 ../../target/VP2/CommandHandler.o: CommandHandler.cpp CommandHandler.h \
@@ -51,9 +51,8 @@
  WeatherTypes.h Loop2Packet.h VantageLogger.h Measurement.h \
  VantageProtocolConstants.h VantageCRC.h VantageDecoder.h
 ../../target/VP2/LoopPacket.o: LoopPacket.cpp BitConverter.h \
- WeatherTypes.h UnitConverter.h LoopPacket.h Measurement.h \
- VantageProtocolConstants.h VantageLogger.h VantageEnums.h VantageCRC.h \
- VantageDecoder.h
+ WeatherTypes.h LoopPacket.h Measurement.h VantageProtocolConstants.h \
+ VantageLogger.h VantageEnums.h VantageCRC.h VantageDecoder.h
 ../../target/VP2/main.o: main.cpp VantageLogger.h ArchiveManager.h \
  WeatherTypes.h CommandSocket.h VantageDriver.h EventManager.h \
  SensorStation.h Sensor.h LoopPacket.h Measurement.h \
@@ -63,7 +62,7 @@
  WindDirectionSlice.h Loop2Packet.h CurrentWeatherPublisher.h \
  CurrentWeatherManager.h
 ../../target/VP2/ParametersMessage.o: ParametersMessage.cpp \
- UnitConverter.h WeatherTypes.h ParametersMessage.h
+ ParametersMessage.h WeatherTypes.h
 ../../target/VP2/ProtocolException.o: ProtocolException.cpp \
  ProtocolException.h
 ../../target/VP2/Sensor.o: Sensor.cpp Sensor.h LoopPacket.h \
@@ -75,15 +74,13 @@
  Measurement.h WeatherTypes.h SerialPort.h
 ../../target/VP2/UnitConverter.o: UnitConverter.cpp UnitConverter.h \
  WeatherTypes.h
-../../target/VP2/VantageConstants.o: VantageConstants.cpp \
- VantageConstants.h WeatherTypes.h
 ../../target/VP2/VantageCRC.o: VantageCRC.cpp BitConverter.h \
  WeatherTypes.h VantageCRC.h VantageLogger.h
 ../../target/VP2/VantageConfiguration.o: VantageConfiguration.cpp \
  BitConverter.h WeatherTypes.h VantageConfiguration.h SensorStation.h \
  Sensor.h LoopPacket.h Measurement.h VantageProtocolConstants.h \
  VantageLogger.h VantageWeatherStation.h ArchivePacket.h SerialPort.h \
- VantageDecoder.h VantageConstants.h
+ VantageDecoder.h VantageEepromConstants.h
 ../../target/VP2/VantageDecoder.o: VantageDecoder.cpp BitConverter.h \
  WeatherTypes.h VantageProtocolConstants.h VantageDecoder.h Measurement.h \
  VantageLogger.h Weather.h
@@ -97,7 +94,7 @@
 ../../target/VP2/VantageLogger.o: VantageLogger.cpp VantageLogger.h \
  Weather.h Measurement.h WeatherTypes.h
 ../../target/VP2/VantageWeatherStation.o: VantageWeatherStation.cpp \
- VantageProtocolConstants.h WeatherTypes.h VantageConstants.h \
+ VantageProtocolConstants.h WeatherTypes.h VantageEepromConstants.h \
  HiLowPacket.h VantageLogger.h Measurement.h LoopPacket.h Loop2Packet.h \
  VantageCRC.h BitConverter.h ProtocolException.h VantageWeatherStation.h \
  ArchivePacket.h SensorStation.h Sensor.h SerialPort.h Weather.h

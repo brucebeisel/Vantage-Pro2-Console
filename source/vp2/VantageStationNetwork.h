@@ -61,12 +61,11 @@ public:
     bool retrieveSensorStationInfo();
 
 private:
-    static constexpr int STATION_DATA_SIZE = 16;
-    static constexpr StationId UNKNOWN_STATION_ID = 0;
+    static constexpr int UNKNOWN_STATION_ID = 0;
 
     VantageLogger              logger;
     VantageWeatherStation &    station;
-    std::vector<SensorStation> sensorStations;           // The sensor stations as reported by the console
+    SensorStation              sensorStations[ProtocolConstants::MAX_STATIONS];           // The sensor stations as reported by the console
     StationId                  windSensorStationId;
 };
 

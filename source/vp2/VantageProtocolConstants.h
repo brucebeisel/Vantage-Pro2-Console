@@ -264,6 +264,7 @@ enum class Forecast {
 //
 static constexpr int NUM_ARCHIVE_RECORDS = 2560;
 static constexpr int MAX_STATION_ID = 8;
+static constexpr int MAX_STATIONS = 8;
 static constexpr int MAX_INTEGRATED_SENSOR_STATIONS = 1;
 static constexpr int MAX_ANEMOMETER_STATIONS = 1;
 //
@@ -330,8 +331,7 @@ static constexpr int MAX_LEAF_WETNESS = 15;
 
 
 //
-// The Vantage protocol has no concept of a wind slice.
-// TODO Move this elsewhere
+// Used to translate archive wind direction index of 0 - 15 to a heading.
 //
 static constexpr int NUM_WIND_DIR_SLICES = 16;
 static constexpr double DEGREES_PER_SLICE = 360.0 / NUM_WIND_DIR_SLICES;

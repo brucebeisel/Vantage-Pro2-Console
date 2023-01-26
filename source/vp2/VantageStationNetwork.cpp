@@ -17,19 +17,17 @@
 #include <iostream>
 #include "VantageStationNetwork.h"
 #include "VantageWeatherStation.h"
-#include "VantageConstants.h"
+#include "VantageEnums.h"
 #include "BitConverter.h"
+#include "VantageEepromConstants.h"
+#include "VantageDecoder.h"
+#include "WeatherTypes.h"
 
 using namespace std;
 
 namespace vws {
-
-struct SensorStationData {
-    SensorStation::RepeaterId        repeaterId;
-    SensorStation::SensorStationType stationType;
-    byte                             humiditySensorNumber;
-    byte                             temperatureSensorNumber;
-};
+using namespace VantageEepromConstants;
+using namespace ProtocolConstants;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,52 +54,50 @@ VantageStationNetwork::initialize() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageStationNetwork::retrieveSensorStationInfo() {
-    char buffer[STATION_DATA_SIZE];
+    char buffer[EE_STATION_LIST_SIZE];
 
     logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving sensor station information" << endl;
 
-    if (!station.eepromBinaryRead(VantageConstants::EE_STATION_LIST_ADDRESS, STATION_DATA_SIZE))
+    if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
         return false;
 
-    SensorStationData data[VantageConstants::MAX_STATION_ID];
-    for (int i = 0; i < VantageConstants::MAX_STATION_ID; i++) {
-        data[i].repeaterId = static_cast<SensorStation::RepeaterId>(BitConverter::getUpperNibble(buffer[i * 2]));
-        data[i].stationType = static_cast<SensorStation::SensorStationType>(BitConverter::getLowerNibble(buffer[i * 2]));
-        data[i].temperatureSensorNumber = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
+    VantageDecoder::SensorStationData sensorStationData[ProtocolConstants::MAX_STATIONS];
+    VantageDecoder::decodeSensorStationList(buffer, 0, sensorStationData);
 
-        //
-        // If there is an anemometer sensor station, it by definition is the sensor station that measures
-        // the wind. The ISS cannot measure the wind if an anemometer station exists.
-        //
-        if (data[i].stationType == SensorStation::ANEMOMETER)
+    //
+    // Find the sensor station with the anemometer. An anemometer sensor station overrides an ISS
+    //
+    for (int i = 0; i < MAX_STATIONS; i++) {
+        if (sensorStationData[i].stationType == SensorStationType::ANEMOMETER_STATION)
             windSensorStationId = i + 1;
-        else if (data[i].stationType == SensorStation::INTEGRATED_SENSOR_STATION && windSensorStationId == 0)
+        else if (sensorStationData[i].stationType == SensorStationType::INTEGRATED_SENSOR_STATION && windSensorStationId == UNKNOWN_STATION_ID)
             windSensorStationId = i + 1;
-
     }
+
+
 
     //
     // Assign the anemometer to the sensor station to which it is connected
     //
-    for (int i = 0; i < VantageConstants::MAX_STATION_ID; i++) {
-        if (data[i].stationType != SensorStation::NO_STATION) {
+    for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
+        if (sensorStationData[i].stationType != SensorStationType::NO_STATION) {
             bool hasAnemometer = (i + 1) == windSensorStationId;
-            sensorStations.push_back(SensorStation(data[i].stationType, i + 1, data[i].repeaterId, hasAnemometer));
+            sensorStations[i].setData(sensorStationData[i].stationType, i + 1, sensorStationData[i].repeaterId, hasAnemometer);
         }
     }
 
     cout << "@@@@@@@@@@ Station Data:" << endl;
     cout << "@@@@@@@@@@ Wind Sensor Station ID: " << windSensorStationId << endl;
-    for (int i = 0; i < VantageConstants::MAX_STATION_ID; i++) {
-        cout << "@@@@@@@@@@ [" << i << "] Repeater ID: " << data[i].repeaterId
-             << " Station Type: " << data[i].stationType
-             << " Humidity Sensor: " << data[i].humiditySensorNumber
-             << " Temperature Sensor: " << data[i].temperatureSensorNumber << endl;
+    for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
+        cout << "@@@@@@@@@@ [" << i << "] Repeater ID: " << (int)sensorStationData[i].repeaterId
+             << " Station Type: " << sensorStationTypeEnum.valueToString(sensorStationData[i].stationType)
+             << " Humidity Sensor: " << sensorStationData[i].extraHumidityIndex
+             << " Temperature Sensor: " << sensorStationData[i].extraTemperatureIndex << endl;
 
     }
 
-    for (vector<SensorStation>::iterator it = sensorStations.begin(); it != sensorStations.end(); ++it)
-        logger.log(VantageLogger::VANTAGE_DEBUG1) << *it << endl;
+    for (int i = 0; i < MAX_STATION_ID; i++)
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << sensorStations[i] << endl;
 
     return true;
 }

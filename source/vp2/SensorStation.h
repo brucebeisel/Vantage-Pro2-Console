@@ -22,6 +22,7 @@
 #include <string>
 #include "Sensor.h"
 #include "WeatherTypes.h"
+#include "VantageEepromConstants.h"
 
 namespace vws {
 /**
@@ -29,43 +30,6 @@ namespace vws {
  */
 class SensorStation {
 public:
-    /**
-     * Sensor station types supported by the Vantage weather station, the enum integer values are from the Vantage serial protocol.
-     */
-    enum SensorStationType {
-        INTEGRATED_SENSOR_STATION = 0,
-        TEMPERATURE_ONLY = 1,
-        HUMIDITY_ONLY = 2,
-        TEMPERATURE_HUMIDITY = 3,
-        ANEMOMETER = 4,
-        RAIN = 5,
-        LEAF = 6,
-        SOIL = 7,
-        SOIL_LEAF = 8,
-        NO_STATION = 10,
-        UNKNOWN = 99       // The sensor station has been heard, but not identified
-    };
-
-    enum VantageVueSensorStationType {
-        VUE_INTEGRATED_SENSOR_STATION = 0,
-        VUE_ANEMOMETER = 4,
-        VP2_INTEGRATED_SENSOR_STATION = 5,
-        VUE_NO_STATION = 10,
-        VUE_UNKNOWN = 99       // The sensor station has been heard, but not identified
-    };
-
-    enum RepeaterId {
-        NO_REPEATER = 0,
-        REPEATER_A = 8,
-        REPEATER_B = 9,
-        REPEATER_C = 10,
-        REPEATER_D = 11,
-        REPEATER_E = 12,
-        REPEATER_F = 13,
-        REPEATER_G = 14,
-        REPEATER_H = 15
-    };
-
     static constexpr int NO_LINK_QUALITY = 999;
 
     /**
@@ -78,19 +42,22 @@ public:
      * @param repeaterId               The repeater through which this sensor station is transmitting
      * @param hasAnemometer            Whether this station has an anemometer which will determine if link quality is calculated
      */
-    SensorStation(SensorStationType type, int sensorTransmitterChannel, RepeaterId repeaterId = NO_REPEATER, bool hasAnemometer = false);
+    SensorStation();
+    SensorStation(VantageEepromConstants::SensorStationType type, int sensorTransmitterChannel, VantageEepromConstants::RepeaterId repeaterId = VantageEepromConstants::RepeaterId::NO_REPEATER, bool hasAnemometer = false);
 
     /**
      * Destructor.
      */
     virtual ~SensorStation() {}
 
+    void setData(VantageEepromConstants::SensorStationType type, int sensorTransmitterChannel, VantageEepromConstants::RepeaterId repeaterId = VantageEepromConstants::RepeaterId::NO_REPEATER, bool hasAnemometer = false);
+
     /**
      * Get the sensor station type.
      * 
      * @return The sensor station type
      */
-    SensorStationType getSensorStationType() const;
+    VantageEepromConstants::SensorStationType getSensorStationType() const;
 
     /**
      * Get the sensor station index.
@@ -104,7 +71,7 @@ public:
      *
      * @return The ID of the repeater, or NONE
      */
-    RepeaterId getRepeaterId() const;
+    VantageEepromConstants::RepeaterId getRepeaterId() const;
 
     /**
      * Get the battery status of the sensor station. These stations are typically wireless and the battery will
@@ -144,8 +111,8 @@ public:
     int getTemperatureIndex() const;
     int getHumidityIndex() const;
 
-    static const std::string & sensorStationTypeToString(SensorStationType sensorStationType);
-    static bool lookupSensorStationType(const std::string & sensorStationName, SensorStationType & sensorStationType);
+    static const std::string & sensorStationTypeToString(VantageEepromConstants::SensorStationType sensorStationType);
+    static bool lookupSensorStationType(const std::string & sensorStationName, VantageEepromConstants::SensorStationType & sensorStationType);
 
     /**
      * Build a message to send to the collector that reports which sensor stations are connected (wired or wireless) to the console.
@@ -175,19 +142,18 @@ public:
     friend std::ostream & operator<<(std::ostream & os, const SensorStation & ss);
 
 private:
-    SensorStationType   type;                     // The type of this sensor station
-    RepeaterId          connectedRepeaterId;      // ID of the repeater to which this sensor station is directly connected (Note this cannot be determined except in a single repeater chain)
-    RepeaterId          terminatingRepeaterId;    // ID of the repeater that is sending this sensor station data to a console (Available from EEPROM)
-    int                 sensorTransmitterChannel; // Sensor index, 1-8
-    bool                isAnemometerConnected;    // True if this sensor station has the anemometer
-    int                 humiditySensorIndex;      // The index into the "extra humidities" that this station's values are reported (1 - 8)
-    int                 temperatureSensorIndex;   // The index into the "extra temperatures" that this station's values are reported (0 - 7)
-    bool                batteryStatus;            // Battery status
-    int                 linkQuality;              // Only reported if this is an ISS or an Anemometer station
-    std::vector<Sensor> connectedSensors;         // The sensors that are connected to this sensor station
-                                                  // The connected sensors can be derived from the humidity and temperature index and the
-                                                  // data in the loop packet. TBD need to determine how soil and leaf sensors work.
-
+    VantageEepromConstants::SensorStationType type;                     // The type of this sensor station
+    VantageEepromConstants::RepeaterId        connectedRepeaterId;      // ID of the repeater to which this sensor station is directly connected (Note this cannot be determined except in a single repeater chain)
+    VantageEepromConstants::RepeaterId        terminatingRepeaterId;    // ID of the repeater that is sending this sensor station data to a console (Available from EEPROM)
+    int                                       sensorTransmitterChannel; // Sensor index, 1-8
+    bool                                      isAnemometerConnected;    // True if this sensor station has the anemometer
+    int                                       humiditySensorIndex;      // The index into the "extra humidities" that this station's values are reported (1 - 8)
+    int                                       temperatureSensorIndex;   // The index into the "extra temperatures" that this station's values are reported (0 - 7)
+    bool                                      batteryStatus;            // Battery status
+    int                                       linkQuality;              // Only reported if this is an ISS or an Anemometer station
+    std::vector<Sensor>                       connectedSensors;         // The sensors that are connected to this sensor station
+                                                                        // The connected sensors can be derived from the humidity and temperature index and the
+                                                                        // data in the loop packet. TBD need to determine how soil and leaf sensors work.
 };
 }
 

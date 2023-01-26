@@ -1,3 +1,4 @@
+
 /* 
  * Copyright (C) 2023 Bruce Beisel
  *
@@ -24,7 +25,7 @@
 #include <sstream>
 #include <cstring>
 #include "VantageProtocolConstants.h"
-#include "VantageConstants.h"
+#include "VantageEepromConstants.h"
 #include "HiLowPacket.h"
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
@@ -127,7 +128,7 @@ VantageWeatherStation::retrieveConfigurationData() {
     if (!wakeupStation())
         return false;
 
-    if (!eepromBinaryRead(VantageConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
+    if (!eepromBinaryRead(VantageEepromConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
         return false;
 
     archivePeriod = BitConverter::toInt8(buffer, 0);

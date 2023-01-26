@@ -17,6 +17,7 @@
 #ifndef PARAMETERS_MESSAGE_H
 #define PARAMETERS_MESSAGE_H
 #include <string>
+#include "WeatherTypes.h"
 
 namespace vws {
 

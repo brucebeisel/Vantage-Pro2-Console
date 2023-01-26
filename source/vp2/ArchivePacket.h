@@ -166,7 +166,7 @@ private:
     DateTime        packetTime;
     int             windSampleCount;
     byte            buffer[BYTES_PER_ARCHIVE_PACKET];
-    VantageLogger * log;
+    VantageLogger * logger;
 };
 
 }

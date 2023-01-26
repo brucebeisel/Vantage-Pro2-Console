@@ -1,6 +1,6 @@
 CC= g++
-#CXXFLAGS= -g -std=c++11
 CXXFLAGS= -g -std=c++20 -Wno-psabi
+PROGRAM= vws
 
 SRCS=\
 	Alarm.cpp \
@@ -32,6 +32,7 @@ SRCS=\
     VantageDecoder.cpp \
 	VantageDriver.cpp \
 	VantageLogger.cpp \
+	VantageStationNetwork.cpp \
 	VantageWeatherStation.cpp \
 	Weather.cpp \
 	WeatherSenseSocket.cpp \
@@ -46,10 +47,10 @@ OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 $(OBJDIR)/%.o : %.cpp
 	$(CC) $(CXXFLAGS) $(INCDIRS) -c $< -o $@
 	
-all: vp2
+all: $(PROGRAM)
 
-vp2: $(OBJDIR) $(OBJS)
-	$(CC) -g -o vp2 $(OBJS) -lpthread
+$(PROGRAM): $(OBJDIR) $(OBJS)
+	$(CC) -g -o $(PROGRAM) $(OBJS) -lpthread
 
 clean:
 	rm $(OBJS)

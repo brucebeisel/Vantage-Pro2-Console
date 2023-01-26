@@ -18,7 +18,6 @@
 #include <cstring>
 #include <iostream>
 #include "BitConverter.h"
-#include "UnitConverter.h"
 #include "LoopPacket.h"
 #include "VantageProtocolConstants.h"
 #include "VantageEnums.h"

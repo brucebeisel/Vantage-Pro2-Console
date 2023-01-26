@@ -18,7 +18,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "../vp2/VantageConstants.h"
+#include "../vp2/VantageEepromConstants.h"
 #include "../VP2/Weather.h"
 #include "../VP2/ArchivePacket.h"
 

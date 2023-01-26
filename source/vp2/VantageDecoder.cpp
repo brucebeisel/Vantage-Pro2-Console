@@ -17,11 +17,13 @@
 #include <iostream>
 #include "BitConverter.h"
 #include "VantageProtocolConstants.h"
+#include "VantageEepromConstants.h"
 #include "VantageDecoder.h"
 #include "Weather.h"
 
 namespace vws {
 using namespace ProtocolConstants;
+using namespace VantageEepromConstants;
 
 Rainfall VantageDecoder::rainCollectorSizeInches = static_cast<Rainfall>(0.0);
 bool VantageDecoder::rainCollectorSizeSet = false;
@@ -470,4 +472,15 @@ VantageDecoder::decodeTime(const byte buffer[], int offset) {
     return t;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageDecoder::decodeSensorStationList(const byte buffer[], int offset, SensorStationData stationList[ProtocolConstants::MAX_STATIONS]) {
+    for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
+        stationList[i].repeaterId = static_cast<RepeaterId>(BitConverter::getUpperNibble(buffer[offset + (i * 2)]));
+        stationList[i].stationType = static_cast<SensorStationType>(BitConverter::getLowerNibble(buffer[offset + (i * 2)]));
+        stationList[i].extraTemperatureIndex = BitConverter::getLowerNibble(buffer[offset + (i * 2) + 1]);
+        stationList[i].extraHumidityIndex = BitConverter::getLowerNibble(buffer[offset + (i * 2) + 1]);
+    }
+}
 }

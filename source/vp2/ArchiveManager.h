@@ -29,7 +29,7 @@ class VantageWeatherStation;
 
 /**
  * The ArchiveManager class manages a file that contains the raw data read from the DUMP and DMPAFT command of the Vantage console.
- * This archive acts as a augmented storage for the console.
+ * This archive acts as augmented storage for the console.
  */
 class ArchiveManager {
 public:

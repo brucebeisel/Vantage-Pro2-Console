@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sstream>
-#include "UnitConverter.h"
 #include "ParametersMessage.h"
+#include "WeatherTypes.h"
 
 using namespace std;
 
@@ -179,7 +179,7 @@ ParametersMessage::formatMessage() const {
     ss << "<firmwareVersion>" << firmwareVersion << "</firmwareVersion>";
     ss << "<location><latitude>" << latitude << "</latitude>";
     ss << "<longitude>" << longitude << "</longitude>";
-    ss << "<elevation>" << UnitConverter::feetToMillimeters(elevation) << "</elevation></location>";
+    ss << "<elevation>" << elevation << "</elevation></location>";
     ss << "<weatherYearStartMonth>" << rainSeasonStart << "</weatherYearStartMonth>";
     ss << "<parameters>";
     ss << "<entry><key>" << "Archive Period" << "</key><value>" << archivePeriod << "</value></entry>";

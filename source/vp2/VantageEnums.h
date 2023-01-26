@@ -6,6 +6,7 @@
 #include <utility>
 #include <stdexcept>
 #include "VantageProtocolConstants.h"
+#include "VantageEepromConstants.h"
 
 namespace vws {
 
@@ -306,6 +307,40 @@ static ForecastEnum forecastEnum;
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::Forecast value) {
     os << forecastEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static const NameValuePair<VantageEepromConstants::SensorStationType> sstMappings[] = {
+    { "Integrated Sensor Station", VantageEepromConstants::SensorStationType::INTEGRATED_SENSOR_STATION },
+    { "Temperature Only", VantageEepromConstants::SensorStationType::TEMPERATURE_ONLY_STATION },
+    { "Humidity Only", VantageEepromConstants::SensorStationType::HUMIDITY_ONLY_STATION },
+    { "Temperature/Humidity", VantageEepromConstants::SensorStationType::TEMPERATURE_HUMIDITY_STATION },
+    { "Anemometer", VantageEepromConstants::SensorStationType::ANEMOMETER_STATION },
+    { "Rain", VantageEepromConstants::SensorStationType::RAIN_STATION },
+    { "Leaf", VantageEepromConstants::SensorStationType::LEAF_STATION },
+    { "Soil", VantageEepromConstants::SensorStationType::SOIL_STATION },
+    { "Soil/Leaf", VantageEepromConstants::SensorStationType::SOIL_LEAF_STATION },
+    { "No Station", VantageEepromConstants::SensorStationType::NO_STATION },
+    { "Unknown Station", VantageEepromConstants::SensorStationType::UNKNOWN_STATION }
+};
+
+class SensorStationTypeEnum : public VantageEnum<VantageEepromConstants::SensorStationType,sizeof(sstMappings)/sizeof(sstMappings[0])>  {
+public:
+    SensorStationTypeEnum() {};
+    virtual ~SensorStationTypeEnum() {};
+
+    virtual const NameValuePair<VantageEepromConstants::SensorStationType> * getMappings() const {
+        return sstMappings;
+    }
+};
+
+static SensorStationTypeEnum sensorStationTypeEnum;
+
+static std::ostream &
+operator<<(std::ostream & os, VantageEepromConstants::SensorStationType value) {
+    os << sensorStationTypeEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 

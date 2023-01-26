@@ -18,7 +18,7 @@
 #include "BitConverter.h"
 #include "VantageConfiguration.h"
 #include "VantageDecoder.h"
-#include "VantageConstants.h"
+#include "VantageEepromConstants.h"
 #include "VantageProtocolConstants.h"
 
 using namespace std;
@@ -50,7 +50,7 @@ VantageConfiguration::updatePosition(double latitude, double longitude, int elev
     value = std::lround(longitude * LAT_LON_SCALE);
     BitConverter::getBytes(value, buffer, 2, 2);
 
-    if (station.eepromBinaryWrite(VantageConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
+    if (station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
         if (station.updateElevationAndBarometerOffset(elevation, 0.0)) {
             success = true;
         }
@@ -67,7 +67,7 @@ VantageConfiguration::retrievePosition(double & latitude, double & longitude, in
 
     byte positionData[6];
 
-    if (station.eepromBinaryRead(VantageConstants::EE_LATITUDE_ADDRESS, 6, positionData)) {
+    if (station.eepromBinaryRead(VantageEepromConstants::EE_LATITUDE_ADDRESS, 6, positionData)) {
         latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / LAT_LON_SCALE;  // TBD Does BitConverter::toInt16 handle signed values?
         longitude = static_cast<double>(BitConverter::toInt16(positionData, 2)) / LAT_LON_SCALE;
         consoleElevation = BitConverter::toInt16(positionData, 4);
@@ -91,7 +91,7 @@ VantageConfiguration::updateTimeSettings(const TimeSettings & timeSettings) {
     int value = (timeSettings.gmtOffsetMinutes / 60 * 100) + (timeSettings.gmtOffsetMinutes % 60);
     BitConverter::getBytes(value, buffer, 3, 2);
 
-    return station.eepromBinaryWrite(VantageConstants::EE_TIME_FIELDS_START_ADDRESS, buffer, 6);
+    return station.eepromBinaryWrite(VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS, buffer, 6);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ VantageConfiguration::retrieveTimeSettings(TimeSettings & timeSettings) {
     bool success = false;
     byte buffer[6];
 
-    if (station.eepromBinaryRead(VantageConstants::EE_TIME_FIELDS_START_ADDRESS, 6, buffer)) {
+    if (station.eepromBinaryRead(VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS, 6, buffer)) {
         timeSettings.timezoneIndex = buffer[0] - '0';
         timeSettings.manualDaylightSavingsTime = BitConverter::toInt8(buffer, 1) == 1;
         timeSettings.manualDaylightSavingsTimeOn = BitConverter::toInt8(buffer, 2) == 1;
@@ -132,8 +132,8 @@ VantageConfiguration::updateUnitsSettings(BarometerUnits baroUnits,
     buffer |= (static_cast<int>(windUnits) & 0x3) << 6;
 
     byte invertedBuffer = ~buffer;
-    if (station.eepromBinaryWrite(VantageConstants::EE_UNIT_BITS_ADDRESS, &buffer, 1) &&
-        station.eepromBinaryWrite(VantageConstants::EE_UNIT_BITS_ADDRESS + 1, &invertedBuffer, 1)) {
+    if (station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, &buffer, 1) &&
+        station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS + 1, &invertedBuffer, 1)) {
             success = true;
     }
 
@@ -150,7 +150,7 @@ VantageConfiguration::retrieveUnitsSettings(BarometerUnits & baroUnits,
                                             WindUnits & windUnits) {
     bool success = false;
     byte buffer;
-    if (station.eepromBinaryRead(VantageConstants::EE_UNIT_BITS_ADDRESS, 1, &buffer)) {
+    if (station.eepromBinaryRead(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, 1, &buffer)) {
         baroUnits = static_cast<BarometerUnits>(buffer & 0x3);
         temperatureUnits = static_cast<TemperatureUnits>((buffer >> 2) & 0x3);
         elevationUnits = static_cast<ElevationUnits>((buffer >> 4) & 0x1);
@@ -176,7 +176,7 @@ VantageConfiguration::updateSetupBits(const SetupBits & setupBits) {
     buffer |= setupBits.isNorthLatitude ? 0x40 : 0;
     buffer |= setupBits.isEastLongitude ? 0x80 : 0;
     buffer |= (static_cast<int>(setupBits.rainCollectorSizeType) & 0x3) << 4;
-    if (station.eepromBinaryWrite(VantageConstants::EE_SETUP_BITS_ADDRESS, &buffer, 1)) {
+    if (station.eepromBinaryWrite(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, &buffer, 1)) {
         saveRainCollectorSize(setupBits.rainCollectorSizeType);
 
         //
@@ -195,7 +195,7 @@ VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
     bool success = false;
     char buffer;
 
-    if (station.eepromBinaryRead(VantageConstants::EE_SETUP_BITS_ADDRESS, 1, &buffer)) {
+    if (station.eepromBinaryRead(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, 1, &buffer)) {
         setupBits.is24HourMode = (buffer & 0x1) == 0;
         setupBits.isAMMode = (buffer & 0x2) == 1;
         setupBits.isDayMonthDisplay = (buffer & 0x4) == 1;

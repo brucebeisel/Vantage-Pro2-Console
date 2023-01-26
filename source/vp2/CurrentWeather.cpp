@@ -179,15 +179,15 @@ std::string
 CurrentWeather::formatJSON() const {
     ostringstream ss;
     ss << "{ \"currentWeather\" : {"
-       << "{ \"time\" : \"" << Weather::formatDateTime(time(0)) << "\" },"
-       << loopPacket.getInsideTemperature().formatJSON("indoorTemperature") << ","
-       << loopPacket.getInsideHumidity().formatJSON("indoorHumidity") << ","
-       << loopPacket.getOutsideTemperature().formatJSON("outdoorTemperature") << ","
-       << loopPacket.getOutsideHumidity().formatJSON("outdoorHumidity") << ","
-       << loop2Packet.getDewPoint().formatJSON("dewPoint") << ","
-       << loop2Packet.getWindChill().formatJSON("windChill") << ","
-       << loop2Packet.getHeatIndex().formatJSON("heatIndex") << ","
-       << loop2Packet.getThsw().formatJSON("thsw") << ","
+       << "\"time\" : \"" << Weather::formatDateTime(time(0)) << "\""
+       << loopPacket.getInsideTemperature().formatJSON("indoorTemperature", true)
+       << loopPacket.getInsideHumidity().formatJSON("indoorHumidity", true)
+       << loopPacket.getOutsideTemperature().formatJSON("outdoorTemperature", true)
+       << loopPacket.getOutsideHumidity().formatJSON("outdoorHumidity", true)
+       << loop2Packet.getDewPoint().formatJSON("dewPoint", true)
+       << loop2Packet.getWindChill().formatJSON("windChill", true)
+       << loop2Packet.getHeatIndex().formatJSON("heatIndex", true)
+       << loop2Packet.getThsw().formatJSON("thsw", true)
        << "{ \"wind\" : { \"speed\" : " << windSpeed << " }, { \"direction>\" : " << windDirection << " } },"
        << "{ \"wind\" : { \"speed\" : " << loop2Packet.getWindGust10Minute() << " }, { \"direction>\" : " << loop2Packet.getWindGustDirection10Minute() << " } },"
        << "{ \"windSpeed10MinAvg\" : " << windSpeed10MinuteAverage << " },"
@@ -198,70 +198,88 @@ CurrentWeather::formatJSON() const {
         ss << "{ \"domWindDir" << windDirNumber << "\" : " << dominantWindDirections.at(i) << " }, ";
     }
 
-    ss << loopPacket.getBarometricPressure().formatJSON("baroPressure") << ", "
-       << loop2Packet.getAtmPressure().formatJSON("atmPressure") << "}, "
-       << "{ \"barometerTrend\" : \"" << loopPacket.getBarometerTrendString() << "\" }, "
-       << "{ \"rainRate\" : " << loopPacket.getRainRate() << "}, "
-       << "{ \"rainToday\" : " << loopPacket.getDayRain() << "}, "
-       << "{ \"rain15Minute\" : " << loop2Packet.getRain15Minute() << "}, "
-       << "{ \"rainHour\" : " << loop2Packet.getRainHour() << "}, "
-       << "{ \"rain24Hour\" : " << loop2Packet.getRain24Hour() << "}, "
-       << "{ \"rainMonth\" : " << loopPacket.getMonthRain() << "}, "
-       << "{ \"rainWeatherYear\" : " << loopPacket.getYearRain() << "}, "
-       << loopPacket.getSolarRadiation().formatJSON("solarRadiation") << ", ";
+    ss << loopPacket.getBarometricPressure().formatJSON("baroPressure", true)
+       << loop2Packet.getAtmPressure().formatJSON("atmPressure", true)
+       << ", \"barometerTrend\" : \"" << loopPacket.getBarometerTrendString() << "\""
+       << ", \"rainRate\" : " << loopPacket.getRainRate()
+       << ", \"rainToday\" : " << loopPacket.getDayRain()
+       << ", \"rain15Minute\" : " << loop2Packet.getRain15Minute()
+       << ", \"rainHour\" : " << loop2Packet.getRainHour()
+       << ", \"rain24Hour\" : " << loop2Packet.getRain24Hour()
+       << ", \"rainMonth\" : " << loopPacket.getMonthRain()
+       << ", \"rainWeatherYear\" : " << loopPacket.getYearRain()
+       << loopPacket.getSolarRadiation().formatJSON("solarRadiation", true);
 
     if (loopPacket.getDayET() > 0.0)
-        ss << "{ \"dayET\" : " << loopPacket.getDayET() << " }, ";
+        ss << ", \"dayET\" : " << loopPacket.getDayET();
 
     if (loopPacket.getMonthET() > 0.0)
-        ss << "{ \"monthET\" : " << loopPacket.getMonthET() << " }, ";
+        ss << ", \"monthET\" : " << loopPacket.getMonthET();
 
     if (loopPacket.getYearET() > 0.0)
-        ss << "{ \"yearET\" : " << loopPacket.getYearET() << " }, ";
+        ss << ", \"yearET\" : " << loopPacket.getYearET();
 
-    ss << loopPacket.getUvIndex().formatJSON("uvIndex") << " }, ";
+    ss << loopPacket.getUvIndex().formatJSON("uvIndex", true);
 
     if (loopPacket.isStormOngoing())
-        ss << "{ \"stormStart\" : \"" << Weather::formatDate(loopPacket.getStormStart()) << "\" }, "
-           << "{ \"stormRain\" : " << loopPacket.getStormRain() << " }, ";
+        ss << ", \"stormStart\" : \"" << Weather::formatDate(loopPacket.getStormStart()) << "\""
+           << ", { \"stormRain\" : " << loopPacket.getStormRain();
 
 
-    ss << "{ \"forecastRule\" : \"" << ForecastRule::forecastString(loopPacket.getForecastRuleIndex()) << "\" }, "
-        << "{ \"forecast\" : \"" << loopPacket.getForecastIconString() << "\" }";
+    ss << ", \"forecastRule\" : \"" << ForecastRule::forecastString(loopPacket.getForecastRuleIndex()) << "\""
+        << ", \"forecast\" : \"" << loopPacket.getForecastIconString() << "\"";
 
-    ss << "{ \"extraTemperatures\" : [ ";
+    bool firstValue = true;
+    ss << ", \"extraTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++) {
         if (loopPacket.getExtraTemperature(i).isValid()) {
-            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraTemperature(i).getValue() << " },";
+            if (!firstValue)
+                ss << ", ";
+
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraTemperature(i).getValue() << " }";
+            firstValue = false;
         }
     }
-    ss << "] }";
+    ss << "]";
 
-    ss << "{ \"extraHumidities\" : [ ";
+    firstValue = true;
+    ss << ", \"extraHumidities\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++) {
         if (loopPacket.getExtraHumidity(i).isValid()) {
-            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraHumidity(i).getValue() << " },";
+            if (!firstValue)
+                ss << ", ";
+
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraHumidity(i).getValue() << " }";
+            firstValue = false;
         }
     }
-    ss << "] }";
+    ss << "]";
 
-    ss << "{ \"soilMoistures\" : [ ";
+    ss << ", \"soilMoistures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         if (loopPacket.getSoilMoisture(i).isValid()) {
-            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getSoilMoisture(i).getValue() << " },";
+            if (!firstValue)
+                ss << ", ";
+
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getSoilMoisture(i).getValue() << " }";
+            firstValue = false;
         }
     }
-    ss << "] }";
+    ss << "]";
 
-    ss << "{ \"leafWetnesses\" : [ ";
+    ss << ", \"leafWetnesses\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         if (loopPacket.getLeafWetness(i).isValid()) {
-            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getLeafWetness(i).getValue() << " },";
+            if (!firstValue)
+                ss << ", ";
+
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getLeafWetness(i).getValue() << " }";
+            firstValue = false;
         }
     }
-    ss << "] }";
+    ss << "]";
 
-    ss << "}";
+    ss << "} }";
 
     return ss.str();
 }

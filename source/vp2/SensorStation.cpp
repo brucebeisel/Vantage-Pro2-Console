@@ -16,30 +16,35 @@
  */
 #include <iostream>
 #include <sstream>
+#include "VantageEnums.h"
+#include "VantageEepromConstants.h"
 #include "SensorStation.h"
 #include "Weather.h"
 
 using namespace std;
 
 namespace vws {
-static const char *STATION_TYPES[] = {
-    "Integrated Sensor Station",
-    "Temperature Only",
-    "Humidity Only",
-    "Temperature/Humidity",
-    "Anemometer",
-    "Rain",
-    "Leaf",
-    "Soil",
-    "Soil/Leaf"
-};
+using namespace VantageEepromConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-//SensorStation::SensorStation(SensorStation::SensorStationType type, int sensorIndex, RepeaterId repeaterId)
+SensorStation::SensorStation() : type(type),
+                                 sensorTransmitterChannel(sensorTransmitterChannel),
+                                 connectedRepeaterId(RepeaterId::NO_REPEATER),
+                                 terminatingRepeaterId(RepeaterId::NO_REPEATER),
+                                 batteryStatus(true),
+                                 isAnemometerConnected(false),
+                                 temperatureSensorIndex(-1),
+                                 humiditySensorIndex(-1),
+                                 linkQuality(NO_LINK_QUALITY) {
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 SensorStation::SensorStation(SensorStationType type, int sensorTransmitterChannel, RepeaterId repeaterId, bool hasAnemometer) : type(type),
                                                                                                                                 sensorTransmitterChannel(sensorTransmitterChannel),
-                                                                                                                                connectedRepeaterId(NO_REPEATER),
+                                                                                                                                connectedRepeaterId(RepeaterId::NO_REPEATER),
                                                                                                                                 terminatingRepeaterId(repeaterId),
                                                                                                                                 batteryStatus(true),
                                                                                                                                 isAnemometerConnected(false),
@@ -50,7 +55,17 @@ SensorStation::SensorStation(SensorStationType type, int sensorTransmitterChanne
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-SensorStation::SensorStationType
+void
+SensorStation::setData(VantageEepromConstants::SensorStationType type, int sensorTransmitterChannel, VantageEepromConstants::RepeaterId repeaterId,  bool hasAnemometer) {
+    this->type = type;
+    this->sensorTransmitterChannel = sensorTransmitterChannel;
+    this->terminatingRepeaterId = repeaterId;
+    this->isAnemometerConnected = hasAnemometer;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+SensorStationType
 SensorStation::getSensorStationType() const {
     return type;
 }
@@ -64,7 +79,7 @@ SensorStation::getSensorTransmitterChannel() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-SensorStation::RepeaterId
+RepeaterId
 SensorStation::getRepeaterId() const {
     return terminatingRepeaterId;
 }
@@ -106,7 +121,7 @@ SensorStation::formatSensorStationMessage(const vector<SensorStation> & list) {
     ss << "<sensorStationMessage>";
     for (vector<SensorStation>::const_iterator it = list.begin(); it != list.end(); ++it) {
         ss << "<sensorStation>";
-        ss << "<name>Sensor Station - "<< it->sensorTransmitterChannel << "</name><type>" << STATION_TYPES[it->type] << "</type><sensorStationId>" << it->sensorTransmitterChannel << "</sensorStationId>";
+        ss << "<name>Sensor Station - "<< it->sensorTransmitterChannel << "</name><type>" << sensorStationTypeEnum.valueToString(it->type) << "</type><sensorStationId>" << it->sensorTransmitterChannel << "</sensorStationId>";
         ss <<"</sensorStation>";
     }
 
@@ -127,7 +142,7 @@ SensorStation::formatSensorStationStatusMessage(const vector<SensorStation> & li
     for (vector<SensorStation>::const_iterator it = list.begin(); it != list.end(); ++it) {
         ss << "<sensorStationStatus>";
         ss << "<time>" << Weather::formatDateTime(time) << "</time><sensorStationId>" << it->getSensorTransmitterChannel() << "</sensorStationId><batteryOk>" << (it->isBatteryGood() ? "true" : "false") << "</batteryOk>";
-        if (it->getSensorStationType() == INTEGRATED_SENSOR_STATION)
+        if (it->getSensorStationType() == SensorStationType::INTEGRATED_SENSOR_STATION)
             ss << "<linkQuality>" << it->getLinkQuality() << "</linkQuality>";
         ss << "</sensorStationStatus>";
     }
@@ -140,7 +155,7 @@ SensorStation::formatSensorStationStatusMessage(const vector<SensorStation> & li
 ////////////////////////////////////////////////////////////////////////////////
 ostream &
 operator<<(ostream & os, const SensorStation & ss) {
-    os << "Station Type: " << ss.type << ", Station Transmitter Channel: " << ss.sensorTransmitterChannel;
+    os << "Station Type: " << sensorStationTypeEnum.valueToString(ss.type) << ", Station Transmitter Channel: " << ss.sensorTransmitterChannel;
     return os;
 }
 }

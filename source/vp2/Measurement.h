@@ -132,10 +132,14 @@ public:
      * @param element The JSON element name to be used
      * @return An JSON element with the element name provided and the value OR a blank string if the measurement is not valid
      */
-    std::string formatJSON(const std::string & element) const {
+    std::string formatJSON(const std::string & element, bool leadingComma = false)  const {
         std::ostringstream ss;
-        if (valid) 
-            ss << "{ \"" << element << "\" : " << value << "\" }";
+        if (valid) {
+            if (leadingComma)
+                ss << ", ";
+
+            ss << "\"" << element << "\" : " << value;
+        }
 
         return ss.str();
     }
