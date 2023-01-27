@@ -4,3 +4,5 @@ target
 .settings
 vp2.exe
 vws.exe
+*.exe
+source/test/DominantWindTest.exe

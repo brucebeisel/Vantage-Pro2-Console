@@ -18,9 +18,9 @@
 #define SENSOR_H
 
 #include <vector>
-#include "LoopPacket.h"
 
 namespace vws {
+class LoopPacket;
 
 class Sensor {
 public:
@@ -60,7 +60,7 @@ public:
      * @param loop The LOOP packet to inspect
      * @param sensors The list of detected sensors
      */
-    static void detectSensors(LoopPacket loop, std::vector<Sensor> & sensors);
+    static void detectSensors(const LoopPacket & loop, std::vector<Sensor> & sensors);
 
     /**
      * Format the sensor message to be sent to the WeatherSense collector.

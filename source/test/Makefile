@@ -1,5 +1,4 @@
 CC= g++
-#CXXFLAGS= -g -std=c++11
 CXXFLAGS= -g -I../vp2 -std=c++20 -Wno-psabi
 
 SRCS=\
@@ -7,7 +6,7 @@ SRCS=\
 
 
 OBJDIR=../../target/test
-VP2TESTOBJDIR=../../target/vp2
+VP2TESTOBJDIR=../../target/vws
 OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
@@ -32,7 +31,7 @@ EnumTest: $(OBJDIR) $(OBJDIR)/EnumTest.o
 	$(CC) -g -o EnumTest $(OBJDIR)/EnumTest.o $(ENUMOBJS)
 
 clean:
-	rm $(OBJS)
+	rm -f $(OBJS) $(OBJDIR)/EnumTest.o
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)

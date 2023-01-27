@@ -460,4 +460,12 @@ LoopPacket::getSunsetTime() const {
     return sunsetTime;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::ostream &
+operator<<(std::ostream & os, const LoopPacket & packet) {
+    os << "Inside Temperature" << packet.getInsideTemperature() << endl;
+    return os;
+
+}
 }

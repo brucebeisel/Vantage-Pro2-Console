@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include "VantageWeatherStation.h"
+#include "LoopPacket.h"
 
 namespace vws {
 

@@ -22,6 +22,7 @@
 typedef int HANDLE;
 #endif
 #include <string>
+#include "VantageLogger.h"
 
 namespace vws {
 

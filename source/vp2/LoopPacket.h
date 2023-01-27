@@ -93,6 +93,8 @@ public:
     DateTime                                getSunriseTime() const;
     DateTime                                getSunsetTime() const;
 
+    friend std::ostream & operator<<(std::ostream & os, const LoopPacket & packet);
+
 private:
     static const int LOOP_PACKET_TYPE = 0;
 

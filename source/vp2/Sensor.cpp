@@ -16,6 +16,7 @@
  */
 #include <sstream>
 #include "Sensor.h"
+#include "LoopPacket.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ Sensor::Sensor(SensorType type, int id) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-Sensor::detectSensors(LoopPacket loop, vector<Sensor> & sensors) {
+Sensor::detectSensors(const LoopPacket & loop, vector<Sensor> & sensors) {
     sensors.push_back(Sensor(THERMOMETER, OUTDOOR_THERMOMETER_SENSOR_ID));
     sensors.push_back(Sensor(THERMOMETER, INDOOR_THERMOMETER_SENSOR_ID));
     sensors.push_back(Sensor(HYGROMETER, OUTDOOR_HYGROMETER_SENSOR_ID));

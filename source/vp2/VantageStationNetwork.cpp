@@ -89,7 +89,7 @@ VantageStationNetwork::retrieveSensorStationInfo() {
     cout << "@@@@@@@@@@ Station Data:" << endl;
     cout << "@@@@@@@@@@ Wind Sensor Station ID: " << windSensorStationId << endl;
     for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
-        cout << "@@@@@@@@@@ [" << i << "] Repeater ID: " << (int)sensorStationData[i].repeaterId
+        cout << "@@@@@@@@@@ [" << i << "] Repeater ID: " << sensorStationData[i].repeaterId
              << " Station Type: " << sensorStationTypeEnum.valueToString(sensorStationData[i].stationType)
              << " Humidity Sensor: " << sensorStationData[i].extraHumidityIndex
              << " Temperature Sensor: " << sensorStationData[i].extraTemperatureIndex << endl;

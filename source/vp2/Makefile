@@ -16,7 +16,7 @@ SRCS=\
 	DominantWindDirections.cpp \
 	EventManager.cpp \
 	ForecastRule.cpp \
-    HiLowPacket.cpp \
+	HiLowPacket.cpp \
 	Loop2Packet.cpp \
 	LoopPacket.cpp \
 	main.cpp \
@@ -24,12 +24,12 @@ SRCS=\
 	ProtocolException.cpp \
 	Sensor.cpp \
 	SensorStation.cpp \
-    SerialPort.cpp \
+ 	SerialPort.cpp \
 	UnitConverter.cpp \
-	VantageConstants.cpp \
+	VantageEepromConstants.cpp \
 	VantageCRC.cpp \
-    VantageConfiguration.cpp \
-    VantageDecoder.cpp \
+	VantageConfiguration.cpp \
+	VantageDecoder.cpp \
 	VantageDriver.cpp \
 	VantageLogger.cpp \
 	VantageStationNetwork.cpp \
@@ -39,7 +39,7 @@ SRCS=\
 	WindDirectionSlice.cpp
 
 
-OBJDIR=../../target/VP2
+OBJDIR=../../target/vws
 INCDIRS=-I../3rdParty
 OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))

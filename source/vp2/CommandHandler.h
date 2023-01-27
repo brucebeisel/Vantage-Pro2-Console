@@ -54,6 +54,10 @@ private:
 
     void handleQueryUnitsCommand(const std::string & commandName, std::string & response);
 
+    void handleQuerySensorStations(const std::string & commandName, std::string & response);
+
+    void handleRequestSensorStationsStatus(const std::string & commandName, std::string & response);
+
     VantageWeatherStation & station;
     VantageConfiguration & configurator;
 };

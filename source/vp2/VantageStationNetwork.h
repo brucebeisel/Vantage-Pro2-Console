@@ -20,6 +20,7 @@
 #include <vector>
 #include "SensorStation.h"
 #include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
 
 namespace vws {
 
@@ -65,6 +66,8 @@ private:
 
     VantageLogger              logger;
     VantageWeatherStation &    station;
+    // TODO determine if an array or a vector is the proper container. As a vector you will only have as many sensor station as the
+    // console can see, but as an array you have to search the array to find which stations are actually there.
     SensorStation              sensorStations[ProtocolConstants::MAX_STATIONS];           // The sensor stations as reported by the console
     StationId                  windSensorStationId;
 };

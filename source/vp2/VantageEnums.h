@@ -344,7 +344,38 @@ operator<<(std::ostream & os, VantageEepromConstants::SensorStationType value) {
     return os;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static const NameValuePair<VantageEepromConstants::RepeaterId> riMappings[] = {
+    { "No Repeater", VantageEepromConstants::RepeaterId::NO_REPEATER },
+    { "Repeater A", VantageEepromConstants::RepeaterId::REPEATER_A },
+    { "Repeater B", VantageEepromConstants::RepeaterId::REPEATER_B },
+    { "Repeater C", VantageEepromConstants::RepeaterId::REPEATER_C },
+    { "Repeater D", VantageEepromConstants::RepeaterId::REPEATER_D },
+    { "Repeater E", VantageEepromConstants::RepeaterId::REPEATER_E },
+    { "Repeater F", VantageEepromConstants::RepeaterId::REPEATER_F },
+    { "Repeater G", VantageEepromConstants::RepeaterId::REPEATER_G },
+    { "Repeater H", VantageEepromConstants::RepeaterId::REPEATER_H }
+};
+
+class RepeaterIdEnum : public VantageEnum<VantageEepromConstants::RepeaterId,sizeof(riMappings)/sizeof(riMappings[0])>  {
+public:
+    RepeaterIdEnum() {};
+    virtual ~RepeaterIdEnum() {};
+
+    virtual const NameValuePair<VantageEepromConstants::RepeaterId> * getMappings() const {
+        return riMappings;
+    }
+};
+
+static RepeaterIdEnum repeaterIdEnum;
+
+static std::ostream &
+operator<<(std::ostream & os, VantageEepromConstants::RepeaterId value) {
+    os << repeaterIdEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
 }
 
+}
 
 #endif

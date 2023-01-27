@@ -104,15 +104,9 @@ public:
      */
     void setLinkQuality(int value);
 
-    void setTemperatureHumidityIndicies(int temperatureIndex, int HumidityIndex);
-    void setTemperatureIndex(int temperatureIndex);
-    void setHumidityIndex(int HumidityIndex);
 
     int getTemperatureIndex() const;
     int getHumidityIndex() const;
-
-    static const std::string & sensorStationTypeToString(VantageEepromConstants::SensorStationType sensorStationType);
-    static bool lookupSensorStationType(const std::string & sensorStationName, VantageEepromConstants::SensorStationType & sensorStationType);
 
     /**
      * Build a message to send to the collector that reports which sensor stations are connected (wired or wireless) to the console.
