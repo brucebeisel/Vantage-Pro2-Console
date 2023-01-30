@@ -17,26 +17,96 @@
 #ifndef COMMAND_SOCKET_H_
 #define COMMAND_SOCKET_H_
 #include <string>
+#include <thread>
+#include "ResponseHandler.h"
+#include "VantageLogger.h"
 
 namespace vws {
 
 class EventManager;
 
-class CommandSocket {
+/**
+ * The CommandSocket is a class that uses to thread to read commands from clients
+ * and pass them onto the the event manager.
+ */
+class CommandSocket : ResponseHandler {
 public:
-    CommandSocket(EventManager & evtMgr);
+    /**
+     * Constructor.
+     *
+     * @param port   The port on which to bind the socket
+     * @param evtMgr The event manager to which incoming command are sent for processing
+     */
+    CommandSocket(int port, EventManager & evtMgr);
+
+    /**
+     * Destructor.
+     */
     virtual ~CommandSocket();
 
-    void processCommand(const std::string & commandJson);
-    bool dataAvailable();
+    /**
+     *
+     */
+    virtual void handleCommandResponse(const CommandData & commandData, const std::string & response);
+
+    /**
+     * Initialize the object; creating the listen socket and spawning the reader thread.
+     */
+    bool initialize();
+
+    /**
+     * The main loop that read the commands from the socket.
+     * This is also the thread entry point.
+     */
+    void mainLoop();
+
+    /**
+     * Mark the main loop for termination.
+     * The join() method should be called next.
+     */
+    void terminate();
+
+    /**
+     * Join (in the pthread sense), the reader thread.
+     */
+    void join();
 
 private:
+    static constexpr int HEADER_SIZE = 15;
+    static constexpr const char * HEADER_TEXT = "VANTAGE";
+    static constexpr int MIN_COMMAND_LENGTH = 20; // Arbitrary number for quick error checks
+
+    /**
+     * Accept a new client socket connection.
+     */
     void acceptConnection();
 
+    /**
+     * Create the socket for listening for new connections.
+     */
+    bool createListenSocket();
+
+    /**
+     * Read a command from one of the client sockets.
+     *
+     * @param fd The file descriptor from which to read
+     */
+    void readCommand(int fd);
+
+    /**
+     * Close the specified client socket.
+     *
+     * @param fd The file descriptor to close
+     */
+    void closeSocket(int fd);
+
+    int              port;
     int              listenFd;
     std::vector<int> socketFdList;
-    int              maxSocket;
     EventManager &   eventManager;
+    VantageLogger    logger;
+    bool             terminating;
+    std::thread *    commandThread;
 };
 
 } /* namespace vws */

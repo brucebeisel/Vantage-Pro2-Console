@@ -4,7 +4,6 @@ PROGRAM= vws
 
 SRCS=\
 	Alarm.cpp \
-	Api.cpp \
 	ArchiveManager.cpp \
 	ArchivePacket.cpp \
 	BitConverter.cpp \
@@ -20,7 +19,6 @@ SRCS=\
 	Loop2Packet.cpp \
 	LoopPacket.cpp \
 	main.cpp \
-	ParametersMessage.cpp \
 	ProtocolException.cpp \
 	Sensor.cpp \
 	SensorStation.cpp \
@@ -35,7 +33,6 @@ SRCS=\
 	VantageStationNetwork.cpp \
 	VantageWeatherStation.cpp \
 	Weather.cpp \
-	WeatherSenseSocket.cpp \
 	WindDirectionSlice.cpp
 
 

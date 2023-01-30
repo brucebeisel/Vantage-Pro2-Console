@@ -16,13 +16,15 @@
  */
 //#include <sys/signalfd.h>
 #include <signal.h>
+#include "CommandHandler.h"
+#include "ResponseHandler.h"
 #include "EventManager.h"
 
 namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-EventManager::EventManager() {
+EventManager::EventManager(CommandHandler & ch) : commandHandler(ch) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,7 +43,7 @@ EventManager::isEventAvailable() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-EventManager::queueEvent(const std::string & event) {
+EventManager::queueEvent(const CommandData & event) {
 
     std::lock_guard<std::mutex> guard(mutex);
     commandQueue.push(event);
@@ -49,14 +51,27 @@ EventManager::queueEvent(const std::string & event) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+void
+EventManager::processNextEvent() {
+    CommandData event;
+    std::string response;
+    if (consumeEvent(event)) {
+        commandHandler.handleCommand(event.command, response);
+        event.responseHandler->handleCommandResponse(event, response);
+        // TODO what to do with the response?
+    }
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
-EventManager::consumeEvent(std::string & event) {
+EventManager::consumeEvent(CommandData & event) {
     std::lock_guard<std::mutex> guard(mutex);
     if (commandQueue.empty())
         return false;
 
     event = commandQueue.front();
     commandQueue.pop();
+
     return true;
 }
 

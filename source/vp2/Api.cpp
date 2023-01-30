@@ -15,12 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include "json.hpp"
 #include "Weather.h"
 #include "Api.h"
 #include "HiLowPacket.h"
 #include "VantageWeatherStation.h"
 
 using namespace std;
+using json = nlohmann::json;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/*
+void
+jsonKeyValue(json object, std::string & key, std::string & value) {
+    auto iterator = object.begin();
+    key = iterator.key();
+    value = iterator.value();
+}
+*/
 
 namespace vws {
 
@@ -32,21 +45,34 @@ Api::Api(VantageWeatherStation & station) : station(station) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-Api::processCommand(std::string & command) {
-    int pos = command.find_first_of('?');
-    if (pos == string::npos) {
-        cerr << "Did not find '?' in command: '" << command << "'" << endl;
-        return;
-    }
+Api::processCommand(std::string & commandJson) {
+    /*
+    try {
+        json command = json::parse(commandJson.begin(), commandJson.end());
+        string commandName = command.value("command", "unknown");
+        json args = command.at("arguments");
+        vector<pair<string,string>> argumentList;
+        for (int i = 0; i < args.size(); i++) {
+            json arg = args[i];
+            std::string key, value;
+            pair<string,string> argument;
+            jsonKeyValue(arg, argument.first, argument.second);
+            argumentList.push_back(argument);
+        }
 
-    string localString = command.substr(pos);
-    string commandName;
+        cout <<     "Command: " << commandName << endl;
+        cout <<     "    Arguments:" << endl;
+        for (int i = 0; i < argumentList.size(); i++) {
+            cout << "          [" << i << "]: " << argumentList[i].first << "=" << argumentList[i].second << endl;
+        }
 
-    if (commandName == "lamp") {
+        if (commandName == "backlight") {
+        }
     }
-    else if (commandName == "current-weather") {
-        requestCurrentWeather();
+    catch (const std::exception & e) {
+        cout << "Exception: " << e.what() << endl;
     }
+    */
 }
 
 ////////////////////////////////////////////////////////////////////////////////

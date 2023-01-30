@@ -20,8 +20,10 @@
 #include <queue>
 #include <string>
 #include <mutex>
+#include "ResponseHandler.h"
 
 namespace vws {
+class CommandHandler;
 
 /**
  * Class to handle events from the HTTP threads.
@@ -31,7 +33,7 @@ public:
     /**
      * Constructor.
      */
-    EventManager();
+    EventManager(CommandHandler & commandHandler);
 
     /**
      * Destructor.
@@ -51,7 +53,12 @@ public:
      *
      * @param event The event to be queued
      */
-    void queueEvent(const std::string & event);
+    void queueEvent(const CommandData & event);
+
+    /**
+     * Process the event at the head of the queue.
+     */
+    void processNextEvent();
 
     /**
      * Consume the event at the head of the queue.
@@ -60,7 +67,7 @@ public:
      *
      * @return True if an event was actually copied. If false, the parameter event is not changed.
      */
-    bool consumeEvent(std::string & event);
+    bool consumeEvent(CommandData & event);
 
     //
     // Prevent all copying and moving
@@ -69,8 +76,9 @@ public:
     EventManager & operator=(const EventManager &) = delete;
 
 private:
-    std::queue<std::string> commandQueue; // The queue on which to store events
-    mutable std::mutex mutex;             // The mutex to protect the queue against multi-threaded contention
+    std::queue<CommandData> commandQueue;   // The queue on which to store events
+    mutable std::mutex      mutex;          // The mutex to protect the queue against multi-threaded contention
+    CommandHandler &        commandHandler; // The command handler that will execute the command
 };
 
 }

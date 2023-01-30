@@ -28,6 +28,7 @@
 #include "VantageLogger.h"
 #include "ArchiveManager.h"
 #include "CommandSocket.h"
+#include "CommandHandler.h"
 #include "VantageDriver.h"
 #include "VantageConfiguration.h"
 #include "CurrentWeatherSocket.h"
@@ -64,8 +65,10 @@ consoleThreadEntry(const string & archiveFile, const string & serialPortName, in
         CurrentWeatherManager currentWeatherManager(currentWeatherPublisher);
         VantageWeatherStation station(serialPortName, baudRate);
         ArchiveManager archiveManager(archiveFile, station);
-        EventManager eventManager;
         VantageConfiguration configuration(station);
+        CommandHandler commandHandler(station, configuration);
+        EventManager eventManager(commandHandler);
+        CommandSocket commandSocket(11461, eventManager);
         VantageDriver driver(station, configuration, archiveManager, eventManager);
 
         //
@@ -78,6 +81,9 @@ consoleThreadEntry(const string & archiveFile, const string & serialPortName, in
         // Initialize objects that require it before entering the main loop
         //
         logger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
+        if (!commandSocket.initialize())
+            return;
+
         if (!currentWeatherPublisher.initialize())
             return;
 
@@ -108,13 +114,8 @@ main(int argc, char *argv[]) {
     signal(SIGTERM, sigHandler);
 #endif
 
-    const char jsonCommand[] = "{ \"command\"  : \"backlight\", \"arguments\" : [ { \"state\" : \"on\" } ] }";
-    EventManager em;
-    CommandSocket socket(em);
-    socket.processCommand(jsonCommand);
-
     if (argc < 3 || argc > 4) {
-        cerr << "Usage: vp2 <port> <archive file> [log file]" << endl;
+        cerr << "Usage: vws <weather station serial port> <archive file> [log file]" << endl;
         exit(1);
     }
 

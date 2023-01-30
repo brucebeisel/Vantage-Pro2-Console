@@ -199,16 +199,12 @@ VantageDriver::reopenStation() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageDriver::mainLoop() {
-    vector<ArchivePacket> list;
-    list.reserve(ProtocolConstants::NUM_ARCHIVE_RECORDS);
-
-    /*
-
     if (!archiveManager.synchronizeArchive()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read the archive during initialization" << endl;
         return;
     }
 
+    /*
     if (!station.wakeupStation()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to wake up console after initialization" << endl;
         return;
@@ -261,10 +257,12 @@ VantageDriver::mainLoop() {
                 continue;
             }
 
-            string event;
-            while (eventManager.consumeEvent(event)) {
-
-            }
+            //
+            // Process the next event that the event manager has received.
+            // Note that the events are expected to come in slowly as the
+            // events are typically human driven.
+            //
+            eventManager.processNextEvent();
 
             //
             // If the LOOP packet data indicates that a new archive packet is available
@@ -273,20 +271,15 @@ VantageDriver::mainLoop() {
             if (previousNextRecord != nextRecord) {
                 logger.log(VantageLogger::VANTAGE_INFO) << "New archive record available. Record ID = " << nextRecord << endl;
                 previousNextRecord = nextRecord;
-            /*
+
                 if (archiveManager.synchronizeArchive()) {
                     ArchivePacket packet;
-                    // TBD What if multiple archive packets are received?
-                    //     What is the concern of the above question? Multiple archive packets should never be returned.
-                    //     It may have been a hold over from when this program would asynchronously send archive packets
-                    //     to the connected client.
                     archiveManager.getNewestRecord(packet);
                     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: "
                                                            << Weather::formatDateTime(packet.getDateTime())
                                                            << " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
                     previousNextRecord = nextRecord;
                 }
-            */
             }
         }
         catch (std::exception & e) {
