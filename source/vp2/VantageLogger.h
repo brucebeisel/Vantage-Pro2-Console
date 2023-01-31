@@ -38,6 +38,7 @@ public:
         VANTAGE_DEBUG2,
         VANTAGE_DEBUG3
     };
+
     /**
      * Get a logger for the given name.
      * 
@@ -128,13 +129,7 @@ private:
 
     std::string loggerName;
 };
-}
 
-using vws::VantageLogger::Level::VANTAGE_ERROR;
-using vws::VantageLogger::Level::VANTAGE_WARNING;
-using vws::VantageLogger::Level::VANTAGE_INFO;
-using vws::VantageLogger::Level::VANTAGE_DEBUG1;
-using vws::VantageLogger::Level::VANTAGE_DEBUG2;
-using vws::VantageLogger::Level::VANTAGE_DEBUG3;
+}
 
 #endif /* VANTAGE_LOGGER_H */

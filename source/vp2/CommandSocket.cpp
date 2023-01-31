@@ -64,7 +64,7 @@ CommandSocket::~CommandSocket() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::mainLoop() {
-    logger.log(VANTAGE_INFO) << "Entering command socket thread" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Entering command socket thread" << endl;
     struct timeval tv;
     while (!terminating) {
         fd_set fd_read;
@@ -85,14 +85,14 @@ CommandSocket::mainLoop() {
             }
         }
     }
-    logger.log(VANTAGE_INFO) << "Exiting command socket thread" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Exiting command socket thread" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::terminate() {
-    logger.log(VANTAGE_INFO) << "Received request to terminate command socket thread" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Received request to terminate command socket thread" << endl;
     terminating = true;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ CommandSocket::closeSocket(int fd) {
     // Since the list is sorted, deleting a single item will not change the sort order
     //
     socketFdList.erase(std::find(socketFdList.begin(), socketFdList.end(), fd));
-    logger.log(VANTAGE_DEBUG1) << "Closed socket that used fd = " << fd << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Closed socket that used fd = " << fd << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,12 +142,12 @@ CommandSocket::readCommand(int fd) {
     while (readPosition < HEADER_SIZE) {
         int nbytes = read(fd, &buffer[readPosition], HEADER_SIZE - readPosition);
         if (nbytes == 0) {
-            logger.log(VANTAGE_WARNING) << "Failed to read command header, closing socket. Read returned 0." << endl;
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to read command header, closing socket. Read returned 0." << endl;
             closeSocket(fd);
             return;
         }
         else if (nbytes < 0) {
-            logger.log(VANTAGE_WARNING) << "Read() returned an error while reading command header, closing socket. Read returned -1." << endl;
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Read() returned an error while reading command header, closing socket. Read returned -1." << endl;
             closeSocket(fd);
             return;
         }
@@ -157,7 +157,7 @@ CommandSocket::readCommand(int fd) {
     }
 
     if (strncmp(buffer, HEADER_TEXT, strlen(HEADER_TEXT)) != 0) {
-        logger.log(VANTAGE_WARNING) << "Command does not start with header text. Received '" << buffer << "'" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Command does not start with header text. Received '" << buffer << "'" << endl;
         return;
     }
 
@@ -166,7 +166,7 @@ CommandSocket::readCommand(int fd) {
     //
     int messageLength = atoi(&buffer[strlen(HEADER_TEXT) + 1]);
     if (messageLength < MIN_COMMAND_LENGTH) {
-        logger.log(VANTAGE_WARNING) << "Command length in header is too small. Received " << messageLength << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Command length in header is too small. Received " << messageLength << endl;
         closeSocket(fd);
         return;
     }
@@ -178,12 +178,12 @@ CommandSocket::readCommand(int fd) {
     while (readPosition < messageLength) {
         int nbytes = read(fd, &buffer[readPosition], messageLength - readPosition);
         if (nbytes == 0) {
-            logger.log(VANTAGE_WARNING) << "Failed to read command body, closing socket. Read returned 0." << endl;
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to read command body, closing socket. Read returned 0." << endl;
             closeSocket(fd);
             return;
         }
         else if (nbytes < 0) {
-            logger.log(VANTAGE_WARNING) << "Read() returned an error while reading command body, closing socket. Read returned -1." << endl;
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Read() returned an error while reading command body, closing socket. Read returned -1." << endl;
             closeSocket(fd);
             return;
         }
@@ -213,7 +213,7 @@ void
 CommandSocket::handleCommandResponse(const CommandData & commandData, const std::string & response) {
     const char * responseBuffer = response.c_str();
     if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
-        logger.log(VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
     }
 }
 
@@ -224,13 +224,13 @@ CommandSocket::createListenSocket() {
     listenFd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (listenFd < 0) {
-        logger.log(VANTAGE_ERROR) << "Could not create command server socket" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not create command server socket" << endl;
         return false;
     }
 
     int opt = 1;
     if (setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
-        logger.log(VANTAGE_ERROR) << "Could not configure command server socket" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not configure command server socket" << endl;
         return false;
     }
 
@@ -241,12 +241,12 @@ CommandSocket::createListenSocket() {
     address.sin_port = htons(port);
 
     if (bind(listenFd, (struct sockaddr*)&address, sizeof(address)) < 0) {
-        logger.log(VANTAGE_ERROR) << "Failed to bind command server socket" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to bind command server socket" << endl;
         return false;
     }
 
     if (listen(listenFd, 3) < 0) {
-        logger.log(VANTAGE_ERROR) << "Failed to listen on command server socket" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to listen on command server socket" << endl;
         return false;
     }
 
@@ -260,7 +260,7 @@ CommandSocket::acceptConnection() {
     int fd = accept(listenFd, NULL, NULL);
 
     if (fd < 0) {
-        logger.log(VANTAGE_WARNING) << "Accept failed" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Accept failed" << endl;
         return;
     }
 
@@ -274,7 +274,7 @@ CommandSocket::acceptConnection() {
 
     socketFdList.push_back(fd);
     std::sort(socketFdList.begin(), socketFdList.end());
-    logger.log(VANTAGE_DEBUG1) << "Accepted socket using fd = " << fd << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Accepted socket using fd = " << fd << endl;
 }
 
 }

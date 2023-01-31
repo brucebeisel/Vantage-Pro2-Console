@@ -28,6 +28,8 @@ using namespace std;
 
 namespace vws {
 
+using vws::VantageLogger;
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ArchiveManager::ArchiveManager(const std::string & archiveFilename, VantageWeatherStation & station) :
@@ -46,7 +48,7 @@ ArchiveManager::~ArchiveManager() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 ArchiveManager::synchronizeArchive() {
-    logger.log(VANTAGE_INFO) << "Synchronizing local archive from Vantage console's archive" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing local archive from Vantage console's archive" << endl;
     vector<ArchivePacket> list;
     bool result = false;
 
@@ -69,7 +71,7 @@ ArchiveManager::synchronizeArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket>& list) {
-    logger.log(VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
     positionStream(stream, afterTime, true);
@@ -101,7 +103,9 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::vector<ArchivePacket> & list) {
-    logger.log(VANTAGE_DEBUG1) << "Querying archive records between " << Weather::formatDateTime(startTime) << " and " << Weather::formatDateTime(endTime) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Querying archive records between "
+                                              << Weather::formatDateTime(startTime)
+                                              << " and " << Weather::formatDateTime(endTime) << endl;
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
     positionStream(stream, startTime, false);
@@ -129,7 +133,7 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::v
 
     stream.close();
 
-    logger.log(VANTAGE_DEBUG1) << "Query found " << list.size() << " items. Time of last record is " << Weather::formatDateTime(timeOfLastRecord) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query found " << list.size() << " items. Time of last record is " << Weather::formatDateTime(timeOfLastRecord) << endl;
     return timeOfLastRecord;
 }
 
@@ -221,10 +225,10 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
         if (newestPacketTime < it->getDateTime()) {
             stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
             newestPacketTime = it->getDateTime();
-            logger.log(VANTAGE_DEBUG1) << "Archived packet with time: " << Weather::formatDateTime(it->getDateTime()) << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: " << Weather::formatDateTime(it->getDateTime()) << endl;
         }
         else
-            logger.log(VANTAGE_INFO) << "Skipping archive of packet with time " << Weather::formatDateTime(it->getDateTime()) << endl;
+            logger.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time " << Weather::formatDateTime(it->getDateTime()) << endl;
     }
     stream.close();
 }
