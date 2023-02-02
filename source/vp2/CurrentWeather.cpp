@@ -204,7 +204,7 @@ CurrentWeather::formatJSON() const {
     }
     ss << "]";
 
-    ss << loopPacket.getBarometricPressure().formatJSON("barometerPressure", true)
+    ss << loopPacket.getBarometricPressure().formatJSON("barometricPressure", true)
        << loop2Packet.getAtmPressure().formatJSON("atmosphericPressure", true)
        << ", \"barometerTrend\" : \"" << loopPacket.getBarometerTrendString() << "\""
        << ", \"rainRate\" : " << loopPacket.getRainRate()
