@@ -56,7 +56,7 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
 
     Weather::localtime(packetTime, tm);
     char filename[100];
-    snprintf(filename, sizeof(filename), "./log/LookPacketArchive_%02d.dat", tm.tm_hour);
+    snprintf(filename, sizeof(filename), "./log/LoopPacketArchive_%02d.dat", tm.tm_hour);
     ios_base::openmode mode = ofstream::binary;
 
     //
@@ -65,10 +65,12 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
     struct stat fileinfo;
     int sr = stat(filename, &fileinfo);
     time_t now = time(0);
-    if (sr != -1 && fileinfo.st_mtim.tv_sec + 3600 < now)
+    long fileAge = now - fileinfo.st_mtim.tv_sec;
+
+    if (sr != -1 && fileAge > 3600)
         mode |= std::ofstream::trunc;
-    else
-        mode |= std::ofstream::out;
+
+    mode |= std::ofstream::app;
 
     ofstream ofs(filename, mode);
     if (ofs.is_open()) {
