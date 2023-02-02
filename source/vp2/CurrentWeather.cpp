@@ -179,7 +179,7 @@ CurrentWeather::formatXML() const {
 std::string
 CurrentWeather::formatJSON() const {
     ostringstream ss;
-    ss << "{ \"currentWeather\" : { "
+    ss << "{"
        << "\"time\" : \"" << Weather::formatDateTime(time(0)) << "\""
        << loopPacket.getInsideTemperature().formatJSON("indoorTemperature", true)
        << loopPacket.getInsideHumidity().formatJSON("indoorHumidity", true)
@@ -190,7 +190,7 @@ CurrentWeather::formatJSON() const {
        << loop2Packet.getHeatIndex().formatJSON("heatIndex", true)
        << loop2Packet.getThsw().formatJSON("thsw", true)
        << ", \"wind\" : { \"speed\" : " << windSpeed << ", \"direction\" : " <<  windDirection << " }"
-       << ", \"gust\" : { \"speed\" : " <<  loop2Packet.getWindGust10Minute()
+       << ", \"windGust\" : { \"speed\" : " <<  loop2Packet.getWindGust10Minute()
        << ", \"direction\" : " <<  loop2Packet.getWindGustDirection10Minute() << " }"
        << ", \"windSpeed10MinAvg\" : " <<  windSpeed10MinuteAverage
        << ", \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage();
@@ -204,8 +204,8 @@ CurrentWeather::formatJSON() const {
     }
     ss << "]";
 
-    ss << loopPacket.getBarometricPressure().formatJSON("baroPressure", true)
-       << loop2Packet.getAtmPressure().formatJSON("atmPressure", true)
+    ss << loopPacket.getBarometricPressure().formatJSON("barometerPressure", true)
+       << loop2Packet.getAtmPressure().formatJSON("atmosphericPressure", true)
        << ", \"barometerTrend\" : \"" << loopPacket.getBarometerTrendString() << "\""
        << ", \"rainRate\" : " << loopPacket.getRainRate()
        << ", \"rainToday\" : " << loopPacket.getDayRain()
@@ -287,7 +287,7 @@ CurrentWeather::formatJSON() const {
     }
     ss << " ]";
 
-    ss << " } }";
+    ss << " }";
 
     return ss.str();
 }
