@@ -16,6 +16,7 @@
  */
 #include <time.h>
 #include <vector>
+#include <iomanip>
 #include <sstream>
 #include "ForecastRule.h"
 #include "CurrentWeather.h"
@@ -178,6 +179,7 @@ CurrentWeather::formatXML() const {
 std::string
 CurrentWeather::formatJSON() const {
     ostringstream ss;
+    ss << setprecision(2);
     ss << "{ \"currentWeather\" : {"
        << "\"time\" : \"" << Weather::formatDateTime(time(0)) << "\""
        << loopPacket.getInsideTemperature().formatJSON("indoorTemperature", true)
