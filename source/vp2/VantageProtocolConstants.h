@@ -242,18 +242,18 @@ enum class BarometerTrend {
 // LOOP packet forecast icons
 //
 static constexpr short RAIN_BIT = 0x1;
-static constexpr short MOSTLY_CLOUDY_BIT = 0x2;
+static constexpr short CLOUD_BIT = 0x2;
 static constexpr short PARTLY_CLOUDY_BIT = 0x4;
-static constexpr short SUNNY_BIT = 0x8;
+static constexpr short SUN_BIT = 0x8;
 static constexpr short SNOW_BIT = 0x10;
 
 enum class Forecast {
-    SUNNY =                                 SUNNY_BIT,
-    PARTLY_CLOUDY =                         PARTLY_CLOUDY_BIT,
-    MOSTLY_CLOUDY =                         MOSTLY_CLOUDY_BIT,
-    MOSTLY_CLOUDY_WITH_RAIN =               MOSTLY_CLOUDY_BIT | RAIN_BIT,
-    MOSTLY_CLOUDY_WITH_SNOW =               MOSTLY_CLOUDY_BIT | SNOW_BIT,
-    MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW =       MOSTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT,
+    SUNNY =                                 SUN_BIT,
+    PARTLY_CLOUDY =                         CLOUD_BIT | PARTLY_CLOUDY_BIT,
+    MOSTLY_CLOUDY =                         CLOUD_BIT,
+    MOSTLY_CLOUDY_WITH_RAIN =               CLOUD_BIT | RAIN_BIT,
+    MOSTLY_CLOUDY_WITH_SNOW =               CLOUD_BIT | SNOW_BIT,
+    MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW =       CLOUD_BIT | RAIN_BIT | SNOW_BIT,
     PARTLY_CLOUDY_WITH_RAIN_LATER =         PARTLY_CLOUDY_BIT | RAIN_BIT,
     PARTLY_CLOUDY_WITH_SNOW_LATER =         PARTLY_CLOUDY_BIT | SNOW_BIT,
     PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT
