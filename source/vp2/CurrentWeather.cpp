@@ -200,7 +200,7 @@ CurrentWeather::formatJSON() const {
         if (i != 0)
             ss << ",";
 
-        ss << dominantWindDirections[i];
+        ss << "\"" << dominantWindDirections[i] << "\"";
     }
     ss << "]";
 
