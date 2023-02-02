@@ -179,6 +179,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Console Battery Voltage: " << consoleBatteryVoltage << endl;
 
     forecastIcon = static_cast<Forecast>(BitConverter::toInt8(packetData, FORECAST_ICONS_OFFSET));
+    cout << "Loop packet forecast icon byte: " << (int)packetData[FORECAST_ICONS_OFFSET] << " at offset " << FORECAST_ICONS_OFFSET << endl;
     forecastRuleIndex = BitConverter::toInt8(packetData, FORECAST_RULE_NUMBER_OFFSET);
 
     sunriseTime = VantageDecoder::decodeTime(packetData, SUNRISE_TIME_OFFSET);
@@ -436,6 +437,7 @@ LoopPacket::getBarometerTrendString() const {
 ////////////////////////////////////////////////////////////////////////////////
 string
 LoopPacket::getForecastIconString() const {
+    cout << "Forecast icon value:" << forecastIcon << endl;
     return forecastEnum.valueToString(forecastIcon);
 }
 

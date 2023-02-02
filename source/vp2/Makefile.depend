@@ -2,11 +2,6 @@
  VantageWeatherStation.h ArchivePacket.h SensorStation.h Sensor.h \
  VantageEepromConstants.h SerialPort.h VantageLogger.h \
  VantageProtocolConstants.h LoopPacket.h Measurement.h
-../../target/vws/Api.o: Api.cpp ../3rdParty/json.hpp Weather.h \
- Measurement.h WeatherTypes.h Api.h SensorStation.h Sensor.h \
- VantageEepromConstants.h HiLowPacket.h VantageProtocolConstants.h \
- VantageLogger.h VantageWeatherStation.h ArchivePacket.h BitConverter.h \
- SerialPort.h
 ../../target/vws/ArchiveManager.o: ArchiveManager.cpp \
  VantageProtocolConstants.h WeatherTypes.h ArchivePacket.h \
  ArchiveManager.h VantageLogger.h VantageWeatherStation.h SensorStation.h \
@@ -24,7 +19,7 @@
  BitConverter.h SerialPort.h VantageLogger.h VantageProtocolConstants.h \
  VantageConfiguration.h VantageEnums.h
 ../../target/vws/CommandSocket.o: CommandSocket.cpp ../3rdParty/json.hpp \
- EventManager.h CommandSocket.h VantageLogger.h
+ EventManager.h ResponseHandler.h CommandSocket.h VantageLogger.h
 ../../target/vws/CurrentWeather.o: CurrentWeather.cpp ForecastRule.h \
  CurrentWeather.h DominantWindDirections.h VantageLogger.h WeatherTypes.h \
  WindDirectionSlice.h LoopPacket.h Measurement.h \
@@ -46,7 +41,8 @@
 ../../target/vws/DominantWindDirections.o: DominantWindDirections.cpp \
  DominantWindDirections.h VantageLogger.h WeatherTypes.h \
  WindDirectionSlice.h Weather.h Measurement.h
-../../target/vws/EventManager.o: EventManager.cpp EventManager.h
+../../target/vws/EventManager.o: EventManager.cpp CommandHandler.h \
+ ResponseHandler.h EventManager.h
 ../../target/vws/ForecastRule.o: ForecastRule.cpp ForecastRule.h
 ../../target/vws/HiLowPacket.o: HiLowPacket.cpp BitConverter.h \
  WeatherTypes.h Weather.h Measurement.h HiLowPacket.h \
@@ -61,14 +57,13 @@
  VantageLogger.h VantageEnums.h VantageEepromConstants.h VantageCRC.h \
  VantageDecoder.h
 ../../target/vws/main.o: main.cpp VantageLogger.h ArchiveManager.h \
- WeatherTypes.h CommandSocket.h VantageDriver.h EventManager.h \
- SensorStation.h Sensor.h VantageEepromConstants.h VantageConfiguration.h \
- VantageWeatherStation.h ArchivePacket.h BitConverter.h SerialPort.h \
- VantageProtocolConstants.h CurrentWeatherSocket.h CurrentWeather.h \
- DominantWindDirections.h WindDirectionSlice.h LoopPacket.h Measurement.h \
- Loop2Packet.h CurrentWeatherPublisher.h CurrentWeatherManager.h
-../../target/vws/ParametersMessage.o: ParametersMessage.cpp \
- ParametersMessage.h WeatherTypes.h
+ WeatherTypes.h CommandSocket.h ResponseHandler.h CommandHandler.h \
+ VantageDriver.h EventManager.h SensorStation.h Sensor.h \
+ VantageEepromConstants.h VantageConfiguration.h VantageWeatherStation.h \
+ ArchivePacket.h BitConverter.h SerialPort.h VantageProtocolConstants.h \
+ CurrentWeatherSocket.h CurrentWeather.h DominantWindDirections.h \
+ WindDirectionSlice.h LoopPacket.h Measurement.h Loop2Packet.h \
+ CurrentWeatherPublisher.h CurrentWeatherManager.h
 ../../target/vws/ProtocolException.o: ProtocolException.cpp \
  ProtocolException.h
 ../../target/vws/Sensor.o: Sensor.cpp Sensor.h LoopPacket.h \
@@ -98,8 +93,8 @@
  VantageProtocolConstants.h Loop2Packet.h HiLowPacket.h SensorStation.h \
  Sensor.h VantageEepromConstants.h Alarm.h VantageWeatherStation.h \
  ArchivePacket.h BitConverter.h SerialPort.h VantageDecoder.h \
- VantageDriver.h ArchiveManager.h EventManager.h VantageConfiguration.h \
- Weather.h
+ VantageDriver.h ArchiveManager.h EventManager.h ResponseHandler.h \
+ VantageConfiguration.h Weather.h
 ../../target/vws/VantageLogger.o: VantageLogger.cpp VantageLogger.h \
  Weather.h Measurement.h WeatherTypes.h
 ../../target/vws/VantageStationNetwork.o: VantageStationNetwork.cpp \
@@ -114,8 +109,5 @@
  ArchivePacket.h SensorStation.h Sensor.h SerialPort.h Weather.h
 ../../target/vws/Weather.o: Weather.cpp Weather.h Measurement.h \
  WeatherTypes.h
-../../target/vws/WeatherSenseSocket.o: WeatherSenseSocket.cpp \
- WeatherSenseSocket.h VantageLogger.h WeatherTypes.h Weather.h \
- Measurement.h
 ../../target/vws/WindDirectionSlice.o: WindDirectionSlice.cpp Weather.h \
  Measurement.h WeatherTypes.h WindDirectionSlice.h

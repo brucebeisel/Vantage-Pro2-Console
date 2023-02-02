@@ -179,8 +179,7 @@ CurrentWeather::formatXML() const {
 std::string
 CurrentWeather::formatJSON() const {
     ostringstream ss;
-    ss << setprecision(2);
-    ss << "{ \"currentWeather\" : {"
+    ss << "{ \"currentWeather\" : { "
        << "\"time\" : \"" << Weather::formatDateTime(time(0)) << "\""
        << loopPacket.getInsideTemperature().formatJSON("indoorTemperature", true)
        << loopPacket.getInsideHumidity().formatJSON("indoorHumidity", true)
@@ -190,19 +189,20 @@ CurrentWeather::formatJSON() const {
        << loop2Packet.getWindChill().formatJSON("windChill", true)
        << loop2Packet.getHeatIndex().formatJSON("heatIndex", true)
        << loop2Packet.getThsw().formatJSON("thsw", true)
-       << "{ \"wind\" : { \"speed\" : " << windSpeed << " }, \"direction>\" : " << windDirection << " } },"
-       << "{ \"gust\" : { \"speed\" : " << loop2Packet.getWindGust10Minute() << ", \"direction>\" : " << loop2Packet.getWindGustDirection10Minute() << " } },"
-       << "{ \"windSpeed10MinAvg\" : " << windSpeed10MinuteAverage << " },"
-       << "{ \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage() << " },";
+       << ", \"wind\" : { \"speed\" : " << windSpeed << ", \"direction\" : " <<  windDirection << " }"
+       << ", \"gust\" : { \"speed\" : " <<  loop2Packet.getWindGust10Minute()
+       << ", \"direction\" : " <<  loop2Packet.getWindGustDirection10Minute() << " }"
+       << ", \"windSpeed10MinAvg\" : " <<  windSpeed10MinuteAverage
+       << ", \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage();
 
-    ss << "{ \"dominantWindDirections\" : [";
+    ss << ", \"dominantWindDirections\" : [";
     for (unsigned int i = 0; i < dominantWindDirections.size(); i++) {
         if (i != 0)
             ss << ",";
 
         ss << dominantWindDirections[i];
     }
-    ss << "] },";
+    ss << "]";
 
     ss << loopPacket.getBarometricPressure().formatJSON("baroPressure", true)
        << loop2Packet.getAtmPressure().formatJSON("atmPressure", true)

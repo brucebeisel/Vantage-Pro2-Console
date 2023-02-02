@@ -70,7 +70,13 @@ CommandSocket::mainLoop() {
         fd_set fd_read;
         fd_set fd_write;
         fd_set fd_except;
-        int nfds = std::max(socketFdList[socketFdList.size() - 1], listenFd) + 1;
+        int nfds;
+        if (socketFdList.size() > 0)
+            nfds = std::max(socketFdList[socketFdList.size() - 1], listenFd);
+        else
+            nfds = listenFd;
+
+        nfds++;
         tv.tv_sec = 0;
         tv.tv_usec = 500000;
 
