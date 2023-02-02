@@ -59,7 +59,7 @@ CurrentWeather::setLoop2Data(const Loop2Packet & loop2Packet) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CurrentWeather::setDominantWindDirectionData(const vector<int> & dominantWindDirs) {
+CurrentWeather::setDominantWindDirectionData(const vector<std::string> & dominantWindDirs) {
     dominantWindDirections.clear();
     dominantWindDirections.assign(dominantWindDirs.begin(), dominantWindDirs.end());
 }
@@ -188,15 +188,19 @@ CurrentWeather::formatJSON() const {
        << loop2Packet.getWindChill().formatJSON("windChill", true)
        << loop2Packet.getHeatIndex().formatJSON("heatIndex", true)
        << loop2Packet.getThsw().formatJSON("thsw", true)
-       << "{ \"wind\" : { \"speed\" : " << windSpeed << " }, { \"direction>\" : " << windDirection << " } },"
-       << "{ \"wind\" : { \"speed\" : " << loop2Packet.getWindGust10Minute() << " }, { \"direction>\" : " << loop2Packet.getWindGustDirection10Minute() << " } },"
+       << "{ \"wind\" : { \"speed\" : " << windSpeed << " }, \"direction>\" : " << windDirection << " } },"
+       << "{ \"gust\" : { \"speed\" : " << loop2Packet.getWindGust10Minute() << ", \"direction>\" : " << loop2Packet.getWindGustDirection10Minute() << " } },"
        << "{ \"windSpeed10MinAvg\" : " << windSpeed10MinuteAverage << " },"
        << "{ \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage() << " },";
 
+    ss << "{ \"dominantWindDirections\" : [";
     for (unsigned int i = 0; i < dominantWindDirections.size(); i++) {
-        int windDirNumber = i + 1;
-        ss << "{ \"domWindDir" << windDirNumber << "\" : " << dominantWindDirections.at(i) << " }, ";
+        if (i != 0)
+            ss << ",";
+
+        ss << dominantWindDirections[i];
     }
+    ss << "] },";
 
     ss << loopPacket.getBarometricPressure().formatJSON("baroPressure", true)
        << loop2Packet.getAtmPressure().formatJSON("atmPressure", true)
@@ -240,7 +244,7 @@ CurrentWeather::formatJSON() const {
             firstValue = false;
         }
     }
-    ss << "]";
+    ss << " ]";
 
     firstValue = true;
     ss << ", \"extraHumidities\" : [ ";
@@ -253,8 +257,9 @@ CurrentWeather::formatJSON() const {
             firstValue = false;
         }
     }
-    ss << "]";
+    ss << " ]";
 
+    firstValue = true;
     ss << ", \"soilMoistures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         if (loopPacket.getSoilMoisture(i).isValid()) {
@@ -265,8 +270,9 @@ CurrentWeather::formatJSON() const {
             firstValue = false;
         }
     }
-    ss << "]";
+    ss << " ]";
 
+    firstValue = true;
     ss << ", \"leafWetnesses\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         if (loopPacket.getLeafWetness(i).isValid()) {
@@ -277,9 +283,9 @@ CurrentWeather::formatJSON() const {
             firstValue = false;
         }
     }
-    ss << "]";
+    ss << " ]";
 
-    ss << "} }";
+    ss << " } }";
 
     return ss.str();
 }

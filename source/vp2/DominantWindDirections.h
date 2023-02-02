@@ -71,8 +71,8 @@ public:
      * 
      * @param headings The directions that the wind has been blowing most often in the last hour
      */
-    void dominantDirectionsForPastHour(std::vector<int> & headings) const;
-    const std::vector<int> & dominantDirectionsForPastHour() const;
+    void dominantDirectionsForPastHour(std::vector<std::string> & headings) const;
+    const std::vector<std::string> & dominantDirectionsForPastHour() const;
 
     /**
      * Dump the internal data to cout.
@@ -150,11 +150,11 @@ private:
      */
     static const int DOMINANT_DIR_DURATION = 3600;
 
-    VantageLogger      logger;
-    WindDirectionSlice windSlices[NUM_SLICES];
-    time_t             startOf10MinuteTimeWindow;
-    time_t             endOf10MinuteTimeWindow;
-    std::vector<int>   dominantWindDirectionList;
+    VantageLogger            logger;
+    WindDirectionSlice       windSlices[NUM_SLICES];
+    time_t                   startOf10MinuteTimeWindow;
+    time_t                   endOf10MinuteTimeWindow;
+    std::vector<std::string> dominantWindDirectionList;
 };
 }
 

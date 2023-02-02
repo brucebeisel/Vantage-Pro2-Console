@@ -144,7 +144,7 @@ DominantWindDirections::endWindow(DateTime time) {
     dominantWindDirectionList.clear();
     for (int i = 0; i < NUM_SLICES; i++) {
         if (windSlices[i].getLast10MinuteDominantTime() != 0)
-            dominantWindDirectionList.push_back(static_cast<int>(windSlices[i].getCenter()));
+            dominantWindDirectionList.push_back(windSlices[i].getName());
     }
 }
 
@@ -254,18 +254,18 @@ DominantWindDirections::dumpData() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-DominantWindDirections::dominantDirectionsForPastHour(vector<int> & headings) const {
+DominantWindDirections::dominantDirectionsForPastHour(vector<std::string> & headings) const {
     //
     // Pull out the wind directions that have been dominant for a 10 minute period over the past hour
     //
     headings.clear();
-    const std::vector<int> & dwd = dominantDirectionsForPastHour();
+    const std::vector<std::string> & dwd = dominantDirectionsForPastHour();
     headings.assign(dwd.begin(), dwd.end());
 }
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
-const std::vector<int> &
+const std::vector<std::string> &
 DominantWindDirections::dominantDirectionsForPastHour() const {
     return dominantWindDirectionList;
 }

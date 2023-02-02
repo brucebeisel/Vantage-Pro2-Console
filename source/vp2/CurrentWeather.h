@@ -51,7 +51,7 @@ public:
     //void setData(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const WindDirectionSlices  & pastWindDirs);
     void setLoopData(const LoopPacket & loopPacket);
     void setLoop2Data(const Loop2Packet & loopPacket);
-    void setDominantWindDirectionData(const std::vector<int> & windDirs);
+    void setDominantWindDirectionData(const std::vector<std::string> & windDirs);
 
     /**
      * Get the next packet field that was extracted from the LOOP packet.
@@ -77,9 +77,9 @@ public:
     std::string formatJSON() const;
 
 private:
-    LoopPacket             loopPacket;
-    Loop2Packet            loop2Packet;
-    std::vector<int>       dominantWindDirections;
+    LoopPacket               loopPacket;
+    Loop2Packet              loop2Packet;
+    std::vector<std::string> dominantWindDirections;
 
     //
     // Since wind data changes frequently, store the wind from both loop packets
