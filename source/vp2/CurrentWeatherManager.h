@@ -33,7 +33,7 @@ public:
      *
      * @param cwPublisher The publisher of current weather data
      */
-    CurrentWeatherManager(CurrentWeatherPublisher & cwPublisher);
+    CurrentWeatherManager(const std::string & archiveDir, CurrentWeatherPublisher & cwPublisher);
 
     /**
      * Destructor.
@@ -67,6 +67,7 @@ public:
     virtual bool processLoop2Packet(const Loop2Packet & packet);
 
 private:
+    std::string               archiveDirectory;
     CurrentWeatherPublisher & currentWeatherPublisher;
     CurrentWeather            currentWeather;
     bool                      firstLoop2PacketReceived;

@@ -52,7 +52,7 @@ sigHandler(int sig) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-consoleThreadEntry(const string & archiveFile, const string & serialPortName, int baudRate) {
+consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArchiveDir, const string & serialPortName, int baudRate) {
     VantageLogger & logger = VantageLogger::getLogger("Vantage Main");
     logger.log(VantageLogger::VANTAGE_INFO) << "Starting console thread" << endl;
 
@@ -62,7 +62,7 @@ consoleThreadEntry(const string & archiveFile, const string & serialPortName, in
         // Create all of the runtime object that never get destroyed
         //
         CurrentWeatherSocket currentWeatherPublisher;
-        CurrentWeatherManager currentWeatherManager(currentWeatherPublisher);
+        CurrentWeatherManager currentWeatherManager(loopPacketArchiveDir, currentWeatherPublisher);
         VantageWeatherStation station(serialPortName, baudRate);
         ArchiveManager archiveManager(archiveFile, station);
         VantageConfiguration configuration(station);
@@ -115,21 +115,22 @@ main(int argc, char *argv[]) {
 #endif
 
     if (argc < 3 || argc > 4) {
-        cerr << "Usage: vws <weather station serial port> <archive file> [log file]" << endl;
+        cerr << "Usage: vws <weather station serial port> <archive file> <loop packet archive dir> [log file]" << endl;
         exit(1);
     }
 
     const string serialPortName(argv[1]);
     const string archiveFile(argv[2]);
+    const string loopPacketArchiveDir(argv[3]);
 
-    if (argc == 4) {
-        const string logFile(argv[3]);
+    if (argc == 5) {
+        const string logFile(argv[4]);
         ofstream logStream(logFile.c_str(), ios::app | ios::ate | ios::out);
         VantageLogger::setLogStream(logStream);
     }
 
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
-    thread consoleThread(consoleThreadEntry, archiveFile, serialPortName, 19200);
+    thread consoleThread(consoleThreadEntry, archiveFile, loopPacketArchiveDir, serialPortName, 19200);
 
     consoleThread.join();
 }

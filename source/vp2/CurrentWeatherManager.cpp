@@ -27,9 +27,10 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeatherManager::CurrentWeatherManager(CurrentWeatherPublisher & cwPublisher) : currentWeatherPublisher(cwPublisher),
-                                                                                      firstLoop2PacketReceived(false),
-                                                                                      logger(VantageLogger::getLogger("CurrentWeatherManager")){
+CurrentWeatherManager::CurrentWeatherManager(const string & archiveDir, CurrentWeatherPublisher & cwPublisher) : archiveDirectory(archiveDir),
+                                                                                                                 currentWeatherPublisher(cwPublisher),
+                                                                                                                 firstLoop2PacketReceived(false),
+                                                                                                                 logger(VantageLogger::getLogger("CurrentWeatherManager")){
 
 }
 
@@ -56,7 +57,7 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
 
     Weather::localtime(packetTime, tm);
     char filename[100];
-    snprintf(filename, sizeof(filename), "./log/LoopPacketArchive_%02d.dat", tm.tm_hour);
+    snprintf(filename, sizeof(filename), "%s/LoopPacketArchive_%02d.dat", archiveDirectory.c_str(), tm.tm_hour);
     ios_base::openmode mode = ofstream::binary;
 
     //
