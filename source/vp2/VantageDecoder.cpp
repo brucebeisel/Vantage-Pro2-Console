@@ -161,6 +161,29 @@ VantageDecoder::decodeUvIndex(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Evapotranspiration> &
+VantageDecoder::decodeArchiveET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement) {
+    int value8 = BitConverter::toInt8(buffer, offset);
+
+    if (value8 != INVALID_ET)
+        measurement.setValue(static_cast<Evapotranspiration>(value8) / DAY_ET_SCALE);
+    else
+        measurement.invalidate();
+
+    return measurement;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Evapotranspiration>
+VantageDecoder::decodeArchiveET(const byte buffer[], int offset) {
+    Measurement<Evapotranspiration> measurement;
+    return decodeArchiveET(buffer, offset, measurement);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const Measurement<Evapotranspiration> &
 VantageDecoder::decodeDayET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 

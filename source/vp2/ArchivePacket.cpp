@@ -335,14 +335,18 @@ ArchivePacket::formatJSON() const {
     VantageDecoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET, uvIndex);
     ss << uvIndex.formatJSON("avgUvIndex", true);
 
-    Measurement<Evapotranspiration> et = VantageDecoder::decodeDayET(buffer, ET_OFFSET);
-    ss <<  et.formatJSON("evapotranspiration", true);
+    Measurement<Evapotranspiration> et = VantageDecoder::decodeArchiveET(buffer, ET_OFFSET);
+    if (et.isValid())
+        ss <<  et.formatJSON("evapotranspiration", true);
 
     VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET, solarRadiation);
     ss << solarRadiation.formatJSON("highSolarRadiation", true);
 
     VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET, uvIndex);
     ss << uvIndex.formatJSON("highUvIndex", true);
+
+    int forecastRule = BitConverter::toInt8(buffer, FORECAST_RULE_OFFSET);
+    ss << ", \"forcastRule\" : " << forecastRule;
 
     bool firstValue = true;
     ss << ", \"extraHumidities\" : [";

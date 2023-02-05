@@ -76,6 +76,9 @@ public:
     static Measurement<UvIndex> decodeUvIndex(const byte buffer[], int offset);
     static const Measurement<UvIndex> & decodeUvIndex(const byte buffer[], int offset, Measurement<UvIndex> & measurement);
 
+    static Measurement<Evapotranspiration> decodeArchiveET(const byte buffer[], int offset);
+    static const Measurement<Evapotranspiration> & decodeArchiveET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement);
+
     static Measurement<Evapotranspiration> decodeDayET(const byte buffer[], int offset);
     static const Measurement<Evapotranspiration> & decodeDayET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement);
 

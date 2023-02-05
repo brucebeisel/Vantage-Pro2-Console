@@ -268,7 +268,6 @@ VantageDriver::mainLoop() {
             // If the LOOP packet data indicates that a new archive packet is available
             // go get it.
             //
-            /*
             if (previousNextRecord != nextRecord) {
                 logger.log(VantageLogger::VANTAGE_INFO) << "New archive record available. Record ID = " << nextRecord << endl;
                 previousNextRecord = nextRecord;
@@ -277,12 +276,13 @@ VantageDriver::mainLoop() {
                     ArchivePacket packet;
                     archiveManager.getNewestRecord(packet);
                     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: "
-                                                           << Weather::formatDateTime(packet.getDateTime())
-                                                           << " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
+                                                           << Weather::formatDateTime(packet.getDateTime());
+                    // TODO The following line was commented out because it was causing the vws to exit.
+                    // Need to determine why
+                                                           //<< " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
                     previousNextRecord = nextRecord;
                 }
             }
-            */
         }
         catch (std::exception & e) {
             logger.log(VantageLogger::VANTAGE_ERROR) << "Caught exception: " << e.what() << endl;     
@@ -298,14 +298,11 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
 
     bool sc = signalCaught.load();
     bool em = eventManager.isEventAvailable();
-    //bool nr = previousNextRecord != nextRecord;
-    //bool continueLoopPacketProcessing = !sc && !em && !nr;
-    bool continueLoopPacketProcessing = !sc && !em;
+    bool nr = previousNextRecord != nextRecord;
+    bool continueLoopPacketProcessing = !sc && !em && !nr;
 
-    //logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop: " << std::boolalpha << continueLoopPacketProcessing
-    //                               << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop: " << std::boolalpha << continueLoopPacketProcessing
-                                   << " Signal: " << sc << " Event: " << em << endl;
+                                   << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
 
     return continueLoopPacketProcessing;
 }

@@ -376,7 +376,6 @@ VantageWeatherStation::retrieveHiLowValues(HiLowPacket & packet) {
     }
 
     packet.decodeHiLowPacket(buffer);
-    cout << "Hi/Low packet:" << endl << packet.formatXML() << endl;
     return true;
 }
 
@@ -423,7 +422,11 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
     if (sendAckedCommand(DUMP_ARCHIVE_CMD)) {
         for (int i = 0; i < NUM_ARCHIVE_PAGES; i++) {
             readNextArchivePage(list, 0, time(0));
+            if (!serialPort.write(DMP_SEND_NEXT_PAGE)) {
+                break;
+            }
         }
+
     }
 }
 
@@ -492,7 +495,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     if (numPages == 0)
         return true;
 
-    return readAfterArchivePages(time, list, numPages, firstRecord);
+    return readAfterArchivePages(time, list, firstRecord, numPages);
 }
 
 //

@@ -103,7 +103,7 @@ private:
      * The number of LOOP/LOOP2 packet pairs that are received in succession. Note that if a new archive record is available
      * the loop packet cycle will be interrupted early.
      */
-    static const int LOOP_PACKET_CYCLES = 12;
+    static const int LOOP_PACKET_CYCLES = 60;
 
     static const int INITIAL_LOOP_PACKET_RETRIES = 5;
 
