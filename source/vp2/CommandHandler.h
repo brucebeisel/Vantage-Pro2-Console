@@ -26,6 +26,9 @@ class VantageConfiguration;
 
 class CommandHandler {
 public:
+    typedef std::pair<std::string,std::string> CommandArgument;
+    typedef std::vector<CommandArgument> CommandArgumentList;
+
     /**
      * Constructor.
      */
@@ -46,17 +49,40 @@ public:
     void handleCommand(const std::string & command, std::string & response);
 
 private:
+
+    /**
+     * Generic handler that calls the provided member function and builds the response JSON
+     *
+     * @param handle      Pointer to the VantageWeatherStation member function that executes the command on the console
+     * @param commandName The name of the command from the JSON string
+     * @param response    The string into which the response will be written
+     */
+    void handleNoArgCommand(bool (VantageWeatherStation::*handler)(), const std::string & commandName, std::string & response);
+
+    void handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     void handleQueryFirmwareCommand(const std::string & commandName, std::string & response);
 
     void handleQueryReceiverListCommand(const std::string & commandName, std::string & response);
 
-    void handleUpdateUnitsCommand(const std::string & commandName, const std::vector<std::pair<std::string,std::string>> & argumentList, std::string & response);
+    void handleUpdateUnitsCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleQueryUnitsCommand(const std::string & commandName, std::string & response);
 
     void handleQuerySensorStations(const std::string & commandName, std::string & response);
 
     void handleRequestSensorStationsStatus(const std::string & commandName, std::string & response);
+
+    void handleUpdateArchivePeriod(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
+    //
+    // Clearing Commands. Note that all command that do not require an argument are called through handleNoArgCommand()
+    //
+    void handleClearCumulativeValueCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
+    void handleClearHighValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
+    void handleClearLowValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     VantageWeatherStation & station;
     VantageConfiguration & configurator;

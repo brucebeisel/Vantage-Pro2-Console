@@ -456,7 +456,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     BitConverter::getBytes(crc, dateTimeBytes, TIME_LENGTH, CRC_BYTES, false);
 
     if (!serialPort.write(dateTimeBytes, TIME_LENGTH + CRC_BYTES)) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Canceling DUMPAFT due to port write failure" << endl;
+        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Canceling DMPAFT due to port write failure" << endl;
         return false;
     }
 
@@ -464,7 +464,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     // Another ACK
     //
     if (!consumeAck()) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Canceling DUMPAFT due to CRC failure" << endl
+        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Canceling DMPAFT due to CRC failure" << endl
                                         << Weather::dumpBuffer(dateTimeBytes, sizeof(dateTimeBytes));
         return false;
     }
@@ -636,7 +636,9 @@ VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets() {
     // is not sent in response to the CLRCAL command. This needs to be tested
     // to determine if this is an error in the document or an inconsistency
     // with the protocol
-    return sendOKedWithDoneCommand(CLEAR_TEMP_HUMID_CAL_CMD);
+    // TODO This is commented out for now to avoid clearing offset needed for the weather station to run properly
+    //return sendOKedWithDoneCommand(CLEAR_TEMP_HUMID_CAL_CMD);
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

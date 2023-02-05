@@ -35,6 +35,8 @@ using vws::VantageLogger;
 ArchiveManager::ArchiveManager(const std::string & archiveFilename, VantageWeatherStation & station) :
                                                                     archiveFile(archiveFilename),
                                                                     station(station),
+                                                                    newestPacketTime(0),
+                                                                    oldestPacketTime(0),
                                                                     logger(VantageLogger::getLogger("ArchiveManager")) {
     findArchivePacketTimeRange();
 }
@@ -49,9 +51,8 @@ ArchiveManager::~ArchiveManager() {
 bool
 ArchiveManager::synchronizeArchive() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing local archive from Vantage console's archive" << endl;
-    logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing archive is temporarily disabled" << endl;
-    return true;
-    /*
+    //logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing archive is temporarily disabled" << endl;
+    //return true;
     vector<ArchivePacket> list;
     bool result = false;
 
@@ -68,7 +69,6 @@ ArchiveManager::synchronizeArchive() {
         cout << "Archive: " << list[list.size() - 1].formatXML() << endl;
 
     return result;
-    */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,9 +76,9 @@ ArchiveManager::synchronizeArchive() {
 DateTime
 ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket>& list) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
-    logger.log(VantageLogger::VANTAGE_INFO) << "DMPAFT is temporarily disabled" << endl;
-    return time(0);
-    /*
+    //logger.log(VantageLogger::VANTAGE_INFO) << "DMPAFT is temporarily disabled" << endl;
+    //return time(0);
+
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
     positionStream(stream, afterTime, true);
@@ -104,7 +104,6 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
     stream.close();
 
     return timeOfLastRecord;
-    */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
