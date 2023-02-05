@@ -87,6 +87,7 @@ CommandSocket::mainLoop() {
 
         for (int i = 0; i < socketFdList.size(); i++) {
             if (FD_ISSET(socketFdList[i], &fd_read)) {
+                logger.log(VantageLogger::VANTAGE_DEBUG2) << "Received data on fd " << i << endl;
                 readCommand(socketFdList[i]);
             }
         }
@@ -210,6 +211,8 @@ CommandSocket::readCommand(int fd) {
     cd.fd = fd;
     cd.command = buffer;
     cd.responseHandler = this;
+
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Queuing command " << cd.command << " that was received on fd " << cd.fd << endl;
     eventManager.queueEvent(cd);
 }
 
@@ -218,6 +221,9 @@ CommandSocket::readCommand(int fd) {
 void
 CommandSocket::handleCommandResponse(const CommandData & commandData, const std::string & response) {
     const char * responseBuffer = response.c_str();
+
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Write response " << response << " on fd " << commandData.fd << endl;
+
     if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
     }
