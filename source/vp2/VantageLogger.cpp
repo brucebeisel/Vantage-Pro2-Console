@@ -18,6 +18,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <time.h>
+#include <mutex>
 
 #include "VantageLogger.h"
 #include "Weather.h"
@@ -34,6 +35,8 @@ int VantageLogger::maxFiles;
 string VantageLogger::logFilePattern;
 
 const static char *LEVEL_STRINGS[] = {"ERROR  ", "WARNING", "INFO   ", "DEBUG1 ", "DEBUG2 ", "DEBUG3 "};
+
+static std::mutex mutex;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

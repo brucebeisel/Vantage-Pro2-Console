@@ -68,8 +68,6 @@ CommandSocket::mainLoop() {
     struct timeval tv;
     while (!terminating) {
         fd_set fd_read;
-        fd_set fd_write;
-        fd_set fd_except;
         int nfds;
         if (socketFdList.size() > 0)
             nfds = std::max(socketFdList[socketFdList.size() - 1], listenFd);
@@ -80,7 +78,14 @@ CommandSocket::mainLoop() {
         tv.tv_sec = 0;
         tv.tv_usec = 500000;
 
-        int n = select(nfds, &fd_read, &fd_write, &fd_except, &tv);
+        FD_ZERO(&fd_read);
+        FD_SET(listenFd, &fd_read);
+
+        for (int i = 0; i < socketFdList.size(); i++) {
+            FD_SET(i, &fd_read);
+        }
+
+        int n = select(nfds, &fd_read, NULL, NULL, &tv);
 
         if (FD_ISSET(listenFd, &fd_read))
             acceptConnection();
