@@ -80,9 +80,10 @@ HiLowPacket::Values<T>::formatJSON(bool low) const {
 
     string which = low ? "low" : "high";
 
-    ss << "    \"" << which << "\" : " << endl
-       << "        { \"day\" : { \"value\" : " << dayExtremeValue.getValue() << ", \"time\"  : \"" << Weather::formatDateTime(dayExtremeValueTime) << "\" }," << endl
-       << "          \"month\" : " << monthExtremeValue << ", \"year\"  : " << yearExtremeValue << " }";
+    ss << "    \"" << which << "\" : {" << endl
+       << "         \"day\" : { \"value\" : " << dayExtremeValue.getValue() << ", \"time\"  : \"" << Weather::formatDateTime(dayExtremeValueTime) << "\" }," << endl
+       << "         \"month\" : " << monthExtremeValue << ", \"year\"  : " << yearExtremeValue
+       << " }";
 
     return ss.str();
 }
@@ -182,11 +183,13 @@ HiLowPacket::formatXML() const {
 std::string
 HiLowPacket::formatJSON() const {
     ostringstream ss;
-    ss << "{ \"high-low\" : " << endl
-       << "    { \"outdoorTemperature\" : " << outdoorTemperature.formatJSON() << " }," << endl
-       << "    { \"indoorTemperature\" : " << indoorTemperature.formatJSON() << " }," << endl
-       << "    { \"barometer\" : " << barometer.formatJSON() << " }," << endl
-       << "    { \"rainRate\" : " << rainRate.formatJSON(false) << " }" << endl
+    ss << "{ " << endl
+       << "    \"high-low\" : {" << endl
+       << "        \"outdoorTemperature\" : {" << outdoorTemperature.formatJSON() << " }," << endl
+       << "        \"indoorTemperature\" : {" << indoorTemperature.formatJSON() << " }," << endl
+       << "        \"barometer\" : {" << barometer.formatJSON() << " }," << endl
+       << "        \"rainRate\" : {" << rainRate.formatJSON(false) << " }" << endl
+       <<     "}" << endl
        << "}" << endl;
 
     return ss.str();
