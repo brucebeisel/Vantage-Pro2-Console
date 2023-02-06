@@ -70,13 +70,18 @@ HiLowPacket::Values<T>::formatJSON(bool low) const {
 template<typename T>
 string
 HiLowPacket::Values<T>::formatExtremeValueTime() const {
-    int hour = todayExtremeValueTime / 100;
-    int minute = todayExtremeValueTime % 100;
 
     ostringstream oss;
-    oss << hour << ":" << setw(2) << setfill('0') << minute;
+    if (todayExtremeValueTime != 65535) {
+        int hour = todayExtremeValueTime / 100;
+        int minute = todayExtremeValueTime % 100;
+        oss << hour << ":" << setw(2) << setfill('0') << minute;
+    }
+    else
+        oss << "N/A";
 
     return oss.str();
+
 }
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +106,7 @@ std::string
 HiLowPacket::formatJSON() const {
     ostringstream ss;
     ss << "{ " << endl
-       << "    \"high-low\" : {" << endl
+       << "    \"highLow\" : {" << endl
        << "        \"outdoorTemperature\" : {" << outdoorTemperature.formatJSON() << " }," << endl
        << "        \"outdoorHumidity\" : {" << outdoorHumidity.formatJSON() << " }," << endl
        << "        \"dewPoint\" : {" << dewPoint.formatJSON() << " }," << endl
