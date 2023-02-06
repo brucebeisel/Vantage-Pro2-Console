@@ -224,7 +224,7 @@ CommandHandler::handleQueryHighLows(const std::string & commandName, std::string
 
     HiLowPacket packet;
     if (station.retrieveHiLowValues(packet)) {
-        oss << "\"success\", \"data\" : { ";
+        oss << "\"success\", \"data\" : ";
         oss << packet.formatJSON();
     }
     else

@@ -126,3 +126,17 @@ Archive query
     "START"     Enables the creation of archive records, if they have been halted with the STOP command.
     "NEWSETUP"  Re-initialize the Vantage console after making certain configuration changes.
     "LAMPS <Lamp state: '0' (off) or '1' (on)>"
+    { "response" : "query-highlows", "result" : "success",
+      "data" : {
+        { "high-low" :
+            { "indoorTemperature" :
+                { "low" : { "day" : {"value" : 64.9}, {"time"  : "2023-02-06 05:33:00" } }, { "month" : 60}, { "year"  : 60} }
+                { "high" : { "day" : {"value" : 80.1}, {"time"  : "2023-02-06 11:10:00" } }, { "month" : 80.1}, { "year"  : 80.1} }
+            },
+            { "barometer" :
+                { "low" : { "day" : {"value" : 29.879}, {"time"  : "2023-02-06 04:05:00" } }, { "month" : 29.835}, { "year"  : 29.446} }
+                { "high" : { "day" : {"value" : 29.985}, {"time"  : "2023-02-06 00:00:00" } }, { "month" : 30.667}, { "year"  : 30.667} }
+            }
+        }
+    } }
+    

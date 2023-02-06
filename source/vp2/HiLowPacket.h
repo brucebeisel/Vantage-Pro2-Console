@@ -77,16 +77,16 @@ public:
     Temperature getYearHighIndoorTemperature() const;
 
     //
-    // Outside Temperature High/Lows
+    // Outdoor Temperature High/Lows
     //
-    Temperature getDayLowOutsideTemperature() const;
-    DateTime    getDayLowOutsideTemperatureTime() const;
-    Temperature getDayHighOutsideTemperature() const;
-    DateTime    getDayHighOutsideTemperatureTime() const;
-    Temperature getMonthLowOutsideTemperature() const;
-    Temperature getMonthHighOutsideTemperature() const;
-    Temperature getYearLowOutsideTemperature() const;
-    Temperature getYearHighOutsideTemperature() const;
+    Temperature getDayLowOutdoorTemperature() const;
+    DateTime    getDayLowOutdoorTemperatureTime() const;
+    Temperature getDayHighOutdoorTemperature() const;
+    DateTime    getDayHighOutdoorTemperatureTime() const;
+    Temperature getMonthLowOutdoorTemperature() const;
+    Temperature getMonthHighOutdoorTemperature() const;
+    Temperature getYearLowOutdoorTemperature() const;
+    Temperature getYearHighOutdoorTemperature() const;
 
     //
     // Indoor Humidity High/Lows
@@ -101,16 +101,16 @@ public:
     Humidity getYearHighIndoorHumidity() const;
 
     //
-    // Outside Humidity High/Lows
+    // Outdoor Humidity High/Lows
     //
-    Humidity getDayLowOutsideHumidity() const;
-    DateTime getDayLowOutsideHumidityTime() const;
-    Humidity getDayHighOutsideHumidity() const;
-    DateTime getDayHighOutsideHumidityTime() const;
-    Humidity getMonthLowOutsideHumidity() const;
-    Humidity getMonthHighOutsideHumidity() const;
-    Humidity getYearLowOutsideHumidity() const;
-    Humidity getYearHighOutsideHumidity() const;
+    Humidity getDayLowOutdoorHumidity() const;
+    DateTime getDayLowOutdoorHumidityTime() const;
+    Humidity getDayHighOutdoorHumidity() const;
+    DateTime getDayHighOutdoorHumidityTime() const;
+    Humidity getMonthLowOutdoorHumidity() const;
+    Humidity getMonthHighOutdoorHumidity() const;
+    Humidity getYearLowOutdoorHumidity() const;
+    Humidity getYearHighOutdoorHumidity() const;
 
     //
     // Dew Point High/Lows
@@ -207,8 +207,8 @@ private:
     HighValues<Speed>           wind;
     HighLowValues<Temperature>  indoorTemperature;
     HighLowValues<Humidity>     indoorHumidity;
-    HighLowValues<Temperature>  outsideTemperature;
-    HighLowValues<Humidity>     outsideHumidity;
+    HighLowValues<Temperature>  outdoorTemperature;
+    HighLowValues<Humidity>     outdoorHumidity;
     HighLowValues<Temperature>  dewPoint;
     HighValues<Temperature>     heatIndex;
     LowValues<Temperature>      windChill;
