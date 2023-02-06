@@ -80,11 +80,9 @@ HiLowPacket::Values<T>::formatJSON(bool low) const {
 
     string which = low ? "low" : "high";
 
-    ss << "    { \"" << which << "\" : " << endl
+    ss << "    \"" << which << "\" : " << endl
        << "        { \"day\" : { \"value\" : " << dayExtremeValue.getValue() << ", \"time\"  : \"" << Weather::formatDateTime(dayExtremeValueTime) << "\" }," << endl
-       << "          \"month\" : " << monthExtremeValue << ", \"year\"  : " << yearExtremeValue << endl
-       << "        }" << endl
-       << "    }" << endl;
+       << "          \"month\" : " << monthExtremeValue << ", \"year\"  : " << yearExtremeValue << " }";
 
     return ss.str();
 }
@@ -111,7 +109,7 @@ HiLowPacket::HighLowValues<T>::formatXML() const {
 template<typename T>
 string
 HiLowPacket::HighLowValues<T>::formatJSON() const {
-    string s = lows.formatJSON(true).append(",").append(highs.formatJSON(false));
+    string s = lows.formatJSON(true).append(",\n").append(highs.formatJSON(false));
     return s;
 }
 
