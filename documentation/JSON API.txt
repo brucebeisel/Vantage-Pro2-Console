@@ -62,24 +62,24 @@ Archive query
     "TEST"      Sends the string “TEST\n” back.
     "RXCHECK"   Sends the Console Diagnostics report.
     "RXTEST"    Moves the console from the “Receiving from” screen to the main current conditions screen.
-    "VER"       Sends the firmware date code as a text string.
+    + "VER"       Sends the firmware date code as a text string.
     "RECEIVERS" Sends the bit map of station IDs that the console can hear, This is not the byte for indicating what the console selects to listen from.
-    "NVER"      Sends the firmware version number as a text string. This command is only supported by Vantage Pro2 (Firmware 1.90 or later) and Vantage Vue.
+    + "NVER"      Sends the firmware version number as a text string. This command is only supported by Vantage Pro2 (Firmware 1.90 or later) and Vantage Vue.
 
 2. Current Data commands
-    "LOOP <number of LOOP packets to send-decimal>"
+    + "LOOP <number of LOOP packets to send-decimal>"
                 Sends the specified number of LOOP packets, 1 every 2 seconds. Console sleeps between packets.
-    "LPS <loop packet type bit mask-hex> <number of packets to send-decimal>"
+    + "LPS <loop packet type bit mask-hex> <number of packets to send-decimal>"
                 Sends the specified number of the different loop packet(s), 1 every 2 seconds. Console sleeps between packets.
-    "HILOWS"    Sends all the current high/low data in a single 436 byte data block, plus 2 CRC bytes.
+    + "HILOWS"    Sends all the current high/low data in a single 436 byte data block, plus 2 CRC bytes.
     "PUTRAIN <Yearly Rain in rain clicks-decimal>"
                 Set the Yearly rainfall amount on the Vantage Console.
     "PUTET <Yearly ET in 100th inch-decimal>"
                 Set the Yearly ET amount on the Vantage Console.
 
 3. Download Commands
-    "DMP"       Downloads the entire archive memory. See the sections X.6 and X.4 for more details.
-    "DMPAFT"    Downloads the records after a specified date and time. See the sections X.6 and X.4 for more details.
+    + "DMP"       Downloads the entire archive memory. See the sections X.6 and X.4 for more details.
+    + "DMPAFT"    Downloads the records after a specified date and time. See the sections X.6 and X.4 for more details.
 
 4. EEPROM Commands
     "GETEE"     Reads the full 4K EEPROM in one data block.
@@ -111,79 +111,18 @@ Archive query
     "CLRLOWS <0, 1, or 2>"
                 Clears all of the daily (0), monthly (1), or yearly (2) low values.
     "CLRBITS"   Clears the active alarm bits. Alarms will be reactivated if the alarm condition is still present.
-    "CLRDATA"   Clears all current data values to dashes.
+    + "CLRDATA"   Clears all current data values to dashes.
 
 7. Configuration Commands
     "BAUD <New baud rate-decimal>"
                 Sets the console to a new baud rate. Valid values are 1200, 2400, 4800, 9600, 14400, and 19200.
     "SETTIME"   Sets the time and date on the Vantage console. Data in a binary format is sent after ACK.
-    "GAIN <Gain State: '0' (off) or '1' (on)>"
+    - "GAIN <Gain State: '0' (off) or '1' (on)>"
                 Sets the gain of the radio receiver. This command is currently not supported in Vantage Pro2.
     "GETTIME"   Retrieves the current time and date on the Vantage console. Data is sent in a binary format.
     "SETPER <Archive interval in minutes-decimal>"
                 Sets the Vantage archive interval. Valid values are (1, 5, 10, 15, 30, 60, and 120).
     "STOP"      Disables the creation of archive records.
     "START"     Enables the creation of archive records, if they have been halted with the STOP command.
-    "NEWSETUP"  Re-initialize the Vantage console after making certain configuration changes.
-    "LAMPS <Lamp state: '0' (off) or '1' (on)>"
-    
-    { "response" : "query-highlows", "result" : "success", "data" :
-    { "high-low" :
-        { "outdoorTemperature" :     { "low" :  { "day" : { "value" : 29.3, "time"  : "2023-02-06 06:10:00" }, "month" : 16,   "year"  : 16 },
-                                       "high" : { "day" : { "value" : 52.5, "time"  : "2023-02-06 12:01:00" }, "month" : 57.3, "year"  : 67 } }
-        },
-
-        { "indoorTemperature" :     { "low" : { "day" : { "value" : 64.9, "time"  : "2023-02-06 05:33:00" }, "month" : 60, "year"  : 60 } } ,
-                                    { "high" : { "day" : { "value" : 80.1, "time"  : "2023-02-06 11:10:00" }, "month" : 80.1, "year"  : 80.1 } }
-        },
-        { "barometer" :             { "low" : { "day" : { "value" : 29.879, "time"  : "2023-02-06 04:05:00" }, "month" : 29.835, "year"  : 29.446 } } ,
-                                    { "high" : { "day" : { "value" : 29.985, "time"  : "2023-02-06 00:00:00" }, "month" : 30.667, "year"  : 30.667 } }
-        },
-        { "rainRate" :              { "high" : { "day" : { "value" : 0, "time"  : "2023-03-05 07:35:00" }, "month" : 0.06, "year"  : 0 } } }
-    }
-    }
-    
-    
-     { "response" : "query-highlows", "result" : "success", "data" : { "high-low" :
-    { "outdoorTemperature" :     { "low" :
-        { "day" : { "value" : 29.3, "time"  : "2023-02-06 06:10:00" },
-          "month" : 16, "year"  : 16
-        }
-    }
-,    { "high" :
-        { "day" : { "value" : 52.5, "time"  : "2023-02-06 12:01:00" },
-          "month" : 57.3, "year"  : 67
-        }
-    }
- },
-    { "indoorTemperature" :     { "low" :
-        { "day" : { "value" : 64.9, "time"  : "2023-02-06 05:33:00" },
-          "month" : 60, "year"  : 60
-        }
-    }
-,    { "high" :
-        { "day" : { "value" : 80.1, "time"  : "2023-02-06 11:10:00" },
-          "month" : 80.1, "year"  : 80.1
-        }
-    }
- },
-    { "barometer" :     { "low" :
-        { "day" : { "value" : 29.879, "time"  : "2023-02-06 04:05:00" },
-          "month" : 29.835, "year"  : 29.446
-        }
-    }
-,    { "high" :
-        { "day" : { "value" : 29.985, "time"  : "2023-02-06 00:00:00" },
-          "month" : 30.667, "year"  : 30.667
-        }
-    }
- },
-    { "rainRate" :     { "high" :
-        { "day" : { "value" : 0, "time"  : "2023-03-05 07:35:00" },
-          "month" : 0.06, "year"  : 0
-        }
-    }
- }
-}
- }
-    
+    + "NEWSETUP"  Re-initialize the Vantage console after making certain configuration changes.
+    + "LAMPS <Lamp state: '0' (off) or '1' (on)>"

@@ -68,6 +68,7 @@ private:
 
     void handleQueryReceiverListCommand(const std::string & commandName, std::string & response);
 
+    void handleQueryConsoleDiagnostics(const std::string & commandName, std::string & response);
 
     //
     // Current Data Commands

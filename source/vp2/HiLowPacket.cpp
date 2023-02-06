@@ -60,7 +60,7 @@ HiLowPacket::Values<T>::formatJSON(bool low) const {
     ss << "    \"" << which << "\" : {" << endl
        << "         \"today\" : { \"value\" : " << todayExtremeValue.getValue() << ", \"time\"  : \"" << formatExtremeValueTime() << "\" }," << endl
        << "         \"month\" : " << monthExtremeValue << ", \"year\"  : " << yearExtremeValue
-       << " }";
+       << "     }";
 
     return ss.str();
 }
@@ -118,14 +118,18 @@ HiLowPacket::formatJSON() const {
        << "        \"windSpeed\" : {" << wind.formatJSON(false) << " }," << endl
        << "        \"barometer\" : {" << barometer.formatJSON() << " }," << endl
        << "        \"uvIndex\" : {" << uvIndex.formatJSON(false) << " }," << endl
-       << "        \"solarRadiation\" : {" << solarRadiation.formatJSON(false) << " }," << endl
-       << "        \"rainRate\" : {" << rainRate.formatJSON(false) << " }" << endl
-       <<     "}" << endl
+       << "        \"solarRadiation\" : {" << solarRadiation.formatJSON(false) << " }," << endl;
+
+    ss << "        \"rainRate\" : { \"high\" : {" << endl
+       << "            \"today\" : { \"value\" : " << rainRate.todayExtremeValue << ", \"time\"  : \"" << rainRate.formatExtremeValueTime() << "\" }," << endl
+       << "            \"hour\" : " << highHourRainRate << ", " << endl
+       << "            \"month\" : " << rainRate.monthExtremeValue << ", \"year\"  : " << rainRate.yearExtremeValue
+       << "        }"
+       << "    }" << endl
        << "}" << endl;
 
     return ss.str();
     /*
-    Rainfall                    highHourRainRate;
     HighLowValues<Temperature>  extraTemperature[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
     HighLowValues<Temperature>  soilTemperature[ProtocolConstants::MAX_SOIL_TEMPERATURES];
     HighLowValues<Temperature>  leafTemperature[ProtocolConstants::MAX_LEAF_TEMPERATURES];
