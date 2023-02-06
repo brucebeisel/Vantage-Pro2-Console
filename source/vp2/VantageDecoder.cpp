@@ -438,7 +438,7 @@ const Measurement<LeafWetness> &
 VantageDecoder::decodeLeafWetness(const byte buffer[], int offset, Measurement<LeafWetness> & measurement) {
     int value8 = BitConverter::toInt8(buffer, offset);
 
-    if (value8 != INVALID_LEAF_WETNESS && value8 >= MIN_LEAF_WETNESS && value8 <= MAX_LEAF_WETNESS)
+    if (value8 != INVALID_LEAF_WETNESS && value8 >= MIN_LEAF_WETNESS_VALUE && value8 <= MAX_LEAF_WETNESS_VALUE)
         measurement.setValue(static_cast<LeafWetness>(value8));
     else
         measurement.invalidate();

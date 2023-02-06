@@ -42,12 +42,12 @@ using namespace ProtocolConstants;
 
 static constexpr int protectedEepromBytes[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0x2d};
 static constexpr int NUM_PROTECTED_EEPROM_BYTES = sizeof(protectedEepromBytes) / sizeof(protectedEepromBytes[0]);
-const string STATION_TYPE_STRINGS[] = { "Vantage Pro2", "Vantage Vue", "Unknown" };
+const string CONSOLE_TYPE_STRINGS[] = { "Vantage Pro2", "Vantage Vue", "Unknown" };
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 VantageWeatherStation::VantageWeatherStation(const string & portName, int baudRate) : serialPort(portName, baudRate),
-                                                                                      stationType(VANTAGE_PRO_2),
+                                                                                      consoleType(VANTAGE_PRO_2),
                                                                                       consoleBatteryVoltage(0.0),
                                                                                       baudRate(baudRate),
                                                                                       archivePeriod(0),
@@ -183,24 +183,26 @@ VantageWeatherStation::retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::retrieveStationType() {
+VantageWeatherStation::retrieveConsoleType(string * consoleTypeString) {
     const char command[] = {STATION_TYPE_CMD[0], STATION_TYPE_CMD[1], STATION_TYPE_CMD[2], WRD_BYTE1, WRD_BYTE2, '\0'};
 
     if (!sendAckedCommand(command))
         return false;
 
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Reading station type" << endl;
+    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Reading console type" << endl;
 
     byte stationTypeByte;
     if (!serialPort.read(&stationTypeByte, 1)) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_ERROR) << "Failed to read station type" << endl;
+        logger.log(VantageLogger::VantageLogger::VANTAGE_ERROR) << "Failed to read console type" << endl;
         return false;
     }
 
-    stationType = static_cast<StationType>(stationTypeByte);
+    consoleType = static_cast<ConsoleType>(stationTypeByte);
 
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieved station type of " << getStationTypeString() << endl;
+    if (consoleTypeString != NULL)
+        *consoleTypeString = getConsoleTypeString();
 
+    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieved console type of " << getConsoleTypeString() << endl;
 
     return true;
 }
@@ -882,15 +884,15 @@ VantageWeatherStation::calculateStationReceptionPercentage(int archivePacketWind
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const std::string &
-VantageWeatherStation::getStationTypeString() const {
+VantageWeatherStation::getConsoleTypeString() const {
     std::string stationTypeName;
 
-    if (stationType == VANTAGE_PRO_2)
-        return STATION_TYPE_STRINGS[0];
-    else if (stationType == VANTAGE_VUE)
-        return STATION_TYPE_STRINGS[1];
+    if (consoleType == VANTAGE_PRO_2)
+        return CONSOLE_TYPE_STRINGS[0];
+    else if (consoleType == VANTAGE_VUE)
+        return CONSOLE_TYPE_STRINGS[1];
     else
-        return STATION_TYPE_STRINGS[2];
+        return CONSOLE_TYPE_STRINGS[2];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

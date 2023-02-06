@@ -114,11 +114,11 @@ public:
     };
 
     /**
-     * The station types supported by this software. Note that there are many more
+     * The console types supported by this software. Note that there are many more
      * legacy value that include the Vantage Pro, which reports the same value as
      * the Vantage Pro 2.
      */
-    enum StationType {
+    enum ConsoleType {
         VANTAGE_PRO_2 = 16,
         VANTAGE_VUE = 17
     };
@@ -200,11 +200,12 @@ public:
     bool retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport & report);
 
     /**
-     * Retrieve the type of station of this console.
+     * Retrieve the type of this console.
      *
+     * @param consoleType An optional string to return the console type. NULL pointer is allowed.
      * @return True if the station type was retrieved successfully
      */
-    bool retrieveStationType();
+    bool retrieveConsoleType(std::string * consoleType = NULL);
 
     /**
      * Move the console from the "Receiving from..." screen to the current condition screen and reset
@@ -215,17 +216,17 @@ public:
     /**
      * Retrieve the date of the console firmware.
      *
-     * @param firmwareDate An optional string to return the firmware date. nullptr is allowed.
+     * @param firmwareDate An optional string to return the firmware date. NULL pointer is allowed.
      *
      * @return True if the date was retrieved successfully
      */
-    bool retrieveFirmwareDate(std::string * firmwareDate);
+    bool retrieveFirmwareDate(std::string * firmwareDate = NULL);
 
     /**
      * Retrieve the list of receivers the console can hear. Note that this is not the set of stations that the console is
      * reading from. There can be other sensor stations in the area that do not belong to this Vantage station.
      *
-     * @param sensorStations An optional vector into which the sensor station list will be written. nullptr is allowed.
+     * @param sensorStations An optional vector into which the sensor station list will be written. NULL pointer is allowed.
      *
      * @return True if the list of sensor stations was retrieved
      */
@@ -544,7 +545,7 @@ public:
      */
     int calculateStationReceptionPercentage(int archivePacketWindSamples) const;
 
-    const std::string & getStationTypeString() const;
+    const std::string & getConsoleTypeString() const;
 
 private:
     static constexpr int WAKEUP_TRIES = 5;               // The number of times to try to wake up the console before performing a disconnect/reconnect cycle
@@ -579,7 +580,7 @@ private:
      *
      * @param loopPacket The LoopPacket into which the data will be copied
      *
-     * @return True if the packet was read succesfully
+     * @return True if the packet was read successfully
      */
     bool readLoopPacket(LoopPacket & loopPacket);
 
@@ -683,7 +684,7 @@ private:
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
     LoopPacketListenerList     loopPacketListenerList;   // The list of Loop Packet listeners
 
-    StationType                stationType;
+    ConsoleType                consoleType;
 
 
     //

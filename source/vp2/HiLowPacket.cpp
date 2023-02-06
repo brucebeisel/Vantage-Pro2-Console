@@ -131,15 +131,15 @@ HiLowPacket::formatXML() const {
     ss << "<wind>" << endl;
     ss << wind.formatXML(false) << endl;
     ss << "</wind>" << endl;
-    ss << "<insideTemperature>" << endl;
-    ss << insideTemperature.formatXML();
-    ss << "</insideTemperature>" << endl;
+    ss << "<indoorTemperature>" << endl;
+    ss << indoorTemperature.formatXML();
+    ss << "</indoorTemperature>" << endl;
     ss << "<outsideTemperature>" << endl;
     ss << outsideTemperature.formatXML();
     ss << "</outsideTemperature>" << endl;
-    ss << "<insideHumidity>" << endl;
-    ss << insideHumidity.formatXML();
-    ss << "</insideHumidity>" << endl;
+    ss << "<indoorHumidity>" << endl;
+    ss << indoorHumidity.formatXML();
+    ss << "</indoorHumidity>" << endl;
     ss << "<outsideHumidity>" << endl;
     ss << outsideHumidity.formatXML();
     ss << "</outsideHumidity>" << endl;
@@ -187,12 +187,9 @@ HiLowPacket::formatXML() const {
 std::string
 HiLowPacket::formatJSON() const {
     ostringstream ss;
-    ss << "{" << endl
-       << "    {\"high-low\" : " << endl
-       << "        { \"barometer\" : " << endl
-       << barometer.formatJSON() << endl
-       << "        }" << endl
-       << "    }" << endl
+    ss << "{ \"high-low\" : " << endl
+       << "    { \"indoorTemperature\" : " << indoorTemperature.formatJSON() << " }" << endl
+       << "    { \"barometer\" : " << barometer.formatJSON() << " }" << endl
        << "}" << endl;
 
     return ss.str();
@@ -225,28 +222,28 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     wind.yearExtremeValue    = VantageDecoder::decodeWindSpeed(buffer, 20);
 
     //
-    // Inside temperature section
+    // Indoor temperature section
     //
-    insideTemperature.highs.dayExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 21);
-    insideTemperature.lows.dayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 23);
-    insideTemperature.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 25);
-    insideTemperature.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 27);
-    insideTemperature.lows.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 29);
-    insideTemperature.highs.monthExtremeValue   = VantageDecoder::decode16BitTemperature(buffer, 31);
-    insideTemperature.lows.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 33);
-    insideTemperature.highs.yearExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 35);
+    indoorTemperature.highs.dayExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 21);
+    indoorTemperature.lows.dayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 23);
+    indoorTemperature.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 25);
+    indoorTemperature.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 27);
+    indoorTemperature.lows.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 29);
+    indoorTemperature.highs.monthExtremeValue   = VantageDecoder::decode16BitTemperature(buffer, 31);
+    indoorTemperature.lows.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 33);
+    indoorTemperature.highs.yearExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 35);
 
     //
     // Indoor humidity section
     //
-    insideHumidity.highs.dayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 37);
-    insideHumidity.lows.dayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 38);
-    insideHumidity.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 39);
-    insideHumidity.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 41);
-    insideHumidity.highs.monthExtremeValue   = VantageDecoder::decodeHumidity(buffer, 43);
-    insideHumidity.lows.monthExtremeValue    = VantageDecoder::decodeHumidity(buffer, 44);
-    insideHumidity.highs.yearExtremeValue    = VantageDecoder::decodeHumidity(buffer, 45);
-    insideHumidity.lows.yearExtremeValue     = VantageDecoder::decodeHumidity(buffer, 46);
+    indoorHumidity.highs.dayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 37);
+    indoorHumidity.lows.dayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 38);
+    indoorHumidity.highs.dayExtremeValueTime = VantageDecoder::decodeTime(buffer, 39);
+    indoorHumidity.lows.dayExtremeValueTime  = VantageDecoder::decodeTime(buffer, 41);
+    indoorHumidity.highs.monthExtremeValue   = VantageDecoder::decodeHumidity(buffer, 43);
+    indoorHumidity.lows.monthExtremeValue    = VantageDecoder::decodeHumidity(buffer, 44);
+    indoorHumidity.highs.yearExtremeValue    = VantageDecoder::decodeHumidity(buffer, 45);
+    indoorHumidity.lows.yearExtremeValue     = VantageDecoder::decodeHumidity(buffer, 46);
 
     //
     // Outside temperature section

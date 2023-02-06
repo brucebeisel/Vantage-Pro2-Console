@@ -59,12 +59,24 @@ private:
      */
     void handleNoArgCommand(bool (VantageWeatherStation::*handler)(), const std::string & commandName, std::string & response);
 
-    void handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    //
+    // Testing commands
+    //
+    void handleQueryConsoleType(const std::string & commandName, std::string & response);
 
     void handleQueryFirmwareCommand(const std::string & commandName, std::string & response);
 
     void handleQueryReceiverListCommand(const std::string & commandName, std::string & response);
 
+
+    //
+    // Current Data Commands
+    //
+    void handleQueryHighLows(const std::string & commandName, std::string & response);
+
+    //
+    // EEPROM Commands
+    //
     void handleUpdateUnitsCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleQueryUnitsCommand(const std::string & commandName, std::string & response);
@@ -73,16 +85,20 @@ private:
 
     void handleRequestSensorStationsStatus(const std::string & commandName, std::string & response);
 
+    //
+    // Configuration Commands
     void handleUpdateArchivePeriod(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     //
-    // Clearing Commands. Note that all command that do not require an argument are called through handleNoArgCommand()
+    // Clearing Commands. Note that commands that do not require an argument are called through handleNoArgCommand()
     //
     void handleClearCumulativeValueCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleClearHighValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleClearLowValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
+    void handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     VantageWeatherStation & station;
     VantageConfiguration & configurator;

@@ -21,6 +21,7 @@
 #include "json.hpp"
 #include "VantageWeatherStation.h"
 #include "VantageConfiguration.h"
+#include "HiLowPacket.h"
 #include "VantageEnums.h"
 
 using namespace std;
@@ -69,8 +70,8 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             cout << "          [" << i << "]: " << argumentList[i].first << "=" << argumentList[i].second << endl;
         }
 
-        if (commandName == "backlight") {
-            handleBacklightCommand(commandName, argumentList, responseJson);
+        if (commandName == "query-console-type") {
+            handleQueryConsoleType(commandName, responseJson);
         }
         else if (commandName == "query-firmware") {
             handleQueryFirmwareCommand(commandName, responseJson);
@@ -78,14 +79,17 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-receiver-list") {
             handleQueryReceiverListCommand(commandName, responseJson);
         }
+        else if (commandName == "query-highlows") {
+            handleQueryHighLows(commandName, responseJson);
+        }
+        else if (commandName == "update-archive-period") {
+            handleUpdateArchivePeriod(commandName, argumentList, responseJson);
+        }
         else if (commandName == "update-units") {
             handleUpdateUnitsCommand(commandName, argumentList, responseJson);
         }
         else if (commandName == "query-units") {
             handleQueryUnitsCommand(commandName, responseJson);
-        }
-        else if (commandName == "update-archive-period") {
-            handleUpdateArchivePeriod(commandName, argumentList, responseJson);
         }
         else if (commandName == "clear-archive") {
             handleNoArgCommand(&VantageWeatherStation::clearArchive, commandName, responseJson);
@@ -114,6 +118,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "clear-current-data") {
             handleNoArgCommand(&VantageWeatherStation::clearCurrentData, commandName, responseJson);
         }
+        else if (commandName == "backlight") {
+            handleBacklightCommand(commandName, argumentList, responseJson);
+        }
     }
     catch (const std::exception & e) {
         cout << "Exception: " << e.what() << endl;
@@ -140,38 +147,24 @@ CommandHandler::handleNoArgCommand(bool (VantageWeatherStation::*handler)(), con
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    bool lampOn;
-    bool success = true;
+CommandHandler::handleQueryConsoleType(const std::string & commandName, std::string & responseJson) {
+    string consoleType;
 
     ostringstream oss;
-
     oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
-    //"success", "info" : "Light is on|off" }
 
-    if (argumentList[0].first != "state")
-        success = false;
-    else {
-        if (argumentList[0].second == "on")
-            lampOn = true;
-        else if (argumentList[0].second == "off")
-            lampOn = false;
-        else
-            success = false;
+    if (station.retrieveConsoleType(&consoleType)) {
+        oss << " \"success\", \"data\" : { \"consoleType\" : \"" << consoleType << "\" }";
     }
-
-    if (success)
-        success = station.controlConsoleLamp(lampOn);
-
-    if (success)
-        oss << "\"success\"";
-    else
-        oss << "\"failure\"";
+    else {
+        oss << " \"failure\"";
+    }
 
     oss << " }";
 
-    response = oss.str();
+    responseJson = oss.str();
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
@@ -220,6 +213,91 @@ CommandHandler::handleQueryReceiverListCommand(const std::string & commandName, 
     }
 
     responseJson = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryHighLows(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+
+    HiLowPacket packet;
+    if (station.retrieveHiLowValues(packet)) {
+        oss << "\"success\", \"data\" : { ";
+        oss << packet.formatJSON();
+    }
+    else
+        oss << " \"failure\"";
+
+    oss << " }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleUpdateArchivePeriod(const string & commandName, const CommandArgumentList & argumentList, string & response) {
+    int periodValue = 0;
+
+    ostringstream oss;
+    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+
+    for (CommandArgument arg : argumentList) {
+        if (arg.first == "period")
+            periodValue = atoi(arg.first.c_str());
+    }
+
+    ArchivePeriod period = static_cast<ArchivePeriod>(periodValue);
+
+    if ((period == ArchivePeriod::ONE_MINUTE || period == ArchivePeriod::FIVE_MINUTES || period == ArchivePeriod::TEN_MINUTES ||
+        period == ArchivePeriod::FIFTEEN_MINUTES || period == ArchivePeriod::THIRTY_MINUTES || period == ArchivePeriod::ONE_HOUR ||
+        period == ArchivePeriod::TWO_HOURS) && station.updateArchivePeriod(period))
+        oss << "\"success\"";
+    else
+        oss << "\"failure\"";
+
+    oss << " }";
+
+    response = oss.str();
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    bool lampOn;
+    bool success = true;
+
+    ostringstream oss;
+
+    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    //"success", "info" : "Light is on|off" }
+
+    if (argumentList[0].first != "state")
+        success = false;
+    else {
+        if (argumentList[0].second == "on")
+            lampOn = true;
+        else if (argumentList[0].second == "off")
+            lampOn = false;
+        else
+            success = false;
+    }
+
+    if (success)
+        success = station.controlConsoleLamp(lampOn);
+
+    if (success)
+        oss << "\"success\"";
+    else
+        oss << "\"failure\"";
+
+    oss << " }";
+
+    response = oss.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -298,35 +376,6 @@ CommandHandler::handleQueryUnitsCommand(const std::string & commandName, std::st
     oss << " }";
 
     response = oss.str();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-CommandHandler::handleUpdateArchivePeriod(const string & commandName, const CommandArgumentList & argumentList, string & response) {
-    int periodValue = 0;
-
-    ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
-
-    for (CommandArgument arg : argumentList) {
-        if (arg.first == "period")
-            periodValue = atoi(arg.first.c_str());
-    }
-
-    ArchivePeriod period = static_cast<ArchivePeriod>(periodValue);
-
-    if ((period == ArchivePeriod::ONE_MINUTE || period == ArchivePeriod::FIVE_MINUTES || period == ArchivePeriod::TEN_MINUTES ||
-        period == ArchivePeriod::FIFTEEN_MINUTES || period == ArchivePeriod::THIRTY_MINUTES || period == ArchivePeriod::ONE_HOUR ||
-        period == ArchivePeriod::TWO_HOURS) && station.updateArchivePeriod(period))
-        oss << "\"success\"";
-    else
-        oss << "\"failure\"";
-
-    oss << " }";
-
-    response = oss.str();
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////

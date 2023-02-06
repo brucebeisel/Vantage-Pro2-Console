@@ -78,10 +78,12 @@ CommandSocket::mainLoop() {
 
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Adding " << socketFdList.size() << " to fd mask" << endl;
 
-        for (int i = 0; i < socketFdList.size(); i++) {
+        for (int i = 0; i < socketFdList.size(); i++)
             FD_SET(socketFdList[i], &fd_read);
+
+        if (socketFdList.size() > 0)
             nfds = std::max(socketFdList[socketFdList.size() - 1], listenFd);
-        }
+
         nfds++;
 
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Entering select()  nfds = " << nfds << endl;

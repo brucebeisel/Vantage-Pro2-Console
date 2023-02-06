@@ -84,12 +84,12 @@ VantageDriver::initialize() {
         logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station is awake" << endl;
     }
 
-    if (!station.retrieveStationType()) {
+    if (!station.retrieveConsoleType()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve station type for weather station" << endl;
         return false;
     }
 
-    logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << station.getStationTypeString() << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << station.getConsoleTypeString() << endl;
 
     if (!retrieveConfiguration())
         return false;

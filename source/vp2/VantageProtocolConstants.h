@@ -96,7 +96,7 @@ static const std::string CLEAR_CUMULATIVE_VALUE_CMD = "CLRVAR";      // Clear th
 static const std::string CLEAR_HIGH_VALUES_CMD = "CLRHIGHS";         // Clear the daily, monthly or yearly high values
 static const std::string CLEAR_LOW_VALUES_CMD = "CLRLOWS";           // Clear the daily, monthly or yearly low values
 static const std::string CLEAR_ACTIVE_ALARMS_CMD = "CLRBITS";        // Clear active alarms
-static const std::string CLEAR_CURRENT_DATA_VALUES_CMD = "CLRDATA";  // Clear all current data values
+static const std::string CLEAR_CURRENT_DATA_VALUES_CMD = "CLRDATA";  // Clear all current data values which includes setting the rain and ET cumulative values to 0!
 
 //
 // Configuration Commands
@@ -324,7 +324,7 @@ static constexpr int INVALID_SOIL_TEMPERATURE = 255;
 static constexpr int INVALID_SOIL_MOISTURE = 255;
 static constexpr int INVALID_BAROMETER = 0;
 static constexpr int INVALID_SOLAR_RADIATION = 32767;
-static constexpr int INVALID_THSW = 32767;
+static constexpr int INVALID_THSW = 255;
 static constexpr int INVALID_ET = 0;
 
 //
@@ -332,8 +332,8 @@ static constexpr int INVALID_ET = 0;
 //
 static constexpr int NORTH_HEADING_VALUE = 360;
 static constexpr int NO_STORM_ACTIVE_DATE = -1;
-static constexpr int MIN_LEAF_WETNESS = 0;
-static constexpr int MAX_LEAF_WETNESS = 15;
+static constexpr int MIN_LEAF_WETNESS_VALUE = 0;
+static constexpr int MAX_LEAF_WETNESS_VALUE = 15;
 
 
 //
