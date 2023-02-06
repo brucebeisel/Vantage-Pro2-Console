@@ -79,7 +79,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-receiver-list") {
             handleQueryReceiverListCommand(commandName, responseJson);
         }
-        else if (commandName == "query-console-diagnostics") {
+        else if (commandName == "console-diagnostics") {
             handleQueryConsoleDiagnostics(commandName, responseJson);
         }
         else if (commandName == "query-highlows") {
@@ -227,13 +227,13 @@ CommandHandler::handleQueryConsoleDiagnostics(const std::string & commandName, s
 
     VantageWeatherStation::ConsoleDiagnosticReport report;
     if (station.retrieveConsoleDiagnosticsReport(report)) {
-        oss << "\"success\", \"data\" : "
+        oss << "\"success\", \"data\" : {"
             << "\"consoleDiagnosticReport\" : { \"totalPacketsReceived\" : " << report.packetCount << ", "
             << "\"totalPacketsMissed\" : " << report.missedPacketCount << ", "
             << "\"resyncCount\" : " << report.syncCount << ", "
             << "\"packetReceptionHwm\" : " << report.maxPacketSequence << ", "
             << "\"crcErrorCount\" : " << report.crcErrorCount
-            << " }";
+            << " } }";
     }
     else
         oss << " \"failure\"";
