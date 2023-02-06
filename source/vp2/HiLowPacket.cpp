@@ -124,7 +124,7 @@ HiLowPacket::formatJSON() const {
        << "            \"today\" : { \"value\" : " << rainRate.todayExtremeValue << ", \"time\"  : \"" << rainRate.formatExtremeValueTime() << "\" }," << endl
        << "            \"hour\" : " << highHourRainRate << ", " << endl
        << "            \"month\" : " << rainRate.monthExtremeValue << ", \"year\"  : " << rainRate.yearExtremeValue
-       << "        }"
+       << "        } }"
        << "    }" << endl
        << "}" << endl;
 
