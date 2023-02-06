@@ -180,13 +180,14 @@ private:
 
     template<typename T>
     struct Values {
-        Measurement<T> dayExtremeValue;
-        DateTime       dayExtremeValueTime;
+        Measurement<T> todayExtremeValue;
+        int            todayExtremeValueTime;
         Measurement<T> monthExtremeValue;
         Measurement<T> yearExtremeValue;
         bool isValid() const;
         std::string    formatXML(bool low) const;
         std::string    formatJSON(bool low) const;
+        std::string    formatExtremeValueTime() const;
     };
 
     template<typename T> using LowValues = Values<T>;
