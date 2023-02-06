@@ -21,6 +21,7 @@
 #include <string>
 #include <mutex>
 #include "ResponseHandler.h"
+#include "VantageLogger.h"
 
 namespace vws {
 class CommandHandler;
@@ -79,6 +80,7 @@ private:
     std::queue<CommandData> commandQueue;   // The queue on which to store events
     mutable std::mutex      mutex;          // The mutex to protect the queue against multi-threaded contention
     CommandHandler &        commandHandler; // The command handler that will execute the command
+    VantageLogger           logger;
 };
 
 }

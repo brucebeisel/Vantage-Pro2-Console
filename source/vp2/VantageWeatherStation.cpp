@@ -314,9 +314,9 @@ VantageWeatherStation::currentValuesLoop(int records) {
             // Send the LOOP packet to each listener
             //
             for (LoopPacketListenerList::iterator it = loopPacketListenerList.begin();
-                 it != loopPacketListenerList.end();
-                 ++it) {
-                terminateLoop = !(*it)->processLoopPacket(loopPacket);
+                                                  it != loopPacketListenerList.end();
+                                                ++it) {
+                terminateLoop = terminateLoop || !(*it)->processLoopPacket(loopPacket);
             }
 
             if (!terminateLoop && readLoop2Packet(loop2Packet)) {
@@ -324,9 +324,9 @@ VantageWeatherStation::currentValuesLoop(int records) {
                 // Send the LOOP2 packet to each listener
                 //
                 for (LoopPacketListenerList::iterator it = loopPacketListenerList.begin();
-                     it != loopPacketListenerList.end();
-                     ++it) {
-                    terminateLoop = !(*it)->processLoop2Packet(loop2Packet);
+                                                      it != loopPacketListenerList.end();
+                                                    ++it) {
+                    terminateLoop = terminateLoop || !(*it)->processLoop2Packet(loop2Packet);
                 }
             }
             else
@@ -1093,10 +1093,13 @@ VantageWeatherStation::sendOKedCommand(const string & command) {
         }
         else if (!serialPort.read(buffer, COMMAND_RECOGNIZED_RESPONSE.length()))
             success = false;
-        else if (COMMAND_RECOGNIZED_RESPONSE != buffer)
-            success = false;
-        else
-            success = true;
+        else {
+            buffer[COMMAND_RECOGNIZED_RESPONSE.length()] = '\0';
+            if (COMMAND_RECOGNIZED_RESPONSE != buffer)
+                success = false;
+            else
+                success = true;
+        }
 
         if (!success)
             wakeupStation();

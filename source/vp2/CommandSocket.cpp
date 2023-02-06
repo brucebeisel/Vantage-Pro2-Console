@@ -68,24 +68,25 @@ CommandSocket::mainLoop() {
     struct timeval tv;
     while (!terminating) {
         fd_set fd_read;
-        int nfds;
-        if (socketFdList.size() > 0)
-            nfds = std::max(socketFdList[socketFdList.size() - 1], listenFd);
-        else
-            nfds = listenFd;
+        int nfds = listenFd;
 
-        nfds++;
-        tv.tv_sec = 0;
-        tv.tv_usec = 500000;
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
 
         FD_ZERO(&fd_read);
         FD_SET(listenFd, &fd_read);
 
-        for (int i = 0; i < socketFdList.size(); i++) {
-            FD_SET(i, &fd_read);
-        }
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Adding " << socketFdList.size() << " to fd mask" << endl;
 
+        for (int i = 0; i < socketFdList.size(); i++) {
+            FD_SET(socketFdList[i], &fd_read);
+            nfds = std::max(socketFdList[socketFdList.size() - 1], listenFd);
+        }
+        nfds++;
+
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Entering select()  nfds = " << nfds << endl;
         int n = select(nfds, &fd_read, NULL, NULL, &tv);
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "select()  returned  " << n << endl;
 
         if (FD_ISSET(listenFd, &fd_read))
             acceptConnection();
@@ -274,6 +275,7 @@ CommandSocket::createListenSocket() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::acceptConnection() {
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Accepting socket using listen fd = " << listenFd << endl;
     int fd = accept(listenFd, NULL, NULL);
 
     if (fd < 0) {

@@ -301,7 +301,7 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
     bool nr = previousNextRecord != nextRecord;
     bool continueLoopPacketProcessing = !sc && !em && !nr;
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop: " << std::boolalpha << continueLoopPacketProcessing
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop (LOOP): " << std::boolalpha << continueLoopPacketProcessing
                                    << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
 
     return continueLoopPacketProcessing;
@@ -311,8 +311,13 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageDriver::processLoop2Packet(const Loop2Packet & packet) {
-    //
-    // This class has no interest in LOOP2 packet data
-    return true;
+    bool sc = signalCaught.load();
+    bool em = eventManager.isEventAvailable();
+    bool continueLoopPacketProcessing = !sc && !em;
+
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop (LOOP2): " << std::boolalpha << continueLoopPacketProcessing
+                                   << " Signal: " << sc << " Event: " << em << endl;
+
+    return continueLoopPacketProcessing;
 }
 }

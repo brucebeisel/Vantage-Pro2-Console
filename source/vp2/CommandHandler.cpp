@@ -146,7 +146,7 @@ CommandHandler::handleBacklightCommand(const std::string & commandName, const Co
 
     ostringstream oss;
 
-    oss << "{ \"response\" : " << commandName << ", \"result\" : ";
+    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
     //"success", "info" : "Light is on|off" }
 
     if (argumentList[0].first != "state")
@@ -154,7 +154,7 @@ CommandHandler::handleBacklightCommand(const std::string & commandName, const Co
     else {
         if (argumentList[0].second == "on")
             lampOn = true;
-        else if (argumentList[1].second == "off")
+        else if (argumentList[0].second == "off")
             lampOn = false;
         else
             success = false;

@@ -20,11 +20,13 @@
 #include "ResponseHandler.h"
 #include "EventManager.h"
 
+using namespace std;
+
 namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-EventManager::EventManager(CommandHandler & ch) : commandHandler(ch) {
+EventManager::EventManager(CommandHandler & ch) : commandHandler(ch), logger(VantageLogger::getLogger("EventManager")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +48,7 @@ void
 EventManager::queueEvent(const CommandData & event) {
 
     std::lock_guard<std::mutex> guard(mutex);
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Queuing event" << endl;
     commandQueue.push(event);
 }
 
@@ -53,9 +56,11 @@ EventManager::queueEvent(const CommandData & event) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 EventManager::processNextEvent() {
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Checking for event" << endl;
     CommandData event;
     std::string response;
     if (consumeEvent(event)) {
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event" << endl;
         commandHandler.handleCommand(event.command, response);
         event.responseHandler->handleCommandResponse(event, response);
         // TODO what to do with the response?

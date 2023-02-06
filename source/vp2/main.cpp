@@ -68,7 +68,7 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         VantageConfiguration configuration(station);
         CommandHandler commandHandler(station, configuration);
         EventManager eventManager(commandHandler);
-        CommandSocket commandSocket(11461, eventManager);
+        CommandSocket commandSocket(11462, eventManager);
         VantageDriver driver(station, configuration, archiveManager, eventManager);
 
         //
