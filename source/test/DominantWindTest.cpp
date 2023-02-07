@@ -8,9 +8,9 @@
 #include <string.h>
 #include <vector>
 
-#include "../vp2/DominantWindDirections.h"
-#include "../vp2/VantageLogger.h"
-#include "../vp2/Weather.h"
+#include "../vws/DominantWindDirections.h"
+#include "../vws/VantageLogger.h"
+#include "../vws/Weather.h"
 
 using namespace vws;
 using namespace std;
