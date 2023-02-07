@@ -19,9 +19,9 @@
 #include <iomanip>
 #include <fstream>
 
-#include "VantageProtocolConstants.h"
-#include "Weather.h"
-#include "ArchivePacket.h"
+#include "../vws/ArchivePacket.h"
+#include "../vws/VantageProtocolConstants.h"
+#include "../vws/Weather.h"
 
 using namespace std;
 using namespace vws;

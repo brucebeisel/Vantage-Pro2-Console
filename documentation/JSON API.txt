@@ -54,7 +54,7 @@ Units command
 { "response"  : "query-units", "result" : "success", "data" : { "receiverList" : [ 1, 2, 4] } }
 
 Archive query
-{ "command"  : "query-archive", "arguments" { "startDate" : "2021-12-13T13:53:00", "endDate" :  "2021-12-13T14:53:00" } }
+{ "command"  : "query-archive", "arguments" { "startDate" : "2021-12-13T13:53:00", "endDate" :  "2021-12-13T14:53:00", "datasets" : [ "outdoor-temperature", "outdoor-humidity" ] } }
 { "response"  : "query-archive", "result" : "success", "data" :  [{lots of data 1},{lots of data 2}, ...] }
 
 
