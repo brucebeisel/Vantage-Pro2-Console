@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/ArchiveManager.h"
 
 #include <time.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 
-#include "../vws/ArchivePacket.h"
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/VantageWeatherStation.h"
-#include "../vws/Weather.h"
+#include "ArchiveManager.h"
+#include "ArchivePacket.h"
+#include "VantageProtocolConstants.h"
+#include "VantageWeatherStation.h"
+#include "Weather.h"
 
 using namespace std;
 

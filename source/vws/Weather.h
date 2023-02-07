@@ -20,8 +20,8 @@
 #include <time.h>
 #include <string>
 
-#include "../vws/Measurement.h"
-#include "../vws/WeatherTypes.h"
+#include "Measurement.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 

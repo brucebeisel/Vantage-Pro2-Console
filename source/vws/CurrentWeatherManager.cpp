@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/CurrentWeatherManager.h"
 
 #include <fstream>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "../vws/CurrentWeatherPublisher.h"
-#include "../vws/Weather.h"
+#include "CurrentWeatherManager.h"
+#include "CurrentWeatherPublisher.h"
+#include "Weather.h"
 
 using namespace std;
 

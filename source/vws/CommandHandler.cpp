@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/CommandHandler.h"
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -22,12 +21,13 @@
 #include <vector>
 #include "json.hpp"
 
-#include "../vws/ArchiveManager.h"
-#include "../vws/ArchivePacket.h"
-#include "../vws/HiLowPacket.h"
-#include "../vws/VantageConfiguration.h"
-#include "../vws/VantageEnums.h"
-#include "../vws/VantageWeatherStation.h"
+#include "CommandHandler.h"
+#include "ArchiveManager.h"
+#include "ArchivePacket.h"
+#include "HiLowPacket.h"
+#include "VantageConfiguration.h"
+#include "VantageEnums.h"
+#include "VantageWeatherStation.h"
 
 using namespace std;
 using json = nlohmann::json;

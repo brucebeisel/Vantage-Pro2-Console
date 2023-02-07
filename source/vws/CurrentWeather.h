@@ -19,9 +19,9 @@
 
 #include <string>
 
-#include "../vws/DominantWindDirections.h"
-#include "../vws/Loop2Packet.h"
-#include "../vws/LoopPacket.h"
+#include "DominantWindDirections.h"
+#include "Loop2Packet.h"
+#include "LoopPacket.h"
 
 namespace vws {
 /**

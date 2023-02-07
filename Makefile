@@ -1,4 +1,4 @@
 all: vws
 
-vws: source/vp2/vws
-	cd source/vp2; make all
+vws: source/vws/vws
+	cd source/vws; make all

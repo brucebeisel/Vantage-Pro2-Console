@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/CurrentWeather.h"
 
 #include <time.h>
 #include <vector>
 #include <iomanip>
 #include <sstream>
 
-#include "../vws/ForecastRule.h"
-#include "../vws/Weather.h"
+#include "CurrentWeather.h"
+#include "ForecastRule.h"
+#include "Weather.h"
 
 using namespace std;
 

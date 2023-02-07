@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/Loop2Packet.h"
 
 #include <iostream>
 #include <cstring>
 
-#include "../vws/BitConverter.h"
-#include "../vws/VantageCRC.h"
-#include "../vws/VantageDecoder.h"
-#include "../vws/VantageProtocolConstants.h"
+#include "Loop2Packet.h"
+#include "BitConverter.h"
+#include "VantageCRC.h"
+#include "VantageDecoder.h"
+#include "VantageProtocolConstants.h"
 
 
 

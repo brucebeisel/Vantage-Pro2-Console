@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/LoopPacket.h"
 
 #include <time.h>
 #include <cstring>
 #include <iostream>
 
-#include "../vws/BitConverter.h"
-#include "../vws/VantageCRC.h"
-#include "../vws/VantageDecoder.h"
-#include "../vws/VantageEnums.h"
-#include "../vws/VantageProtocolConstants.h"
+#include "LoopPacket.h"
+#include "BitConverter.h"
+#include "VantageCRC.h"
+#include "VantageDecoder.h"
+#include "VantageEnums.h"
+#include "VantageProtocolConstants.h"
 
 using namespace std;
 

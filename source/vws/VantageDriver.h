@@ -22,12 +22,12 @@
 #endif
 
 #include <string>
-#include "../vws/WeatherTypes.h"
-#include "../vws/ArchiveManager.h"
-#include "../vws/EventManager.h"
-#include "../vws/SensorStation.h"
-#include "../vws/VantageConfiguration.h"
-#include "../vws/VantageWeatherStation.h"
+#include "WeatherTypes.h"
+#include "ArchiveManager.h"
+#include "EventManager.h"
+#include "SensorStation.h"
+#include "VantageConfiguration.h"
+#include "VantageWeatherStation.h"
 
 namespace vws {
 class VantageLogger;

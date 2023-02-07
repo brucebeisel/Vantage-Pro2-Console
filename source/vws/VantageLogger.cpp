@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/VantageLogger.h"
 
 #include <iomanip>
 #include <fstream>
@@ -22,7 +21,8 @@
 #include <time.h>
 #include <mutex>
 
-#include "../vws/Weather.h"
+#include "VantageLogger.h"
+#include "Weather.h"
 
 using namespace std;
 

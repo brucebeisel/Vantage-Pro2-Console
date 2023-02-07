@@ -25,14 +25,14 @@
 #include <thread>
 #include <atomic>
 #include <fstream>
-#include "../vws/VantageLogger.h"
-#include "../vws/ArchiveManager.h"
-#include "../vws/CommandSocket.h"
-#include "../vws/CommandHandler.h"
-#include "../vws/VantageDriver.h"
-#include "../vws/VantageConfiguration.h"
-#include "../vws/CurrentWeatherSocket.h"
-#include "../vws/CurrentWeatherManager.h"
+#include "VantageLogger.h"
+#include "ArchiveManager.h"
+#include "CommandSocket.h"
+#include "CommandHandler.h"
+#include "VantageDriver.h"
+#include "VantageConfiguration.h"
+#include "CurrentWeatherSocket.h"
+#include "CurrentWeatherManager.h"
 
 using namespace std;
 using namespace vws;

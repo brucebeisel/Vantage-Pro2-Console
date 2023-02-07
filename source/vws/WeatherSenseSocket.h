@@ -19,8 +19,8 @@
 
 #include <string>
 
-#include "../vws/VantageLogger.h"
-#include "../vws/WeatherTypes.h"
+#include "VantageLogger.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

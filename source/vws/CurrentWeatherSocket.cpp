@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/CurrentWeatherSocket.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -25,8 +24,9 @@
 #include <string.h>
 #include <string>
 
-#include "../vws/CurrentWeather.h"
-#include "../vws/VantageLogger.h"
+#include "CurrentWeatherSocket.h"
+#include "CurrentWeather.h"
+#include "VantageLogger.h"
 
 using namespace std;
 

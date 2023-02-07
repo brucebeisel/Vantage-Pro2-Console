@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/VantageStationNetwork.h"
 
 #include <iostream>
 
-#include "../vws/BitConverter.h"
-#include "../vws/VantageDecoder.h"
-#include "../vws/VantageEepromConstants.h"
-#include "../vws/VantageEnums.h"
-#include "../vws/VantageWeatherStation.h"
-#include "../vws/WeatherTypes.h"
+#include "VantageStationNetwork.h"
+#include "BitConverter.h"
+#include "VantageDecoder.h"
+#include "VantageEepromConstants.h"
+#include "VantageEnums.h"
+#include "VantageWeatherStation.h"
+#include "WeatherTypes.h"
 
 using namespace std;
 

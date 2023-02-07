@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/ForecastRule.h"
+#include "ForecastRule.h"
 
 /*
  * This text for the forecast rules was obtained off the Internet. Using Google will turn up many references to the list.

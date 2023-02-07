@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/SensorStation.h"
 
 #include <iostream>
 #include <sstream>
 
-#include "../vws/VantageEepromConstants.h"
-#include "../vws/VantageEnums.h"
-#include "../vws/Weather.h"
+#include "SensorStation.h"
+#include "VantageEepromConstants.h"
+#include "VantageEnums.h"
+#include "Weather.h"
 
 using namespace std;
 

@@ -17,11 +17,11 @@
 #ifndef VANTAGE_CONFIGURATION_H
 #define VANTAGE_CONFIGURATION_H
 
-#include "../vws/Sensor.h"
-#include "../vws/SensorStation.h"
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/VantageWeatherStation.h"
-#include "../vws/WeatherTypes.h"
+#include "Sensor.h"
+#include "SensorStation.h"
+#include "VantageProtocolConstants.h"
+#include "VantageWeatherStation.h"
+#include "WeatherTypes.h"
 
 
 namespace vws {

@@ -21,9 +21,9 @@
 #include <vector>
 #include <string>
 
-#include "../vws/Sensor.h"
-#include "../vws/VantageEepromConstants.h"
-#include "../vws/WeatherTypes.h"
+#include "Sensor.h"
+#include "VantageEepromConstants.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

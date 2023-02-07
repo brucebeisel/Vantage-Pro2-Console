@@ -14,19 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/ArchivePacket.h"
 
 #include <time.h>
 #include <string>
 #include <ctime>
 #include <sstream>
 
-#include "../vws/BitConverter.h"
-#include "../vws/VantageDecoder.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/Weather.h"
-#include "../vws/WeatherTypes.h"
+#include "ArchivePacket.h"
+#include "BitConverter.h"
+#include "VantageDecoder.h"
+#include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
+#include "Weather.h"
+#include "WeatherTypes.h"
 
 
 

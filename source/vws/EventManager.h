@@ -21,8 +21,8 @@
 #include <string>
 #include <mutex>
 
-#include "../vws/ResponseHandler.h"
-#include "../vws/VantageLogger.h"
+#include "ResponseHandler.h"
+#include "VantageLogger.h"
 
 namespace vws {
 class CommandHandler;

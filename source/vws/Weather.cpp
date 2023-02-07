@@ -23,7 +23,7 @@
 #endif
 #include <sstream>
 #include <iomanip>
-#include "../vws/Weather.h"
+#include "Weather.h"
 
 using namespace std;
 

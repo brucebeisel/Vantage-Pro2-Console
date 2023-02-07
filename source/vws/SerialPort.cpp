@@ -25,9 +25,9 @@ static const int INVALID_HANDLE_VALUE = -1;
 #include <winsock2.h>
 #endif
 #include <iostream>
-#include "../vws/VantageLogger.h"
-#include "../vws/Weather.h"
-#include "../vws/SerialPort.h"
+#include "VantageLogger.h"
+#include "Weather.h"
+#include "SerialPort.h"
 
 using namespace std;
 

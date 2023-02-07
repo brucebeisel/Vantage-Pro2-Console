@@ -18,7 +18,7 @@
 #define VANTAGE_PROTOCOL_CONSTANTS
 #include <string>
 
-#include "../vws/WeatherTypes.h"
+#include "WeatherTypes.h"
 
 namespace vws::ProtocolConstants {
 

@@ -18,6 +18,7 @@
 #define SENSOR_H
 
 #include <vector>
+#include <string>
 
 namespace vws {
 class LoopPacket;

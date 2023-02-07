@@ -17,10 +17,10 @@
 #ifndef CURRENT_WEATHER_MANAGER_H
 #define CURRENT_WEATHER_MANAGER_H
 
-#include "../vws/CurrentWeather.h"
-#include "../vws/DominantWindDirections.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/VantageWeatherStation.h"
+#include "CurrentWeather.h"
+#include "DominantWindDirections.h"
+#include "VantageLogger.h"
+#include "VantageWeatherStation.h"
 
 namespace vws {
 

@@ -18,7 +18,7 @@
 #define VANTAGE_EEPROM_CONSTANTS_H
 #include <string>
 
-#include "../vws/WeatherTypes.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

@@ -1,13 +1,13 @@
-#ifndef VANTAGE_ENUMS_H_
-#define VANTAGE_ENUMS_H_
+#ifndef VANTAGE_ENUMS_H
+#define VANTAGE_ENUMS_H
 
 #include <vector>
 #include <string>
 #include <utility>
 #include <stdexcept>
 
-#include "../vws/VantageEepromConstants.h"
-#include "../vws/VantageProtocolConstants.h"
+#include "VantageEepromConstants.h"
+#include "VantageProtocolConstants.h"
 
 namespace vws {
 

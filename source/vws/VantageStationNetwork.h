@@ -19,9 +19,9 @@
 
 #include <vector>
 
-#include "../vws/SensorStation.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/VantageProtocolConstants.h"
+#include "SensorStation.h"
+#include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
 
 namespace vws {
 

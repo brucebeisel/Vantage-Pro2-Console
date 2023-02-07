@@ -17,9 +17,9 @@
 #ifndef LOOP2_PACKET_H
 #define LOOP2_PACKET_H
 
-#include "../vws/Measurement.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/WeatherTypes.h"
+#include "Measurement.h"
+#include "VantageLogger.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 

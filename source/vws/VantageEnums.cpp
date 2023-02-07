@@ -5,7 +5,7 @@
  *      Author: bruce
  */
 
-#include "../vws/VantageEnums.h"
+#include "VantageEnums.h"
 
 namespace vws {
 

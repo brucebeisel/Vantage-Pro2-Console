@@ -17,11 +17,11 @@
 #ifndef VANTAGE_DECODER_H
 #define VANTAGE_DECODER_H
 
-#include "../vws/Measurement.h"
-#include "../vws/VantageEepromConstants.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/WeatherTypes.h"
+#include "Measurement.h"
+#include "VantageEepromConstants.h"
+#include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 

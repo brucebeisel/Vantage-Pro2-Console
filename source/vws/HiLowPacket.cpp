@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/HiLowPacket.h"
 
 #include <sstream>
 #include <iomanip>
 
-#include "../vws/BitConverter.h"
-#include "../vws/VantageDecoder.h"
-#include "../vws/Weather.h"
+#include "HiLowPacket.h"
+#include "BitConverter.h"
+#include "VantageDecoder.h"
+#include "Weather.h"
 
 using namespace std;
 

@@ -17,7 +17,7 @@
 #ifndef VANTAGE_CRC_H
 #define VANTAGE_CRC_H
 
-#include "../vws/WeatherTypes.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

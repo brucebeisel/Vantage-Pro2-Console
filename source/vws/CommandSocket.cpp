@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/CommandSocket.h"
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -22,10 +21,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
+#include <vector>
 #include "json.hpp"
 
-#include "../vws/EventManager.h"
-#include "../vws/ResponseHandler.h"
+#include "CommandSocket.h"
+#include "EventManager.h"
+#include "ResponseHandler.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -229,18 +230,17 @@ CommandSocket::readCommand(int fd) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandSocket::handleCommandResponse(const CommandData & commandData, const std::string & response) {
+CommandSocket::handleCommandResponse(const CommandData & commandData, const std::string & responseArg) {
     const char * responseTerminator = "\n\n";
+    string response = responseArg;
+    response.append(responseTerminator);
+
     const char * responseBuffer = response.c_str();
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Write response " << response << " on fd " << commandData.fd << endl;
 
     if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
-    }
-
-    if (write(commandData.fd, responseTerminator, strlen(responseTerminator)) < 0) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response terminator to command server socket. fd = " << commandData.fd <<  endl;
     }
 }
 

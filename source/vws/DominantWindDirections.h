@@ -19,9 +19,9 @@
 
 #include <vector>
 
-#include "../vws/VantageLogger.h"
-#include "../vws/WeatherTypes.h"
-#include "../vws/WindDirectionSlice.h"
+#include "VantageLogger.h"
+#include "WeatherTypes.h"
+#include "WindDirectionSlice.h"
 
 namespace vws {
 /**

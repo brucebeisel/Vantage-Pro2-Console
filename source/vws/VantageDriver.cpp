@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/VantageDriver.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,14 +22,15 @@
 #include <vector>
 #include <atomic>
 
-#include "../vws/Alarm.h"
-#include "../vws/CurrentWeather.h"
-#include "../vws/HiLowPacket.h"
-#include "../vws/SensorStation.h"
-#include "../vws/VantageDecoder.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/Weather.h"
+#include "VantageDriver.h"
+#include "Alarm.h"
+#include "CurrentWeather.h"
+#include "HiLowPacket.h"
+#include "SensorStation.h"
+#include "VantageDecoder.h"
+#include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
+#include "Weather.h"
 
 using namespace std;
 extern atomic_bool signalCaught;

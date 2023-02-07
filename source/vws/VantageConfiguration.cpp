@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/VantageConfiguration.h"
 
 #include <cmath>
 
-#include "../vws/BitConverter.h"
-#include "../vws/VantageDecoder.h"
-#include "../vws/VantageEepromConstants.h"
-#include "../vws/VantageProtocolConstants.h"
+#include "VantageConfiguration.h"
+#include "BitConverter.h"
+#include "VantageDecoder.h"
+#include "VantageEepromConstants.h"
+#include "VantageProtocolConstants.h"
 
 using namespace std;
 

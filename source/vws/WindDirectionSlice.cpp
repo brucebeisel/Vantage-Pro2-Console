@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/WindDirectionSlice.h"
-
-#include "../vws/Weather.h"
+#include "WindDirectionSlice.h"
+#include "Weather.h"
 
 using namespace std;
 

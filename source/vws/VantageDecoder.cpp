@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/VantageDecoder.h"
 
 #include <iostream>
 
-#include "../vws/BitConverter.h"
-#include "../vws/VantageEepromConstants.h"
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/Weather.h"
+#include "VantageDecoder.h"
+#include "BitConverter.h"
+#include "VantageEepromConstants.h"
+#include "VantageProtocolConstants.h"
+#include "Weather.h"
 
 namespace vws {
 using namespace ProtocolConstants;

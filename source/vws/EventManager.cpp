@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 //#include <sys/signalfd.h>
-#include "../vws/EventManager.h"
 
 #include <signal.h>
 
-#include "../vws/CommandHandler.h"
-#include "../vws/ResponseHandler.h"
+#include "EventManager.h"
+#include "CommandHandler.h"
+#include "ResponseHandler.h"
 
 using namespace std;
 

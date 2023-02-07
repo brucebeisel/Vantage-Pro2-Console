@@ -20,11 +20,11 @@
 #include <netinet/in.h>
 #include <string>
 
-#include "../vws/CurrentWeather.h"
-#include "../vws/CurrentWeatherPublisher.h"
-#include "../vws/DominantWindDirections.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/VantageWeatherStation.h"
+#include "CurrentWeather.h"
+#include "CurrentWeatherPublisher.h"
+#include "DominantWindDirections.h"
+#include "VantageLogger.h"
+#include "VantageWeatherStation.h"
 
 namespace vws {
 class CurrentWeather;

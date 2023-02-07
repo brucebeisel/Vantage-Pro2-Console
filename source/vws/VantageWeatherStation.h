@@ -21,13 +21,13 @@
 #include <string>
 #include <vector>
 
-#include "../vws/ArchivePacket.h"
-#include "../vws/BitConverter.h"
-#include "../vws/Sensor.h"
-#include "../vws/SensorStation.h"
-#include "../vws/SerialPort.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/VantageProtocolConstants.h"
+#include "ArchivePacket.h"
+#include "BitConverter.h"
+#include "Sensor.h"
+#include "SensorStation.h"
+#include "SerialPort.h"
+#include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
 
 using namespace vws::ProtocolConstants;
 

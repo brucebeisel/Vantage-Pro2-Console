@@ -34,8 +34,8 @@ typedef long ssize_t;
 #include <errno.h>
 #endif
 #include <iostream>
-#include "../vws/WeatherSenseSocket.h"
-#include "../vws/Weather.h"
+#include "WeatherSenseSocket.h"
+#include "Weather.h"
 
 using namespace std;
 

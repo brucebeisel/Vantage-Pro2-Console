@@ -20,8 +20,8 @@
 #include <string>
 #include <vector>
 
-#include "../vws/VantageLogger.h"
-#include "../vws/WeatherTypes.h"
+#include "VantageLogger.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 class ArchivePacket;

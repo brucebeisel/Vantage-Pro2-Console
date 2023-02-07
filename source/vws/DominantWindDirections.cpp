@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../vws/DominantWindDirections.h"
 
 #include <time.h>
 #include <cstring>
@@ -22,8 +21,9 @@
 #include <algorithm>
 #include <iomanip>
 
-#include "../vws/VantageLogger.h"
-#include "../vws/Weather.h"
+#include "DominantWindDirections.h"
+#include "VantageLogger.h"
+#include "Weather.h"
 
 using namespace std;
 

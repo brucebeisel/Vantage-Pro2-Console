@@ -18,7 +18,7 @@
 #define ARCHIVEPACKET_H
 #include <string>
 
-#include "../vws/WeatherTypes.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 

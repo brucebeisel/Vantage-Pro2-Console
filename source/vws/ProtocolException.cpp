@@ -21,7 +21,7 @@
  * Created on November 17, 2014, 9:18 PM
  */
 
-#include "../vws/ProtocolException.h"
+#include "ProtocolException.h"
 
 namespace vws {
 

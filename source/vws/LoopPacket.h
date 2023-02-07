@@ -20,10 +20,10 @@
 #include <string>
 #include <bitset>
 
-#include "../vws/Measurement.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/WeatherTypes.h"
+#include "Measurement.h"
+#include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
+#include "WeatherTypes.h"
 
 namespace vws {
 /**

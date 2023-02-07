@@ -15,9 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../vws/StreamDataProcessor.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/WeatherTypes.h"
+#include "StreamDataProcessor.h"
+#include "VantageLogger.h"
+#include "WeatherTypes.h"
 using namespace vws;
 using namespace std;
 /**

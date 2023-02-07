@@ -24,16 +24,16 @@
 #include <math.h>
 #include <sstream>
 #include <cstring>
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/VantageEepromConstants.h"
-#include "../vws/HiLowPacket.h"
-#include "../vws/LoopPacket.h"
-#include "../vws/Loop2Packet.h"
-#include "../vws/VantageCRC.h"
-#include "../vws/BitConverter.h"
-#include "../vws/ProtocolException.h"
-#include "../vws/VantageWeatherStation.h"
-#include "../vws/Weather.h"
+#include "VantageProtocolConstants.h"
+#include "VantageEepromConstants.h"
+#include "HiLowPacket.h"
+#include "LoopPacket.h"
+#include "Loop2Packet.h"
+#include "VantageCRC.h"
+#include "BitConverter.h"
+#include "ProtocolException.h"
+#include "VantageWeatherStation.h"
+#include "Weather.h"
 
 using namespace std;
 
