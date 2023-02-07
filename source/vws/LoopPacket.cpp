@@ -122,9 +122,9 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     nextRecord = BitConverter::toInt16(packetData, NEXT_RECORD_OFFSET);
 
     VantageDecoder::decodeBarometricPressure(packetData, BAROMETER_OFFSET, barometricPressure);
-    VantageDecoder::decode16BitTemperature(packetData, INDOOR_TEMPERATURE_OFFSET, indoorTemperature);
-    VantageDecoder::decodeHumidity(packetData, INDOOR_HUMIDITY_OFFSET, indoorHumidity);
-    VantageDecoder::decode16BitTemperature(packetData, OUTDOOR_TEMPERATURE_OFFSET, outdoorTemperature);
+    VantageDecoder::decode16BitTemperature(packetData, INSIDE_TEMPERATURE_OFFSET, insideTemperature);
+    VantageDecoder::decodeHumidity(packetData, INSIDE_HUMIDITY_OFFSET, insideHumidity);
+    VantageDecoder::decode16BitTemperature(packetData, OUTSIDE_TEMPERATURE_OFFSET, outsideTemperature);
 
     windSpeed = VantageDecoder::decodeWindSpeed(packetData, WIND_SPEED_OFFSET);
     windSpeed10MinuteAverage = VantageDecoder::decodeWindSpeed(packetData, TEN_MINUTE_AVG_WIND_SPEED_OFFSET);
@@ -139,7 +139,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++)
         VantageDecoder::decode8BitTemperature(packetData, LEAF_TEMPERATURES_OFFSET + i, leafTemperature[i]);
 
-    VantageDecoder::decodeHumidity(packetData, OUTDOOR_HUMIDITY_OFFSET, outdoorHumidity);
+    VantageDecoder::decodeHumidity(packetData, OUTSIDE_HUMIDITY_OFFSET, outsideHumidity);
 
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++)
         VantageDecoder::decodeHumidity(packetData, EXTRA_HUMIDITIES_OFFSET + i, extraHumidity[i]);
@@ -214,29 +214,29 @@ LoopPacket::getPacketType() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Temperature> &
-LoopPacket::getOutdoorTemperature() const {
-    return outdoorTemperature;
+LoopPacket::getOutsideTemperature() const {
+    return outsideTemperature;
 }
         
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Temperature> &
-LoopPacket::getIndoorTemperature() const {
-    return indoorTemperature;
+LoopPacket::getInsideTemperature() const {
+    return insideTemperature;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Humidity> &
-LoopPacket::getOutdoorHumidity() const {
-    return outdoorHumidity;
+LoopPacket::getOutsideHumidity() const {
+    return outsideHumidity;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Humidity> &
-LoopPacket::getIndoorHumidity() const {
-    return indoorHumidity;
+LoopPacket::getInsideHumidity() const {
+    return insideHumidity;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -468,7 +468,7 @@ LoopPacket::getSunsetTime() const {
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream &
 operator<<(std::ostream & os, const LoopPacket & packet) {
-    os << "Indoor Temperature" << packet.getIndoorTemperature() << endl;
+    os << "Inside Temperature" << packet.getInsideTemperature() << endl;
     return os;
 
 }

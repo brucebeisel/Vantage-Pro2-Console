@@ -24,6 +24,7 @@ namespace vws {
 class VantageWeatherStation;
 class VantageConfiguration;
 class ArchiveManager;
+class VantageLogger;
 
 class CommandHandler {
 public:
@@ -121,6 +122,7 @@ private:
     VantageWeatherStation & station;
     VantageConfiguration &  configurator;
     ArchiveManager &        archiveManager;
+    VantageLogger &         logger;
 };
 
 }

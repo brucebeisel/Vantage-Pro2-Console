@@ -99,11 +99,11 @@ namespace VantageEepromConstants {
     static constexpr unsigned EE_SETUP_BITS_ADDRESS =                 0x2B;
     static constexpr unsigned EE_RAIN_SEASON_START_ADDRESS =          0x2C;
     static constexpr unsigned EE_ARCHIVE_PERIOD_ADDRESS =             0x2D;
-    static constexpr unsigned EE_INDOOR_TEMP_CAL_ADDRESS =            0x32;
-    static constexpr unsigned EE_INDOOR_TEMP_COMP_ADDRESS =           0x33;
+    static constexpr unsigned EE_INSIDE_TEMP_CAL_ADDRESS =            0x32;
+    static constexpr unsigned EE_INSIDE_TEMP_COMP_ADDRESS =           0x33;
     static constexpr unsigned EE_OUTSIDE_TEMP_CAL_ADDRESS =           0x34;
     static constexpr unsigned EE_EXTRA_TEMPS_CAL_ADDRESS =            0x35;
-    static constexpr unsigned EE_INDOOR_HUMID_CAL_ADDRESS =           0x44;
+    static constexpr unsigned EE_INSIDE_HUMID_CAL_ADDRESS =           0x44;
     static constexpr unsigned EE_HUMID_CAL_ADDRESS =                  0x45;
     static constexpr unsigned EE_WIND_DIR_CAL_ADDRESS =               0x4D;
     static constexpr unsigned EE_BARO_GRAPH_TIME_SPAN_ADDRESS =       0x4F;
@@ -130,11 +130,11 @@ namespace VantageEepromConstants {
     //
     // Graph Data
     //
-    static constexpr unsigned EE_INDOOR_TEMP_HOUR_ADDRESS =           EE_GRAPH_DATA_ADDRESS + 0;
-    static constexpr unsigned EE_INDOOR_TEMP_DAY_HIGHS_ADDRESS =      EE_GRAPH_DATA_ADDRESS + 24;
-    static constexpr unsigned EE_INDOOR_TEMP_DAY_HIGH_TIMES_ADDRESS = EE_GRAPH_DATA_ADDRESS + 48;
-    static constexpr unsigned EE_INDOOR_TEMP_DAY_LOWS_ADDRESS =       EE_GRAPH_DATA_ADDRESS + 96;
-    static constexpr unsigned EE_INDOOR_TEMP_DAY_LOW_TIMES_ADDRESS =  EE_GRAPH_DATA_ADDRESS + 120;
+    static constexpr unsigned EE_INSIDE_TEMP_HOUR_ADDRESS =           EE_GRAPH_DATA_ADDRESS + 0;
+    static constexpr unsigned EE_INSIDE_TEMP_DAY_HIGHS_ADDRESS =      EE_GRAPH_DATA_ADDRESS + 24;
+    static constexpr unsigned EE_INSIDE_TEMP_DAY_HIGH_TIMES_ADDRESS = EE_GRAPH_DATA_ADDRESS + 48;
+    static constexpr unsigned EE_INSIDE_TEMP_DAY_LOWS_ADDRESS =       EE_GRAPH_DATA_ADDRESS + 96;
+    static constexpr unsigned EE_INSIDE_TEMP_DAY_LOW_TIMES_ADDRESS =  EE_GRAPH_DATA_ADDRESS + 120;
 
 };
 

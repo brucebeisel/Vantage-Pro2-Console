@@ -51,7 +51,7 @@ private:
      * @return false if an error was detected, the caller should close the socket
      */
     bool readSocket() {
-        logger.log(VANTAGE_DEBUG1) << "Reading available data" << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading available data" << endl;
 
         vector<std::string> messages;
 

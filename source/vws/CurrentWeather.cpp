@@ -82,10 +82,10 @@ CurrentWeather::formatXML() const {
     ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
        << "<currentWeather>"
        << "<time>" << Weather::formatDateTime(time(0)) << "</time>"
-       << loopPacket.getIndoorTemperature().formatXML("indoorTemperature")
-       << loopPacket.getIndoorHumidity().formatXML("indoorHumidity")
-       << loopPacket.getOutdoorTemperature().formatXML("outdoorTemperature")
-       << loopPacket.getOutdoorHumidity().formatXML("outdoorHumidity")
+       << loopPacket.getInsideTemperature().formatXML("insideTemperature")
+       << loopPacket.getInsideHumidity().formatXML("insideHumidity")
+       << loopPacket.getOutsideTemperature().formatXML("outsideTemperature")
+       << loopPacket.getOutsideHumidity().formatXML("outsideHumidity")
        << loop2Packet.getDewPoint().formatXML("dewPoint")
        << loop2Packet.getWindChill().formatXML("windChill")
        << loop2Packet.getHeatIndex().formatXML("heatIndex")
@@ -183,10 +183,10 @@ CurrentWeather::formatJSON() const {
     ostringstream ss;
     ss << "{"
        << "\"time\" : \"" << Weather::formatDateTime(time(0)) << "\""
-       << loopPacket.getIndoorTemperature().formatJSON("indoorTemperature", true)
-       << loopPacket.getIndoorHumidity().formatJSON("indoorHumidity", true)
-       << loopPacket.getOutdoorTemperature().formatJSON("outdoorTemperature", true)
-       << loopPacket.getOutdoorHumidity().formatJSON("outdoorHumidity", true)
+       << loopPacket.getInsideTemperature().formatJSON("insideTemperature", true)
+       << loopPacket.getInsideHumidity().formatJSON("insideHumidity", true)
+       << loopPacket.getOutsideTemperature().formatJSON("outsideTemperature", true)
+       << loopPacket.getOutsideHumidity().formatJSON("outsideHumidity", true)
        << loop2Packet.getDewPoint().formatJSON("dewPoint", true)
        << loop2Packet.getWindChill().formatJSON("windChill", true)
        << loop2Packet.getHeatIndex().formatJSON("heatIndex", true)

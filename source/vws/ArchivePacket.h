@@ -25,7 +25,7 @@ namespace vws {
 class VantageLogger;
 
 /**
- * A class that represents a Vantage archive packet. Very little data is needed outdoor the construction of the archive
+ * A class that represents a Vantage archive packet. Very little data is needed outside the construction of the archive
  * message that is sent to the collector.
  */
 class ArchivePacket {
@@ -80,6 +80,8 @@ public:
      */
     DateTime getDateTime() const;
 
+    Temperature getOutsideTemperature() const;
+
     /**
      * Check whether this is an empty packet, the empty packet concept is used to avoid the use of NULL.
      * 
@@ -126,17 +128,17 @@ private:
 
     static constexpr int DATE_STAMP_OFFSET = 0;
     static constexpr int TIME_STAMP_OFFSET = 2;
-    static constexpr int OUTDOOR_TEMPERATURE_OFFSET = 4;
-    static constexpr int HIGH_OUTDOOR_TEMPERATURE_OFFSET = 6;
-    static constexpr int LOW_OUTDOOR_TEMPERATURE_OFFSET = 8;
+    static constexpr int OUTSIDE_TEMPERATURE_OFFSET = 4;
+    static constexpr int HIGH_OUTSIDE_TEMPERATURE_OFFSET = 6;
+    static constexpr int LOW_OUTSIDE_TEMPERATURE_OFFSET = 8;
     static constexpr int RAINFALL_OFFSET = 10;
     static constexpr int HIGH_RAIN_RATE_OFFSET = 12;
     static constexpr int BAROMETER_OFFSET = 14;
     static constexpr int SOLAR_RADIATION_OFFSET = 16;
     static constexpr int NUM_WIND_SAMPLES_OFFSET = 18;
-    static constexpr int INDOOR_TEMPERATURE_OFFSET = 20;
-    static constexpr int INDOOR_HUMIDITY_OFFSET = 22;
-    static constexpr int OUTDOOR_HUMIDITY_OFFSET = 23;
+    static constexpr int INSIDE_TEMPERATURE_OFFSET = 20;
+    static constexpr int INSIDE_HUMIDITY_OFFSET = 22;
+    static constexpr int OUTSIDE_HUMIDITY_OFFSET = 23;
     static constexpr int AVG_WIND_SPEED_OFFSET = 24;
     static constexpr int HIGH_WIND_SPEED_OFFSET = 25;
     static constexpr int DIR_OF_HIGH_WIND_SPEED_OFFSET = 26;

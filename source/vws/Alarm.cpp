@@ -37,28 +37,28 @@ static const AlarmProperties alarmProperties[] = {
          1
     },
     {
-        "Low Indoor Temperature",
+        "Low Inside Temperature",
           6,    1,
          90,    1,
         255,
           2
     },
     {
-        "High Indoor Temperature",
+        "High Inside Temperature",
           7,    1,
          90,    1,
         255,
           3
     },
     {
-        "Low Indoor Humidity",
+        "Low Inside Humidity",
          40,   1,
           0,   1,
         255,
           4
     },
     {
-        "High Indoor Humidity",
+        "High Inside Humidity",
          41,   1,
           0,   1,
         255,
@@ -79,14 +79,14 @@ static const AlarmProperties alarmProperties[] = {
          -1
     },
     {
-        "Low Outdoor Temperature",
+        "Low Outside Temperature",
           8,    1,
          90,    1,
         255,
          16
     },
     {
-        "High Outdoor Temperature",
+        "High Outside Temperature",
           9,   1,
          90,   1,
         255,
@@ -303,7 +303,7 @@ static const AlarmProperties alarmProperties[] = {
          (15 * 8) +   5
     },
     {
-        "Low Outdoor Humidity",
+        "Low Outside Humidity",
          42,   1,
           0,   1,
         255,
@@ -359,7 +359,7 @@ static const AlarmProperties alarmProperties[] = {
           (1 * 8) +   2
     },
     {
-        "High Outdoor Humidity",
+        "High Outside Humidity",
          50,   1,
           0,   1,
         255,

@@ -53,11 +53,11 @@ namespace vws {
  * Units - EEPROM                                    ----- Initialization: User set, changed if user desires
  * Setup Bits - EEPROM, contains wind cup size which is duplicated in the EEPROM data
  * Rain season start - EEPROM                        ----- Initialization: User set, should not change once set
- * Indoor temperature calibration - EEPROM           ----- Change as needed
- * Outdoor temperature calibration - EEPROM          ----- Change as needed
+ * Inside temperature calibration - EEPROM           ----- Change as needed
+ * Outside temperature calibration - EEPROM          ----- Change as needed
  * Extra temperature calibration - EEPROM            ----- Change as needed
- * Indoor humidity calibration - EEPROM              ----- Change as needed
- * Outdoor humidity calibration - EEPROM             ----- Change as needed
+ * Inside humidity calibration - EEPROM              ----- Change as needed
+ * Outside humidity calibration - EEPROM             ----- Change as needed
  * Extra humidity calibration - EEPROM               ----- Change as needed
  * Alarm thresholds - EEPROM                         ----- User changed as desired
  * Graph time span - EEPROM                          ----- Unknown

@@ -89,6 +89,15 @@ ArchivePacket::getDateTime() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+Temperature
+ArchivePacket::getOutsideTemperature() const {
+    Temperature temperature;
+    temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
+    return temperature;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool ArchivePacket::isEmptyPacket() const {
     return packetTime == EMPTY_ARCHIVE_PACKET_TIME;
 }
@@ -147,14 +156,14 @@ ArchivePacket::formatXML() const {
     ss << "<time>" << Weather::formatDateTime(archiveTime) << "</time>";
 
     Measurement<Temperature> temperature;
-    VantageDecoder::decode16BitTemperature(buffer, OUTDOOR_TEMPERATURE_OFFSET, temperature);
-    ss << temperature.formatXML("avgOutdoorTemperature");
+    VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    ss << temperature.formatXML("avgOutsideTemperature");
 
-    VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTDOOR_TEMPERATURE_OFFSET, temperature);
-    ss << temperature.formatXML("highOutdoorTemperature");
+    VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    ss << temperature.formatXML("highOutsideTemperature");
 
-    VantageDecoder::decode16BitTemperature(buffer, LOW_OUTDOOR_TEMPERATURE_OFFSET, temperature);
-    ss << temperature.formatXML("lowOutdoorTemperature");
+    VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    ss << temperature.formatXML("lowOutsideTemperature");
 
     Rainfall r = VantageDecoder::decodeRain(buffer, RAINFALL_OFFSET);
     ss << "<rainfall>" << r << "</rainfall>";
@@ -170,15 +179,15 @@ ArchivePacket::formatXML() const {
     VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET, solarRadiation);
     ss << solarRadiation.formatXML("avgSolarRadiation");
   
-    VantageDecoder::decode16BitTemperature(buffer, INDOOR_TEMPERATURE_OFFSET, temperature);
-    ss << temperature.formatXML("indoorTemperature");
+    VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET, temperature);
+    ss << temperature.formatXML("insideTemperature");
 
     Measurement<Humidity> humidity;
-    VantageDecoder::decodeHumidity(buffer, INDOOR_HUMIDITY_OFFSET, humidity);
-    ss << humidity.formatXML("indoorHumidity");
+    VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET, humidity);
+    ss << humidity.formatXML("insideHumidity");
 
-    VantageDecoder::decodeHumidity(buffer, OUTDOOR_HUMIDITY_OFFSET, humidity);
-    ss << humidity.formatXML("outdoorHumidity");
+    VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET, humidity);
+    ss << humidity.formatXML("outsideHumidity");
 
     //
     // Both wind speed and direction must be valid to generate the XML
@@ -281,14 +290,14 @@ ArchivePacket::formatJSON() const {
     ss << "\"time\" : \"" << Weather::formatDateTime(archiveTime);
 
     Measurement<Temperature> temperature;
-    VantageDecoder::decode16BitTemperature(buffer, OUTDOOR_TEMPERATURE_OFFSET, temperature);
-    ss << temperature.formatJSON("avgOutdoorTemperature", true);
+    VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    ss << temperature.formatJSON("avgOutsideTemperature", true);
 
-    VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTDOOR_TEMPERATURE_OFFSET, temperature);
-    ss << temperature.formatJSON("highOutdoorTemperature", true);
+    VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    ss << temperature.formatJSON("highOutsideTemperature", true);
 
-    VantageDecoder::decode16BitTemperature(buffer, LOW_OUTDOOR_TEMPERATURE_OFFSET, temperature);
-    ss << temperature.formatJSON("lowOutdoorTemperature", true);
+    VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    ss << temperature.formatJSON("lowOutsideTemperature", true);
 
     Rainfall r = VantageDecoder::decodeRain(buffer, RAINFALL_OFFSET);
     ss << ", \"rainfall\" : " << r;
@@ -298,21 +307,21 @@ ArchivePacket::formatJSON() const {
 
     Measurement<Pressure> baroPressure;
     VantageDecoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET, baroPressure);
-    ss << baroPressure.formatJSON("baroPressure", true);
+    ss << baroPressure.formatJSON("barometricPressure", true);
 
     Measurement<SolarRadiation> solarRadiation;
     VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET, solarRadiation);
     ss << solarRadiation.formatJSON("avgSolarRadiation", true);
 
-    VantageDecoder::decode16BitTemperature(buffer, INDOOR_TEMPERATURE_OFFSET, temperature);
-    ss << temperature.formatJSON("indoorTemperature", true);
+    VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET, temperature);
+    ss << temperature.formatJSON("insideTemperature", true);
 
     Measurement<Humidity> humidity;
-    VantageDecoder::decodeHumidity(buffer, INDOOR_HUMIDITY_OFFSET, humidity);
-    ss << humidity.formatJSON("indoorHumidity", true);
+    VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET, humidity);
+    ss << humidity.formatJSON("insideHumidity", true);
 
-    VantageDecoder::decodeHumidity(buffer, OUTDOOR_HUMIDITY_OFFSET, humidity);
-    ss << humidity.formatJSON("outdoorHumidity", true);
+    VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET, humidity);
+    ss << humidity.formatJSON("outsideHumidity", true);
 
     //
     // Both wind speed and direction must be valid to generate the JSON

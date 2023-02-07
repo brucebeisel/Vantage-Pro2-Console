@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
 #include <iostream>
 #include <vector>
 #include "json.hpp"
@@ -27,6 +28,7 @@
 #include "HiLowPacket.h"
 #include "VantageConfiguration.h"
 #include "VantageEnums.h"
+#include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 
 using namespace std;
@@ -51,6 +53,7 @@ using namespace ProtocolConstants;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 CommandHandler::CommandHandler(VantageWeatherStation & station, VantageConfiguration & configurator, ArchiveManager & archiveManager) : station(station),
+                                                                                                                                        logger(VantageLogger::getLogger("CommandHandler")),
                                                                                                                                         configurator(configurator),
                                                                                                                                         archiveManager(archiveManager) {
 }
@@ -600,9 +603,46 @@ CommandHandler::handleQueryUnitsCommand(const std::string & commandName, std::st
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    vector<ArchivePacket> packets;
-    archiveManager.queryArchiveRecords(0L, 0L, packets);
 
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"datasets\" : [ { \"outsideTemperature\" : [";
+
+    DateTime startTime = 0;
+    DateTime endTime = 0;
+
+    struct tm tm;
+
+    for (CommandArgument arg : argumentList) {
+        if (arg.first == "start-time") {
+            std::stringstream ss(arg.second);
+            ss >> std::get_time(&tm, "%Y-%m-%dT%T");
+            startTime = mktime(&tm);
+        }
+        else if (arg.first == "end-time") {
+            std::stringstream ss(arg.second);
+            ss >> std::get_time(&tm, "%Y-%m-%dT%T");
+            endTime = mktime(&tm);
+        }
+    }
+
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the archive with times: " << startTime << " - " << endTime << endl;
+    vector<ArchivePacket> packets;
+    archiveManager.queryArchiveRecords(startTime, endTime, packets);
+
+    bool first = true;
+    for (ArchivePacket p : packets) {
+        if (!first) {
+            oss << ", ";
+            first = false;
+        }
+        oss << p.getOutsideTemperature();
+
+    }
+
+    oss << " ] } } }";
+
+    response = oss.str();
 }
 
 } // End namespace

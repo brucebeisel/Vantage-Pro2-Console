@@ -92,10 +92,10 @@ private:
     static const int UV_SENSOR_ID = 3;
     static const int SOLAR_RADIATION_SENSOR_ID = 4;
     static const int RAIN_COLLECTOR_SENSOR_ID = 5;
-    static const int INDOOR_THERMOMETER_SENSOR_ID = 6;
-    static const int OUTDOOR_THERMOMETER_SENSOR_ID = 7;
-    static const int INDOOR_HYGROMETER_SENSOR_ID = 8;
-    static const int OUTDOOR_HYGROMETER_SENSOR_ID = 9;
+    static const int INSIDE_THERMOMETER_SENSOR_ID = 6;
+    static const int OUTSIDE_THERMOMETER_SENSOR_ID = 7;
+    static const int INSIDE_HYGROMETER_SENSOR_ID = 8;
+    static const int OUTSIDE_HYGROMETER_SENSOR_ID = 9;
     SensorType sensorType;
     int        sensorId;
 };

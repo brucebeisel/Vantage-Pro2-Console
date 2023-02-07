@@ -49,10 +49,10 @@ Sensor::Sensor(SensorType type, int id) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 Sensor::detectSensors(const LoopPacket & loop, vector<Sensor> & sensors) {
-    sensors.push_back(Sensor(THERMOMETER, OUTDOOR_THERMOMETER_SENSOR_ID));
-    sensors.push_back(Sensor(THERMOMETER, INDOOR_THERMOMETER_SENSOR_ID));
-    sensors.push_back(Sensor(HYGROMETER, OUTDOOR_HYGROMETER_SENSOR_ID));
-    sensors.push_back(Sensor(HYGROMETER, INDOOR_HYGROMETER_SENSOR_ID));
+    sensors.push_back(Sensor(THERMOMETER, OUTSIDE_THERMOMETER_SENSOR_ID));
+    sensors.push_back(Sensor(THERMOMETER, INSIDE_THERMOMETER_SENSOR_ID));
+    sensors.push_back(Sensor(HYGROMETER, OUTSIDE_HYGROMETER_SENSOR_ID));
+    sensors.push_back(Sensor(HYGROMETER, INSIDE_HYGROMETER_SENSOR_ID));
     sensors.push_back(Sensor(BAROMETER, BAROMETER_SENSOR_ID));
     sensors.push_back(Sensor(ANEMOMETER, WIND_SENSOR_ID));
     sensors.push_back(Sensor(RAIN_COLLECTOR, RAIN_COLLECTOR_SENSOR_ID));
