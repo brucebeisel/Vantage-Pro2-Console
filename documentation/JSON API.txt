@@ -47,7 +47,7 @@ Receiver list query
 
 Units command
 { "command"  : "update-units" }
-{ "response"  : "update-units", "result" : "success", "data" : { "receiverList" : [ 1, 2, 4] } }
+{ "response"  : "update-units", "result" : "success", "data" : { "units" : { "rain" : "inches", "temperature" : "fahrenheit", "elevation" : "feet", "barometer" : "inHg" } } }
 
 Units command
 { "command"  : "query-units" }
@@ -72,9 +72,9 @@ Archive query
     + "LPS <loop packet type bit mask-hex> <number of packets to send-decimal>"
                 Sends the specified number of the different loop packet(s), 1 every 2 seconds. Console sleeps between packets.
     + "HILOWS"    Sends all the current high/low data in a single 436 byte data block, plus 2 CRC bytes.
-    "PUTRAIN <Yearly Rain in rain clicks-decimal>"
+    + "PUTRAIN <Yearly Rain in rain clicks-decimal>"
                 Set the Yearly rainfall amount on the Vantage Console.
-    "PUTET <Yearly ET in 100th inch-decimal>"
+    + "PUTET <Yearly ET in 100th inch-decimal>"
                 Set the Yearly ET amount on the Vantage Console.
 
 3. Download Commands
@@ -100,17 +100,17 @@ Archive query
     "BARDATA"   Displays of the current barometer calibration parameters in text.
 
 6. Clearing Commands
-    "CLRLOG"    Clears the archive data.
-    "CLRALM"    Clears all the alarm thresholds.
-    "CLRCAL"    Clears all the Temperature and Humidity calibration offsets.
-    "CLRGRA"    Clears all of the graph points on the Vantage console.
-    "CLRVAR <Data variable-decimal>"
+    + "CLRLOG"    Clears the archive data.
+    + "CLRALM"    Clears all the alarm thresholds.
+    + "CLRCAL"    Clears all the Temperature and Humidity calibration offsets.
+    + "CLRGRA"    Clears all of the graph points on the Vantage console.
+    + "CLRVAR <Data variable-decimal>"
                 Clears a rain or ET data value.
-    "CLRHIGHS <0, 1, or 2>"
+    + "CLRHIGHS <0, 1, or 2>"
                 Clears all of the daily (0), monthly (1), or yearly (2) high values.
-    "CLRLOWS <0, 1, or 2>"
+    + "CLRLOWS <0, 1, or 2>"
                 Clears all of the daily (0), monthly (1), or yearly (2) low values.
-    "CLRBITS"   Clears the active alarm bits. Alarms will be reactivated if the alarm condition is still present.
+    + "CLRBITS"   Clears the active alarm bits. Alarms will be reactivated if the alarm condition is still present.
     + "CLRDATA"   Clears all current data values to dashes.
 
 7. Configuration Commands

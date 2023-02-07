@@ -75,6 +75,10 @@ private:
     //
     void handleQueryHighLows(const std::string & commandName, std::string & response);
 
+    void handlePutYearRainCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
+    void handlePutYearETCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     //
     // EEPROM Commands
     //
@@ -87,17 +91,24 @@ private:
     void handleRequestSensorStationsStatus(const std::string & commandName, std::string & response);
 
     //
-    // Configuration Commands
-    void handleUpdateArchivePeriod(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
-
-    //
-    // Clearing Commands. Note that commands that do not require an argument are called through handleNoArgCommand()
+    // Clearing Commands. Note: the following commands do not require an argument and are handled using handleNoArgCommand()
+    //     1. Clear Archive
+    //     2. Clear Alarm Thresholds
+    //     3. Clear Calibration Offsets
+    //     4. Clear Graph Points
+    //     5. Clear Active Alarms
+    //     6. Clear Current Data
     //
     void handleClearCumulativeValueCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleClearHighValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleClearLowValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
+    //
+    // Configuration Commands
+    //
+    void handleUpdateArchivePeriod(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 

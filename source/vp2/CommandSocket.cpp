@@ -228,12 +228,17 @@ CommandSocket::readCommand(int fd) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::handleCommandResponse(const CommandData & commandData, const std::string & response) {
+    const char * responseTerminator = "\n\n";
     const char * responseBuffer = response.c_str();
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Write response " << response << " on fd " << commandData.fd << endl;
 
     if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
+    }
+
+    if (write(commandData.fd, responseTerminator, strlen(responseTerminator)) < 0) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response terminator to command server socket. fd = " << commandData.fd <<  endl;
     }
 }
 

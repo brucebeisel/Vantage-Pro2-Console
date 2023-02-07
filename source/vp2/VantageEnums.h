@@ -95,9 +95,9 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 static const NameValuePair<ProtocolConstants::ExtremePeriod> epMappings[] = {
-    { "Daily Extremes", ProtocolConstants::ExtremePeriod::DAILY },
-    { "Monthly Extremes", ProtocolConstants::ExtremePeriod::MONTHLY },
-    { "Yearly Extremes", ProtocolConstants::ExtremePeriod::YEARLY }
+    { "Daily", ProtocolConstants::ExtremePeriod::DAILY },
+    { "Monthly", ProtocolConstants::ExtremePeriod::MONTHLY },
+    { "Yearly", ProtocolConstants::ExtremePeriod::YEARLY }
 };
 
 class ExtremePeriodEnum : public VantageEnum<ProtocolConstants::ExtremePeriod,3>  {
@@ -376,6 +376,35 @@ operator<<(std::ostream & os, VantageEepromConstants::RepeaterId value) {
     return os;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static const NameValuePair<ProtocolConstants::CumulativeValue> cvMappings[] = {
+    { "Daily Rain", ProtocolConstants::CumulativeValue::DAILY_RAIN_CUM },
+    { "Storm Rain", ProtocolConstants::CumulativeValue::STORM_RAIN_CUM },
+    { "Month Rain ", ProtocolConstants::CumulativeValue::MONTH_RAIN_CUM },
+    { "Year Rain", ProtocolConstants::CumulativeValue::YEAR_RAIN_CUM },
+    { "Day ET", ProtocolConstants::CumulativeValue::DAY_ET_CUM },
+    { "Month ET", ProtocolConstants::CumulativeValue::MONTH_ET_CUM },
+    { "Year ET", ProtocolConstants::CumulativeValue::YEAR_ET_CUM }
+};
+
+class CumulativeValueEnum : public VantageEnum<ProtocolConstants::CumulativeValue,sizeof(cvMappings)/sizeof(cvMappings[0])>  {
+public:
+    CumulativeValueEnum() {};
+    virtual ~CumulativeValueEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::CumulativeValue> * getMappings() const {
+        return cvMappings;
+    }
+};
+
+static CumulativeValueEnum cumulativeValueEnum;
+
+static std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::CumulativeValue value) {
+    os << cumulativeValueEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
 }
 
 #endif

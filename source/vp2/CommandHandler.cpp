@@ -27,6 +27,12 @@
 using namespace std;
 using json = nlohmann::json;
 
+static const string RESPONSE_TOKEN = "\"response\"";
+static const string RESULT_TOKEN = "\"result\"";
+static const string DATA_TOKEN = "\"data\"";
+static const string SUCCESS_TOKEN = "\"success\"";
+static const string FAILURE_TOKEN = "\"failure\"";
+
 void
 jsonKeyValue(json object, std::string & key, std::string & value) {
     auto iterator = object.begin();
@@ -85,6 +91,12 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-highlows") {
             handleQueryHighLows(commandName, responseJson);
         }
+        else if (commandName == "put-year-rain") {
+            handlePutYearRainCommand(commandName, argumentList, responseJson);
+        }
+        else if (commandName == "put-year-ET") {
+            handlePutYearETCommand(commandName, argumentList, responseJson);
+        }
         else if (commandName == "update-archive-period") {
             handleUpdateArchivePeriod(commandName, argumentList, responseJson);
         }
@@ -135,18 +147,21 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
 void
 CommandHandler::handleNoArgCommand(bool (VantageWeatherStation::*handler)(), const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     if ((station.*handler)())
-        oss << "\"success\"";
+        oss << SUCCESS_TOKEN;
     else
-        oss << "\"failure\"";
+        oss << FAILURE_TOKEN;
 
     oss << " }";
 
     response = oss.str();
 }
 
+/******************************************************************************
+ *                      TESTING COMMANDS                                      *
+ ******************************************************************************/
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
@@ -154,13 +169,13 @@ CommandHandler::handleQueryConsoleType(const std::string & commandName, std::str
     string consoleType;
 
     ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     if (station.retrieveConsoleType(&consoleType)) {
-        oss << " \"success\", \"data\" : { \"consoleType\" : \"" << consoleType << "\" }";
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"consoleType\" : \"" << consoleType << "\" }";
     }
     else {
-        oss << " \"failure\"";
+        oss << FAILURE_TOKEN;
     }
 
     oss << " }";
@@ -176,13 +191,13 @@ CommandHandler::handleQueryFirmwareCommand(const std::string & commandName, std:
     string firmwareVersion;
 
     ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     if (station.retrieveFirmwareDate(&firmwareDate) && station.retrieveFirmwareVersion(&firmwareVersion)) {
-        oss << " \"success\", \"data\" : { \"firmwareVersion\" : \"" << firmwareVersion << "\", \"firmwareDate\" : \"" << firmwareDate << "\"}";
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"firmwareVersion\" : \"" << firmwareVersion << "\", \"firmwareDate\" : \"" << firmwareDate << "\"}";
     }
     else {
-        oss << " \"failure\"";
+        oss << FAILURE_TOKEN;
     }
 
     oss << " }";
@@ -197,9 +212,9 @@ CommandHandler::handleQueryReceiverListCommand(const std::string & commandName, 
     std::vector<StationId> sensorStations;
 
     ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     if (station.retrieveReceiverList(&sensorStations)) {
-        oss << "\"success\", \"data\" : { \"receiverList\" : [";
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"receiverList\" : [";
         bool first = true;
         for (int id : sensorStations) {
             if (!first) {
@@ -212,7 +227,7 @@ CommandHandler::handleQueryReceiverListCommand(const std::string & commandName, 
         oss << " ] } }";
     }
     else {
-        oss << "\"failure\" }";
+        oss << FAILURE_TOKEN;
     }
 
     responseJson = oss.str();
@@ -223,11 +238,11 @@ CommandHandler::handleQueryReceiverListCommand(const std::string & commandName, 
 void
 CommandHandler::handleQueryConsoleDiagnostics(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     VantageWeatherStation::ConsoleDiagnosticReport report;
     if (station.retrieveConsoleDiagnosticsReport(report)) {
-        oss << "\"success\", \"data\" : {"
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : {"
             << "\"consoleDiagnosticReport\" : { \"totalPacketsReceived\" : " << report.packetCount << ", "
             << "\"totalPacketsMissed\" : " << report.missedPacketCount << ", "
             << "\"resyncCount\" : " << report.syncCount << ", "
@@ -236,7 +251,30 @@ CommandHandler::handleQueryConsoleDiagnostics(const std::string & commandName, s
             << " } }";
     }
     else
-        oss << " \"failure\"";
+        oss << FAILURE_TOKEN;
+
+    oss << " }";
+
+    response = oss.str();
+}
+
+/******************************************************************************
+ *                      CURRENT DATA COMMANDS                                 *
+ ******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryHighLows(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    HiLowPacket packet;
+    if (station.retrieveHiLowValues(packet)) {
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+        oss << packet.formatJSON();
+    }
+    else
+        oss << FAILURE_TOKEN;
 
     oss << " }";
 
@@ -246,23 +284,162 @@ CommandHandler::handleQueryConsoleDiagnostics(const std::string & commandName, s
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryHighLows(const std::string & commandName, std::string & response) {
-    ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+CommandHandler::handlePutYearRainCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    Rainfall yearRain = -1.0; // Use negative number as the "not set" value
 
-    HiLowPacket packet;
-    if (station.retrieveHiLowValues(packet)) {
-        oss << "\"success\", \"data\" : ";
-        oss << packet.formatJSON();
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    for (CommandArgument arg : argumentList) {
+        if (arg.first == "year-rain")
+            yearRain = strtod(arg.second.c_str(), NULL);
     }
+
+    if (yearRain > 0 && station.putYearlyRain(yearRain))
+        oss << SUCCESS_TOKEN;
     else
-        oss << " \"failure\"";
+        oss << FAILURE_TOKEN;
 
     oss << " }";
 
     response = oss.str();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handlePutYearETCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    Evapotranspiration yearET = -1.0; // Use negative number as the "not set" value
+
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    for (CommandArgument arg : argumentList) {
+        if (arg.first == "year-rain")
+            yearET = strtod(arg.second.c_str(), NULL);
+    }
+
+    if (yearET > 0 && station.putYearlyET(yearET))
+        oss << SUCCESS_TOKEN;
+    else
+        oss << FAILURE_TOKEN;
+
+    oss << " }";
+
+    response = oss.str();
+}
+
+/******************************************************************************
+ *                      DOWNLOAD COMMANDS                                     *
+ ******************************************************************************/
+/******************************************************************************
+ *                       EEPROM COMMANDS                                      *
+ ******************************************************************************/
+/******************************************************************************
+ *                    CALIBRATION COMMANDS                                    *
+ ******************************************************************************/
+/******************************************************************************
+ *                    CLEARING COMMANDS                                       *
+ ******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleClearCumulativeValueCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    CumulativeValue value;
+
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    try {
+        bool argFound = false;
+        for (CommandArgument arg : argumentList) {
+            if (arg.first == "value") {
+                 value = cumulativeValueEnum.stringToValue(arg.second);
+                argFound = true;
+            }
+        }
+
+        if (argFound && station.clearCumulativeValue(value))
+            oss << SUCCESS_TOKEN;
+        else
+            oss << FAILURE_TOKEN;
+    }
+    catch (std::exception & e) {
+        oss << FAILURE_TOKEN;
+    }
+
+    oss << " }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleClearHighValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    ExtremePeriod extremePeriod;
+
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    try {
+        bool argFound = false;
+        for (CommandArgument arg : argumentList) {
+            if (arg.first == "period") {
+                extremePeriod = extremePeriodEnum.stringToValue(arg.second);
+                argFound = true;
+            }
+        }
+
+        if (argFound && station.clearHighValues(extremePeriod))
+            oss << SUCCESS_TOKEN;
+        else
+            oss << FAILURE_TOKEN;
+    }
+    catch (std::exception & e) {
+        oss << FAILURE_TOKEN;
+    }
+
+    oss << " }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleClearLowValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    ExtremePeriod extremePeriod;
+
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    try {
+        bool argFound = false;
+        for (CommandArgument arg : argumentList) {
+            if (arg.first == "period") {
+                extremePeriod = extremePeriodEnum.stringToValue(arg.second);
+                argFound = true;
+            }
+        }
+
+        if (argFound && station.clearLowValues(extremePeriod))
+            oss << SUCCESS_TOKEN;
+        else
+            oss << FAILURE_TOKEN;
+    }
+    catch (std::exception & e) {
+        oss << FAILURE_TOKEN;
+    }
+
+    oss << " }";
+
+    response = oss.str();
+}
+
+/******************************************************************************
+ *                   CONFIGURATION COMMANDS                                   *
+ ******************************************************************************/
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
@@ -270,11 +447,11 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
     int periodValue = 0;
 
     ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "period")
-            periodValue = atoi(arg.first.c_str());
+            periodValue = atoi(arg.second.c_str());
     }
 
     ArchivePeriod period = static_cast<ArchivePeriod>(periodValue);
@@ -282,14 +459,13 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
     if ((period == ArchivePeriod::ONE_MINUTE || period == ArchivePeriod::FIVE_MINUTES || period == ArchivePeriod::TEN_MINUTES ||
         period == ArchivePeriod::FIFTEEN_MINUTES || period == ArchivePeriod::THIRTY_MINUTES || period == ArchivePeriod::ONE_HOUR ||
         period == ArchivePeriod::TWO_HOURS) && station.updateArchivePeriod(period))
-        oss << "\"success\"";
+        oss << SUCCESS_TOKEN;
     else
-        oss << "\"failure\"";
+        oss << FAILURE_TOKEN;
 
     oss << " }";
 
     response = oss.str();
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -301,8 +477,7 @@ CommandHandler::handleBacklightCommand(const std::string & commandName, const Co
 
     ostringstream oss;
 
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
-    //"success", "info" : "Light is on|off" }
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     if (argumentList[0].first != "state")
         success = false;
@@ -319,9 +494,9 @@ CommandHandler::handleBacklightCommand(const std::string & commandName, const Co
         success = station.controlConsoleLamp(lampOn);
 
     if (success)
-        oss << "\"success\"";
+        oss << SUCCESS_TOKEN;
     else
-        oss << "\"failure\"";
+        oss << FAILURE_TOKEN;
 
     oss << " }";
 
@@ -366,11 +541,11 @@ CommandHandler::handleUpdateUnitsCommand(const std::string & commandName, const 
     }
 
     ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     if (configurator.updateUnitsSettings(baroUnits, temperatureUnits, elevationUnits, rainUnits, windUnits))
-        oss << " \"success\"";
+        oss << SUCCESS_TOKEN;
     else
-        oss << " \"failure\"";
+        oss << FAILURE_TOKEN;
 
     oss << " }";
 
@@ -388,10 +563,10 @@ CommandHandler::handleQueryUnitsCommand(const std::string & commandName, std::st
     WindUnits windUnits;
 
     ostringstream oss;
-    oss << "{ \"response\" : \"" << commandName << "\", \"result\" : ";
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     if (configurator.retrieveUnitsSettings(baroUnits, temperatureUnits, elevationUnits, rainUnits, windUnits)) {
-        oss << "\"success\", \"data\" : { ";
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { ";
         oss << "\"baroUnits\" : \"" << barometerUnitsEnum.valueToString(baroUnits) << "\", ";
         oss << "\"temperatureUnits\" : \"" << temperatureUnitsEnum.valueToString(temperatureUnits) << "\", ";
         oss << "\"elevationUnits\" : \"" << elevationUnitsEnum.valueToString(elevationUnits) << "\", ";
@@ -399,31 +574,11 @@ CommandHandler::handleQueryUnitsCommand(const std::string & commandName, std::st
         oss << "\"windUnits\" : \"" << windUnitsEnum.valueToString(windUnits) << "\" }";
     }
     else
-        oss << " \"failure\"";
+        oss << FAILURE_TOKEN;
 
     oss << " }";
 
     response = oss.str();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-CommandHandler::handleClearCumulativeValueCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-CommandHandler::handleClearHighValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-CommandHandler::handleClearLowValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-
 }
 
 } // End namespace

@@ -57,10 +57,10 @@ HiLowPacket::Values<T>::formatJSON(bool low) const {
 
     string which = low ? "low" : "high";
 
-    ss << "    \"" << which << "\" : {" << endl
-       << "         \"today\" : { \"value\" : " << todayExtremeValue.getValue() << ", \"time\"  : \"" << formatExtremeValueTime() << "\" }," << endl
-       << "         \"month\" : " << monthExtremeValue << ", \"year\"  : " << yearExtremeValue
-       << "     }";
+    ss << " \"" << which << "\" : {"
+       << " \"today\" : { \"value\" : " << todayExtremeValue.getValue() << ", \"time\"  : \"" << formatExtremeValueTime() << "\" },"
+       << " \"month\" : " << monthExtremeValue << ", \"year\"  : " << yearExtremeValue
+       << " }";
 
     return ss.str();
 }
@@ -105,28 +105,25 @@ HiLowPacket::HighLowValues<T>::formatJSON() const {
 std::string
 HiLowPacket::formatJSON() const {
     ostringstream ss;
-    ss << "{ " << endl
-       << "    \"highLow\" : {" << endl
-       << "        \"outdoorTemperature\" : {" << outdoorTemperature.formatJSON() << " }," << endl
-       << "        \"outdoorHumidity\" : {" << outdoorHumidity.formatJSON() << " }," << endl
-       << "        \"dewPoint\" : {" << dewPoint.formatJSON() << " }," << endl
-       << "        \"heatIndex\" : {" << heatIndex.formatJSON(false) << " }," << endl
-       << "        \"windChill\" : {" << windChill.formatJSON(true) << " }," << endl
-       << "        \"thsw\" : {" << thsw.formatJSON(false) << " }," << endl
-       << "        \"indoorTemperature\" : {" << indoorTemperature.formatJSON() << " }," << endl
-       << "        \"indoorHumidity\" : {" << indoorHumidity.formatJSON() << " }," << endl
-       << "        \"windSpeed\" : {" << wind.formatJSON(false) << " }," << endl
-       << "        \"barometer\" : {" << barometer.formatJSON() << " }," << endl
-       << "        \"uvIndex\" : {" << uvIndex.formatJSON(false) << " }," << endl
-       << "        \"solarRadiation\" : {" << solarRadiation.formatJSON(false) << " }," << endl;
-
-    ss << "        \"rainRate\" : { \"high\" : {" << endl
-       << "            \"today\" : { \"value\" : " << rainRate.todayExtremeValue << ", \"time\"  : \"" << rainRate.formatExtremeValueTime() << "\" }," << endl
-       << "            \"hour\" : " << highHourRainRate << ", " << endl
-       << "            \"month\" : " << rainRate.monthExtremeValue << ", \"year\"  : " << rainRate.yearExtremeValue
-       << "        } }"
-       << "    }" << endl
-       << "}" << endl;
+    ss << "{ "
+       << " \"highLow\" : {"
+       << " \"outdoorTemperature\" : {" << outdoorTemperature.formatJSON() << " },"
+       << " \"outdoorHumidity\" : {" << outdoorHumidity.formatJSON() << " },"
+       << " \"dewPoint\" : {" << dewPoint.formatJSON() << " },"
+       << " \"heatIndex\" : {" << heatIndex.formatJSON(false) << " },"
+       << " \"windChill\" : {" << windChill.formatJSON(true) << " },"
+       << " \"thsw\" : {" << thsw.formatJSON(false) << " },"
+       << " \"indoorTemperature\" : {" << indoorTemperature.formatJSON() << " },"
+       << " \"indoorHumidity\" : {" << indoorHumidity.formatJSON() << " },"
+       << " \"windSpeed\" : {" << wind.formatJSON(false) << " },"
+       << " \"barometer\" : {" << barometer.formatJSON() << " },"
+       << " \"uvIndex\" : {" << uvIndex.formatJSON(false) << " },"
+       << " \"solarRadiation\" : {" << solarRadiation.formatJSON(false) << " },"
+       << " \"rainRate\" : { \"high\" : {"
+       << " \"today\" : { \"value\" : " << rainRate.todayExtremeValue << ", \"time\"  : \"" << rainRate.formatExtremeValueTime() << "\" },"
+       << " \"hour\" : " << highHourRainRate << ", "
+       << " \"month\" : " << rainRate.monthExtremeValue << ", \"year\"  : " << rainRate.yearExtremeValue
+       << " } } } }";
 
     return ss.str();
     /*
