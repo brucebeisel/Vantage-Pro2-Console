@@ -610,7 +610,7 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
 
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
-    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"datasets\" : [ { \"outsideTemperature\" : [";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"datasets\" : [ ";
 
     DateTime startTime = 0;
     DateTime endTime = 0;
@@ -634,17 +634,31 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
     vector<ArchivePacket> packets;
     archiveManager.queryArchiveRecords(startTime, endTime, packets);
 
+    oss << "\"time\" : [ ";
     bool first = true;
     for (ArchivePacket p : packets) {
-        if (!first) {
+        if (!first)
             oss << ", ";
-            first = false;
-        }
-        oss << p.getOutsideTemperature();
 
+        first = false;
+        oss << p.getDateTime();
     }
 
-    oss << " ] } } }";
+    oss << " ], ";
+
+    oss << "\"outsideTemperature\" : [ ";
+    first = true;
+    for (ArchivePacket p : packets) {
+        if (!first)
+            oss << ", ";
+
+        first = false;
+        oss << p.getOutsideTemperature();
+    }
+
+    oss << " ] ";
+
+    oss << "} }";
 
     response = oss.str();
 }
