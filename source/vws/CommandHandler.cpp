@@ -634,7 +634,7 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
     vector<ArchivePacket> packets;
     archiveManager.queryArchiveRecords(startTime, endTime, packets);
 
-    oss << "\"time\" : [ ";
+    oss << " { \"time\" : [ ";
     bool first = true;
     for (ArchivePacket p : packets) {
         if (!first)
@@ -644,9 +644,9 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
         oss << p.getDateTime();
     }
 
-    oss << " ], ";
+    oss << " ]}, ";
 
-    oss << "\"outsideTemperature\" : [ ";
+    oss << " { \"outsideTemperature\" : [ ";
     first = true;
     for (ArchivePacket p : packets) {
         if (!first)
@@ -656,9 +656,9 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
         oss << p.getOutsideTemperature();
     }
 
-    oss << " ] ";
+    oss << " ]} ";
 
-    oss << "} }";
+    oss << "] } }";
 
     response = oss.str();
 }
