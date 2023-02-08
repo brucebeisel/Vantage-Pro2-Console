@@ -67,9 +67,10 @@ CommandHandler::~CommandHandler() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleCommand(const std::string & commandJson, std::string & responseJson) {
+    string commandName = "parse-error";
     try {
         json command = json::parse(commandJson.begin(), commandJson.end());
-        string commandName = command.value("command", "unknown");
+        commandName = command.value("command", "unknown");
         json args = command.at("arguments");
         vector<pair<string,string>> argumentList;
         for (int i = 0; i < args.size(); i++) {
@@ -156,6 +157,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
     }
     catch (const std::exception & e) {
+        ostringstream oss;
+        oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << " }";
+        responseJson = oss.str();
         cout << "Exception: " << e.what() << endl;
     }
 }
