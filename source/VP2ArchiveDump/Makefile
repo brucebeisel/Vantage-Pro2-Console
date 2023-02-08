@@ -6,7 +6,7 @@ SRCS= archiveDumper.cpp
 
 VWSOBJDIR=../../target/vws
 OBJDIR=../../target/test
-INCDIRS=-I../vp2
+INCDIRS=-I../vws
 OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 

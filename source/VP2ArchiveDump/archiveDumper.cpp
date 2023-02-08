@@ -19,9 +19,10 @@
 #include <iomanip>
 #include <fstream>
 
-#include "../vws/ArchivePacket.h"
-#include "../vws/VantageProtocolConstants.h"
-#include "../vws/Weather.h"
+#include "ArchivePacket.h"
+#include "VantageProtocolConstants.h"
+#include "VantageDecoder.h"
+#include "Weather.h"
 
 using namespace std;
 using namespace vws;
@@ -54,6 +55,8 @@ main(int argc, char *argv[]) {
         exit(1);
     }
 
+
+    VantageDecoder::setRainCollectorSize(.01);
 
     char buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
 
