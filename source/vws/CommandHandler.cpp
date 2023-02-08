@@ -615,7 +615,7 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
     DateTime startTime = 0;
     DateTime endTime = 0;
 
-    struct tm tm;
+    struct tm tm = {0};
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "start-time") {

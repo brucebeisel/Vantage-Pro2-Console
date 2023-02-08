@@ -296,6 +296,7 @@ static constexpr int MAX_LEAF_WETNESSES = 4;
 //
 static const vws::Temperature        TEMPERATURE_16BIT_SCALE = 10.0;
 static const int                     TEMPERATURE_16BIT_INVALID_VALUE = 32767;
+static const int                     HIGH_TEMPERATURE_16BIT_INVALID_VALUE = -32768;
 static const vws::Temperature        TEMPERATURE_8BIT_OFFSET = 90.0;
 static const int                     TEMPERATURE_8BIT_INVALID_VALUE = 255;
 static const vws::Pressure           BAROMETER_SCALE = 1000.0;

@@ -159,7 +159,7 @@ ArchivePacket::formatXML() const {
     VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET, temperature);
     ss << temperature.formatXML("avgOutsideTemperature");
 
-    VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    VantageDecoder::decode16BitHighTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
     ss << temperature.formatXML("highOutsideTemperature");
 
     VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET, temperature);

@@ -51,6 +51,9 @@ public:
      */
     static const Measurement<Temperature> & decode16BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement);
 
+    static Measurement<Temperature> decode16BitHighTemperature(const byte buffer[], int offset);
+    static const Measurement<Temperature> & decode16BitHighTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement);
+
     /**
      * Decode a Vantage 16 bit temperature that is not scaled.
      *

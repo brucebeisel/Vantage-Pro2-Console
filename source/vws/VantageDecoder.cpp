@@ -56,6 +56,28 @@ VantageDecoder::decode16BitTemperature(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<Temperature> &
+VantageDecoder::decode16BitHighTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
+    int value16 = BitConverter::toInt16(buffer, offset);
+
+    if (value16 != INVALID_16BIT_HIGH_TEMPERATURE)
+        measurement.setValue(static_cast<Temperature>(value16) / TEMPERATURE_16BIT_SCALE);
+    else
+        measurement.invalidate();
+
+    return measurement;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+VantageDecoder::decode16BitHighTemperature(const byte buffer[], int offset) {
+    Measurement<Temperature> measurement;
+    return decode16BitHighTemperature(buffer, offset, measurement);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const Measurement<Temperature> &
 VantageDecoder::decodeNonScaled16BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
