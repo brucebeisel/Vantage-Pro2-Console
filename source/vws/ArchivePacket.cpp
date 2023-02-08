@@ -89,10 +89,9 @@ ArchivePacket::getDateTime() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Temperature
+Measurement<Temperature>
 ArchivePacket::getOutsideTemperature() const {
-    Temperature temperature;
-    temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
+    Measurement<Temperature> temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
     return temperature;
 }
 
@@ -293,7 +292,7 @@ ArchivePacket::formatJSON() const {
     VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET, temperature);
     ss << temperature.formatJSON("avgOutsideTemperature", true);
 
-    VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    VantageDecoder::decode16BitHighTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
     ss << temperature.formatJSON("highOutsideTemperature", true);
 
     VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET, temperature);

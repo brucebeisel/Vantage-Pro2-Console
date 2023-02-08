@@ -16,6 +16,7 @@
  */
 #ifndef MEASUREMENT_H
 #define MEASUREMENT_H
+#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -144,9 +145,9 @@ public:
         return ss.str();
     }
 
-    std::ostream & operator<<(std::ostream & os) const {
-        if (valid)
-            os << value;
+    friend std::ostream & operator<<(std::ostream & os, const Measurement<T> & measurement) {
+        if (measurement.valid)
+            os << measurement.value;
 
         return os;
     }

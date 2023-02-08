@@ -653,7 +653,11 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
             oss << ", ";
 
         first = false;
-        oss << p.getOutsideTemperature();
+        Measurement<Temperature> t = p.getOutsideTemperature();
+        if (t.isValid())
+            oss << p.getOutsideTemperature();
+        else
+            oss << "null";
     }
 
     oss << " ]} ";

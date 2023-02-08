@@ -79,6 +79,8 @@ main(int argc, char *argv[]) {
             cout << packet.formatJSON() << endl << endl;
         }
         else {
+            Measurement<Temperature> t = packet.getOutsideTemperature();
+
             cout << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(packet.getDateTime()) << endl;
             if (dumpBinary)
                 cout << Weather::dumpBuffer(buffer, sizeof(buffer));

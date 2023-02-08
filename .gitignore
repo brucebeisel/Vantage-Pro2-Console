@@ -2,7 +2,7 @@ target
 .cproject
 .project
 .settings
-vp2.exe
 vws.exe
 *.exe
 source/test/DominantWindTest.exe
+source/vws/vws

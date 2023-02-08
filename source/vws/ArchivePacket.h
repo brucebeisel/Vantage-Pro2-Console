@@ -19,6 +19,7 @@
 #include <string>
 
 #include "WeatherTypes.h"
+#include "Measurement.h"
 
 namespace vws {
 
@@ -80,7 +81,7 @@ public:
      */
     DateTime getDateTime() const;
 
-    Temperature getOutsideTemperature() const;
+    Measurement<Temperature> getOutsideTemperature() const;
 
     /**
      * Check whether this is an empty packet, the empty packet concept is used to avoid the use of NULL.

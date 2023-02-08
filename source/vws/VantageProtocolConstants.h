@@ -292,13 +292,10 @@ static constexpr int MAX_LEAF_TEMPERATURES = 4;
 static constexpr int MAX_LEAF_WETNESSES = 4;
 
 //
-// Scales
+// Scales and offsets
 //
 static const vws::Temperature        TEMPERATURE_16BIT_SCALE = 10.0;
-static const int                     TEMPERATURE_16BIT_INVALID_VALUE = 32767;
-static const int                     HIGH_TEMPERATURE_16BIT_INVALID_VALUE = -32768;
 static const vws::Temperature        TEMPERATURE_8BIT_OFFSET = 90.0;
-static const int                     TEMPERATURE_8BIT_INVALID_VALUE = 255;
 static const vws::Pressure           BAROMETER_SCALE = 1000.0;
 static const vws::Speed              AVG_WIND_SPEED_SCALE = 10.0;
 static const int                     YEAR_OFFSET = 2000;
@@ -312,7 +309,7 @@ static const double                  LAT_LON_SCALE = 10.0;
 // Invalid values, that is the value that is reported when the console has no value
 //
 static constexpr int INVALID_16BIT_TEMPERATURE = 32767;
-static constexpr int INVALID_16BIT_HIGH_TEMPERATURE = -32768;
+static constexpr int INVALID_16BIT_HIGH_TEMPERATURE = 32768;
 static constexpr int INVALID_8BIT_TEMPERATURE = 255;
 static constexpr int INVALID_HUMIDITY = 255;
 static constexpr int INVALID_WIND_DIRECTION_SLICE = 255;

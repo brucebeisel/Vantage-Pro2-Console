@@ -59,6 +59,8 @@ const Measurement<Temperature> &
 VantageDecoder::decode16BitHighTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
+    std::cout << "Decoding 16 Bit High Temperature. Value = " << value16 << std::endl;
+
     if (value16 != INVALID_16BIT_HIGH_TEMPERATURE)
         measurement.setValue(static_cast<Temperature>(value16) / TEMPERATURE_16BIT_SCALE);
     else
