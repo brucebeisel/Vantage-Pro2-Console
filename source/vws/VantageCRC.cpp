@@ -83,7 +83,7 @@ VantageCRC::checkCRC(const byte * buffer, int length) {
     // actually 2 bytes longer.
     // TBD - should this interface be changed so that length is the total length of the data in buffer?
     //
-    int sentCRC = BitConverter::toInt16(buffer, length, false) & 0xFFFF;
+    int sentCRC = BitConverter::toUint16(buffer, length, false) & 0xFFFF;
     int calculatedCRC = calculateCRC(buffer, length);
 
     VantageLogger::getLogger("VantageCRC").log(VantageLogger::VANTAGE_DEBUG2) << "CRC Compare. Sent: " << sentCRC << "  Calculated: " << calculatedCRC << endl;

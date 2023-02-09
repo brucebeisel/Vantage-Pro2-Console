@@ -105,7 +105,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "put-year-rain") {
             handlePutYearRainCommand(commandName, argumentList, responseJson);
         }
-        else if (commandName == "put-year-ET") {
+        else if (commandName == "put-year-et") {
             handlePutYearETCommand(commandName, argumentList, responseJson);
         }
         else if (commandName == "update-archive-period") {
@@ -319,7 +319,7 @@ CommandHandler::handlePutYearRainCommand(const std::string & commandName, const 
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     for (CommandArgument arg : argumentList) {
-        if (arg.first == "year-rain")
+        if (arg.first == "value")
             yearRain = strtod(arg.second.c_str(), NULL);
     }
 
@@ -343,7 +343,7 @@ CommandHandler::handlePutYearETCommand(const std::string & commandName, const Co
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     for (CommandArgument arg : argumentList) {
-        if (arg.first == "year-rain")
+        if (arg.first == "value")
             yearET = strtod(arg.second.c_str(), NULL);
     }
 

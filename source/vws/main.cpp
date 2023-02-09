@@ -129,7 +129,7 @@ main(int argc, char *argv[]) {
         VantageLogger::setLogStream(logStream);
     }
 
-    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG1);
     thread consoleThread(consoleThreadEntry, archiveFile, loopPacketArchiveDir, serialPortName, 19200);
 
     consoleThread.join();

@@ -99,7 +99,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
 
 
     if (packetData[BAROMETER_TREND_OFFSET] != 'P') {
-        BarometerTrend baroTrendValue = static_cast<BarometerTrend>(BitConverter::toInt8(packetData, BAROMETER_TREND_OFFSET));
+        BarometerTrend baroTrendValue = static_cast<BarometerTrend>(BitConverter::toUint8(packetData, BAROMETER_TREND_OFFSET));
 
         switch (baroTrendValue) {
             case BarometerTrend::UNKNOWN:
