@@ -111,6 +111,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "update-archive-period") {
             handleUpdateArchivePeriod(commandName, argumentList, responseJson);
         }
+        else if (commandName == "query-archive-period") {
+            handleQueryArchivePeriod(commandName, responseJson);
+        }
         else if (commandName == "update-units") {
             handleUpdateUnitsCommand(commandName, argumentList, responseJson);
         }
