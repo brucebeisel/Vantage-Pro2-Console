@@ -1,0 +1,9 @@
+../../target/test/DominantWindTest.o: DominantWindTest.cpp \
+ ../vws/DominantWindDirections.h ../vws/VantageLogger.h \
+ ../vws/WeatherTypes.h ../vws/WindDirectionSlice.h ../vws/VantageLogger.h \
+ ../vws/Weather.h ../vws/Measurement.h
+../../target/test/EnumTest.o: EnumTest.cpp ../vws/VantageEnums.h \
+ ../vws/VantageEepromConstants.h ../vws/WeatherTypes.h \
+ ../vws/VantageProtocolConstants.h
+../../target/test/BitConverterTest.o: BitConverterTest.cpp \
+ ../vws/BitConverter.h ../vws/WeatherTypes.h ../vws/WeatherTypes.h

@@ -8,19 +8,19 @@
 #include <string.h>
 #include <vector>
 
-#include "../vws/DominantWindDirections.h"
-#include "../vws/VantageLogger.h"
-#include "../vws/Weather.h"
+#include "DominantWindDirections.h"
+#include "VantageLogger.h"
+#include "Weather.h"
 
 using namespace vws;
 using namespace std;
 
 int
 main(int argc, char * argv[]) {
-    vector<int> headings;
+    vector<std::string> headings;
     struct tm tm;
 
-    VantageLogger::setLogLevel(VANTAGE_DEBUG3);
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     DominantWindDirections dominantWinds;
 
     memset(&tm, 0, sizeof(tm));

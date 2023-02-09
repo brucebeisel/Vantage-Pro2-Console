@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "../vws/VantageEnums.h"
+#include "VantageEnums.h"
 
 using namespace std;
 using namespace vws;

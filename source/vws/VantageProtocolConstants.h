@@ -309,7 +309,7 @@ static const double                  LAT_LON_SCALE = 10.0;
 // Invalid values, that is the value that is reported when the console has no value
 //
 static constexpr int INVALID_16BIT_TEMPERATURE = 32767;
-static constexpr int INVALID_16BIT_HIGH_TEMPERATURE = 32768;
+static constexpr int INVALID_16BIT_HIGH_TEMPERATURE = -32768;
 static constexpr int INVALID_8BIT_TEMPERATURE = 255;
 static constexpr int INVALID_HUMIDITY = 255;
 static constexpr int INVALID_WIND_DIRECTION_SLICE = 255;

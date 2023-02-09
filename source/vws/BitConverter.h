@@ -27,6 +27,7 @@ class BitConverter {
 public:
     static constexpr int ONE_BYTE_MASK = 0xFF;
     static constexpr int BITS_PER_BYTE = 8;
+    static constexpr char SIGN_BIT = 0x80;
 
     virtual ~BitConverter();
 
@@ -38,6 +39,7 @@ public:
      * @return The converted integer
      */
     static int toInt8(const byte buffer[], int index);
+    static unsigned int toUint8(const byte buffer[], int index);
 
     /**
      * Convert two bytes to a integer.
@@ -46,8 +48,13 @@ public:
      * @param index The index within the buffer to do the conversion
      * @param littleEndian True if the buffer holds the integer in little endian format
      * @return The converted integer
+     *
+     * TODO Figure out how to handle negative numbers. Not all 16 bit values will
+     * be signed. Perhaps add unsigned version of toInt8(), toInt16() and toInt32()
+     * For instance "static unsigned int toUint16(...)"
      */
     static int toInt16(const byte buffer[], int index, bool littleEndian = true);
+    static unsigned int toUint16(const byte buffer[], int index, bool littleEndian = true);
 
     /**
      * Convert four bytes to a integer.
@@ -58,6 +65,7 @@ public:
      * @return The converted integer
      */
     static int toInt32(const byte buffer[], int index, bool littleEndian = true);
+    static unsigned int toUint32(const byte buffer[], int index, bool littleEndian = true);
 
     /**
      * Convert an integer into bytes.
@@ -99,11 +107,12 @@ private:
     /**
      * Utility function to covert bytes in a buffer to any form of integer.
      * 
-     * @param bits The buffer containing the integer to be converted
+     * @param bits         The buffer containing the integer to be converted
      * @param littleEndian Whether the integer is store in the buffer as little endian
+     * @param isSigned     Whether the input should be treated as signed or unsigned
      * @return The integer
      */
-    template <typename T> static int bitsToInt(const byte bits[], bool littleEndian);
+    template <typename T, typename R> static R bitsToInt(const byte bits[], bool littleEndian, bool isSigned);
 };
 }
 #endif
