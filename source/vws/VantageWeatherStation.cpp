@@ -816,6 +816,22 @@ VantageWeatherStation::updateArchivePeriod(ArchivePeriod period) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
+VantageWeatherStation::retrieveArchivePeriod(ArchivePeriod & period) {
+
+    if (!eepromBinaryRead(VantageEepromConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
+        return false;
+
+    int archivePeriodValue = BitConverter::toInt8(buffer, 0);
+    period = static_cast<ArchivePeriod>(archivePeriodValue);
+
+    logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) <<  " Archive Period: " << archivePeriodValue << endl;
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
 VantageWeatherStation::startArchiving() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Starting to archive" << endl;
     return sendAckedCommand(START_ARCHIVING_CMD);

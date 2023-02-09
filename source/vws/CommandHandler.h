@@ -107,6 +107,8 @@ private:
 
     void handleClearLowValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    void handleQueryArchivePeriod(const std::string & commandName, std::string & response);
+
     //
     // Configuration Commands
     //

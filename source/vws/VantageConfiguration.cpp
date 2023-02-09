@@ -70,7 +70,7 @@ VantageConfiguration::retrievePosition(double & latitude, double & longitude, in
     byte positionData[6];
 
     if (station.eepromBinaryRead(VantageEepromConstants::EE_LATITUDE_ADDRESS, 6, positionData)) {
-        latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / LAT_LON_SCALE;  // TBD Does BitConverter::toInt16 handle signed values?
+        latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / LAT_LON_SCALE;
         longitude = static_cast<double>(BitConverter::toInt16(positionData, 2)) / LAT_LON_SCALE;
         consoleElevation = BitConverter::toInt16(positionData, 4);
         success = true;

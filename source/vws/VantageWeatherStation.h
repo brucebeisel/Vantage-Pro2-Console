@@ -573,9 +573,6 @@ private:
     static constexpr int ARCHIVE_PAGE_READ_RETRIES = 3;
     static constexpr int BUFFER_SIZE = EEPROM_DATA_BLOCK_SIZE + CRC_BYTES;
 
-    static constexpr double LAT_LON_SCALE = 10.0;
-
-
     /**
      * Read the LOOP packet and save off a few values for later use.
      *

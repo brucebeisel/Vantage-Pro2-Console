@@ -147,6 +147,12 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "backlight") {
             handleBacklightCommand(commandName, argumentList, responseJson);
         }
+        else if (commandName == "clear-lows") {
+            handleClearLowValuesCommand(commandName, argumentList, responseJson);
+        }
+        else if (commandName == "clear-highs") {
+            handleClearHighValuesCommand(commandName, argumentList, responseJson);
+        }
         else if (commandName == "query-archive") {
             handleQueryArchive(commandName, argumentList, responseJson);
         }
@@ -482,6 +488,27 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
         period == ArchivePeriod::FIFTEEN_MINUTES || period == ArchivePeriod::THIRTY_MINUTES || period == ArchivePeriod::ONE_HOUR ||
         period == ArchivePeriod::TWO_HOURS) && station.updateArchivePeriod(period))
         oss << SUCCESS_TOKEN;
+    else
+        oss << FAILURE_TOKEN;
+
+    oss << " }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryArchivePeriod(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    ArchivePeriod period;
+    int periodValue = static_cast<int>(period);
+
+    if (station.retrieveArchivePeriod(period)) {
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"period\" : " << periodValue << " } ";
+    }
     else
         oss << FAILURE_TOKEN;
 
