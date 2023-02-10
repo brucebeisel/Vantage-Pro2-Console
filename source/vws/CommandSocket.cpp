@@ -145,6 +145,7 @@ CommandSocket::closeSocket(int fd) {
     //
     socketFdList.erase(std::find(socketFdList.begin(), socketFdList.end(), fd));
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Closed socket that used fd = " << fd << endl;
+    close(fd);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

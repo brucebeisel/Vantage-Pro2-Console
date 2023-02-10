@@ -84,6 +84,8 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
             logger.log(VantageLogger::VANTAGE_ERROR) << "Write to LOOP packet archive failed" << endl;
         }
     }
+    else
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open LOOP/LOOP2 packet archive file " << filename << endl;
 
     ofs.close();
 }

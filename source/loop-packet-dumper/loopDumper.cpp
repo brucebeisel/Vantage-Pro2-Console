@@ -67,6 +67,7 @@ main(int argc, char *argv[]) {
     string jsonString;
     char *buffer;
     long bufferLength;
+    string loopString;
 
     int record = 0;
     while (true) {
@@ -80,6 +81,7 @@ main(int argc, char *argv[]) {
         }
 
         if (packetType == LoopPacket::LOOP_PACKET_TYPE) {
+            loopString = "LOOP  ";
             stream.read(loopBuffer, sizeof(loopBuffer));
             if (!stream) {
                 stream.close();
@@ -91,7 +93,8 @@ main(int argc, char *argv[]) {
             bufferLength = sizeof(loopBuffer);
         }
         else if (packetType == Loop2Packet::LOOP2_PACKET_TYPE) {
-            stream.read(loopBuffer, sizeof(loopBuffer));
+            loopString = "LOOP2 ";
+            stream.read(loop2Buffer, sizeof(loop2Buffer));
             if (!stream) {
                 stream.close();
                 exit(0);
@@ -108,7 +111,7 @@ main(int argc, char *argv[]) {
             //cout << packet.formatJSON() << endl << endl;
         }
         else {
-            cout << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(time) << endl;
+            cout << loopString << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(time) << endl;
             if (dumpBinary)
                 cout << Weather::dumpBuffer(buffer, bufferLength);
         }

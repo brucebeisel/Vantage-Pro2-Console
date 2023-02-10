@@ -506,10 +506,11 @@ CommandHandler::handleQueryArchivePeriod(const std::string & commandName, std::s
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
+
     ArchivePeriod period;
-    int periodValue = static_cast<int>(period);
 
     if (station.retrieveArchivePeriod(period)) {
+        int periodValue = static_cast<int>(period);
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"period\" : " << periodValue << " } ";
     }
     else
