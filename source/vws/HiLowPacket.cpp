@@ -54,15 +54,23 @@ string
 HiLowPacket::Values<T>::formatJSON(bool low) const {
     ostringstream ss;
 
-    if (!isValid())
-        return "";
-
     string which = low ? "low" : "high";
 
     ss << " \"" << which << "\" : {"
-       << " \"today\" : { \"value\" : " << todayExtremeValue.getValue() << ", \"time\"  : \"" << formatExtremeValueTime() << "\" },"
-       << " \"month\" : " << monthExtremeValue << ", \"year\"  : " << yearExtremeValue
-       << " }";
+       << " \"today\" : { ";
+
+    if (todayExtremeValue.isValid())
+        ss << "\"value\" : " << todayExtremeValue.getValue() << ", \"time\"  : \"" << formatExtremeValueTime() << "\" } ";
+    else
+        ss << " }";
+
+    if (monthExtremeValue.isValid())
+        ss << ", \"month\" : " << monthExtremeValue;
+
+    if (yearExtremeValue.isValid())
+        ss << ", \"year\"  : " << yearExtremeValue;
+
+    ss << " }";
 
     return ss.str();
 }
@@ -74,7 +82,7 @@ string
 HiLowPacket::Values<T>::formatExtremeValueTime() const {
 
     ostringstream oss;
-    if (todayExtremeValueTime != 65535) {
+    if (todayExtremeValueTime != ProtocolConstants::INVALID_16BIT_TIME) {
         int hour = todayExtremeValueTime / 100;
         int minute = todayExtremeValueTime % 100;
         oss << hour << ":" << setw(2) << setfill('0') << minute;
@@ -153,14 +161,14 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     barometer.highs.monthExtremeValue   = VantageDecoder::decodeBarometricPressure(buffer, 6);
     barometer.lows.yearExtremeValue     = VantageDecoder::decodeBarometricPressure(buffer, 8);
     barometer.highs.yearExtremeValue    = VantageDecoder::decodeBarometricPressure(buffer, 10);
-    barometer.lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 12);
-    barometer.highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 14);
+    barometer.lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 12);
+    barometer.highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 14);
 
     //
     // Wind section
     //
     wind.todayExtremeValue     = VantageDecoder::decodeWindSpeed(buffer, 16);
-    wind.todayExtremeValueTime = BitConverter::toInt16(buffer, 17);
+    wind.todayExtremeValueTime = BitConverter::toUint16(buffer, 17);
     wind.monthExtremeValue   = VantageDecoder::decodeWindSpeed(buffer, 19);
     wind.yearExtremeValue    = VantageDecoder::decodeWindSpeed(buffer, 20);
 
@@ -169,8 +177,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     insideTemperature.highs.todayExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 21);
     insideTemperature.lows.todayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 23);
-    insideTemperature.highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 25);
-    insideTemperature.lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 27);
+    insideTemperature.highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 25);
+    insideTemperature.lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 27);
     insideTemperature.lows.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 29);
     insideTemperature.highs.monthExtremeValue   = VantageDecoder::decode16BitTemperature(buffer, 31);
     insideTemperature.lows.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 33);
@@ -181,8 +189,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     insideHumidity.highs.todayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 37);
     insideHumidity.lows.todayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 38);
-    insideHumidity.highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 39);
-    insideHumidity.lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 41);
+    insideHumidity.highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 39);
+    insideHumidity.lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 41);
     insideHumidity.highs.monthExtremeValue   = VantageDecoder::decodeHumidity(buffer, 43);
     insideHumidity.lows.monthExtremeValue    = VantageDecoder::decodeHumidity(buffer, 44);
     insideHumidity.highs.yearExtremeValue    = VantageDecoder::decodeHumidity(buffer, 45);
@@ -193,8 +201,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     outsideTemperature.lows.todayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 47);
     outsideTemperature.highs.todayExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 49);
-    outsideTemperature.lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 51);
-    outsideTemperature.highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 53);
+    outsideTemperature.lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 51);
+    outsideTemperature.highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 53);
     outsideTemperature.highs.monthExtremeValue   = VantageDecoder::decode16BitTemperature(buffer, 55);
     outsideTemperature.lows.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 57);
     outsideTemperature.highs.yearExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 59);
@@ -205,8 +213,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     dewPoint.lows.todayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 63);
     dewPoint.highs.todayExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 65);
-    dewPoint.lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 67);
-    dewPoint.highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 69);
+    dewPoint.lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 67);
+    dewPoint.highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 69);
     dewPoint.highs.monthExtremeValue   = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 71);
     dewPoint.lows.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 73);
     dewPoint.highs.yearExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 75);
@@ -216,7 +224,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     // Wind chill section
     //
     windChill.todayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 79);
-    windChill.todayExtremeValueTime  = BitConverter::toInt16(buffer, 81);
+    windChill.todayExtremeValueTime  = BitConverter::toUint16(buffer, 81);
     windChill.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 83);
     windChill.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 85);
 
@@ -224,7 +232,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     // Heat index section
     //
     heatIndex.todayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 87);
-    heatIndex.todayExtremeValueTime  = BitConverter::toInt16(buffer, 89);
+    heatIndex.todayExtremeValueTime  = BitConverter::toUint16(buffer, 89);
     heatIndex.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 91);
     heatIndex.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 93);
 
@@ -232,7 +240,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     // THSW index section
     //
     thsw.todayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 95);
-    thsw.todayExtremeValueTime  = BitConverter::toInt16(buffer, 97);
+    thsw.todayExtremeValueTime  = BitConverter::toUint16(buffer, 97);
     thsw.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 99);
     thsw.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 101);
 
@@ -240,7 +248,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     // Solar radiation section
     //
     solarRadiation.todayExtremeValue      = VantageDecoder::decodeSolarRadiation(buffer, 103);
-    solarRadiation.todayExtremeValueTime  = BitConverter::toInt16(buffer, 105);
+    solarRadiation.todayExtremeValueTime  = BitConverter::toUint16(buffer, 105);
     solarRadiation.monthExtremeValue    = VantageDecoder::decodeSolarRadiation(buffer, 107);
     solarRadiation.yearExtremeValue     = VantageDecoder::decodeSolarRadiation(buffer, 109);
 
@@ -248,7 +256,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     // UV section
     //
     uvIndex.todayExtremeValue      = VantageDecoder::decodeUvIndex(buffer, 111);
-    uvIndex.todayExtremeValueTime  = BitConverter::toInt16(buffer, 112);
+    uvIndex.todayExtremeValueTime  = BitConverter::toUint16(buffer, 112);
     uvIndex.monthExtremeValue    = VantageDecoder::decodeUvIndex(buffer, 114);
     uvIndex.yearExtremeValue     = VantageDecoder::decodeUvIndex(buffer, 115);
 
@@ -256,7 +264,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     // Rain rate section
     //
     rainRate.todayExtremeValue      = VantageDecoder::decodeRain(buffer, 116);
-    rainRate.todayExtremeValueTime  = BitConverter::toInt16(buffer, 118);
+    rainRate.todayExtremeValueTime  = BitConverter::toUint16(buffer, 118);
     highHourRainRate              = VantageDecoder::decodeRain(buffer, 120);
     rainRate.monthExtremeValue    = VantageDecoder::decodeRain(buffer, 122);
     rainRate.yearExtremeValue     = VantageDecoder::decodeRain(buffer, 124);
@@ -267,8 +275,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++) {
         extraTemperature[i].lows.todayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + i);
         extraTemperature[i].highs.todayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + i);
-        extraTemperature[i].lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 156 + (i * 2));
-        extraTemperature[i].highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 186 + (i * 2));
+        extraTemperature[i].lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 156 + (i * 2));
+        extraTemperature[i].highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 186 + (i * 2));
         extraTemperature[i].highs.monthExtremeValue   = VantageDecoder::decode8BitTemperature(buffer, 216 + i);
         extraTemperature[i].lows.monthExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 231 + i);
         extraTemperature[i].highs.yearExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 246 + i);
@@ -282,8 +290,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++) {
         soilTemperature[i].lows.todayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + offset + i);
         soilTemperature[i].highs.todayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + offset + i);
-        soilTemperature[i].lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 156 + (offset * 2) + (i * 2));
-        soilTemperature[i].highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 186 + (offset * 2) + (i * 2));
+        soilTemperature[i].lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 156 + (offset * 2) + (i * 2));
+        soilTemperature[i].highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 186 + (offset * 2) + (i * 2));
         soilTemperature[i].highs.monthExtremeValue   = VantageDecoder::decode8BitTemperature(buffer, 216 + offset + i);
         soilTemperature[i].lows.monthExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 231 + offset + i);
         soilTemperature[i].highs.yearExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 246 + offset + i);
@@ -296,8 +304,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++) {
         leafTemperature[i].lows.todayExtremeValue      = VantageDecoder::decode8BitTemperature(buffer, 126 + offset + i);
         leafTemperature[i].highs.todayExtremeValue     = VantageDecoder::decode8BitTemperature(buffer, 141 + offset + i);
-        leafTemperature[i].lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 156 + (offset * 2) + (i * 2));
-        leafTemperature[i].highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 186 + (offset * 2) + (i * 2));
+        leafTemperature[i].lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 156 + (offset * 2) + (i * 2));
+        leafTemperature[i].highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 186 + (offset * 2) + (i * 2));
         leafTemperature[i].highs.monthExtremeValue   = VantageDecoder::decode8BitTemperature(buffer, 216 + offset + i);
         leafTemperature[i].lows.monthExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 231 + offset + i);
         leafTemperature[i].highs.yearExtremeValue    = VantageDecoder::decode8BitTemperature(buffer, 246 + offset + i);
@@ -309,8 +317,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     outsideHumidity.lows.todayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 276);
     outsideHumidity.highs.todayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 284);
-    outsideHumidity.lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 308);
-    outsideHumidity.highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 292);
+    outsideHumidity.lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 308);
+    outsideHumidity.highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 292);
     outsideHumidity.highs.monthExtremeValue   = VantageDecoder::decodeHumidity(buffer, 324);
     outsideHumidity.lows.monthExtremeValue    = VantageDecoder::decodeHumidity(buffer, 332);
     outsideHumidity.highs.yearExtremeValue    = VantageDecoder::decodeHumidity(buffer, 340);
@@ -322,8 +330,8 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++) {
         extraHumidity[i].lows.todayExtremeValue      = VantageDecoder::decodeHumidity(buffer, 277 + i);
         extraHumidity[i].highs.todayExtremeValue     = VantageDecoder::decodeHumidity(buffer, 285 + i);
-        extraHumidity[i].lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 309 + i);
-        extraHumidity[i].highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 293 + i);
+        extraHumidity[i].lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 309 + i);
+        extraHumidity[i].highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 293 + i);
         extraHumidity[i].highs.monthExtremeValue   = VantageDecoder::decodeHumidity(buffer, 325 + i);
         extraHumidity[i].lows.monthExtremeValue    = VantageDecoder::decodeHumidity(buffer, 333 + i);
         extraHumidity[i].highs.yearExtremeValue    = VantageDecoder::decodeHumidity(buffer, 341 + 1);
@@ -335,9 +343,9 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         soilMoisture[i].highs.todayExtremeValue     = VantageDecoder::decodeSoilMoisture(buffer, 356 + i);
-        soilMoisture[i].highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 360 + i);
+        soilMoisture[i].highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 360 + i);
         soilMoisture[i].lows.todayExtremeValue      = VantageDecoder::decodeSoilMoisture(buffer, 368 + i);
-        soilMoisture[i].lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 372 + i);
+        soilMoisture[i].lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 372 + i);
         soilMoisture[i].lows.monthExtremeValue    = VantageDecoder::decodeSoilMoisture(buffer, 380 + i);
         soilMoisture[i].highs.monthExtremeValue   = VantageDecoder::decodeSoilMoisture(buffer, 384 + i);
         soilMoisture[i].lows.yearExtremeValue     = VantageDecoder::decodeSoilMoisture(buffer, 388 + i);
@@ -349,9 +357,9 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         leafWetness[i].highs.todayExtremeValue     = VantageDecoder::decodeLeafWetness(buffer, 396 + i);
-        leafWetness[i].highs.todayExtremeValueTime = BitConverter::toInt16(buffer, 400 + i);
+        leafWetness[i].highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 400 + i);
         leafWetness[i].lows.todayExtremeValue      = VantageDecoder::decodeLeafWetness(buffer, 408 + i);
-        leafWetness[i].lows.todayExtremeValueTime  = BitConverter::toInt16(buffer, 412 + i);
+        leafWetness[i].lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 412 + i);
         leafWetness[i].lows.monthExtremeValue    = VantageDecoder::decodeLeafWetness(buffer, 420 + i);
         leafWetness[i].highs.monthExtremeValue   = VantageDecoder::decodeLeafWetness(buffer, 424 + i);
         leafWetness[i].lows.yearExtremeValue     = VantageDecoder::decodeLeafWetness(buffer, 428 + i);

@@ -60,10 +60,10 @@ Archive query
 
 1. Test Commands
     "TEST"      Sends the string “TEST\n” back.
-    "RXCHECK"   Sends the Console Diagnostics report.
+    + "RXCHECK"   Sends the Console Diagnostics report.
     "RXTEST"    Moves the console from the “Receiving from” screen to the main current conditions screen.
     + "VER"       Sends the firmware date code as a text string.
-    "RECEIVERS" Sends the bit map of station IDs that the console can hear, This is not the byte for indicating what the console selects to listen from.
+    + "RECEIVERS" Sends the bit map of station IDs that the console can hear, This is not the byte for indicating what the console selects to listen from.
     + "NVER"      Sends the firmware version number as a text string. This command is only supported by Vantage Pro2 (Firmware 1.90 or later) and Vantage Vue.
 
 2. Current Data commands
@@ -114,13 +114,13 @@ Archive query
     + "CLRDATA"   Clears all current data values to dashes.
 
 7. Configuration Commands
-    "BAUD <New baud rate-decimal>"
+    - "BAUD <New baud rate-decimal>"
                 Sets the console to a new baud rate. Valid values are 1200, 2400, 4800, 9600, 14400, and 19200.
-    "SETTIME"   Sets the time and date on the Vantage console. Data in a binary format is sent after ACK.
+    + "SETTIME"   Sets the time and date on the Vantage console. Data in a binary format is sent after ACK.
     - "GAIN <Gain State: '0' (off) or '1' (on)>"
                 Sets the gain of the radio receiver. This command is currently not supported in Vantage Pro2.
     "GETTIME"   Retrieves the current time and date on the Vantage console. Data is sent in a binary format.
-    "SETPER <Archive interval in minutes-decimal>"
+    + "SETPER <Archive interval in minutes-decimal>"
                 Sets the Vantage archive interval. Valid values are (1, 5, 10, 15, 30, 60, and 120).
     "STOP"      Disables the creation of archive records.
     "START"     Enables the creation of archive records, if they have been halted with the STOP command.

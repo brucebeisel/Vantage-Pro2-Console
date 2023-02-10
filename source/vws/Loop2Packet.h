@@ -29,6 +29,7 @@ namespace vws {
 class Loop2Packet {
 public:
     static const int LOOP2_PACKET_SIZE = 99;
+    static const int LOOP2_PACKET_TYPE = 1;
     //
     // LOOP packet forecast icons
     //
@@ -46,7 +47,6 @@ public:
     static const int PARTLY_CLOUDY_CHANCE_OF_RAIN_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT;
     static const int PARTLY_CLOUDY_CHANCE_OF_SNOW_FORECAST = PARTLY_CLOUDY_BIT | SNOW_BIT;
     static const int PARTLY_CLOUDY_CHANCE_OF_RAIN_OR_SNOW_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT;
-
 
     /**
      * Constructor.
@@ -84,8 +84,6 @@ public:
     const Measurement<Pressure> &    getAtmPressure() const;
 
 private:
-    static const int LOOP2_PACKET_TYPE = 1;
-
     byte                     packetData[LOOP2_PACKET_SIZE];
     int                      packetType;
     Measurement<Speed>       windSpeed;

@@ -325,6 +325,7 @@ static constexpr int INVALID_BAROMETER = 0;
 static constexpr int INVALID_SOLAR_RADIATION = 32767;
 static constexpr int INVALID_THSW = 255;
 static constexpr int INVALID_ET = 0;
+static constexpr int INVALID_16BIT_TIME = 65535;
 
 //
 // Limits

@@ -35,6 +35,7 @@ public:
     typedef std::bitset<ALARM_BITS> AlarmBitSet;
 
     static const int LOOP_PACKET_SIZE = 99;
+    static const int LOOP_PACKET_TYPE = 0;
 
     /**
      * Constructor.
@@ -97,8 +98,6 @@ public:
     friend std::ostream & operator<<(std::ostream & os, const LoopPacket & packet);
 
 private:
-    static const int LOOP_PACKET_TYPE = 0;
-
     static constexpr int L_OFFSET = 0;
     static constexpr int FIRST_O_OFFSET = 1;
     static constexpr int SECOND_O_OFFSET = 2;
