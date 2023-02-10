@@ -520,7 +520,7 @@ CommandHandler::handleQueryConsoleTime(const std::string & commandName, std::str
 
         strftime(timeString, sizeof(timeString), "%Y-%m-%d %T", &tm);
 
-        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"time\" : " << timeString << " } ";
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"time\" : \"" << timeString << "\" } ";
     }
     else
         oss << FAILURE_TOKEN;
