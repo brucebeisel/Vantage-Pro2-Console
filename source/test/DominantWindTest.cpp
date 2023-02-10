@@ -35,7 +35,7 @@ main(int argc, char * argv[]) {
     Heading h = 20;
     Speed s = 2;
 
-    dominantWinds.processWindSample(t, h, s);
+    dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
 
     dominantWinds.dumpData();
     dominantWinds.dominantDirectionsForPastHour(headings);
@@ -43,14 +43,14 @@ main(int argc, char * argv[]) {
     tm.tm_min += 11;
     t = timelocal(&tm);
     h = 40;
-    dominantWinds.processWindSample(t, h, s);
+    dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
 
     for (int i = 0; i < 10; i++) {
         tm.tm_min += 1;
         t = timelocal(&tm);
         h = 40;
         s = 1;
-        dominantWinds.processWindSample(t, h, s);
+        dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
         dominantWinds.dumpData();
     }
 
@@ -60,7 +60,7 @@ main(int argc, char * argv[]) {
     t = timelocal(&tm);
     h = 40;
     s = 0;
-    dominantWinds.processWindSample(t, h, s);
+    dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
 
     dominantWinds.dumpData();
     dominantWinds.dominantDirectionsForPastHour(headings);
@@ -69,7 +69,7 @@ main(int argc, char * argv[]) {
     t = timelocal(&tm);
     h = 70;
     s = 1;
-    dominantWinds.processWindSample(t, h, s);
+    dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
 
     dominantWinds.dumpData();
     dominantWinds.dominantDirectionsForPastHour(headings);
@@ -82,13 +82,13 @@ main(int argc, char * argv[]) {
     for (int i = 0; i < 6; i++) {
         t = timelocal(&tm);
         tm.tm_min += 10;
-        dominantWinds.processWindSample(t, h, s);
+        dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
         h += 22;
     }
     tm.tm_hour++;
     tm.tm_min = 0;
     t = timelocal(&tm);
-    dominantWinds.processWindSample(t, h, s);
+    dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
 
     dominantWinds.dumpData();
 
@@ -102,10 +102,10 @@ main(int argc, char * argv[]) {
         t = timelocal(&tm);
         tm.tm_sec++;
         h = 22;
-        dominantWinds.processWindSample(t, h, s);
+        dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
         tm.tm_sec++;
         h = 44;
-        dominantWinds.processWindSample(t, h, s);
+        dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
     }
     dominantWinds.dumpData();
     tm.tm_hour++;
@@ -113,7 +113,7 @@ main(int argc, char * argv[]) {
     tm.tm_sec = 0;
     t = timelocal(&tm);
     s = 0;
-    dominantWinds.processWindSample(t, h, s);
+    dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
     dominantWinds.dumpData();
 
     //
@@ -125,7 +125,7 @@ main(int argc, char * argv[]) {
     for (int i = 0; i < 1000; i++) {
         h = (i % 4) * 22;
         s = 1;
-        dominantWinds.processWindSample(t, h, s);
+        dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
         dominantWinds.dumpData();
         t += 7;
     }

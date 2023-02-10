@@ -423,7 +423,7 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
 
     if (sendAckedCommand(DUMP_ARCHIVE_CMD)) {
         for (int i = 0; i < NUM_ARCHIVE_PAGES; i++) {
-            readNextArchivePage(list, 0, time(0));
+            readNextArchivePage(list, 0, time(0)); // @suppress("Ambiguous problem")
             if (!serialPort.write(DMP_SEND_NEXT_PAGE)) {
                 break;
             }
@@ -436,7 +436,7 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
-    logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << Weather::formatDateTime(time) << endl;
+    logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << Weather::formatDateTime(time) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
     list.clear();
 
     //
@@ -497,7 +497,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     if (numPages == 0)
         return true;
 
-    return readAfterArchivePages(time, list, firstRecord, numPages);
+    return readAfterArchivePages(time, list, firstRecord, numPages); // @suppress("Ambiguous problem")
 }
 
 //
@@ -738,7 +738,7 @@ VantageWeatherStation::updateConsoleTime() {
     time_t now = time(0);
     struct tm tm;
     Weather::localtime(now, tm);
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Setting console time to " << Weather::formatDateTime(now) << endl;
+    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Setting console time to " << Weather::formatDateTime(now) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
     int n = 0;
     buffer[n++] = static_cast<byte>(tm.tm_sec);
     buffer[n++] = static_cast<byte>(tm.tm_min);
@@ -983,7 +983,7 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
         //
         // Process a single page. This will return 1 - 5 packets
         //
-        if (!readNextArchivePage(list, firstRecordInPageToProcess, newestPacketTime)) {
+        if (!readNextArchivePage(list, firstRecordInPageToProcess, newestPacketTime)) { // @suppress("Ambiguous problem")
             serialPort.write(DMP_CANCEL_DOWNLOAD);
             success = false;
             break;
@@ -1009,9 +1009,9 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
     }
 
     if (success)
-        logger.log(VantageLogger::VANTAGE_INFO) << "Received " << list.size() << " records from DMPAFT " << Weather::formatDateTime(afterTime) << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Received " << list.size() << " records from DMPAFT " << Weather::formatDateTime(afterTime) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
     else {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "DMPAFT " << Weather::formatDateTime(afterTime) << " failed" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "DMPAFT " << Weather::formatDateTime(afterTime) << " failed" << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
         wakeupStation();
     }
 
@@ -1024,7 +1024,7 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
 bool
 VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int firstRecordInPageToProcess, DateTime newestPacketTime) {
     bool success = true;
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Processing archive page. Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Processing archive page. Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
 
     //
     // Try to read the page. Will attempt 3 tries to correct CRC errors.
@@ -1032,7 +1032,7 @@ VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int fir
     for (int i = 0; i < ARCHIVE_PAGE_READ_RETRIES; i++) {
         if (serialPort.read(buffer, ARCHIVE_PAGE_SIZE + CRC_BYTES)) {
             if (VantageCRC::checkCRC(buffer, ARCHIVE_PAGE_SIZE)) {
-                decodeArchivePage(list, buffer, firstRecordInPageToProcess, newestPacketTime);
+                decodeArchivePage(list, buffer, firstRecordInPageToProcess, newestPacketTime); // @suppress("Ambiguous problem")
                 success = true;
                 break;
             }
@@ -1062,7 +1062,8 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
     // Which page this is in a DMP or DMPAFT command
     //
     int pageSequence = BitConverter::toInt8(buffer, 0);
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Decoding archive page " << pageSequence << ". Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Decoding archive page " << pageSequence
+                                              << ". Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
 
     //
     // The first record value may not be zero in the case of a dump after command. The first record after the specified time may not be at the
@@ -1086,7 +1087,8 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
                 recordCount++;
             }
             else
-                logger.log(VantageLogger::VANTAGE_DEBUG1) << "Skipping archive record " << i << " in page " << pageSequence << " with date " << Weather::formatDateTime(packet.getDateTime()) << endl;
+                logger.log(VantageLogger::VANTAGE_DEBUG1) << "Skipping archive record " << i << " in page " << pageSequence
+                                                          << " with date " << Weather::formatDateTime(packet.getDateTime()) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
         }
     }
 

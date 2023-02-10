@@ -22,6 +22,7 @@
 #include <vector>
 #include "json.hpp"
 
+#include "Weather.h"
 #include "CommandHandler.h"
 #include "ArchiveManager.h"
 #include "ArchivePacket.h"
@@ -497,6 +498,34 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
     oss << " }";
 
     response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryConsoleTime(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+
+    DateTime consoleTime;
+
+    if (station.retrieveConsoleTime(consoleTime)) {
+        char timeString[100];
+        struct tm tm = {0};
+        Weather::localtime(consoleTime, tm);
+
+        strftime(timeString, sizeof(timeString), "%Y-%m-%d %T", &tm);
+
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"time\" : " << timeString << " } ";
+    }
+    else
+        oss << FAILURE_TOKEN;
+
+    oss << " }";
+
+    response = oss.str();
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

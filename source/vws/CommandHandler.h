@@ -112,6 +112,8 @@ private:
     //
     // Configuration Commands
     //
+    void handleQueryConsoleTime(const std::string & commandName, std::string & response);
+
     void handleUpdateArchivePeriod(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);

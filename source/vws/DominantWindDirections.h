@@ -64,7 +64,7 @@ public:
      * @param heading The direction of the non-zero speed wind
      * @param speed   The speed of the wind sample
      */
-    void processWindSample(DateTime time, Heading heading, Speed speed);
+    void processWindSample(vws::DateTime time, Heading heading, Speed speed);
 
     /**
      * Return the past heading tendencies.

@@ -433,7 +433,7 @@ public:
      * @param stationTime The time that was retrieved or 0 on failure
      * @return True if the time was retrieved successfully
      */
-    bool retrieveConsoleTime(DateTime &stationTime);
+    bool retrieveConsoleTime(vws::DateTime & stationTime);
 
     /**
      * Update the archive period to one of the allowed intervals.

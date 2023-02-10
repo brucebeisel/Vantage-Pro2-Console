@@ -94,14 +94,14 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CurrentWeatherManager::processLoopPacket(const LoopPacket & packet) {
-    time_t packetTime = time(0);
+    DateTime packetTime = time(0);
     currentWeather.setLoopData(packet);
     writeLoopArchive(packetTime, packet.getPacketType(), packet.getPacketData(), LoopPacket::LOOP_PACKET_SIZE);
     //
     // Build a list of past wind directions. This is to mimic what is shown on the
     // console
     //
-    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection(), packet.getWindSpeed());
+    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue()); // @suppress("Ambiguous problem")
     currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
 
     if (firstLoop2PacketReceived)
@@ -114,7 +114,7 @@ CurrentWeatherManager::processLoopPacket(const LoopPacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CurrentWeatherManager::processLoop2Packet(const Loop2Packet & packet) {
-    time_t packetTime = time(0);
+    DateTime packetTime = time(0);
     firstLoop2PacketReceived = true;
     currentWeather.setLoop2Data(packet);
     writeLoopArchive(packetTime, packet.getPacketType(), packet.getPacketData(), Loop2Packet::LOOP2_PACKET_SIZE);
@@ -122,7 +122,7 @@ CurrentWeatherManager::processLoop2Packet(const Loop2Packet & packet) {
     // Build a list of past wind directions. This is to mimic what is shown on the
     // console
     //
-    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection(), packet.getWindSpeed());
+    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue()); // @suppress("Ambiguous problem")
     currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
     currentWeatherPublisher.publishCurrentWeather(currentWeather);
     dominantWindDirections.dumpData();

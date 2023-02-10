@@ -111,7 +111,7 @@ main(int argc, char *argv[]) {
             //cout << packet.formatJSON() << endl << endl;
         }
         else {
-            cout << loopString << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(time) << endl;
+            cout << loopString << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(time) << endl; // @suppress("Invalid overload") @suppress("Ambiguous problem")
             if (dumpBinary)
                 cout << Weather::dumpBuffer(buffer, bufferLength);
         }
