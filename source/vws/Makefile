@@ -24,7 +24,6 @@ SRCS=\
 	SensorStation.cpp \
  	SerialPort.cpp \
 	UnitConverter.cpp \
-	VantageEepromConstants.cpp \
 	VantageCRC.cpp \
 	VantageConfiguration.cpp \
 	VantageDecoder.cpp \
