@@ -160,6 +160,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-archive") {
             handleQueryArchive(commandName, argumentList, responseJson);
         }
+        else if (commandName == "query-console-time") {
+            handleQueryConsoleTime(commandName, responseJson);
+        }
         else {
             ostringstream oss;
             oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << " }";
