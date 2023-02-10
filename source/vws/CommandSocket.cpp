@@ -76,7 +76,7 @@ CommandSocket::mainLoop() {
         tv.tv_sec = 1;
         tv.tv_usec = 0;
 
-        FD_ZERO(&fd_read); // @suppress("Symbol is not resolved")
+        FD_ZERO(&fd_read); // @suppress("Symbol is not resolved") @suppress("Statement has no effect")
         FD_SET(listenFd, &fd_read);
 
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Adding " << socketFdList.size() << " to fd mask" << endl;
