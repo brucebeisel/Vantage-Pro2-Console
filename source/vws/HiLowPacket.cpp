@@ -211,38 +211,38 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     // Dew point section
     //
-    dewPoint.lows.todayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 63);
-    dewPoint.highs.todayExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 65);
+    dewPoint.lows.todayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 63, false);
+    dewPoint.highs.todayExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 65, false);
     dewPoint.lows.todayExtremeValueTime  = BitConverter::toUint16(buffer, 67);
     dewPoint.highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 69);
-    dewPoint.highs.monthExtremeValue   = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 71);
-    dewPoint.lows.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 73);
-    dewPoint.highs.yearExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 75);
-    dewPoint.lows.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 77);
+    dewPoint.highs.monthExtremeValue   = VantageDecoder::decode16BitTemperature(buffer, 71, false);
+    dewPoint.lows.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 73, false);
+    dewPoint.highs.yearExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 75, false);
+    dewPoint.lows.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 77, false);
 
     //
     // Wind chill section
     //
-    windChill.todayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 79);
+    windChill.todayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 79, false);
     windChill.todayExtremeValueTime  = BitConverter::toUint16(buffer, 81);
-    windChill.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 83);
-    windChill.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 85);
+    windChill.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 83, false);
+    windChill.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 85, false);
 
     //
     // Heat index section
     //
-    heatIndex.todayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 87);
+    heatIndex.todayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 87, false);
     heatIndex.todayExtremeValueTime  = BitConverter::toUint16(buffer, 89);
-    heatIndex.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 91);
-    heatIndex.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 93);
+    heatIndex.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 91, false);
+    heatIndex.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 93, false);
 
     //
     // THSW index section
     //
-    thsw.todayExtremeValue      = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 95);
+    thsw.todayExtremeValue      = VantageDecoder::decode16BitTemperature(buffer, 95, false);
     thsw.todayExtremeValueTime  = BitConverter::toUint16(buffer, 97);
-    thsw.monthExtremeValue    = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 99);
-    thsw.yearExtremeValue     = VantageDecoder::decodeNonScaled16BitTemperature(buffer, 101);
+    thsw.monthExtremeValue    = VantageDecoder::decode16BitTemperature(buffer, 99, false);
+    thsw.yearExtremeValue     = VantageDecoder::decode16BitTemperature(buffer, 101, false);
 
     //
     // Solar radiation section

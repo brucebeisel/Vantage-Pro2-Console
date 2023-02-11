@@ -200,12 +200,12 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
     rainHour = VantageDecoder::decodeRain(packetData, 54);
     rain24Hour = VantageDecoder::decodeRain(packetData, 58);
 
-    VantageDecoder::decodeNonScaled16BitTemperature(packetData, 30, dewPoint);
-    VantageDecoder::decodeNonScaled16BitTemperature(packetData, 35, heatIndex);
-    VantageDecoder::decodeNonScaled16BitTemperature(packetData, 37, windChill);
-    VantageDecoder::decodeNonScaled16BitTemperature(packetData, 39, thsw);
+    dewPoint = VantageDecoder::decode16BitTemperature(packetData, 30, false);
+    heatIndex = VantageDecoder::decode16BitTemperature(packetData, 35, false);
+    windChill = VantageDecoder::decode16BitTemperature(packetData, 37, false);
+    thsw = VantageDecoder::decode16BitTemperature(packetData, 39, false);
 
-    VantageDecoder::decodeBarometricPressure(packetData, 65, atmPressure);
+    atmPressure = VantageDecoder::decodeBarometricPressure(packetData, 65);
 
     return true;
 }

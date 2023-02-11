@@ -121,33 +121,33 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
 
     nextRecord = BitConverter::toInt16(packetData, NEXT_RECORD_OFFSET);
 
-    VantageDecoder::decodeBarometricPressure(packetData, BAROMETER_OFFSET, barometricPressure);
-    VantageDecoder::decode16BitTemperature(packetData, INSIDE_TEMPERATURE_OFFSET, insideTemperature);
-    VantageDecoder::decodeHumidity(packetData, INSIDE_HUMIDITY_OFFSET, insideHumidity);
-    VantageDecoder::decode16BitTemperature(packetData, OUTSIDE_TEMPERATURE_OFFSET, outsideTemperature);
+    barometricPressure = VantageDecoder::decodeBarometricPressure(packetData, BAROMETER_OFFSET);
+    insideTemperature = VantageDecoder::decode16BitTemperature(packetData, INSIDE_TEMPERATURE_OFFSET);
+    insideHumidity = VantageDecoder::decodeHumidity(packetData, INSIDE_HUMIDITY_OFFSET);
+    outsideTemperature = VantageDecoder::decode16BitTemperature(packetData, OUTSIDE_TEMPERATURE_OFFSET);
 
     windSpeed = VantageDecoder::decodeWindSpeed(packetData, WIND_SPEED_OFFSET);
     windSpeed10MinuteAverage = VantageDecoder::decodeWindSpeed(packetData, TEN_MINUTE_AVG_WIND_SPEED_OFFSET);
     windDirection = VantageDecoder::decodeWindDirection(packetData, WIND_DIRECTION_OFFSET);
 
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(packetData, EXTRA_TEMPERATURES_OFFSET + i, extraTemperature[i]);
+        extraTemperature[i] = VantageDecoder::decode8BitTemperature(packetData, EXTRA_TEMPERATURES_OFFSET + i);
 
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(packetData, SOIL_TEMPERATURES_OFFSET + i, soilTemperature[i]);
+        soilTemperature[i] = VantageDecoder::decode8BitTemperature(packetData, SOIL_TEMPERATURES_OFFSET + i);
 
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++)
-        VantageDecoder::decode8BitTemperature(packetData, LEAF_TEMPERATURES_OFFSET + i, leafTemperature[i]);
+        leafTemperature[i] = VantageDecoder::decode8BitTemperature(packetData, LEAF_TEMPERATURES_OFFSET + i);
 
-    VantageDecoder::decodeHumidity(packetData, OUTSIDE_HUMIDITY_OFFSET, outsideHumidity);
+    outsideHumidity = VantageDecoder::decodeHumidity(packetData, OUTSIDE_HUMIDITY_OFFSET);
 
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++)
-        VantageDecoder::decodeHumidity(packetData, EXTRA_HUMIDITIES_OFFSET + i, extraHumidity[i]);
+        extraHumidity[i] = VantageDecoder::decodeHumidity(packetData, EXTRA_HUMIDITIES_OFFSET + i);
 
     rainRate = VantageDecoder::decodeRain(packetData, RAIN_RATE_OFFSET);
 
-    VantageDecoder::decodeUvIndex(packetData, UV_INDEX_OFFSET, uvIndex);
-    VantageDecoder::decodeSolarRadiation(packetData, SOLAR_RADIATION_OFFSET, solarRadiation);
+    uvIndex = VantageDecoder::decodeUvIndex(packetData, UV_INDEX_OFFSET);
+    solarRadiation = VantageDecoder::decodeSolarRadiation(packetData, SOLAR_RADIATION_OFFSET);
 
     stormRain = VantageDecoder::decodeStormRain(packetData, STORM_RAIN_OFFSET);
     stormStart = VantageDecoder::decodeStormStartDate(packetData, STORM_START_DATE_OFFSET);
@@ -161,13 +161,13 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     yearET = VantageDecoder::decodeMonthYearET(packetData, YEAR_ET_OFFSET);
 
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++)
-        VantageDecoder::decodeSoilMoisture(packetData, SOIL_MOISTURES_OFFSET + i, soilMoisture[i]);
+        soilMoisture[i] = VantageDecoder::decodeSoilMoisture(packetData, SOIL_MOISTURES_OFFSET + i);
 
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++)
-        VantageDecoder::decodeLeafWetness(packetData, LEAF_WETNESSES_OFFSET + i, leafWetness[i]);
+        leafWetness[i] = VantageDecoder::decodeLeafWetness(packetData, LEAF_WETNESSES_OFFSET + i);
 
-    for (int i = 0; i < 16; i++) {
-        int alarms = BitConverter::toInt8(packetData, ALARMS_OFFSET + i);
+    for (int i = 0; i < ALARM_BYTES; i++) {
+        int alarms = BitConverter::toUint8(packetData, ALARMS_OFFSET + i);
         for (int j = 0; j < 8; j++) {
             int bit = (i * 8) + j;
             alarmBits[bit] = (alarms & (1 << j)) == 0 ? 0 : 1;

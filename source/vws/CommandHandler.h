@@ -118,6 +118,8 @@ private:
 
     void handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    void handleQueryConfigurationData(const std::string & commandName, std::string & response);
+
     //
     // Other Commands
     //

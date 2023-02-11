@@ -36,62 +36,6 @@ class HiLowPacket;
 class LoopPacket;
 class Loop2Packet;
 
-struct TimeZoneData {
-    int index;
-    int offsetMinutes;
-    const char * name;
-};
-
-static const TimeZoneData TIME_ZONES[] = {
-    0, -1200, "(GMT-12:00) Eniwetok, Kwajalein",
-    1, -1100, "(GMT-11:00) Midway Island, Samoa",
-    2, -1000, "(GMT-10:00) Hawaii",
-    3,  -900, "(GMT-09:00) Alaska",
-    4,  -800, "(GMT-08:00) Pacific Time, Tijuana",
-    5,  -700, "(GMT-07:00) Mountain Time",
-    6,  -600, "(GMT-06:00) Central Time",
-    7,  -600, "(GMT-06:00) Mexico City",
-    8,  -600, "(GMT-06:00) Central America",
-    9,  -500, "(GMT-05.00) Bogota, Lima, Quito",
-    10, -500, "(GMT-05:00) Eastern Time",
-    11, -400, "(GMT-04:00) Atlantic Time",
-    12, -400, "(GMT-04.00) Caracas, La Paz, Santiago",
-    13, -330, "(GMT-03.30) Newfoundland",
-    14, -300, "(GMT-03.00) Brasilia",
-    15, -300, "(GMT-03.00) Buenos Aires, Georgetown, Greenland",
-    16, -200, "(GMT-02.00) Mid-Atlantic",
-    17, -100, "(GMT-01:00) Azores, Cape Verde Island",
-    18,    0, "(GMT) Greenwich Mean Time, Dublin, Edinburgh, Lisbon, London",
-    19,    0, "(GMT) Monrovia, Casablanca",
-    20,  100, "(GMT+01.00) Berlin, Rome, Amsterdam, Bern, Stockholm, Vienna",
-    21,  100, "(GMT+01.00) Paris, Madrid, Brussels, Copenhagen, W Central Africa",
-    22,  100, "(GMT+01.00) Prague, Belgrade, Bratislava, Budapest, Ljubljana",
-    23,  200, "(GMT+02.00) Athens, Helsinki, Istanbul, Minsk, Riga, Tallinn",
-    24,  200, "(GMT+02:00) Cairo",
-    25,  200, "(GMT+02.00) Eastern Europe, Bucharest",
-    26,  200, "(GMT+02:00) Harare, Pretoria",
-    27,  200, "(GMT+02.00) Israel, Jerusalem",
-    28,  300, "(GMT+03:00) Baghdad, Kuwait, Nairobi, Riyadh",
-    29,  300, "(GMT+03.00) Moscow, St. Petersburg, Volgograd",
-    30,  330, "(GMT+03:30) Tehran",
-    31,  400, "(GMT+04:00) Abu Dhabi, Muscat, Baku, Tblisi, Yerevan, Kazan",
-    32,  430, "(GMT+04:30) Kabul",
-    33,  500, "(GMT+05:00) Islamabad, Karachi, Ekaterinburg, Tashkent",
-    34,  530, "(GMT+05:30) Bombay, Calcutta, Madras, New Delhi, Chennai",
-    35,  600, "(GMT+06:00) Almaty, Dhaka, Colombo, Novosibirsk, Astana",
-    36,  700, "(GMT+07:00) Bangkok, Jakarta, Hanoi, Krasnoyarsk",
-    37,  800, "(GMT+08:00) Beijing, Chongqing, Urumqi, Irkutsk, Ulaan Bataar",
-    38,  800, "(GMT+08:00) Hong Kong, Perth, Singapore, Taipei, Kuala Lumpur",
-    39,  900, "(GMT+09:00) Tokyo, Osaka, Sapporo, Seoul, Yakutsk",
-    40,  930, "(GMT+09:30) Adelaide",
-    41,  930, "(GMT+09:30) Darwin",
-    42, 1000, "(GMT+10:00) Brisbane, Melbourne, Sydney, Canberra",
-    43, 1000, "(GMT+10.00) Hobart, Guam, Port Moresby, Vladivostok",
-    44, 1100, "(GMT+11:00) Magadan, Solomon Is, New Caledonia",
-    45, 1200, "(GMT+12:00) Fiji, Kamchatka, Marshall Is.",
-    46, 1200, "(GMT+12:00) Wellington, Auckland"
-};
-
 /**
  * Class that handles the command protocols with the Vantage console.
  */

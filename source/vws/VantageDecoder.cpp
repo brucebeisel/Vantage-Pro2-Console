@@ -33,14 +33,21 @@ VantageLogger * log = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const Measurement<Temperature> &
-VantageDecoder::decode16BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
+Measurement<Temperature>
+VantageDecoder::decode16BitTemperature(const byte buffer[], int offset, bool scaleValue) {
+    Measurement<Temperature> measurement;
     int value16 = BitConverter::toInt16(buffer, offset);
+    Temperature scale = 1.0;
 
-    if (value16 != INVALID_16BIT_TEMPERATURE)
-        measurement.setValue(static_cast<Temperature>(value16) / TEMPERATURE_16BIT_SCALE);
-    else
+    if (scaleValue)
+        scale = TEMPERATURE_16BIT_SCALE;
+
+    if (value16 == INVALID_16BIT_TEMPERATURE || value16 == INVALID_16BIT_TEMPERATURE_NEGATIVE) {
         measurement.invalidate();
+    }
+    else {
+        measurement.setValue(static_cast<Temperature>(value16) / scale);
+    }
 
     return measurement;
 }
@@ -48,61 +55,8 @@ VantageDecoder::decode16BitTemperature(const byte buffer[], int offset, Measurem
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Temperature>
-VantageDecoder::decode16BitTemperature(const byte buffer[], int offset) {
+VantageDecoder::decode8BitTemperature(const byte buffer[], int offset) {
     Measurement<Temperature> measurement;
-    return decode16BitTemperature(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Temperature> &
-VantageDecoder::decode16BitHighTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
-    int value16 = BitConverter::toInt16(buffer, offset);
-
-    std::cout << "Decoding 16 Bit High Temperature. Value = " << value16 << std::endl;
-
-    if (value16 != INVALID_16BIT_HIGH_TEMPERATURE)
-        measurement.setValue(static_cast<Temperature>(value16) / TEMPERATURE_16BIT_SCALE);
-    else
-        measurement.invalidate();
-
-    return measurement;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-Measurement<Temperature>
-VantageDecoder::decode16BitHighTemperature(const byte buffer[], int offset) {
-    Measurement<Temperature> measurement;
-    return decode16BitHighTemperature(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Temperature> &
-VantageDecoder::decodeNonScaled16BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
-    int value16 = BitConverter::toInt16(buffer, offset);
-
-    if (value16 != INVALID_16BIT_TEMPERATURE)
-        measurement.setValue(static_cast<Temperature>(value16));
-    else
-        measurement.invalidate();
-
-    return measurement;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-Measurement<Temperature>
-VantageDecoder::decodeNonScaled16BitTemperature(const byte buffer[], int offset) {
-    Measurement<Temperature> measurement;
-    return decodeNonScaled16BitTemperature(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Temperature> &
-VantageDecoder::decode8BitTemperature(const byte buffer[], int offset, Measurement<Temperature> & measurement) {
     int value8 = BitConverter::toUint8(buffer, offset);
 
     if (value8 != INVALID_8BIT_TEMPERATURE)
@@ -115,16 +69,9 @@ VantageDecoder::decode8BitTemperature(const byte buffer[], int offset, Measureme
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<Temperature>
-VantageDecoder::decode8BitTemperature(const byte buffer[], int offset) {
-    Measurement<Temperature> measurement;
-    return decode8BitTemperature(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Pressure> &
-VantageDecoder::decodeBarometricPressure(const byte buffer[], int offset, Measurement<Pressure> & measurement) {
+Measurement<Pressure>
+VantageDecoder::decodeBarometricPressure(const byte buffer[], int offset) {
+    Measurement<Pressure> measurement;
     int value16 = BitConverter::toInt16(buffer, offset);
 
     measurement = static_cast<Pressure>(value16) / BAROMETER_SCALE;
@@ -134,16 +81,9 @@ VantageDecoder::decodeBarometricPressure(const byte buffer[], int offset, Measur
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<Pressure>
-VantageDecoder::decodeBarometricPressure(const byte buffer[], int offset) {
-    Measurement<Pressure> measurement;
-    return decodeBarometricPressure(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Humidity> &
-VantageDecoder::decodeHumidity(const byte buffer[], int offset, Measurement<Humidity> & measurement) {
+Measurement<Humidity>
+VantageDecoder::decodeHumidity(const byte buffer[], int offset) {
+    Measurement<Humidity> measurement;
     int value8 = BitConverter::toUint8(buffer, offset);
 
     if (value8 != INVALID_HUMIDITY)
@@ -156,16 +96,9 @@ VantageDecoder::decodeHumidity(const byte buffer[], int offset, Measurement<Humi
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<Humidity>
-VantageDecoder::decodeHumidity(const byte buffer[], int offset) {
-    Measurement<Humidity> measurement;
-    return decodeHumidity(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<UvIndex> &
-VantageDecoder::decodeUvIndex(const byte buffer[], int offset, Measurement<UvIndex> & measurement) {
+Measurement<UvIndex>
+VantageDecoder::decodeUvIndex(const byte buffer[], int offset) {
+    Measurement<UvIndex> measurement;
     int value8 = BitConverter::toUint8(buffer, offset);
 
     if (value8 != INVALID_UV_INDEX)
@@ -178,16 +111,9 @@ VantageDecoder::decodeUvIndex(const byte buffer[], int offset, Measurement<UvInd
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<UvIndex>
-VantageDecoder::decodeUvIndex(const byte buffer[], int offset) {
-    Measurement<UvIndex> measurement;
-    return decodeUvIndex(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Evapotranspiration> &
-VantageDecoder::decodeArchiveET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement) {
+Measurement<Evapotranspiration>
+VantageDecoder::decodeArchiveET(const byte buffer[], int offset) {
+    Measurement<Evapotranspiration> measurement;
     int value8 = BitConverter::toUint8(buffer, offset);
 
     if (value8 != INVALID_ET)
@@ -201,16 +127,8 @@ VantageDecoder::decodeArchiveET(const byte buffer[], int offset, Measurement<Eva
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Evapotranspiration>
-VantageDecoder::decodeArchiveET(const byte buffer[], int offset) {
+VantageDecoder::decodeDayET(const byte buffer[], int offset) {
     Measurement<Evapotranspiration> measurement;
-    return decodeArchiveET(buffer, offset, measurement);
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Evapotranspiration> &
-VantageDecoder::decodeDayET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != INVALID_ET)
@@ -224,16 +142,8 @@ VantageDecoder::decodeDayET(const byte buffer[], int offset, Measurement<Evapotr
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Evapotranspiration>
-VantageDecoder::decodeDayET(const byte buffer[], int offset) {
+VantageDecoder::decodeMonthYearET(const byte buffer[], int offset) {
     Measurement<Evapotranspiration> measurement;
-    return decodeDayET(buffer, offset, measurement);
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Evapotranspiration> &
-VantageDecoder::decodeMonthYearET(const byte buffer[], int offset, Measurement<Evapotranspiration> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != INVALID_ET)
@@ -246,16 +156,9 @@ VantageDecoder::decodeMonthYearET(const byte buffer[], int offset, Measurement<E
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<Evapotranspiration>
-VantageDecoder::decodeMonthYearET(const byte buffer[], int offset) {
-    Measurement<Evapotranspiration> measurement;
-    return decodeMonthYearET(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<SolarRadiation> &
-VantageDecoder::decodeSolarRadiation(const byte buffer[], int offset, Measurement<SolarRadiation> & measurement) {
+Measurement<SolarRadiation>
+VantageDecoder::decodeSolarRadiation(const byte buffer[], int offset) {
+    Measurement<SolarRadiation> measurement;
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != INVALID_SOLAR_RADIATION)
@@ -268,16 +171,9 @@ VantageDecoder::decodeSolarRadiation(const byte buffer[], int offset, Measuremen
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<SolarRadiation>
-VantageDecoder::decodeSolarRadiation(const byte buffer[], int offset) {
-    Measurement<SolarRadiation> measurement;
-    return decodeSolarRadiation(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Speed> &
-VantageDecoder::decodeWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
+Measurement<Speed>
+VantageDecoder::decodeWindSpeed(const byte buffer[], int offset) {
+    Measurement<Speed> measurement;
     int value8 = BitConverter::toUint8(buffer, offset);
 
     if (value8 != INVALID_WIND_SPEED)
@@ -291,15 +187,8 @@ VantageDecoder::decodeWindSpeed(const byte buffer[], int offset, Measurement<Spe
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Speed>
-VantageDecoder::decodeWindSpeed(const byte buffer[], int offset) {
+VantageDecoder::decode16BitWindSpeed(const byte buffer[], int offset) {
     Measurement<Speed> measurement;
-    return decodeWindSpeed(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Speed> &
-VantageDecoder::decode16BitWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
     measurement.setValue(static_cast<Speed>(value16));
@@ -310,15 +199,8 @@ VantageDecoder::decode16BitWindSpeed(const byte buffer[], int offset, Measuremen
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Speed>
-VantageDecoder::decode16BitWindSpeed(const byte buffer[], int offset) {
+VantageDecoder::decodeAverageWindSpeed(const byte buffer[], int offset) {
     Measurement<Speed> measurement;
-    return decode16BitWindSpeed(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Speed> &
-VantageDecoder::decodeAverageWindSpeed(const byte buffer[], int offset, Measurement<Speed> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != INVALID_16BIT_AVG_WIND_SPEED)
@@ -331,16 +213,9 @@ VantageDecoder::decodeAverageWindSpeed(const byte buffer[], int offset, Measurem
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<Speed>
-VantageDecoder::decodeAverageWindSpeed(const byte buffer[], int offset) {
-    Measurement<Speed> measurement;
-    return decodeAverageWindSpeed(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Heading> &
-VantageDecoder::decodeWindDirectionSlice(const byte buffer[], int offset, Measurement<Heading> & measurement) {
+Measurement<Heading>
+VantageDecoder::decodeWindDirectionSlice(const byte buffer[], int offset) {
+    Measurement<Heading> measurement;
     int value8 = BitConverter::toUint8(buffer, offset);
 
     if (value8 != INVALID_WIND_DIRECTION_SLICE)
@@ -354,15 +229,8 @@ VantageDecoder::decodeWindDirectionSlice(const byte buffer[], int offset, Measur
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Heading>
-VantageDecoder::decodeWindDirectionSlice(const byte buffer[], int offset) {
+VantageDecoder::decodeWindDirection(const byte buffer[], int offset) {
     Measurement<Heading> measurement;
-    return decodeWindDirectionSlice(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<Heading> &
-VantageDecoder::decodeWindDirection(const byte buffer[], int offset, Measurement<Heading> & measurement) {
     int value16 = BitConverter::toInt16(buffer, offset);
 
     if (value16 != INVALID_WIND_DIRECTION) {
@@ -378,14 +246,6 @@ VantageDecoder::decodeWindDirection(const byte buffer[], int offset, Measurement
         measurement.invalidate();
 
     return measurement;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-Measurement<Heading>
-VantageDecoder::decodeWindDirection(const byte buffer[], int offset) {
-    Measurement<Heading> measurement;
-    return decodeWindDirection(buffer, offset, measurement);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -460,8 +320,9 @@ VantageDecoder::decodeConsoleBatteryVoltage(const byte buffer[], int offset) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const Measurement<LeafWetness> &
-VantageDecoder::decodeLeafWetness(const byte buffer[], int offset, Measurement<LeafWetness> & measurement) {
+Measurement<LeafWetness>
+VantageDecoder::decodeLeafWetness(const byte buffer[], int offset) {
+    Measurement<LeafWetness> measurement;
     int value8 = BitConverter::toUint8(buffer, offset);
 
     if (value8 != INVALID_LEAF_WETNESS && value8 >= MIN_LEAF_WETNESS_VALUE && value8 <= MAX_LEAF_WETNESS_VALUE)
@@ -474,16 +335,9 @@ VantageDecoder::decodeLeafWetness(const byte buffer[], int offset, Measurement<L
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<LeafWetness>
-VantageDecoder::decodeLeafWetness(const byte buffer[], int offset) {
-    Measurement<LeafWetness> measurement;
-    return decodeLeafWetness(buffer, offset, measurement);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-const Measurement<SoilMoisture> &
-VantageDecoder::decodeSoilMoisture(const byte buffer[], int offset, Measurement<SoilMoisture> & measurement) {
+Measurement<SoilMoisture>
+VantageDecoder::decodeSoilMoisture(const byte buffer[], int offset) {
+    Measurement<SoilMoisture> measurement;
     int value8 = BitConverter::toUint8(buffer, offset);
 
     if (value8 != INVALID_SOIL_MOISTURE)
@@ -492,14 +346,6 @@ VantageDecoder::decodeSoilMoisture(const byte buffer[], int offset, Measurement<
         measurement.invalidate();
 
     return measurement;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-Measurement<SoilMoisture>
-VantageDecoder::decodeSoilMoisture(const byte buffer[], int offset) {
-    Measurement<SoilMoisture> measurement;
-    return decodeSoilMoisture(buffer, offset, measurement);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

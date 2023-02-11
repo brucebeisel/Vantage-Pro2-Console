@@ -31,11 +31,12 @@ namespace vws {
  */
 class LoopPacket {
 public:
-    static const size_t ALARM_BITS = 16 * 8;
+    static constexpr size_t ALARM_BYTES = 16;
+    static constexpr size_t ALARM_BITS = ALARM_BYTES * 8;
     typedef std::bitset<ALARM_BITS> AlarmBitSet;
 
-    static const int LOOP_PACKET_SIZE = 99;
-    static const int LOOP_PACKET_TYPE = 0;
+    static constexpr int LOOP_PACKET_SIZE = 99;
+    static constexpr int LOOP_PACKET_TYPE = 0;
 
     /**
      * Constructor.

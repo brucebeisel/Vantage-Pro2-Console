@@ -17,6 +17,8 @@
 #ifndef VANTAGE_CONFIGURATION_H
 #define VANTAGE_CONFIGURATION_H
 
+#include <vector>
+#include <string>
 #include "Sensor.h"
 #include "SensorStation.h"
 #include "VantageProtocolConstants.h"
@@ -73,11 +75,11 @@ namespace vws {
  */
 
 struct TimeSettings {
-    bool useGmtOffset;
-    int  timezoneIndex;               // Only used if useGmtOffset is false
-    int  gmtOffsetMinutes;            // Only used if useGmtOffset is true
-    bool manualDaylightSavingsTime;
-    bool manualDaylightSavingsTimeOn; // This will change twice a year, but only if manualDaylightSavingsTime is true
+    bool        useGmtOffset;
+    std::string timezoneName;               // Only used if useGmtOffset is false
+    int         gmtOffsetMinutes;            // Only used if useGmtOffset is true
+    bool        manualDaylightSavingsTime;
+    bool        manualDaylightSavingsTimeOn; // This will change twice a year, but only if manualDaylightSavingsTime is true
 };
 
 struct SetupBits {
@@ -88,6 +90,33 @@ struct SetupBits {
     ProtocolConstants::RainCupSizeType rainCollectorSizeType;
     bool isNorthLatitude;
     bool isEastLongitude;
+};
+
+struct PositionData {
+    double latitude;
+    double longitude;
+    int    elevation;
+};
+
+struct UnitsSettings {
+    BarometerUnits baroUnits;
+    TemperatureUnits temperatureUnits;
+    ElevationUnits elevationUnits;
+    RainUnits rainUnits;
+    WindUnits windUnits;
+};
+
+struct ConsoleConfigurationData {
+    TimeSettings             timeSettings;
+    SetupBits                setupBits;
+    PositionData             positionData;
+    UnitsSettings            unitsSettings;
+    int                      secondaryWindCupSize;
+    ProtocolConstants::Month rainSeasonStartMonth;
+    StationId                retransmitId;
+    bool                     logFinalTemperature;
+
+    std::string formatJSON();
 };
 
 /**
@@ -108,21 +137,17 @@ public:
     /**
      * Update the position of the weather station.
      *
-     * @param latitude  The latitude of the station
-     * @param longitude The longitude of the station
-     * @param elevation The elevation of the console, not the station, as the barometer which uses this value is in the console.
+     * @param position  The position of the station (not the ISS)
      * @return True if the position was updated
      */
-    bool updatePosition(double latitude, double longitude, int elevation);
-
-    bool retrievePosition(double & latitude, double & longitude, int & elevation);
+    bool updatePosition(const PositionData & position);
+    bool retrievePosition(PositionData & position);
 
 
     /**
      * Update the DST and time zone settings.
      */
     bool updateTimeSettings(const TimeSettings & timeSettings);
-
     bool retrieveTimeSettings(TimeSettings & timeSettings);
 
     /**
@@ -131,36 +156,29 @@ public:
      * updating them all simultaneously will reduce EEPROM writes. Also note that these settings
      * only change the displayed values, not the values reported in the serial protocol.
      *
-     * @param baroUnits        The units for barometric pressure
-     * @param temperatureUnits The units for temperature
-     * @param elevationUnits   The units for elevation
-     * @param rainUnits        The units for rainfall
-     * @param windUnits        The units for wind speed
-     * @return True if the EEPROM was updated successfully
+     * @param unitsSettings    The settings for all of the unit of display
+     * @return True if the units setting were written successfully
      */
-    bool updateUnitsSettings(BarometerUnits baroUnits,
-                             TemperatureUnits temperatureUnits,
-                             ElevationUnits elevationUnits,
-                             RainUnits rainUnits,
-                             WindUnits windUnits);
-
-    bool retrieveUnitsSettings(BarometerUnits & baroUnits,
-                               TemperatureUnits & temperatureUnits,
-                               ElevationUnits & elevationUnits,
-                               RainUnits & rainUnits,
-                               WindUnits & windUnits);
+    bool updateUnitsSettings(const UnitsSettings & unitsSettings);
+    bool retrieveUnitsSettings(UnitsSettings & unitsSettings);
 
     bool updateSetupBits(const SetupBits & setupBits);
-
     bool retrieveSetupBits(SetupBits & setupBits);
+
+    void retrieveTimeZoneOptions(std::vector<std::string> & timezoneList);
 
 private:
     void saveRainCollectorSize(ProtocolConstants::RainCupSizeType rainCupType);
 
     //static const int EEPROM_CONFIG_SIZE = 46;
 
-    VantageWeatherStation  &           station;
-    VantageLogger                      logger;
+    VantageWeatherStation &  station;
+    VantageLogger &          logger;
+    int                      secondaryWindCupSize;
+    ProtocolConstants::Month rainSeasonStartMonth;
+    StationId                retransmitId;
+    bool                     logFinalTemperature;  // Whether to log temperature at the end of an archive period,
+                                                   // false indicates that the average will be logged
 
     /**
      * Get the list of sensor stations.

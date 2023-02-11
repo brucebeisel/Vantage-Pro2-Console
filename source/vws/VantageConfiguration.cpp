@@ -28,9 +28,73 @@ using namespace std;
 namespace vws {
 using namespace ProtocolConstants;
 
+struct TimeZoneData {
+    int index;
+    int offsetMinutes;
+    const char * name;
+};
+
+static const TimeZoneData TIME_ZONES[] = {
+    0, -1200, "(GMT-12:00) Eniwetok, Kwajalein",
+    1, -1100, "(GMT-11:00) Midway Island, Samoa",
+    2, -1000, "(GMT-10:00) Hawaii",
+    3,  -900, "(GMT-09:00) Alaska",
+    4,  -800, "(GMT-08:00) Pacific Time, Tijuana",
+    5,  -700, "(GMT-07:00) Mountain Time",
+    6,  -600, "(GMT-06:00) Central Time",
+    7,  -600, "(GMT-06:00) Mexico City",
+    8,  -600, "(GMT-06:00) Central America",
+    9,  -500, "(GMT-05.00) Bogota, Lima, Quito",
+    10, -500, "(GMT-05:00) Eastern Time",
+    11, -400, "(GMT-04:00) Atlantic Time",
+    12, -400, "(GMT-04.00) Caracas, La Paz, Santiago",
+    13, -330, "(GMT-03.30) Newfoundland",
+    14, -300, "(GMT-03.00) Brasilia",
+    15, -300, "(GMT-03.00) Buenos Aires, Georgetown, Greenland",
+    16, -200, "(GMT-02.00) Mid-Atlantic",
+    17, -100, "(GMT-01:00) Azores, Cape Verde Island",
+    18,    0, "(GMT) Greenwich Mean Time, Dublin, Edinburgh, Lisbon, London",
+    19,    0, "(GMT) Monrovia, Casablanca",
+    20,  100, "(GMT+01.00) Berlin, Rome, Amsterdam, Bern, Stockholm, Vienna",
+    21,  100, "(GMT+01.00) Paris, Madrid, Brussels, Copenhagen, W Central Africa",
+    22,  100, "(GMT+01.00) Prague, Belgrade, Bratislava, Budapest, Ljubljana",
+    23,  200, "(GMT+02.00) Athens, Helsinki, Istanbul, Minsk, Riga, Tallinn",
+    24,  200, "(GMT+02:00) Cairo",
+    25,  200, "(GMT+02.00) Eastern Europe, Bucharest",
+    26,  200, "(GMT+02:00) Harare, Pretoria",
+    27,  200, "(GMT+02.00) Israel, Jerusalem",
+    28,  300, "(GMT+03:00) Baghdad, Kuwait, Nairobi, Riyadh",
+    29,  300, "(GMT+03.00) Moscow, St. Petersburg, Volgograd",
+    30,  330, "(GMT+03:30) Tehran",
+    31,  400, "(GMT+04:00) Abu Dhabi, Muscat, Baku, Tblisi, Yerevan, Kazan",
+    32,  430, "(GMT+04:30) Kabul",
+    33,  500, "(GMT+05:00) Islamabad, Karachi, Ekaterinburg, Tashkent",
+    34,  530, "(GMT+05:30) Bombay, Calcutta, Madras, New Delhi, Chennai",
+    35,  600, "(GMT+06:00) Almaty, Dhaka, Colombo, Novosibirsk, Astana",
+    36,  700, "(GMT+07:00) Bangkok, Jakarta, Hanoi, Krasnoyarsk",
+    37,  800, "(GMT+08:00) Beijing, Chongqing, Urumqi, Irkutsk, Ulaan Bataar",
+    38,  800, "(GMT+08:00) Hong Kong, Perth, Singapore, Taipei, Kuala Lumpur",
+    39,  900, "(GMT+09:00) Tokyo, Osaka, Sapporo, Seoul, Yakutsk",
+    40,  930, "(GMT+09:30) Adelaide",
+    41,  930, "(GMT+09:30) Darwin",
+    42, 1000, "(GMT+10:00) Brisbane, Melbourne, Sydney, Canberra",
+    43, 1000, "(GMT+10.00) Hobart, Guam, Port Moresby, Vladivostok",
+    44, 1100, "(GMT+11:00) Magadan, Solomon Is, New Caledonia",
+    45, 1200, "(GMT+12:00) Fiji, Kamchatka, Marshall Is.",
+    46, 1200, "(GMT+12:00) Wellington, Auckland"
+};
+
+static constexpr int NUM_TIME_ZONES = sizeof(TIME_ZONES) / sizeof(TIME_ZONES[0]);
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageConfiguration::VantageConfiguration(VantageWeatherStation & station) : station(station), logger(VantageLogger::getLogger("VantageConfiguration")) {
+VantageConfiguration::VantageConfiguration(VantageWeatherStation & station) : station(station),
+                                                                              rainSeasonStartMonth(ProtocolConstants::Month::JANUARY),
+                                                                              secondaryWindCupSize(0),
+                                                                              retransmitId(0),
+                                                                              logFinalTemperature(false),
+                                                                              logger(VantageLogger::getLogger("VantageConfiguration")) {
 
 }
 
@@ -42,18 +106,18 @@ VantageConfiguration::~VantageConfiguration() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::updatePosition(double latitude, double longitude, int elevation) {
+VantageConfiguration::updatePosition(const PositionData & position) {
     bool success = false;
     char buffer[4];
 
-    int value = std::lround(latitude * LAT_LON_SCALE);
+    int value = std::lround(position.latitude * LAT_LON_SCALE);
     BitConverter::getBytes(value, buffer, 0, 2);
 
-    value = std::lround(longitude * LAT_LON_SCALE);
+    value = std::lround(position.longitude * LAT_LON_SCALE);
     BitConverter::getBytes(value, buffer, 2, 2);
 
     if (station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
-        if (station.updateElevationAndBarometerOffset(elevation, 0.0)) {
+        if (station.updateElevationAndBarometerOffset(position.elevation, 0.0)) {
             success = true;
         }
     }
@@ -64,15 +128,15 @@ VantageConfiguration::updatePosition(double latitude, double longitude, int elev
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::retrievePosition(double & latitude, double & longitude, int & consoleElevation) {
+VantageConfiguration::retrievePosition(PositionData & position) {
     bool success = false;
 
     byte positionData[6];
 
     if (station.eepromBinaryRead(VantageEepromConstants::EE_LATITUDE_ADDRESS, 6, positionData)) {
-        latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / LAT_LON_SCALE;
-        longitude = static_cast<double>(BitConverter::toInt16(positionData, 2)) / LAT_LON_SCALE;
-        consoleElevation = BitConverter::toInt16(positionData, 4);
+        position.latitude = static_cast<double>(BitConverter::toInt16(positionData, 0)) / LAT_LON_SCALE;
+        position.longitude = static_cast<double>(BitConverter::toInt16(positionData, 2)) / LAT_LON_SCALE;
+        position.elevation = BitConverter::toInt16(positionData, 4);
         success = true;
     }
 
@@ -85,7 +149,16 @@ bool
 VantageConfiguration::updateTimeSettings(const TimeSettings & timeSettings) {
     byte buffer[6];
 
-    buffer[0] = '0' + timeSettings.timezoneIndex;
+    int tzIndex = 18;
+
+    for (int i = 0; i < NUM_TIME_ZONES; i++) {
+        if (TIME_ZONES[i].name == timeSettings.timezoneName) {
+            tzIndex = TIME_ZONES[i].index;
+            break;
+        }
+    }
+
+    buffer[0] = tzIndex;
     buffer[1] = timeSettings.manualDaylightSavingsTime ? 1 : 0;
     buffer[2] = timeSettings.manualDaylightSavingsTimeOn ? 1 : 0;
     buffer[5] = timeSettings.useGmtOffset ? 1 : 0;
@@ -104,7 +177,17 @@ VantageConfiguration::retrieveTimeSettings(TimeSettings & timeSettings) {
     byte buffer[6];
 
     if (station.eepromBinaryRead(VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS, 6, buffer)) {
-        timeSettings.timezoneIndex = buffer[0] - '0';
+        const char * tzName = "";
+        int tzIndex = BitConverter::toInt8(buffer, 0);
+
+        for (int i = 0; i < NUM_TIME_ZONES; i++) {
+            if (TIME_ZONES[i].index == tzIndex) {
+                tzName = TIME_ZONES[i].name;
+                break;
+            }
+        }
+
+        timeSettings.timezoneName = tzName;
         timeSettings.manualDaylightSavingsTime = BitConverter::toInt8(buffer, 1) == 1;
         timeSettings.manualDaylightSavingsTimeOn = BitConverter::toInt8(buffer, 2) == 1;
 
@@ -120,23 +203,19 @@ VantageConfiguration::retrieveTimeSettings(TimeSettings & timeSettings) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::updateUnitsSettings(BarometerUnits baroUnits,
-                                          TemperatureUnits temperatureUnits,
-                                          ElevationUnits elevationUnits,
-                                          RainUnits rainUnits,
-                                          WindUnits windUnits) {
+VantageConfiguration::updateUnitsSettings(const UnitsSettings & unitsSettings) {
     bool success = false;
     byte buffer;
-    buffer = static_cast<int>(baroUnits) & 0x3;
-    buffer |= (static_cast<int>(temperatureUnits) & 0x3) << 2;
-    buffer |= (static_cast<int>(elevationUnits) & 0x1) << 4;
-    buffer |= (static_cast<int>(rainUnits) & 0x1) << 5;
-    buffer |= (static_cast<int>(windUnits) & 0x3) << 6;
+    buffer = static_cast<int>(unitsSettings.baroUnits) & 0x3;
+    buffer |= (static_cast<int>(unitsSettings.temperatureUnits) & 0x3) << 2;
+    buffer |= (static_cast<int>(unitsSettings.elevationUnits) & 0x1) << 4;
+    buffer |= (static_cast<int>(unitsSettings.rainUnits) & 0x1) << 5;
+    buffer |= (static_cast<int>(unitsSettings.windUnits) & 0x3) << 6;
 
     byte invertedBuffer = ~buffer;
     if (station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, &buffer, 1) &&
         station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS + 1, &invertedBuffer, 1)) {
-            success = true;
+        success = true;
     }
 
     return success;
@@ -145,19 +224,15 @@ VantageConfiguration::updateUnitsSettings(BarometerUnits baroUnits,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::retrieveUnitsSettings(BarometerUnits & baroUnits,
-                                            TemperatureUnits & temperatureUnits,
-                                            ElevationUnits & elevationUnits,
-                                            RainUnits & rainUnits,
-                                            WindUnits & windUnits) {
+VantageConfiguration::retrieveUnitsSettings(UnitsSettings & unitsSettings) {
     bool success = false;
     byte buffer;
     if (station.eepromBinaryRead(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, 1, &buffer)) {
-        baroUnits = static_cast<BarometerUnits>(buffer & 0x3);
-        temperatureUnits = static_cast<TemperatureUnits>((buffer >> 2) & 0x3);
-        elevationUnits = static_cast<ElevationUnits>((buffer >> 4) & 0x1);
-        rainUnits = static_cast<RainUnits>((buffer >> 5) & 0x1);
-        windUnits = static_cast<WindUnits>((buffer >> 6) & 0x3);
+        unitsSettings.baroUnits = static_cast<BarometerUnits>(buffer & 0x3);
+        unitsSettings.temperatureUnits = static_cast<TemperatureUnits>((buffer >> 2) & 0x3);
+        unitsSettings.elevationUnits = static_cast<ElevationUnits>((buffer >> 4) & 0x1);
+        unitsSettings.rainUnits = static_cast<RainUnits>((buffer >> 5) & 0x1);
+        unitsSettings.windUnits = static_cast<WindUnits>((buffer >> 6) & 0x3);
         success = true;
     }
 
@@ -234,6 +309,15 @@ VantageConfiguration::saveRainCollectorSize(RainCupSizeType rainCupType) {
     }
 
     VantageDecoder::setRainCollectorSize(rainCollectorSize);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageConfiguration::retrieveTimeZoneOptions(std::vector<std::string> & timezoneList) {
+    for (int i = 0; i < NUM_TIME_ZONES; i++) {
+        timezoneList.push_back(string(TIME_ZONES[i].name));
+    }
 }
 
 }

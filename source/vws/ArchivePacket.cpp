@@ -154,14 +154,13 @@ ArchivePacket::formatXML() const {
     DateTime archiveTime = extractArchiveDate();
     ss << "<time>" << Weather::formatDateTime(archiveTime) << "</time>"; // @suppress("Ambiguous problem")
 
-    Measurement<Temperature> temperature;
-    VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    Measurement<Temperature> temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatXML("avgOutsideTemperature");
 
-    VantageDecoder::decode16BitHighTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    temperature = VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatXML("highOutsideTemperature");
 
-    VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    temperature = VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatXML("lowOutsideTemperature");
 
     Rainfall r = VantageDecoder::decodeRain(buffer, RAINFALL_OFFSET);
@@ -170,22 +169,19 @@ ArchivePacket::formatXML() const {
     r = VantageDecoder::decodeRain(buffer, HIGH_RAIN_RATE_OFFSET);
     ss << "<highRainfallRate>" << r << "</highRainfallRate>";
 
-    Measurement<Pressure> baroPressure;
-    VantageDecoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET, baroPressure);
+    Measurement<Pressure> baroPressure = VantageDecoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET );
     ss << baroPressure.formatXML("baroPressure");
 
-    Measurement<SolarRadiation> solarRadiation;
-    VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET, solarRadiation);
+    Measurement<SolarRadiation> solarRadiation = VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET);
     ss << solarRadiation.formatXML("avgSolarRadiation");
   
-    VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET, temperature);
+    temperature = VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatXML("insideTemperature");
 
-    Measurement<Humidity> humidity;
-    VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET, humidity);
+    Measurement<Humidity> humidity = VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET);
     ss << humidity.formatXML("insideHumidity");
 
-    VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET, humidity);
+    humidity = VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET);
     ss << humidity.formatXML("outsideHumidity");
 
     //
@@ -209,22 +205,21 @@ ArchivePacket::formatXML() const {
            << "</highWind>";
     }
 
-    Measurement<UvIndex> uvIndex;
-    VantageDecoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET, uvIndex);
+    Measurement<UvIndex> uvIndex = VantageDecoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET);
     ss << uvIndex.formatXML("avgUvIndex");
 
     Measurement<Evapotranspiration> et = VantageDecoder::decodeDayET(buffer, ET_OFFSET);
     ss <<  et.formatXML("evapotranspiration");
 
-    VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET, solarRadiation);
+    solarRadiation = VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET);
     ss << solarRadiation.formatXML("highSolarRadiation");
 
-    VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET, uvIndex);
+    uvIndex = VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET);
     ss << uvIndex.formatXML("highUvIndex");
 
     ss << "<extraHumidities>";
     for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++) {
-        VantageDecoder::decodeHumidity(buffer, EXTRA_HUMIDITIES_BASE_OFFSET + i, humidity);
+        humidity = VantageDecoder::decodeHumidity(buffer, EXTRA_HUMIDITIES_BASE_OFFSET + i);
         if (humidity.isValid()) {
             ss << "<humidity><index>" << i << "</index><value>" << humidity.getValue() << "</value></humidity>";
         }
@@ -233,7 +228,7 @@ ArchivePacket::formatXML() const {
 
     ss << "<extraTemperatures>";
     for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
-        VantageDecoder::decode8BitTemperature(buffer, EXTRA_TEMPERATURES_BASE_OFFSET + i, temperature);
+        temperature = VantageDecoder::decode8BitTemperature(buffer, EXTRA_TEMPERATURES_BASE_OFFSET + i);
         if (temperature.isValid()) {
             ss << "<temperature><index>" << i << "</index><value>" << temperature.getValue() << "</value></temperature>";
         }
@@ -288,14 +283,13 @@ ArchivePacket::formatJSON() const {
     DateTime archiveTime = extractArchiveDate();
     ss << "\"time\" : \"" << Weather::formatDateTime(archiveTime); // @suppress("Ambiguous problem")
 
-    Measurement<Temperature> temperature;
-    VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    Measurement<Temperature> temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatJSON("avgOutsideTemperature", true);
 
-    VantageDecoder::decode16BitHighTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    temperature = VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatJSON("highOutsideTemperature", true);
 
-    VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET, temperature);
+    temperature = VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatJSON("lowOutsideTemperature", true);
 
     Rainfall r = VantageDecoder::decodeRain(buffer, RAINFALL_OFFSET);
@@ -304,22 +298,19 @@ ArchivePacket::formatJSON() const {
     r = VantageDecoder::decodeRain(buffer, HIGH_RAIN_RATE_OFFSET);
     ss << ", \"highRainfallRate\" : " << r;
 
-    Measurement<Pressure> baroPressure;
-    VantageDecoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET, baroPressure);
+    Measurement<Pressure> baroPressure = VantageDecoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET);
     ss << baroPressure.formatJSON("barometricPressure", true);
 
-    Measurement<SolarRadiation> solarRadiation;
-    VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET, solarRadiation);
+    Measurement<SolarRadiation> solarRadiation = VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET);
     ss << solarRadiation.formatJSON("avgSolarRadiation", true);
 
-    VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET, temperature);
+    temperature = VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatJSON("insideTemperature", true);
 
-    Measurement<Humidity> humidity;
-    VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET, humidity);
+    Measurement<Humidity> humidity = VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET);
     ss << humidity.formatJSON("insideHumidity", true);
 
-    VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET, humidity);
+    humidity = VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET);
     ss << humidity.formatJSON("outsideHumidity", true);
 
     //
@@ -341,18 +332,17 @@ ArchivePacket::formatJSON() const {
            << "\"direction\" : " << windDir << " } ";
     }
 
-    Measurement<UvIndex> uvIndex;
-    VantageDecoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET, uvIndex);
+    Measurement<UvIndex> uvIndex = VantageDecoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET);
     ss << uvIndex.formatJSON("avgUvIndex", true);
 
     Measurement<Evapotranspiration> et = VantageDecoder::decodeArchiveET(buffer, ET_OFFSET);
     if (et.isValid())
         ss <<  et.formatJSON("evapotranspiration", true);
 
-    VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET, solarRadiation);
+    solarRadiation = VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET);
     ss << solarRadiation.formatJSON("highSolarRadiation", true);
 
-    VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET, uvIndex);
+    uvIndex = VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET);
     ss << uvIndex.formatJSON("highUvIndex", true);
 
     int forecastRule = BitConverter::toInt8(buffer, FORECAST_RULE_OFFSET);
@@ -361,7 +351,7 @@ ArchivePacket::formatJSON() const {
     bool firstValue = true;
     ss << ", \"extraHumidities\" : [";
     for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++) {
-        VantageDecoder::decodeHumidity(buffer, EXTRA_HUMIDITIES_BASE_OFFSET + i, humidity);
+        humidity = VantageDecoder::decodeHumidity(buffer, EXTRA_HUMIDITIES_BASE_OFFSET + i);
         if (humidity.isValid()) {
             if (!firstValue)
                 ss << ", ";
@@ -375,7 +365,7 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"extraTemperatures\" : [ ";
     for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
-        VantageDecoder::decode8BitTemperature(buffer, EXTRA_TEMPERATURES_BASE_OFFSET + i, temperature);
+        temperature = VantageDecoder::decode8BitTemperature(buffer, EXTRA_TEMPERATURES_BASE_OFFSET + i);
         if (temperature.isValid()) {
             if (!firstValue)
                 ss << ", ";
