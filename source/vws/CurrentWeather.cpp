@@ -231,7 +231,7 @@ CurrentWeather::formatJSON() const {
 
     if (loopPacket.isStormOngoing())
         ss << ", \"stormStart\" : \"" << Weather::formatDate(loopPacket.getStormStart()) << "\""
-           << ", { \"stormRain\" : " << loopPacket.getStormRain();
+           << ", \"stormRain\" : " << loopPacket.getStormRain();
 
 
     ss << ", \"forecastRule\" : \"" << ForecastRule::forecastString(loopPacket.getForecastRuleIndex()) << "\""
