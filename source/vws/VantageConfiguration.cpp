@@ -211,6 +211,9 @@ VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSe
     timeSettings.manualDaylightSavingsTimeOn = BitConverter::toInt8(buffer, offset + 2) == 1;
 
     int value16 = BitConverter::toInt16(buffer, offset + 3);
+    if (value16 < 0)
+        value16 = (~value16) + 1;
+
     //timeSettings.gmtOffsetMinutes = ((value16 / 100) * 60) + (value16 % 100);
     timeSettings.gmtOffsetMinutes = value16;
     timeSettings.useGmtOffset = BitConverter::toInt8(buffer, offset + 5) == 1;
@@ -308,12 +311,12 @@ VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageConfiguration::decodeSetupBits(const byte * buffer, int offset, SetupBits & setupBits) {
-        setupBits.is24HourMode = (buffer[offset] & 0x1) == 1;
-        setupBits.isCurrentlyAM = (buffer[offset] & 0x2) == 1;
-        setupBits.isDayMonthDisplay = (buffer[offset] & 0x4) == 1;
-        setupBits.isWindCupLarge = (buffer[offset] & 0x8) == 1;
-        setupBits.isNorthLatitude = (buffer[offset] & 0x40) == 1;
-        setupBits.isEastLongitude = (buffer[offset] & 0x80) == 1;
+        setupBits.is24HourMode = (buffer[offset] & 0x1) != 0;
+        setupBits.isCurrentlyAM = (buffer[offset] & 0x2) != 0;
+        setupBits.isDayMonthDisplay = (buffer[offset] & 0x4) != 0;
+        setupBits.isWindCupLarge = (buffer[offset] & 0x8) != 0;
+        setupBits.isNorthLatitude = (buffer[offset] & 0x40) != 0;
+        setupBits.isEastLongitude = (buffer[offset] & 0x80) != 0;
         setupBits.rainCollectorSizeType = static_cast<ProtocolConstants::RainCupSizeType>((buffer[offset] >> 4) & 0x3);
 
 }
