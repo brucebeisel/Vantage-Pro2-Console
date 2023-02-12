@@ -342,15 +342,15 @@ VantageConfiguration::retrieveAllConfigurationData() {
             << "  \"time\" : {"
             << " \"gmtoffsetminutes\" : " << timeSettings.gmtOffsetMinutes
             << ", \"manualdst\" : " << timeSettings.manualDaylightSavingsTime
-            << ", \"manualdston\" : " << timeSettings.manualDaylightSavingsTimeOn
+            << ", \"manualDSTon\" : " << timeSettings.manualDaylightSavingsTimeOn
             << ", \"timezonename\" : \"" << timeSettings.timezoneName << "\""
-            << " \"usegmtoffset\" : \"" << timeSettings.useGmtOffset
+            << ", \"useGMToffset\" : " << timeSettings.useGmtOffset
             << " }, \"units\" : {"
             << " \"barounits\" : \"" << barometerUnitsEnum.valueToString(unitsSettings.baroUnits) << "\""
-            << ", \"elevationunits\" : " << unitsSettings.elevationUnits
-            << ", \"rainunits\" : " << unitsSettings.rainUnits
-            << ", \"temperatureunits\" : " << unitsSettings.temperatureUnits
-            << ", \"windunits\" : " << unitsSettings.windUnits
+            << ", \"elevationunits\" : \"" << unitsSettings.elevationUnits << "\""
+            << ", \"rainunits\" : \"" << unitsSettings.rainUnits << "\""
+            << ", \"temperatureunits\" : \"" << unitsSettings.temperatureUnits << "\""
+            << ", \"windunits\" : \"" << unitsSettings.windUnits << "\""
             << " }, \"setupBits\" : {"
             << " \"24hourmode\" : " << setupBits.is24HourMode
             << ", \"ammode\" : " << setupBits.isAMMode
@@ -361,9 +361,9 @@ VantageConfiguration::retrieveAllConfigurationData() {
             << ", \"raincollectorsize\" : " << static_cast<int>(setupBits.rainCollectorSizeType)
             << " }, \"misc\" : {"
             << " \"2ndwindcupsize\" : " << secondaryWindCupSize
-            << " \"rainseasonstartmonth\" : " << static_cast<int>(rainSeasonStartMonth)
-            << " \"retransmitid\" : " << retransmitId
-            << " \"logfinaltemperature\" : " << logFinalTemperature
+            << ", \"rainseasonstartmonth\" : " << static_cast<int>(rainSeasonStartMonth)
+            << ", \"retransmitid\" : " << retransmitId
+            << ", \"logfinaltemperature\" : " << logFinalTemperature
             << "} } }";
         return oss.str();
     }
