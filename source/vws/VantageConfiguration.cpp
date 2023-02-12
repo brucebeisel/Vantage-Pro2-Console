@@ -211,7 +211,8 @@ VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSe
     timeSettings.manualDaylightSavingsTimeOn = BitConverter::toInt8(buffer, offset + 2) == 1;
 
     int value16 = BitConverter::toInt16(buffer, offset + 3);
-    timeSettings.gmtOffsetMinutes = ((value16 / 100) * 60) + (value16 % 100);
+    //timeSettings.gmtOffsetMinutes = ((value16 / 100) * 60) + (value16 % 100);
+    timeSettings.gmtOffsetMinutes = value16;
     timeSettings.useGmtOffset = BitConverter::toInt8(buffer, offset + 5) == 1;
 }
 
@@ -269,7 +270,7 @@ VantageConfiguration::updateSetupBits(const SetupBits & setupBits) {
     byte buffer;
 
     buffer = setupBits.is24HourMode ?  0x1 : 0;
-    buffer |= setupBits.isAMMode ? 0x2 : 0;
+    buffer |= setupBits.isCurrentlyAM ? 0x2 : 0;
     buffer |= setupBits.isDayMonthDisplay ? 0x4 : 0;
     buffer |= setupBits.isWindCupLarge ? 0x8 : 0;
     buffer |= setupBits.isNorthLatitude ? 0x40 : 0;
@@ -307,12 +308,14 @@ VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageConfiguration::decodeSetupBits(const byte * buffer, int offset, SetupBits & setupBits) {
-        setupBits.is24HourMode = (buffer[offset] & 0x1) == 0;
-        setupBits.isAMMode = (buffer[offset] & 0x2) == 1;
+        setupBits.is24HourMode = (buffer[offset] & 0x1) == 1;
+        setupBits.isCurrentlyAM = (buffer[offset] & 0x2) == 1;
         setupBits.isDayMonthDisplay = (buffer[offset] & 0x4) == 1;
         setupBits.isWindCupLarge = (buffer[offset] & 0x8) == 1;
         setupBits.isNorthLatitude = (buffer[offset] & 0x40) == 1;
         setupBits.isEastLongitude = (buffer[offset] & 0x80) == 1;
+        setupBits.rainCollectorSizeType = static_cast<ProtocolConstants::RainCupSizeType>((buffer[offset] >> 4) & 0x3);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -332,7 +335,7 @@ VantageConfiguration::retrieveAllConfigurationData() {
         decodeSetupBits(buffer, VantageEepromConstants::EE_SETUP_BITS_ADDRESS - 1, setupBits);
         decodeUnitsSettings(buffer, VantageEepromConstants::EE_UNIT_BITS_ADDRESS - 1, unitsSettings);
         decodeTimeSettings(buffer, VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS - 1, timeSettings);
-        secondaryWindCupSize = buffer[VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS - 1];
+        secondaryWindCupSize = buffer[VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS - 1] & 0x3;
         rainSeasonStartMonth = static_cast<ProtocolConstants::Month>(buffer[VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS - 1]);
         retransmitId = buffer[VantageEepromConstants::EE_RETRANSMIT_ID_ADDRESS - 1];
         logFinalTemperature = logFinalTemperatureValue;
@@ -347,13 +350,13 @@ VantageConfiguration::retrieveAllConfigurationData() {
             << ", \"useGMToffset\" : " << timeSettings.useGmtOffset
             << " }, \"units\" : {"
             << " \"barounits\" : \"" << barometerUnitsEnum.valueToString(unitsSettings.baroUnits) << "\""
-            << ", \"elevationunits\" : \"" << unitsSettings.elevationUnits << "\""
-            << ", \"rainunits\" : \"" << unitsSettings.rainUnits << "\""
-            << ", \"temperatureunits\" : \"" << unitsSettings.temperatureUnits << "\""
-            << ", \"windunits\" : \"" << unitsSettings.windUnits << "\""
+            << ", \"elevationunits\" : \"" << elevationUnitsEnum.valueToString(unitsSettings.elevationUnits) << "\""
+            << ", \"rainunits\" : \"" << rainUnitsEnum.valueToString(unitsSettings.rainUnits) << "\""
+            << ", \"temperatureunits\" : \"" << temperatureUnitsEnum.valueToString(unitsSettings.temperatureUnits) << "\""
+            << ", \"windunits\" : \"" << windUnitsEnum.valueToString(unitsSettings.windUnits) << "\""
             << " }, \"setupBits\" : {"
             << " \"24hourmode\" : " << setupBits.is24HourMode
-            << ", \"ammode\" : " << setupBits.isAMMode
+            << ", \"currentlyAM\" : " << setupBits.isCurrentlyAM
             << ", \"daymonthdisplay\" : " << setupBits.isDayMonthDisplay
             << ", \"eastlongitude\" : " << setupBits.isEastLongitude
             << ", \"northlatitude\" : " << setupBits.isNorthLatitude

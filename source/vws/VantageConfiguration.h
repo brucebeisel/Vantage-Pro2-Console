@@ -84,7 +84,7 @@ struct TimeSettings {
 
 struct SetupBits {
     bool is24HourMode;
-    bool isAMMode;
+    bool isCurrentlyAM;
     bool isDayMonthDisplay;
     bool isWindCupLarge;
     ProtocolConstants::RainCupSizeType rainCollectorSizeType;
