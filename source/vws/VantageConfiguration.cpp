@@ -319,12 +319,13 @@ VantageConfiguration::decodeSetupBits(const byte * buffer, int offset, SetupBits
 ////////////////////////////////////////////////////////////////////////////////
 string
 VantageConfiguration::retrieveAllConfigurationData() {
-    byte buffer[VantageEepromConstants::EE_DATA_BLOCK_SIZE];
+    byte buffer[EEPROM_CONFIG_SIZE];
+    byte logFinalTemperatureValue;
 
     //
     // Read the entire configuration section of the EEPROM
     //
-    if (station.eepromBinaryRead(1U, sizeof(buffer), buffer)) {
+    if (station.eepromBinaryRead(1U, sizeof(buffer), buffer) && station.eepromBinaryRead(VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS, 1, &logFinalTemperatureValue)) {
         SetupBits setupBits;
         UnitsSettings unitsSettings;
         TimeSettings timeSettings;
@@ -334,7 +335,8 @@ VantageConfiguration::retrieveAllConfigurationData() {
         secondaryWindCupSize = buffer[VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS - 1];
         rainSeasonStartMonth = static_cast<ProtocolConstants::Month>(buffer[VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS - 1]);
         retransmitId = buffer[VantageEepromConstants::EE_RETRANSMIT_ID_ADDRESS - 1];
-        logFinalTemperature = buffer[VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS - 1];
+        logFinalTemperature = logFinalTemperatureValue;
+
         ostringstream oss;
         oss << "{ \"configuration\" : { "
             << "  \"time\" : {"

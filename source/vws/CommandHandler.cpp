@@ -168,7 +168,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
         else {
             ostringstream oss;
-            oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << "," << DATA_TOKEN << "[ { \"error\" : \"unrecognized command\" } ] }";
+            oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"unrecognized command\" } ] }";
             responseJson = oss.str();
         }
     }
