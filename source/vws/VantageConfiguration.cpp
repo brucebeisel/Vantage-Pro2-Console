@@ -211,8 +211,9 @@ VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSe
     timeSettings.manualDaylightSavingsTimeOn = BitConverter::toInt8(buffer, offset + 2) == 1;
 
     int value16 = BitConverter::toInt16(buffer, offset + 3);
+    cout << "Raw GMT offset minute value: 0x" << hex << value16 << dec << endl;;
     if (value16 < 0)
-        value16 = (~value16) + 1;
+        value16 = ~(value16 & 0xFFFF) + 1;
 
     //timeSettings.gmtOffsetMinutes = ((value16 / 100) * 60) + (value16 % 100);
     timeSettings.gmtOffsetMinutes = value16;
@@ -332,9 +333,11 @@ VantageConfiguration::retrieveAllConfigurationData() {
     // Read the entire configuration section of the EEPROM
     //
     if (station.eepromBinaryRead(1U, sizeof(buffer), buffer) && station.eepromBinaryRead(VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS, 1, &logFinalTemperatureValue)) {
+        PositionData positionData;
         SetupBits setupBits;
         UnitsSettings unitsSettings;
         TimeSettings timeSettings;
+        decodePosition(buffer, VantageEepromConstants::EE_LATITUDE_ADDRESS - 1, positionData);
         decodeSetupBits(buffer, VantageEepromConstants::EE_SETUP_BITS_ADDRESS - 1, setupBits);
         decodeUnitsSettings(buffer, VantageEepromConstants::EE_UNIT_BITS_ADDRESS - 1, unitsSettings);
         decodeTimeSettings(buffer, VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS - 1, timeSettings);
@@ -345,7 +348,11 @@ VantageConfiguration::retrieveAllConfigurationData() {
 
         ostringstream oss;
         oss << "{ \"configuration\" : { "
-            << "  \"time\" : {"
+            << "  \"position\" : {"
+            << " \"latitude\" : " << positionData.latitude
+            << ", \"longitude\" : " << positionData.longitude
+            << ", \"elevation\" : " << positionData.elevation
+            << " }, \"time\" : {"
             << " \"gmtoffsetminutes\" : " << timeSettings.gmtOffsetMinutes
             << ", \"manualdst\" : " << timeSettings.manualDaylightSavingsTime
             << ", \"manualDSTon\" : " << timeSettings.manualDaylightSavingsTimeOn
