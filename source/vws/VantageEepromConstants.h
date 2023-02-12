@@ -111,6 +111,7 @@ namespace VantageEepromConstants {
     static constexpr unsigned EE_WIND_SPEED_GRAPH_TIME_SPAN_ADDRESS = 0x51;
     static constexpr unsigned EE_ALARM_THRESHOLDS_ADDRESS =           0x52;
     static constexpr unsigned EE_GRAPH_POINTERS_ADDRESS =             177;  // Decimal because the protocol document uses decimal for graph data addresses
+    static constexpr unsigned EE_WIND_CUP_SIZE_ADDRESS =              195;  // Decimal because the protocol document uses decimal for graph data addresses
     static constexpr unsigned EE_GRAPH_DATA_ADDRESS =                 325;
     static constexpr unsigned EE_LOG_AVG_TEMP_ADDRESS =               0xFFC;
     static constexpr unsigned EE_PASSWORD_CRC_ADDRESS =               0xFFE;

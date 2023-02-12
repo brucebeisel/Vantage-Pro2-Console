@@ -167,10 +167,17 @@ public:
 
     void retrieveTimeZoneOptions(std::vector<std::string> & timezoneList);
 
+    std::string retrieveAllConfigurationData();
+
 private:
+    void decodePosition(byte * buffer, int offset, PositionData & positionData);
+    void decodeTimeSettings(const byte * buffer, int offset, TimeSettings & timeSettings);
+    void decodeUnitsSettings(const byte * buffer, int offset, UnitsSettings & unitsSettings);
+    void decodeSetupBits(const byte * buffer, int offset, SetupBits & setupBits);
+
     void saveRainCollectorSize(ProtocolConstants::RainCupSizeType rainCupType);
 
-    //static const int EEPROM_CONFIG_SIZE = 46;
+    static const int EEPROM_CONFIG_SIZE = 46;
 
     VantageWeatherStation &  station;
     VantageLogger &          logger;
