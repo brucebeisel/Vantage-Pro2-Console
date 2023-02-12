@@ -37,7 +37,12 @@ using byte = char;
 using DateTime = time_t;
 using Evapotranspiration = double;
 using StationId = unsigned;
-
+using int8 = byte;
+using uint8 = unsigned char;
+using int16 = short;
+using uint16 = unsigned short;
+using int32 = int;
+using uint32 = unsigned int;
 }
 
 #endif

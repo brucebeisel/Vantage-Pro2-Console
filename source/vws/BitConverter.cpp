@@ -32,9 +32,9 @@ BitConverter::~BitConverter() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+int8
 BitConverter::toInt8(const byte buffer[], int index) {
-    int result = (static_cast<int>(buffer[index]) & ONE_BYTE_MASK);
+    int8 result = (static_cast<int8>(buffer[index]) & ONE_BYTE_MASK);
     if (buffer[index] & SIGN_BIT)
         result *= -1;
 
@@ -43,37 +43,37 @@ BitConverter::toInt8(const byte buffer[], int index) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-unsigned int
+uint8
 BitConverter::toUint8(const byte buffer[], int index) {
-    return static_cast<unsigned int>(buffer[index]) & ONE_BYTE_MASK;
+    return static_cast<uint8>(buffer[index]) & ONE_BYTE_MASK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+int16
 BitConverter::toInt16(const byte buffer[], int index, bool littleEndian) {
-    return bitsToInt<short, int>(&buffer[index], littleEndian, true);
+    return bitsToInt<int16>(&buffer[index], littleEndian, true);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-unsigned int
+uint16
 BitConverter::toUint16(const byte buffer[], int index, bool littleEndian) {
-    return bitsToInt<short, unsigned int>(&buffer[index], littleEndian, false);
+    return bitsToInt<uint16>(&buffer[index], littleEndian, false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+int32
 BitConverter::toInt32(const byte buffer[], int index, bool littleEndian) {
-    return bitsToInt<int, int>(&buffer[index], littleEndian, true);
+    return bitsToInt<int32>(&buffer[index], littleEndian, true);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-unsigned int
+uint32
 BitConverter::toUint32(const byte buffer[], int index, bool littleEndian) {
-    return bitsToInt<int, unsigned int>(&buffer[index], littleEndian, false);
+    return bitsToInt<uint32>(&buffer[index], littleEndian, false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,10 +94,10 @@ BitConverter::getBytes(int value, byte buffer[], int index, int nbytes, bool lit
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-template <typename T, typename R>
-R
+template <typename T>
+T
 BitConverter::bitsToInt(const byte * bits, bool littleEndian, bool isSigned) {
-    R result = 0;
+    T result = 0;
     bool signBitSet = false;
     if (littleEndian) {
         signBitSet = bits[sizeof(T) - 1] & SIGN_BIT;

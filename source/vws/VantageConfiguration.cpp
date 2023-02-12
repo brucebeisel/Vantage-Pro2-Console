@@ -111,11 +111,11 @@ VantageConfiguration::updatePosition(const PositionData & position) {
     bool success = false;
     char buffer[4];
 
-    int value = std::lround(position.latitude * LAT_LON_SCALE);
-    BitConverter::getBytes(value, buffer, 0, 2);
+    int16 value16 = std::lround(position.latitude * LAT_LON_SCALE);
+    BitConverter::getBytes(value16, buffer, 0, 2);
 
-    value = std::lround(position.longitude * LAT_LON_SCALE);
-    BitConverter::getBytes(value, buffer, 2, 2);
+    value16 = std::lround(position.longitude * LAT_LON_SCALE);
+    BitConverter::getBytes(value16, buffer, 2, 2);
 
     if (station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
         if (station.updateElevationAndBarometerOffset(position.elevation, 0.0)) {
@@ -210,10 +210,7 @@ VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSe
     timeSettings.manualDaylightSavingsTime = BitConverter::toInt8(buffer, offset + 1) == 1;
     timeSettings.manualDaylightSavingsTimeOn = BitConverter::toInt8(buffer, offset + 2) == 1;
 
-    int value16 = BitConverter::toInt16(buffer, offset + 3);
-    cout << "Raw GMT offset minute value: 0x" << hex << value16 << dec << endl;;
-    if (value16 < 0)
-        value16 = ~(value16 & 0xFFFF) + 1;
+    int16 value16 = BitConverter::toInt16(buffer, offset + 3);
 
     //timeSettings.gmtOffsetMinutes = ((value16 / 100) * 60) + (value16 % 100);
     timeSettings.gmtOffsetMinutes = value16;

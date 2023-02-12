@@ -38,8 +38,8 @@ public:
      * @param index The index within the buffer to do the conversion
      * @return The converted integer
      */
-    static int toInt8(const byte buffer[], int index);
-    static unsigned int toUint8(const byte buffer[], int index);
+    static int8 toInt8(const byte buffer[], int index);
+    static uint8 toUint8(const byte buffer[], int index);
 
     /**
      * Convert two bytes to a integer.
@@ -53,8 +53,8 @@ public:
      * be signed. Perhaps add unsigned version of toInt8(), toInt16() and toInt32()
      * For instance "static unsigned int toUint16(...)"
      */
-    static int toInt16(const byte buffer[], int index, bool littleEndian = true);
-    static unsigned int toUint16(const byte buffer[], int index, bool littleEndian = true);
+    static int16 toInt16(const byte buffer[], int index, bool littleEndian = true);
+    static uint16 toUint16(const byte buffer[], int index, bool littleEndian = true);
 
     /**
      * Convert four bytes to a integer.
@@ -64,8 +64,8 @@ public:
      * @param littleEndian True if the buffer holds the integer in little endian format
      * @return The converted integer
      */
-    static int toInt32(const byte buffer[], int index, bool littleEndian = true);
-    static unsigned int toUint32(const byte buffer[], int index, bool littleEndian = true);
+    static int32 toInt32(const byte buffer[], int index, bool littleEndian = true);
+    static uint32 toUint32(const byte buffer[], int index, bool littleEndian = true);
 
     /**
      * Convert an integer into bytes.
@@ -112,7 +112,7 @@ private:
      * @param isSigned     Whether the input should be treated as signed or unsigned
      * @return The integer
      */
-    template <typename T, typename R> static R bitsToInt(const byte bits[], bool littleEndian, bool isSigned);
+    template <typename T> static T bitsToInt(const byte bits[], bool littleEndian, bool isSigned);
 };
 }
 #endif
