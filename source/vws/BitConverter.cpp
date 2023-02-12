@@ -111,10 +111,6 @@ BitConverter::bitsToInt(const byte * bits, bool littleEndian, bool isSigned) {
             result = (result << BITS_PER_BYTE) + (static_cast<int>(bits[n]) & ONE_BYTE_MASK);
     }
 
-    if (isSigned && signBitSet) {
-        result *= -1;
-    }
-
     return result;
 }
 
