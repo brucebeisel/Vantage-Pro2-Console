@@ -393,7 +393,7 @@ CommandHandler::handleClearCumulativeValueCommand(const std::string & commandNam
         bool argFound = false;
         for (CommandArgument arg : argumentList) {
             if (arg.first == "value") {
-                 value = cumulativeValueEnum.stringToValue(arg.second);
+                value = cumulativeValueEnum.stringToValue(arg.second);
                 argFound = true;
             }
         }
@@ -405,6 +405,7 @@ CommandHandler::handleClearCumulativeValueCommand(const std::string & commandNam
     }
     catch (std::exception & e) {
         oss << FAILURE_TOKEN;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception: " << e.what() << endl;
     }
 
     oss << " }";

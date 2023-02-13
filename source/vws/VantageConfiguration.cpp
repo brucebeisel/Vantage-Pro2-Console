@@ -344,7 +344,8 @@ VantageConfiguration::retrieveAllConfigurationData() {
         logFinalTemperature = logFinalTemperatureValue;
 
         ostringstream oss;
-        oss << "{ \"configuration\" : { "
+        oss << std::boolalpha
+            << "{ \"configuration\" : { "
             << "  \"position\" : {"
             << " \"latitude\" : " << positionData.latitude
             << ", \"longitude\" : " << positionData.longitude

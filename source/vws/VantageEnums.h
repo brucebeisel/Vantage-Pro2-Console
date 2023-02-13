@@ -382,7 +382,7 @@ operator<<(std::ostream & os, VantageEepromConstants::RepeaterId value) {
 static const NameValuePair<ProtocolConstants::CumulativeValue> cvMappings[] = {
     { "Daily Rain", ProtocolConstants::CumulativeValue::DAILY_RAIN_CUM },
     { "Storm Rain", ProtocolConstants::CumulativeValue::STORM_RAIN_CUM },
-    { "Month Rain ", ProtocolConstants::CumulativeValue::MONTH_RAIN_CUM },
+    { "Month Rain", ProtocolConstants::CumulativeValue::MONTH_RAIN_CUM },
     { "Year Rain", ProtocolConstants::CumulativeValue::YEAR_RAIN_CUM },
     { "Day ET", ProtocolConstants::CumulativeValue::DAY_ET_CUM },
     { "Month ET", ProtocolConstants::CumulativeValue::MONTH_ET_CUM },
