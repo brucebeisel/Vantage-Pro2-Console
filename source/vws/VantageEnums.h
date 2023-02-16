@@ -32,6 +32,15 @@ public:
     virtual ~VantageEnum() {};
 
     /**
+     * Abstract method for getting the structures that map between values and strings.
+     * Note that the order of the mappings will determine the previous and next values
+     * as returned in the previousValue() and nextValue() calls below.
+     *
+     * @return The array of mappings
+     */
+    virtual const NameValuePair<T> * getMappings() const = 0;
+
+    /**
      * Return the list of valid enum values for an enumeration.
      *
      * @param value A list into which the values will be copied
@@ -56,8 +65,6 @@ public:
             strings.push_back(mappings[i].first);
         }
     }
-
-    virtual const NameValuePair<T> * getMappings() const = 0;
 
     /**
      * Convert the given enum value to the string representation.
@@ -91,10 +98,43 @@ public:
 
         throw std::invalid_argument("Invalid enum value string");
     }
+
+    /**
+     * Return the previous value in the enum list or the passed in value if it is already the first value.
+     *
+     * @param value The value from which to find the previous value
+     * @return The previous value in the enumerated list or the passed in value
+     */
+    T previousValue(T value) {
+        const NameValuePair<T> * mappings = getMappings();
+        for (int i = 0; i < Count; i++) {
+            if (mappings[i].second == value && i > 0)
+                return mappings[i - 1].second;
+        }
+
+        return value;
+    }
+
+    /**
+     * Return the next value in the enum list or the passed in value if it is already the last value.
+     *
+     * @param value The value from which to find the next value
+     * @return The next value in the enumerated list or the passed in value
+     */
+    T nextValue(T value) {
+        const NameValuePair<T> * mappings = getMappings();
+        for (int i = 0; i < Count; i++) {
+            if (mappings[i].second == value && i < Count - 1)
+                return mappings[i + 1].second;
+        }
+
+        return value;
+    }
 };
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * ExtremePeriod Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::ExtremePeriod> epMappings[] = {
     { "Daily", ProtocolConstants::ExtremePeriod::DAILY },
     { "Monthly", ProtocolConstants::ExtremePeriod::MONTHLY },
@@ -113,13 +153,17 @@ public:
 
 static ExtremePeriodEnum extremePeriodEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::ExtremePeriod value) {
     os << extremePeriodEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+
+/****************************************
+ * RainUnits Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::RainUnits> ruMappings[] = {
     { "inches", ProtocolConstants::RainUnits::INCHES },
     { "millimeters", ProtocolConstants::RainUnits::MILLIMETERS }
@@ -137,15 +181,17 @@ public:
 
 static RainUnitsEnum rainUnitsEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::RainUnits value) {
     os << rainUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * BarometerUnits Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::BarometerUnits> buMappings[] = {
     { "inHg", ProtocolConstants::BarometerUnits::IN_HG },
     { "mm", ProtocolConstants::BarometerUnits::MILLIMETER },
@@ -171,8 +217,9 @@ operator<<(std::ostream & os, ProtocolConstants::BarometerUnits value) {
     return os;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * TemperatureUnits Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::TemperatureUnits> tuMappings[] = {
     { "F", ProtocolConstants::TemperatureUnits::FAHRENHEIT },
     { ".1F", ProtocolConstants::TemperatureUnits::TENTH_FAHRENHEIT },
@@ -192,14 +239,17 @@ public:
 
 static TemperatureUnitsEnum temperatureUnitsEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::TemperatureUnits value) {
     os << temperatureUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * WindUnits Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::WindUnits> wuMappings[] = {
     { "mph", ProtocolConstants::WindUnits::MPH },
     { "mps", ProtocolConstants::WindUnits::MPS },
@@ -219,14 +269,17 @@ public:
 
 static WindUnitsEnum windUnitsEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::WindUnits value) {
     os << windUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * ElevationUnits Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::ElevationUnits> euMappings[] = {
     { "feet", ProtocolConstants::ElevationUnits::FEET },
     { "meters", ProtocolConstants::ElevationUnits::METERS }
@@ -244,14 +297,17 @@ public:
 
 static ElevationUnitsEnum elevationUnitsEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::ElevationUnits value) {
     os << elevationUnitsEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * BarometerTrend Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::BarometerTrend> btMappings[] = {
     { "Steady", ProtocolConstants::BarometerTrend::STEADY },
     { "Rising Slowly", ProtocolConstants::BarometerTrend::RISING_SLOWLY },
@@ -273,14 +329,17 @@ public:
 
 static BarometerTrendEnum barometerTrendEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::BarometerTrend value) {
     os << barometerTrendEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * Forecast Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::Forecast> fcMappings[] = {
     { "Sunny", ProtocolConstants::Forecast::SUNNY },
     { "Party cloudy", ProtocolConstants::Forecast::PARTLY_CLOUDY },
@@ -305,14 +364,17 @@ public:
 
 static ForecastEnum forecastEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::Forecast value) {
     os << forecastEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * SensorStationType Enumeration
+ ****************************************/
 static const NameValuePair<VantageEepromConstants::SensorStationType> sstMappings[] = {
     { "Integrated Sensor Station", VantageEepromConstants::SensorStationType::INTEGRATED_SENSOR_STATION },
     { "Temperature Only", VantageEepromConstants::SensorStationType::TEMPERATURE_ONLY_STATION },
@@ -339,14 +401,17 @@ public:
 
 static SensorStationTypeEnum sensorStationTypeEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, VantageEepromConstants::SensorStationType value) {
     os << sensorStationTypeEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * RepeaterId Enumeration
+ ****************************************/
 static const NameValuePair<VantageEepromConstants::RepeaterId> riMappings[] = {
     { "No Repeater", VantageEepromConstants::RepeaterId::NO_REPEATER },
     { "Repeater A", VantageEepromConstants::RepeaterId::REPEATER_A },
@@ -371,14 +436,17 @@ public:
 
 static RepeaterIdEnum repeaterIdEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, VantageEepromConstants::RepeaterId value) {
     os << repeaterIdEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/****************************************
+ * CumulativeValue Enumeration
+ ****************************************/
 static const NameValuePair<ProtocolConstants::CumulativeValue> cvMappings[] = {
     { "Daily Rain", ProtocolConstants::CumulativeValue::DAILY_RAIN_CUM },
     { "Storm Rain", ProtocolConstants::CumulativeValue::STORM_RAIN_CUM },
@@ -401,6 +469,8 @@ public:
 
 static CumulativeValueEnum cumulativeValueEnum;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
 operator<<(std::ostream & os, ProtocolConstants::CumulativeValue value) {
     os << cumulativeValueEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";

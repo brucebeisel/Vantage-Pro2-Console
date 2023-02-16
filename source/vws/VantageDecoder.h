@@ -86,15 +86,6 @@ public:
     static DateTime decodeDate(const byte buffer[], int offset);
     static DateTime decodeDateTime(const byte buffer[], int dateOffset, int timeOffset);
 
-    struct SensorStationData {
-        VantageEepromConstants::RepeaterId        repeaterId;
-        VantageEepromConstants::SensorStationType stationType;
-        int                                       extraHumidityIndex;     // Index 1 - 8
-        int                                       extraTemperatureIndex;  // Index 0 - 7
-    };
-
-    static void decodeSensorStationList(const byte buffer[], int offset, SensorStationData stationList[ProtocolConstants::MAX_STATIONS]);
-
 private:
     static Rainfall rainCollectorSizeInches;
     static bool     rainCollectorSizeSet;

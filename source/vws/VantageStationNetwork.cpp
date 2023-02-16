@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <sys/stat.h>
 #include <iostream>
 
 #include "VantageStationNetwork.h"
@@ -34,9 +35,10 @@ using namespace ProtocolConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageStationNetwork::VantageStationNetwork(VantageWeatherStation & station) : station(station),
-                                                                                windSensorStationId(UNKNOWN_STATION_ID),
-                                                                                logger(VantageLogger::getLogger("VantageStationNetwork")) {
+VantageStationNetwork::VantageStationNetwork(VantageWeatherStation & station, const string & file) : station(station),
+                                                                                                     networkFile(file),
+                                                                                                     windSensorStationId(UNKNOWN_STATION_ID),
+                                                                                                     logger(VantageLogger::getLogger("VantageStationNetwork")) {
 
 }
 
@@ -48,7 +50,117 @@ VantageStationNetwork::~VantageStationNetwork() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageStationNetwork::initialize() {
+VantageStationNetwork::initializeNetwork() {
+    //
+    // See if the saved file exists
+    //
+    struct stat st;
+    if (stat(networkFile.c_str(), &st) == 0)
+        return initializeNetworkFromFile();
+    else
+        return initializeNetworkFromConsole();
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageStationNetwork::initializeNetworkFromFile() {
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageStationNetwork::findRepeaters() {
+    for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
+        if (sensorStationData[i].repeaterId != RepeaterId::NO_REPEATER) {
+            RepeaterId repeaterId = sensorStationData[i].repeaterId;
+            RepeaterNode node;
+            if (repeaters.find(sensorStationData[i].repeaterId) == repeaters.end()) {
+                node.repeaterId = repeaterId;
+                node.endPoint = true;
+                node.impliedExistance = false;
+            }
+            else
+                node = repeaters[repeaterId];
+
+            node.connectedStations.push_back(sensorStationData[i].stationId);
+
+            repeaters[node.repeaterId] = node;
+        }
+    }
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Found " << repeaters.size() << " repeaters in the weather station network" << endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageStationNetwork::createSensorStationChains() {
+    if (repeaters.size() == 0) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "No repeaters with which to make sensor station chains" << endl;
+        return;
+    }
+
+    //
+    // For each repeater, look for a repeater that precedes it in the repeater container.
+    // If it does not exist, then add it to the chain.
+    // That is, if we find Repeater C, and Repeater B does not exist, create it and
+    // add it to the chain for Repeater C. Then continue the process, looking for
+    // Repeater A. Note that a chain has a maximum of 4 repeaters in a chain. This is
+    // due to communication/delay concerns.
+    //
+    for (RepeaterNodeMap::iterator it = repeaters.begin(); it != repeaters.end(); ++it) {
+        SensorStationChain chain;
+        chain.endPoint = it->first;
+        chain.hasRepeater = true;
+        chain.repeaters.push_back(it->first);
+
+        RepeaterId previousRepeaterId = it->first;
+        do {
+            previousRepeaterId = repeaterIdEnum.previousValue(previousRepeaterId);
+            if (previousRepeaterId != RepeaterId::NO_REPEATER && repeaters.find(previousRepeaterId) == repeaters.end()) {
+                chain.repeaters.push_back(previousRepeaterId);
+            }
+        }
+        while(previousRepeaterId != RepeaterId::NO_REPEATER && chain.repeaters.size() < MAX_REPEATERS_PER_CHAIN);
+
+        chains[chain.endPoint] = chain;
+    }
+
+    //
+    // Now create the repeater nodes that were implicitly identified
+    //
+    for (SensorStationChainMap::iterator it = chains.begin(); it != chains.end(); ++it) {
+        for (int i = 1; i < it->second.repeaters.size(); i++) {
+            RepeaterNode node;
+            node.repeaterId = it->second.repeaters[i];
+            node.endPoint = false;
+            node.impliedExistance = true;
+            repeaters[node.repeaterId] = node;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageStationNetwork::initializeNetworkFromConsole() {
+    //
+    // Get the raw data from the console
+    //
+    if (!retrieveSensorStationInfo())
+        return false;
+
+    //
+    // Create the network from the raw data
+    //
+    SensorStationChain noRepeaterChain;
+    findRepeaters();
+    createSensorStationChains();
+
     return true;
 }
 
@@ -63,45 +175,44 @@ VantageStationNetwork::retrieveSensorStationInfo() {
     if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
         return false;
 
-    VantageDecoder::SensorStationData sensorStationData[ProtocolConstants::MAX_STATIONS];
-    VantageDecoder::decodeSensorStationList(buffer, 0, sensorStationData);
+    if (!station.eepromBinaryRead(EE_USED_TRANSMITTERS_ADDRESS, 1, &transmitterMask))
+        return false;
 
-    //
-    // Find the sensor station with the anemometer. An anemometer sensor station overrides an ISS
-    //
-    for (int i = 0; i < MAX_STATIONS; i++) {
+    windSensorStationId = UNKNOWN_STATION_ID;
+    for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
+        sensorStationData[i].stationId = i + 1;
+        sensorStationData[i].repeaterId = static_cast<RepeaterId>(BitConverter::getUpperNibble(buffer[i * 2]));
+        sensorStationData[i].stationType = static_cast<SensorStationType>(BitConverter::getLowerNibble(buffer[i * 2]));
+        sensorStationData[i].extraTemperatureIndex = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
+        sensorStationData[i].extraHumidityIndex = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
+
         if (sensorStationData[i].stationType == SensorStationType::ANEMOMETER_STATION)
             windSensorStationId = i + 1;
         else if (sensorStationData[i].stationType == SensorStationType::INTEGRATED_SENSOR_STATION && windSensorStationId == UNKNOWN_STATION_ID)
             windSensorStationId = i + 1;
     }
 
-
-
-    //
-    // Assign the anemometer to the sensor station to which it is connected
-    //
-    for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
-        if (sensorStationData[i].stationType != SensorStationType::NO_STATION) {
-            bool hasAnemometer = (i + 1) == windSensorStationId;
-            sensorStations[i].setData(sensorStationData[i].stationType, i + 1, sensorStationData[i].repeaterId, hasAnemometer);
-        }
-    }
-
-    cout << "@@@@@@@@@@ Station Data:" << endl;
-    cout << "@@@@@@@@@@ Wind Sensor Station ID: " << windSensorStationId << endl;
-    for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
-        cout << "@@@@@@@@@@ [" << i << "] Repeater ID: " << sensorStationData[i].repeaterId
-             << " Station Type: " << sensorStationTypeEnum.valueToString(sensorStationData[i].stationType)
-             << " Humidity Sensor: " << sensorStationData[i].extraHumidityIndex
-             << " Temperature Sensor: " << sensorStationData[i].extraTemperatureIndex << endl;
-
-    }
-
-    for (int i = 0; i < MAX_STATION_ID; i++)
-        logger.log(VantageLogger::VANTAGE_DEBUG1) << sensorStations[i] << endl;
-
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+VantageStationNetwork::formatJSON() const {
+    ostringstream oss;
+
+    oss << "{ \"weatherStationNetwork\" : { "
+        << " \"chains\" : [ ";
+
+    for (SensorStationChainMap::const_iterator it = chains.begin(); it != chains.end(); ++it) {
+        oss << " { ";
+
+    }
+
+
+    oss << " ] } }";
+
+    return oss.str();
 }
 
 } /* namespace vws */

@@ -92,7 +92,8 @@ namespace VantageEepromConstants {
     static constexpr unsigned EE_MANUAL_OR_AUTO_DST_ADDRESS =         0x12;
     static constexpr unsigned EE_DST_ON_ADDRESS =                     0x13;
     static constexpr unsigned EE_GMT_OFFSET_ADDRESS =                 0x14;
-    static constexpr unsigned EE_GMT_OR_TIMEZONE_ADDRESS =            0x14;
+    static constexpr unsigned EE_GMT_OR_TIMEZONE_ADDRESS =            0x16;
+    static constexpr unsigned EE_USED_TRANSMITTERS_ADDRESS =          0x17;
     static constexpr unsigned EE_RETRANSMIT_ID_ADDRESS =              0x18;
     static constexpr unsigned EE_STATION_LIST_ADDRESS =               0x19;
     static constexpr unsigned EE_UNIT_BITS_ADDRESS =                  0x29;

@@ -366,16 +366,4 @@ VantageDecoder::decodeTime(const byte buffer[], int offset) {
 
     return t;
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-VantageDecoder::decodeSensorStationList(const byte buffer[], int offset, SensorStationData stationList[ProtocolConstants::MAX_STATIONS]) {
-    for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
-        stationList[i].repeaterId = static_cast<RepeaterId>(BitConverter::getUpperNibble(buffer[offset + (i * 2)]));
-        stationList[i].stationType = static_cast<SensorStationType>(BitConverter::getLowerNibble(buffer[offset + (i * 2)]));
-        stationList[i].extraTemperatureIndex = BitConverter::getLowerNibble(buffer[offset + (i * 2) + 1]);
-        stationList[i].extraHumidityIndex = BitConverter::getLowerNibble(buffer[offset + (i * 2) + 1]);
-    }
-}
 }

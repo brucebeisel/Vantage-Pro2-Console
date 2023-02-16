@@ -58,6 +58,18 @@ public:
         int crcErrorCount;
     };
 
+    struct BarometerCalibrationData {
+        int         recentMeasurement;         // In 1/1000 of an inch
+        Elevation   elevation;                 // In feet
+        Temperature dewPoint;                  // Fahrenheit
+        Temperature avgTemperature12Hour;      // Fahrenheit
+        Humidity    humidityCorrectionFactor;  // %
+        double      correctionRatio;           // Unknown units
+        double      offsetCorrectionFactor;    // Unknown units
+        int         fixedGain;                 // Unknown units, fixed per console
+        int         fixedOffset;               // Unknown units, fixed per console
+    };
+
     /**
      * The console types supported by this software. Note that there are many more
      * legacy value that include the Vantage Pro, which reports the same value as
@@ -329,6 +341,8 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
 
     bool updateElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg);
+
+    bool retrieveBarometerCalibrationData(BarometerCalibrationData & baroCalData);
 
     /////////////////////////////////////////////////////////////////////////////////
     // End Calibration Commands

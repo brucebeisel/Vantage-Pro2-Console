@@ -63,13 +63,6 @@ public:
     int getNextPacket() const;
 
     /**
-     * Format the Current Weather XML message.
-     *
-     * @return The formatted Current Weather message
-     */
-    std::string formatXML() const;
-
-    /**
      * Format the Current Weather JSON message.
      * 
      * @return The formatted current weather message

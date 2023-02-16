@@ -13,7 +13,56 @@ This file contains the JSON API used to communicate the the Vantage Pro2 driver.
 {
     "response" : "<command name>",
     "result"   : "<success|failure>",
-    "info"  : "<Any additional information>"
+    "data"  : "<Any additional information>"
+}
+
+{
+    "response" : "<command name>",
+    "result"   : "<success|failure>",
+    "data"  : {
+        "usedStations" : [ 1, 2, 3, 4, 8],  // Theoretically each of the stations listed here must be in the network data
+        "weatherStationNetwork" : {
+            "chains" : [
+                { "name" : "Repeater C", "firstNode" : "Repeater A", "lastNode" : "Repeater C", "sensorStations" : [ 1, 2, 8]}, // The default name is the last node
+                { "name" : "Repeater D", "firstNode" : "Repeater D", "lastNode" : "Repeater D", "sensorStations" : [ 3, 4]},
+                { "name" : "Console", "sensorStations" : [1]}                           // A chain without any nodes is the chain where the sensor stations are communicating directly with the console
+            ],
+            "nodes" : [
+                { "node" : "Repeater A", "sensorStations" : [1, 2] },
+                { "node" : "Repeater B", "sensorStations" : [8] },
+                { "node" : "Repeater C", "sensorStations" : [] },
+                { "node" : "Repeater D", "sensorStations" : [3, 4] }
+            ],
+            "stations" : [
+                { "name" : "ISS", "type" : "ISS", "id" : 1 },
+                { "name" : "Pool", "type" : "Temperature", "id" : 2 },
+                { "name" : "Vantage Pro2", "type" : "Console", "id" : 0 } // The ID of the console is the retransmit ID or 0 if it is at the end of the chain
+            ],
+            "sensors" : [
+                { "name" : "Outside Temperature", "type" : "Thermometer", "stationId" : 1 },
+                { "name" : "Outside Humidity", "type" : "Hygrometer", "stationId" : 1 },
+                { "name" : "Solar Radiation", "type" : "Solar Radiation", "stationId" : 1 },
+                { "name" : "UV Index", "type" : "Ultra-violet", "stationId" : 1 },
+                { "name" : "Rain", "type" : "Rain", "stationId" : 1 },
+                { "name" : "Wind", "type" : "Anemometer", "stationId" : 1 },
+                { "name" : "Barometer", "type" : "Barometer", "stationId" : 0 }
+                { "name" : "Inside Temperature", "type" : "Thermometer", "stationId" : 0 }
+                { "name" : "Inside Humidity", "type" : "Hygrometer", "stationId" : 0 }
+            ]
+        }
+    }
+}
+
+{
+    "response" : "<command name>",
+    "result"   : "<success|failure>",
+    "data"  : {
+        "sensorStationStatus" : [
+            { "stationId" : 1, "batteryStatus" : "good", "linkQuality" : 95 }, // linkQuality is only provided if the sensor station has an anemometer attached
+            { "stationId" : 2, "batteryStatus" : "good" },
+            { "stationId" : 0, "batterVoltage" : 13.25 }                       // Battery voltage is only provided for a console
+        ]
+    }
 }
 
 General response:

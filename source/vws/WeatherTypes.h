@@ -33,6 +33,7 @@ using UvIndex = float;
 using LeafWetness = int;
 using SoilMoisture = int;
 using Heading = float;
+using Elevation = int;
 using byte = char;
 using DateTime = time_t;
 using Evapotranspiration = double;

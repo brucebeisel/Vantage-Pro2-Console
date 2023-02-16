@@ -21,8 +21,11 @@
 #endif
 #include <time.h>
 #include <math.h>
+#include <string.h>
 #include <sstream>
 #include <cstring>
+#include <regex>
+#include <iterator>
 #include "VantageProtocolConstants.h"
 #include "VantageEepromConstants.h"
 #include "HiLowPacket.h"
@@ -612,6 +615,95 @@ VantageWeatherStation::updateElevationAndBarometerOffset(int elevationFeet, doub
     //
     // TBD This is the one "OK" response command that can also receive a NACK response.
     return sendOKedCommand(command.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageWeatherStation::retrieveBarometerCalibrationData(BarometerCalibrationData & baroCalData) {
+    static constexpr int NUM_LINES = 9;
+
+    if (!sendOKedCommand(SET_BAROMETRIC_CAL_DATA_CMD))
+        return false;
+
+    //
+    // This command returns a long string that contains 9 <CR><LF> sequences with preceding text.
+    // Continue reading from the serial port until there is no more data.
+    //
+    byte buffer[1024];
+    int offset = 0;
+    int bytesRead;
+    do {
+        bytesRead = serialPort.read(buffer, offset, sizeof(buffer), 500);
+        offset += bytesRead;
+    }
+    while(bytesRead > 0);
+
+    buffer[offset] = '\0';
+    string response(buffer);
+
+    regex lineRegex("[^\\r]+\r\n");
+
+    auto linesBegin = sregex_iterator(response.begin(), response.end(), lineRegex);
+    auto linesEnd = sregex_iterator();
+
+    int numLines = distance(linesBegin, linesEnd);
+    if (numLines != NUM_LINES) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Received the wrong number of line from BARDATA command. Expected: " << NUM_LINES << " Got: " << numLines << endl;
+        return false;
+    }
+
+    int linesProcessed = 0;
+    for (std::sregex_iterator it = linesBegin; it != linesEnd; ++it) {
+        string line = (*it).str();
+        if (strncmp(line.c_str(), "BAR", strlen("BAR")) == 0) {
+            linesProcessed++;
+            baroCalData.recentMeasurement = 0;
+        }
+        else if (strncmp(line.c_str(), "ELEVATION", strlen("ELEVATION")) == 0) {
+            linesProcessed++;
+            baroCalData.elevation = 0;
+        }
+        else if (strncmp(line.c_str(), "DEW POINT", strlen("DEW POINT")) == 0) {
+            linesProcessed++;
+            baroCalData.dewPoint = 0;
+        }
+        else if (strncmp(line.c_str(), "VIRTUAL TEMP", strlen("VIRTUAL TEMP")) == 0) {
+            linesProcessed++;
+            baroCalData.avgTemperature12Hour = 0;
+        }
+        else if (strncmp(line.c_str(), "C", strlen("C")) == 0) {
+            linesProcessed++;
+            baroCalData.humidityCorrectionFactor = 0;
+        }
+        else if (strncmp(line.c_str(), "R", strlen("R")) == 0) {
+            linesProcessed++;
+            baroCalData.correctionRatio = 0.0;
+        }
+        else if (strncmp(line.c_str(), "BARCAL", strlen("BARCAL")) == 0) {
+            linesProcessed++;
+            baroCalData.offsetCorrectionFactor = 0.0;
+        }
+        else if (strncmp(line.c_str(), "GAIN", strlen("GAIN")) == 0) {
+            linesProcessed++;
+            baroCalData.fixedGain = 0.0;
+        }
+        else if (strncmp(line.c_str(), "OFFSET", strlen("OFFSET")) == 0) {
+            linesProcessed++;
+            baroCalData.fixedOffset = 0.0;
+        }
+        else {
+            ; // Error
+            return false;
+        }
+
+        if (linesProcessed != NUM_LINES) {
+            ; // Error
+            return false;
+        }
+    }
+
+    return true;
 }
 
 //

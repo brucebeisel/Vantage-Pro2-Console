@@ -29,17 +29,17 @@ public:
      * The types of sensors supported by the Vantage weather stations
      */
     enum SensorType {
-        THERMOMETER,
-        ULTRAVIOLET,
         ANEMOMETER,
-        LEAF_WETNESS,
-        LEAF_TEMPERATURE,
-        SOLAR_RADIATION, 
-        SOIL_MOISTURE,
-        SOIL_TEMPERATURE,
+        BAROMETER,
         HYGROMETER,
+        LEAF_WETNESS_SENSOR,
+        LEAF_TEMPERATURE_PROBE,
         RAIN_COLLECTOR,
-        BAROMETER
+        SOLAR_RADIATION_SENSOR,
+        SOIL_MOISTURE_SENSOR,
+        SOIL_MOISTURE_COMPENSATION_THERMOMETER,
+        THERMOMETER,
+        ULTRAVIOLET_SENSOR
     };
 
     /**

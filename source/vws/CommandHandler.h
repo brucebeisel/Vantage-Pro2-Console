@@ -93,6 +93,11 @@ private:
     void handleRequestSensorStationsStatus(const std::string & commandName, std::string & response);
 
     //
+    // Calibration Commands
+    //
+    void handleQueryBarometerData(const std::string & commandName, std::string & response);
+
+    //
     // Clearing Commands. Note: the following commands do not require an argument and are handled using handleNoArgCommand()
     //     1. Clear Archive
     //     2. Clear Alarm Thresholds
