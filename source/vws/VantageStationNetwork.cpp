@@ -94,8 +94,11 @@ VantageStationNetwork::initializeNetworkFromFile() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
-    for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++)
-        stations.find(i + 1)->second.isBatteryGood = packet.isTransmitterBatteryGood(i);
+    for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
+        StationMap::iterator it = stations.find(i + 1);
+        if (it != stations.end())
+            it->second.isBatteryGood = packet.isTransmitterBatteryGood(i);
+    }
 
     console.batteryVoltage = packet.getConsoleBatteryVoltage();
 

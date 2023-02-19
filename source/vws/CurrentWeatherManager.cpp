@@ -60,20 +60,22 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
     Weather::localtime(packetTime, tm);
     char filename[100];
     snprintf(filename, sizeof(filename), "%s/LoopPacketArchive_%02d.dat", archiveDirectory.c_str(), tm.tm_hour);
-    ios_base::openmode mode = ofstream::binary;
 
     //
     // If the hour file exists and it is more than an hour since it has changed, truncate it.
     //
+    ios_base::openmode mode = ios::binary ;
     struct stat fileinfo;
     int sr = stat(filename, &fileinfo);
-    time_t now = time(0);
-    long fileAge = now - fileinfo.st_mtim.tv_sec;
+    if (sr < 0) {
+        time_t now = time(0);
+        long fileAge = now - fileinfo.st_mtim.tv_sec;
 
-    if (sr != -1 && fileAge > 3600)
-        mode |= std::ofstream::trunc;
-
-    mode |= std::ofstream::app;
+        if (fileAge > 3600)
+            mode |= ios::trunc;
+        else
+            mode |= ios::app;
+    }
 
     ofstream ofs(filename, mode);
     if (ofs.is_open()) {
@@ -83,11 +85,11 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
         if (!ofs.good()) {
             logger.log(VantageLogger::VANTAGE_ERROR) << "Write to LOOP packet archive failed" << endl;
         }
+        ofs.close();
     }
     else
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open LOOP/LOOP2 packet archive file " << filename << endl;
 
-    ofs.close();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
