@@ -35,6 +35,7 @@
 #include "BitConverter.h"
 #include "ProtocolException.h"
 #include "VantageWeatherStation.h"
+#include "VantageEnums.h"
 #include "Weather.h"
 
 using namespace std;
@@ -44,7 +45,6 @@ using namespace ProtocolConstants;
 
 static constexpr int protectedEepromBytes[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0x2d};
 static constexpr int NUM_PROTECTED_EEPROM_BYTES = sizeof(protectedEepromBytes) / sizeof(protectedEepromBytes[0]);
-const string CONSOLE_TYPE_STRINGS[] = { "Vantage Pro2", "Vantage Vue", "Unknown" };
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -202,9 +202,9 @@ VantageWeatherStation::retrieveConsoleType(string * consoleTypeString) {
     consoleType = static_cast<ConsoleType>(stationTypeByte);
 
     if (consoleTypeString != NULL)
-        *consoleTypeString = getConsoleTypeString();
+        *consoleTypeString = consoleTypeEnum.valueToString(consoleType);
 
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieved console type of " << getConsoleTypeString() << endl;
+    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieved console type of " << consoleTypeEnum.valueToString(consoleType) << endl;
 
     return true;
 }
@@ -425,7 +425,7 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
 
     if (sendAckedCommand(DUMP_ARCHIVE_CMD)) {
         for (int i = 0; i < NUM_ARCHIVE_PAGES; i++) {
-            readNextArchivePage(list, 0, time(0)); // @suppress("Ambiguous problem")
+            readNextArchivePage(list, 0, time(0));
             if (!serialPort.write(DMP_SEND_NEXT_PAGE)) {
                 break;
             }
@@ -438,7 +438,7 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
-    logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << Weather::formatDateTime(time) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+    logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << Weather::formatDateTime(time) << endl;
     list.clear();
 
     //
@@ -499,7 +499,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     if (numPages == 0)
         return true;
 
-    return readAfterArchivePages(time, list, firstRecord, numPages); // @suppress("Ambiguous problem")
+    return readAfterArchivePages(time, list, firstRecord, numPages);
 }
 
 //
@@ -829,7 +829,7 @@ VantageWeatherStation::updateConsoleTime() {
     time_t now = time(0);
     struct tm tm;
     Weather::localtime(now, tm);
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Setting console time to " << Weather::formatDateTime(now) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Setting console time to " << Weather::formatDateTime(now) << endl;
     int n = 0;
     buffer[n++] = static_cast<byte>(tm.tm_sec);
     buffer[n++] = static_cast<byte>(tm.tm_min);
@@ -990,20 +990,6 @@ VantageWeatherStation::calculateStationReceptionPercentage(int archivePacketWind
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const std::string &
-VantageWeatherStation::getConsoleTypeString() const {
-    std::string stationTypeName;
-
-    if (consoleType == VANTAGE_PRO_2)
-        return CONSOLE_TYPE_STRINGS[0];
-    else if (consoleType == VANTAGE_VUE)
-        return CONSOLE_TYPE_STRINGS[1];
-    else
-        return CONSOLE_TYPE_STRINGS[2];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::readLoopPacket(LoopPacket & loopPacket) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading LOOP Packet" << endl;
@@ -1074,7 +1060,7 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
         //
         // Process a single page. This will return 1 - 5 packets
         //
-        if (!readNextArchivePage(list, firstRecordInPageToProcess, newestPacketTime)) { // @suppress("Ambiguous problem")
+        if (!readNextArchivePage(list, firstRecordInPageToProcess, newestPacketTime)) {
             serialPort.write(DMP_CANCEL_DOWNLOAD);
             success = false;
             break;
@@ -1100,9 +1086,9 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
     }
 
     if (success)
-        logger.log(VantageLogger::VANTAGE_INFO) << "Received " << list.size() << " records from DMPAFT " << Weather::formatDateTime(afterTime) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+        logger.log(VantageLogger::VANTAGE_INFO) << "Received " << list.size() << " records from DMPAFT " << Weather::formatDateTime(afterTime) << endl;
     else {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "DMPAFT " << Weather::formatDateTime(afterTime) << " failed" << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+        logger.log(VantageLogger::VANTAGE_WARNING) << "DMPAFT " << Weather::formatDateTime(afterTime) << " failed" << endl;
         wakeupStation();
     }
 
@@ -1115,7 +1101,7 @@ VantageWeatherStation::readAfterArchivePages(DateTime afterTime, vector<ArchiveP
 bool
 VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int firstRecordInPageToProcess, DateTime newestPacketTime) {
     bool success = true;
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Processing archive page. Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Processing archive page. Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
 
     //
     // Try to read the page. Will attempt 3 tries to correct CRC errors.
@@ -1123,7 +1109,7 @@ VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int fir
     for (int i = 0; i < ARCHIVE_PAGE_READ_RETRIES; i++) {
         if (serialPort.read(buffer, ARCHIVE_PAGE_SIZE + CRC_BYTES)) {
             if (VantageCRC::checkCRC(buffer, ARCHIVE_PAGE_SIZE)) {
-                decodeArchivePage(list, buffer, firstRecordInPageToProcess, newestPacketTime); // @suppress("Ambiguous problem")
+                decodeArchivePage(list, buffer, firstRecordInPageToProcess, newestPacketTime);
                 success = true;
                 break;
             }
@@ -1154,7 +1140,7 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
     //
     int pageSequence = BitConverter::toInt8(buffer, 0);
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Decoding archive page " << pageSequence
-                                              << ". Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+                                              << ". Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
 
     //
     // The first record value may not be zero in the case of a dump after command. The first record after the specified time may not be at the
@@ -1179,7 +1165,7 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
             }
             else
                 logger.log(VantageLogger::VANTAGE_DEBUG1) << "Skipping archive record " << i << " in page " << pageSequence
-                                                          << " with date " << Weather::formatDateTime(packet.getDateTime()) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+                                                          << " with date " << Weather::formatDateTime(packet.getDateTime()) << endl;
         }
     }
 

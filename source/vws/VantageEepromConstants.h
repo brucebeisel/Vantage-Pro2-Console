@@ -31,7 +31,7 @@ namespace VantageEepromConstants {
     /**
      * Sensor station types supported by the Vantage weather station, the enum integer values are from the Vantage serial protocol.
      */
-    enum class SensorStationType {
+    enum StationType {
         INTEGRATED_SENSOR_STATION = 0,
         TEMPERATURE_ONLY_STATION = 1,
         HUMIDITY_ONLY_STATION = 2,
@@ -45,7 +45,7 @@ namespace VantageEepromConstants {
         UNKNOWN_STATION = 99       // The sensor station has been heard, but not identified
     };
 
-    enum class VantageVueSensorStationType {
+    enum class VantageVueStationType {
         VUE_INTEGRATED_SENSOR_STATION = 0,
         VUE_ANEMOMETER_STATION = 4,
         VP2_INTEGRATED_SENSOR_STATION = 5,

@@ -101,7 +101,7 @@ CurrentWeatherManager::processLoopPacket(const LoopPacket & packet) {
     // Build a list of past wind directions. This is to mimic what is shown on the
     // console
     //
-    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue()); // @suppress("Ambiguous problem")
+    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue());
     currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
 
     if (firstLoop2PacketReceived)
@@ -122,7 +122,7 @@ CurrentWeatherManager::processLoop2Packet(const Loop2Packet & packet) {
     // Build a list of past wind directions. This is to mimic what is shown on the
     // console
     //
-    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue()); // @suppress("Ambiguous problem")
+    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue());
     currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
     currentWeatherPublisher.publishCurrentWeather(currentWeather);
     dominantWindDirections.dumpData();

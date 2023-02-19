@@ -25,7 +25,6 @@
 #include "WeatherTypes.h"
 #include "ArchiveManager.h"
 #include "EventManager.h"
-#include "SensorStation.h"
 #include "VantageConfiguration.h"
 #include "VantageWeatherStation.h"
 

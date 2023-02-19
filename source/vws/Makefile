@@ -20,8 +20,6 @@ SRCS=\
 	LoopPacket.cpp \
 	main.cpp \
 	ProtocolException.cpp \
-	Sensor.cpp \
-	SensorStation.cpp \
  	SerialPort.cpp \
 	UnitConverter.cpp \
 	VantageCRC.cpp \

@@ -26,7 +26,6 @@
 #include "Alarm.h"
 #include "CurrentWeather.h"
 #include "HiLowPacket.h"
-#include "SensorStation.h"
 #include "VantageDecoder.h"
 #include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
@@ -86,12 +85,13 @@ VantageDriver::initialize() {
         logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station is awake" << endl;
     }
 
-    if (!station.retrieveConsoleType()) {
+    string consoleTypeString;
+    if (!station.retrieveConsoleType(&consoleTypeString)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve station type for weather station" << endl;
         return false;
     }
 
-    logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << station.getConsoleTypeString() << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << consoleTypeString << endl;
 
     if (!retrieveConfiguration())
         return false;
@@ -281,7 +281,7 @@ VantageDriver::mainLoop() {
                                                            << Weather::formatDateTime(packet.getDateTime());
                     // TODO The following line was commented out because it was causing the vws to exit.
                     // Need to determine why
-                                                           //<< " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
+                    //<< " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
                     previousNextRecord = nextRecord;
                 }
             }

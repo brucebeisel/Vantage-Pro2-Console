@@ -60,7 +60,7 @@ ArchiveManager::synchronizeArchive() {
 
     for (int i = 0; i < SYNC_RETRIES && !result; i++) {
         list.clear();
-        if (station.wakeupStation() && station.dumpAfter(newestPacketTime, list)) { // @suppress("Ambiguous problem")
+        if (station.wakeupStation() && station.dumpAfter(newestPacketTime, list)) {
             addPacketsToArchive(list);
             result = true;
             break;
@@ -77,7 +77,7 @@ ArchiveManager::synchronizeArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket>& list) {
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
     //logger.log(VantageLogger::VANTAGE_INFO) << "DMPAFT is temporarily disabled" << endl;
     //return time(0);
 
@@ -113,8 +113,8 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
 DateTime
 ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::vector<ArchivePacket> & list) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Querying archive records between "
-                                              << Weather::formatDateTime(startTime) // @suppress("Ambiguous problem")
-                                              << " and " << Weather::formatDateTime(endTime) << std::endl; // @suppress("Ambiguous problem") @suppress("Invalid overload")
+                                              << Weather::formatDateTime(startTime)
+                                              << " and " << Weather::formatDateTime(endTime) << std::endl;
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
     positionStream(stream, startTime, false);
@@ -144,7 +144,7 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::v
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query found " << list.size()
                                               << " items. Time of last record is "
-                                              << Weather::formatDateTime(timeOfLastRecord) << endl; // @suppress("Invalid overload") @suppress("Ambiguous problem")
+                                              << Weather::formatDateTime(timeOfLastRecord) << endl;
     return timeOfLastRecord;
 }
 
@@ -237,11 +237,11 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
             stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
             newestPacketTime = it->getDateTime();
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: "
-                                                      << Weather::formatDateTime(it->getDateTime()) << endl; // @suppress("Invalid overload") @suppress("Ambiguous problem")
+                                                      << Weather::formatDateTime(it->getDateTime()) << endl;
         }
         else
             logger.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time "
-                                                    << Weather::formatDateTime(it->getDateTime()) << endl; // @suppress("Invalid overload") @suppress("Ambiguous problem")
+                                                    << Weather::formatDateTime(it->getDateTime()) << endl;
     }
     stream.close();
 }

@@ -80,7 +80,7 @@ std::string
 CurrentWeather::formatJSON() const {
     ostringstream ss;
     ss << "{"
-       << "\"time\" : \"" << Weather::formatDateTime(time(0)) << "\"" // @suppress("Ambiguous problem")
+       << "\"time\" : \"" << Weather::formatDateTime(time(0)) << "\""
        << loopPacket.getInsideTemperature().formatJSON("insideTemperature", true)
        << loopPacket.getInsideHumidity().formatJSON("insideHumidity", true)
        << loopPacket.getOutsideTemperature().formatJSON("outsideTemperature", true)
@@ -128,7 +128,7 @@ CurrentWeather::formatJSON() const {
     ss << loopPacket.getUvIndex().formatJSON("uvIndex", true);
 
     if (loopPacket.isStormOngoing())
-        ss << ", \"stormStart\" : \"" << Weather::formatDate(loopPacket.getStormStart()) << "\"" // @suppress("Ambiguous problem")
+        ss << ", \"stormStart\" : \"" << Weather::formatDate(loopPacket.getStormStart()) << "\""
            << ", \"stormRain\" : " << loopPacket.getStormRain();
 
 

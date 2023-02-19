@@ -1,12 +1,28 @@
 #include <iostream>
+#include <vector>
 #include "BitConverter.h"
 #include "WeatherTypes.h"
 
 using namespace std;
 using namespace vws;
 
+struct Foo {
+    int a;
+    int b;
+};
+
 int
 main(int argc, char *argv[]) {
+    std::vector<Foo> v;
+    Foo f = {1,2};
+    v.push_back(f);
+    v[0].a = 5;
+    cout << "A after: " << v[0].a << endl;
+
+    Foo & o = v[0];
+    o.a = 10;
+    cout << "A after 2: " << v[0].a << endl;
+
     vws::byte buffer[10];
 
     buffer[0] = 0;

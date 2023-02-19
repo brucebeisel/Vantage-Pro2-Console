@@ -260,10 +260,23 @@ enum class Forecast {
     PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT
 };
 
+/**
+ * The console types supported by this software. Note that there are many more
+ * legacy value that include the Vantage Pro, which reports the same value as
+ * the Vantage Pro 2.
+ */
+enum ConsoleType {
+    VANTAGE_PRO_2 = 16,
+    VANTAGE_VUE = 17
+};
+
+
 //
 // Maximum counts
 //
 static constexpr int NUM_ARCHIVE_RECORDS = 2560;
+static constexpr int UNKNOWN_STATION_ID = 0;
+static constexpr int MIN_STATION_ID = 1;
 static constexpr int MAX_STATION_ID = 8;
 static constexpr int MAX_STATIONS = 8;
 static constexpr int MAX_INTEGRATED_SENSOR_STATIONS = 1;

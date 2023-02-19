@@ -31,6 +31,7 @@
 #include "CommandHandler.h"
 #include "VantageDriver.h"
 #include "VantageConfiguration.h"
+#include "VantageStationNetwork.h"
 #include "CurrentWeatherSocket.h"
 #include "CurrentWeatherManager.h"
 
@@ -66,7 +67,8 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         VantageWeatherStation station(serialPortName, baudRate);
         ArchiveManager archiveManager(archiveFile, station);
         VantageConfiguration configuration(station);
-        CommandHandler commandHandler(station, configuration, archiveManager);
+        VantageStationNetwork network(station, "");
+        CommandHandler commandHandler(station, configuration, archiveManager, network);
         EventManager eventManager(commandHandler);
         CommandSocket commandSocket(11462, eventManager);
         VantageDriver driver(station, configuration, archiveManager, eventManager);
@@ -85,6 +87,9 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
             return;
 
         if (!currentWeatherPublisher.initialize())
+            return;
+
+        if (!network.initializeNetwork())
             return;
 
         if (!driver.initialize())

@@ -373,39 +373,39 @@ operator<<(std::ostream & os, ProtocolConstants::Forecast value) {
 }
 
 /****************************************
- * SensorStationType Enumeration
+ * StationType Enumeration
  ****************************************/
-static const NameValuePair<VantageEepromConstants::SensorStationType> sstMappings[] = {
-    { "Integrated Sensor Station", VantageEepromConstants::SensorStationType::INTEGRATED_SENSOR_STATION },
-    { "Temperature Only", VantageEepromConstants::SensorStationType::TEMPERATURE_ONLY_STATION },
-    { "Humidity Only", VantageEepromConstants::SensorStationType::HUMIDITY_ONLY_STATION },
-    { "Temperature/Humidity", VantageEepromConstants::SensorStationType::TEMPERATURE_HUMIDITY_STATION },
-    { "Anemometer", VantageEepromConstants::SensorStationType::ANEMOMETER_STATION },
-    { "Rain", VantageEepromConstants::SensorStationType::RAIN_STATION },
-    { "Leaf", VantageEepromConstants::SensorStationType::LEAF_STATION },
-    { "Soil", VantageEepromConstants::SensorStationType::SOIL_STATION },
-    { "Soil/Leaf", VantageEepromConstants::SensorStationType::SOIL_LEAF_STATION },
-    { "No Station", VantageEepromConstants::SensorStationType::NO_STATION },
-    { "Unknown Station", VantageEepromConstants::SensorStationType::UNKNOWN_STATION }
+static const NameValuePair<VantageEepromConstants::StationType> sstMappings[] = {
+    { "Integrated Sensor Station", VantageEepromConstants::StationType::INTEGRATED_SENSOR_STATION },
+    { "Temperature Only", VantageEepromConstants::StationType::TEMPERATURE_ONLY_STATION },
+    { "Humidity Only", VantageEepromConstants::StationType::HUMIDITY_ONLY_STATION },
+    { "Temperature/Humidity", VantageEepromConstants::StationType::TEMPERATURE_HUMIDITY_STATION },
+    { "Anemometer", VantageEepromConstants::StationType::ANEMOMETER_STATION },
+    { "Rain", VantageEepromConstants::StationType::RAIN_STATION },
+    { "Leaf", VantageEepromConstants::StationType::LEAF_STATION },
+    { "Soil", VantageEepromConstants::StationType::SOIL_STATION },
+    { "Soil/Leaf", VantageEepromConstants::StationType::SOIL_LEAF_STATION },
+    { "No Station", VantageEepromConstants::StationType::NO_STATION },
+    { "Unknown Station", VantageEepromConstants::StationType::UNKNOWN_STATION }
 };
 
-class SensorStationTypeEnum : public VantageEnum<VantageEepromConstants::SensorStationType,sizeof(sstMappings)/sizeof(sstMappings[0])>  {
+class StationTypeEnum : public VantageEnum<VantageEepromConstants::StationType,sizeof(sstMappings)/sizeof(sstMappings[0])>  {
 public:
-    SensorStationTypeEnum() {};
-    virtual ~SensorStationTypeEnum() {};
+    StationTypeEnum() {};
+    virtual ~StationTypeEnum() {};
 
-    virtual const NameValuePair<VantageEepromConstants::SensorStationType> * getMappings() const {
+    virtual const NameValuePair<VantageEepromConstants::StationType> * getMappings() const {
         return sstMappings;
     }
 };
 
-static SensorStationTypeEnum sensorStationTypeEnum;
+static StationTypeEnum stationTypeEnum;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
-operator<<(std::ostream & os, VantageEepromConstants::SensorStationType value) {
-    os << sensorStationTypeEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+operator<<(std::ostream & os, VantageEepromConstants::StationType value) {
+    os << stationTypeEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
 
@@ -476,6 +476,73 @@ operator<<(std::ostream & os, ProtocolConstants::CumulativeValue value) {
     os << cumulativeValueEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
+
+/****************************************
+ * Month Enumeration
+ ****************************************/
+static const NameValuePair<ProtocolConstants::Month> mMappings[] = {
+    { "January", ProtocolConstants::Month::JANUARY },
+    { "February", ProtocolConstants::Month::FEBRUARY },
+    { "March", ProtocolConstants::Month::MARCH },
+    { "April", ProtocolConstants::Month::APRIL },
+    { "May", ProtocolConstants::Month::MAY },
+    { "June", ProtocolConstants::Month::JUNE },
+    { "July", ProtocolConstants::Month::JULY },
+    { "August", ProtocolConstants::Month::AUGUST },
+    { "September", ProtocolConstants::Month::SEPTEMBER },
+    { "October", ProtocolConstants::Month::OCTOBER },
+    { "November", ProtocolConstants::Month::NOVEMBER },
+    { "December", ProtocolConstants::Month::DECEMBER }
+};
+
+class MonthEnum : public VantageEnum<ProtocolConstants::Month,sizeof(mMappings)/sizeof(mMappings[0])>  {
+public:
+    MonthEnum() {};
+    virtual ~MonthEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::Month> * getMappings() const {
+        return mMappings;
+    }
+};
+
+static MonthEnum monthEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::Month value) {
+    os << monthEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
+/****************************************
+ * Console Type Enumeration
+ ****************************************/
+static const NameValuePair<ProtocolConstants::ConsoleType> ctMappings[] = {
+    { "Vantage Pro2", ProtocolConstants::ConsoleType::VANTAGE_PRO_2 },
+    { "Vantage Vue", ProtocolConstants::ConsoleType::VANTAGE_VUE }
+};
+
+class ConsoleTypeEnum : public VantageEnum<ProtocolConstants::ConsoleType,sizeof(ctMappings)/sizeof(ctMappings[0])>  {
+public:
+    ConsoleTypeEnum() {};
+    virtual ~ConsoleTypeEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::ConsoleType> * getMappings() const {
+        return ctMappings;
+    }
+};
+
+static ConsoleTypeEnum consoleTypeEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::ConsoleType value) {
+    os << consoleTypeEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
 }
 
 #endif

@@ -152,7 +152,7 @@ ArchivePacket::formatXML() const {
     ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
     ss << "<historicalRecord>";
     DateTime archiveTime = extractArchiveDate();
-    ss << "<time>" << Weather::formatDateTime(archiveTime) << "</time>"; // @suppress("Ambiguous problem")
+    ss << "<time>" << Weather::formatDateTime(archiveTime) << "</time>";
 
     Measurement<Temperature> temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatXML("avgOutsideTemperature");
@@ -281,7 +281,7 @@ ArchivePacket::formatJSON() const {
     ostringstream ss;
     ss << "{ \"archiveRecord\" : { ";
     DateTime archiveTime = extractArchiveDate();
-    ss << "\"time\" : \"" << Weather::formatDateTime(archiveTime); // @suppress("Ambiguous problem")
+    ss << "\"time\" : \"" << Weather::formatDateTime(archiveTime);
 
     Measurement<Temperature> temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatJSON("avgOutsideTemperature", true);

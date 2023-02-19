@@ -31,6 +31,7 @@
 #include "VantageEnums.h"
 #include "VantageLogger.h"
 #include "VantageWeatherStation.h"
+#include "VantageStationNetwork.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -53,10 +54,14 @@ using namespace ProtocolConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CommandHandler::CommandHandler(VantageWeatherStation & station, VantageConfiguration & configurator, ArchiveManager & archiveManager) : station(station),
-                                                                                                                                        logger(VantageLogger::getLogger("CommandHandler")),
-                                                                                                                                        configurator(configurator),
-                                                                                                                                        archiveManager(archiveManager) {
+CommandHandler::CommandHandler(VantageWeatherStation & station,
+                               VantageConfiguration & configurator,
+                               ArchiveManager & archiveManager,
+                               VantageStationNetwork & stationNetwork) : station(station),
+                                                                         logger(VantageLogger::getLogger("CommandHandler")),
+                                                                         configurator(configurator),
+                                                                         network(stationNetwork),
+                                                                         archiveManager(archiveManager) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,6 +132,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "console-diagnostics") {
             handleQueryConsoleDiagnostics(commandName, responseJson);
         }
+        else if (commandName == "get-timezones") {
+            handleGetTimezones(commandName, responseJson);
+        }
         else if (commandName == "query-archive") {
             handleQueryArchive(commandName, argumentList, responseJson);
         }
@@ -147,6 +155,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
         else if (commandName == "query-highlows") {
             handleQueryHighLows(commandName, responseJson);
+        }
+        else if (commandName == "query-network") {
+            handleQueryNetwork(commandName, responseJson);
         }
         else if (commandName == "query-receiver-list") {
             handleQueryReceiverListCommand(commandName, responseJson);
@@ -747,6 +758,42 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
     oss << " ]} ";
 
     oss << "] } }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleGetTimezones(const std::string & commandName, std::string & response) {
+    vector<string> timezoneList;
+    configurator.retrieveTimeZoneOptions(timezoneList);
+
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"timezones\" : [ ";
+    bool first = true;
+    for (string tzName : timezoneList) {
+        if (!first)
+            oss << ", ";
+
+        oss << tzName;
+        first = false;
+    }
+
+    oss << "] } }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryNetwork(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+    oss << network.formatJSON();
 
     response = oss.str();
 }

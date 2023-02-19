@@ -25,6 +25,7 @@ class VantageWeatherStation;
 class VantageConfiguration;
 class ArchiveManager;
 class VantageLogger;
+class VantageStationNetwork;
 
 class CommandHandler {
 public:
@@ -34,7 +35,7 @@ public:
     /**
      * Constructor.
      */
-    CommandHandler(VantageWeatherStation & station, VantageConfiguration & configurator, ArchiveManager & archiveManager);
+    CommandHandler(VantageWeatherStation & station, VantageConfiguration & configurator, ArchiveManager & archiveManager, VantageStationNetwork & network);
 
     /**
      * Destructor.
@@ -130,9 +131,14 @@ private:
     //
     void handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    void handleGetTimezones(const std::string & commandName, std::string & response);
+
+    void handleQueryNetwork(const std::string & commandName, std::string & response);
+
     VantageWeatherStation & station;
     VantageConfiguration &  configurator;
     ArchiveManager &        archiveManager;
+    VantageStationNetwork & network;
     VantageLogger &         logger;
 };
 

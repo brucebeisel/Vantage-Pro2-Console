@@ -18,15 +18,15 @@
 #define VANTAGE_STATION_NETWORK_H
 
 #include <vector>
+#include <bitset>
 
-#include "SensorStation.h"
 #include "VantageLogger.h"
 #include "VantageDecoder.h"
 #include "VantageProtocolConstants.h"
+#include "VantageWeatherStation.h"
 
 namespace vws {
 
-class VantageWeatherStation;
 
 /**
  * A Davis Instruments Vantage weather station is made up of many integrated devices. These
@@ -58,25 +58,83 @@ class VantageWeatherStation;
 using namespace VantageEepromConstants;
 using namespace ProtocolConstants;
 
-class RepeaterNode {
+class Repeater {
 public:
     RepeaterId             repeaterId;
     bool                   endPoint;          // If true then this repeater talks to the console
     bool                   impliedExistance;  // If true there is no evidence this repeater exists,
                                               // but it might due to the configuration recommendations by Davis Instruments.
-    std::vector<StationId> connectedStations; // The stations that are communicating directly with this node (user provided)
+    std::vector<StationId> connectedStations; // The stations that are communicating directly with this repeater (user provided)
 };
 
-class SensorStationChain {
+class RepeaterChain {
 public:
+    std::string               name;           // The name of the chain. Defaults to the end point name
     bool                      hasRepeater;    // If true then the endPoint and repeaters are filled in
     RepeaterId                endPoint;       // The last repeater in the chain, if any
     std::vector<RepeaterId>   repeaters;      // The repeater IDs that are part of this chain (if any)
-    std::vector<StationId>    chainStations;  // The stations can be linked with any repeater node in the chain.
+    std::vector<StationId>    chainStations;  // The stations can be linked with any repeater in the chain.
                                               // Only the user can provide the exact connection configuration.
 };
 
-class VantageStationNetwork {
+class StationData {
+public:
+    StationId   stationId;
+    RepeaterId  repeaterId;
+    StationType stationType;
+    int         extraHumidityIndex;     // Index 1 - 8
+    int         extraTemperatureIndex;  // Index 0 - 7
+};
+
+enum SensorType {
+    ANEMOMETER,
+    BAROMETER,
+    HYGROMETER,
+    LEAF_WETNESS_SENSOR,
+    LEAF_TEMPERATURE_PROBE,
+    RAIN_COLLECTOR,
+    SOLAR_RADIATION_SENSOR,
+    SOIL_MOISTURE_SENSOR,
+    SOIL_MOISTURE_COMPENSATION_THERMOMETER,
+    THERMOMETER,
+    ULTRAVIOLET_SENSOR
+};
+
+class Sensor {
+public:
+    std::string name;
+    SensorType  sensorType;
+    StationId   onStationId;
+};
+
+class SensorContainer {
+public:
+    std::vector<Sensor>     connectedSensors;
+};
+/**
+ * Class representing a sensor station.
+ * A sensor station is a transmitter that has sensors attached.
+ * It reads the data from the sensors and transmits packets via radio to either
+ * a console or a repeater.
+ */
+class Station : public SensorContainer {
+public:
+    std::string name;
+    StationData stationData;
+    bool        isBatteryGood;
+
+};
+
+class Console : public SensorContainer {
+public:
+    ProtocolConstants::ConsoleType consoleType;
+    std::vector<StationId>         connectedStations;
+    float                          batteryVoltage;
+};
+
+typedef std::map<StationId,std::vector<Sensor>> stationSensors;
+
+class VantageStationNetwork : public VantageWeatherStation::LoopPacketListener {
 public:
     VantageStationNetwork(VantageWeatherStation & station, const std::string & networkFile);
     virtual ~VantageStationNetwork();
@@ -85,44 +143,40 @@ public:
 
     std::string formatJSON() const;
 
+    virtual bool processLoopPacket(const LoopPacket & packet);
+    virtual bool processLoop2Packet(const Loop2Packet & packet);
+
 private:
     static constexpr int UNKNOWN_STATION_ID = 0;
     static constexpr int MAX_REPEATERS_PER_CHAIN = 4;
 
-    struct SensorStationData {
-        StationId         stationId;
-        RepeaterId        repeaterId;
-        SensorStationType stationType;
-        int               extraHumidityIndex;     // Index 1 - 8
-        int               extraTemperatureIndex;  // Index 0 - 7
-    };
 
-
-    bool retrieveSensorStationInfo();
+    bool retrieveStationInfo();
     bool initializeNetworkFromFile();
     bool initializeNetworkFromConsole();
     void findRepeaters();
-    void createSensorStationChains();
-    void decodeSensorStationData();
+    void createRepeaterChains();
+    void decodeStationData();
+    void detectSensors(const LoopPacket & packet);
 
-    typedef std::map<RepeaterId,SensorStationChain> SensorStationChainMap;
-    typedef std::map<RepeaterId,RepeaterNode> RepeaterNodeMap;
+    typedef std::map<RepeaterId,RepeaterChain> RepeaterChainMap;
+    typedef std::map<RepeaterId,Repeater> RepeaterMap;
+    typedef std::map<StationId,Station> StationMap;
 
     VantageLogger &         logger;
     VantageWeatherStation & station;
-    byte                    transmitterMask;
-    SensorStationData       sensorStationData[MAX_STATIONS]; // The sensor station data as reported by the console
-    RepeaterNodeMap         repeaters;
-    SensorStationChainMap   chains;
-    std::string             networkFile;  // The file in which the network configuration is stored. This includes user inputs.
-    StationId               windSensorStationId;
+    std::string             networkFile;                     // The file in which the network configuration is stored. This includes user inputs.
+    byte                    transmitterMask;                 // The mask of transmitters that the console is monitoring
 
-    // TODO determine if an array or a vector is the proper container. As a vector you will only have as many sensor station as the
-    // console can see, but as an array you have to search the array to find which stations are actually there.
-    //SensorStation              console;
+    RepeaterChainMap        chains;                          // The chains of repeaters and their sensor stations in the network
+    RepeaterMap             repeaters;                       // The repeaters in the network
+    StationData             stationData[MAX_STATIONS];       // The sensor station data as reported by the console
+    StationMap              stations;                        // The sensor stations being monitored
+    Console                 console;                         // The console with which this software is communicating
 
-
-    //SensorStation              sensorStations[MAX_STATIONS]; // The sensor stations as reported by the console
+    StationId               windStationId;                   // The station ID of the sensor station that has the wind sensor
+    int                     windStationLinkQuality;          // The current link quality of the sensor station that has the wind sensor
+    bool                    firstLoopPacketReceived;         // Whether the first LOOP packet has been received
 };
 
 } /* namespace vws */

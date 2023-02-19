@@ -341,7 +341,7 @@ VantageConfiguration::retrieveAllConfigurationData() {
         secondaryWindCupSize = buffer[VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS - 1] & 0x3;
         rainSeasonStartMonth = static_cast<ProtocolConstants::Month>(buffer[VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS - 1]);
         retransmitId = buffer[VantageEepromConstants::EE_RETRANSMIT_ID_ADDRESS - 1];
-        logFinalTemperature = logFinalTemperatureValue;
+        logFinalTemperature = logFinalTemperatureValue != 0;
 
         ostringstream oss;
         oss << std::boolalpha
@@ -351,30 +351,30 @@ VantageConfiguration::retrieveAllConfigurationData() {
             << ", \"longitude\" : " << positionData.longitude
             << ", \"elevation\" : " << positionData.elevation
             << " }, \"time\" : {"
-            << " \"gmtoffsetminutes\" : " << timeSettings.gmtOffsetMinutes
-            << ", \"manualdst\" : " << timeSettings.manualDaylightSavingsTime
-            << ", \"manualDSTon\" : " << timeSettings.manualDaylightSavingsTimeOn
-            << ", \"timezonename\" : \"" << timeSettings.timezoneName << "\""
-            << ", \"useGMToffset\" : " << timeSettings.useGmtOffset
+            << " \"gmtOffsetMinutes\" : " << timeSettings.gmtOffsetMinutes
+            << ", \"manualDst\" : " << timeSettings.manualDaylightSavingsTime
+            << ", \"manualDstOn\" : " << timeSettings.manualDaylightSavingsTimeOn
+            << ", \"timezoneName\" : \"" << timeSettings.timezoneName << "\""
+            << ", \"useGmtOffset\" : " << timeSettings.useGmtOffset
             << " }, \"units\" : {"
-            << " \"barounits\" : \"" << barometerUnitsEnum.valueToString(unitsSettings.baroUnits) << "\""
-            << ", \"elevationunits\" : \"" << elevationUnitsEnum.valueToString(unitsSettings.elevationUnits) << "\""
-            << ", \"rainunits\" : \"" << rainUnitsEnum.valueToString(unitsSettings.rainUnits) << "\""
-            << ", \"temperatureunits\" : \"" << temperatureUnitsEnum.valueToString(unitsSettings.temperatureUnits) << "\""
-            << ", \"windunits\" : \"" << windUnitsEnum.valueToString(unitsSettings.windUnits) << "\""
+            << " \"baroUnits\" : \"" << barometerUnitsEnum.valueToString(unitsSettings.baroUnits) << "\""
+            << ", \"elevationUnits\" : \"" << elevationUnitsEnum.valueToString(unitsSettings.elevationUnits) << "\""
+            << ", \"rainUnits\" : \"" << rainUnitsEnum.valueToString(unitsSettings.rainUnits) << "\""
+            << ", \"temperatureUnits\" : \"" << temperatureUnitsEnum.valueToString(unitsSettings.temperatureUnits) << "\""
+            << ", \"windUnits\" : \"" << windUnitsEnum.valueToString(unitsSettings.windUnits) << "\""
             << " }, \"setupBits\" : {"
-            << " \"24hourmode\" : " << setupBits.is24HourMode
-            << ", \"currentlyAM\" : " << setupBits.isCurrentlyAM
-            << ", \"daymonthdisplay\" : " << setupBits.isDayMonthDisplay
-            << ", \"eastlongitude\" : " << setupBits.isEastLongitude
-            << ", \"northlatitude\" : " << setupBits.isNorthLatitude
-            << ", \"windcuplarge\" : " << setupBits.isWindCupLarge
-            << ", \"raincollectorsize\" : " << static_cast<int>(setupBits.rainCollectorSizeType)
-            << " }, \"misc\" : {"
-            << " \"2ndwindcupsize\" : " << secondaryWindCupSize
-            << ", \"rainseasonstartmonth\" : " << static_cast<int>(rainSeasonStartMonth)
-            << ", \"retransmitid\" : " << retransmitId
-            << ", \"logfinaltemperature\" : " << logFinalTemperature
+            << " \"24hourMode\" : " << setupBits.is24HourMode
+            << ", \"currentlyAm\" : " << setupBits.isCurrentlyAM
+            << ", \"dayMonthDisplay\" : " << setupBits.isDayMonthDisplay
+            << ", \"eastLongitude\" : " << setupBits.isEastLongitude
+            << ", \"northLatitude\" : " << setupBits.isNorthLatitude
+            << ", \"windCupLarge\" : " << setupBits.isWindCupLarge
+            << ", \"rainCollectorSize\" : " << static_cast<int>(setupBits.rainCollectorSizeType)
+            << " }, \"miscellaneous\" : {"
+            << " \"2ndWindCupSize\" : " << secondaryWindCupSize
+            << ", \"rainSeasonStartMonth\" : \"" << monthEnum.valueToString(rainSeasonStartMonth) << "\""
+            << ", \"retransmitId\" : " << retransmitId
+            << ", \"logFinalTemperature\" : " << logFinalTemperature
             << "} } }";
         return oss.str();
     }
@@ -386,7 +386,7 @@ VantageConfiguration::retrieveAllConfigurationData() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageConfiguration::saveRainCollectorSize(RainCupSizeType rainCupType) {
-    Rainfall rainCollectorSize = 0.01;
+    Rainfall rainCollectorSize = ProtocolConstants::POINT_01_INCH_SIZE;
 
     switch (rainCupType) {
         case RainCupSizeType::POINT_01_INCH:

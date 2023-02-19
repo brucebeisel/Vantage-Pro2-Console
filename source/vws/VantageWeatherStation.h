@@ -23,8 +23,6 @@
 
 #include "ArchivePacket.h"
 #include "BitConverter.h"
-#include "Sensor.h"
-#include "SensorStation.h"
 #include "SerialPort.h"
 #include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
@@ -68,16 +66,6 @@ public:
         double      offsetCorrectionFactor;    // Unknown units
         int         fixedGain;                 // Unknown units, fixed per console
         int         fixedOffset;               // Unknown units, fixed per console
-    };
-
-    /**
-     * The console types supported by this software. Note that there are many more
-     * legacy value that include the Vantage Pro, which reports the same value as
-     * the Vantage Pro 2.
-     */
-    enum ConsoleType {
-        VANTAGE_PRO_2 = 16,
-        VANTAGE_VUE = 17
     };
 
     /**
@@ -504,7 +492,7 @@ public:
      */
     int calculateStationReceptionPercentage(int archivePacketWindSamples) const;
 
-    const std::string & getConsoleTypeString() const;
+    ConsoleType getConsoleType() const;
 
 private:
     static constexpr int WAKEUP_TRIES = 5;               // The number of times to try to wake up the console before performing a disconnect/reconnect cycle
@@ -659,8 +647,6 @@ private:
     std::vector<StationId>     stationIds;               // The ID of the stations that the console can hear
     int                        windSensorStationId;      // The ID of the sensor station containing the anemometer
     int                        archivePeriod;            // The archive period used to calculate reception percentage
-    //StationConfiguration       stationConfiguration;
-    //std::vector<Sensor>        sensors;
 };
 }
 

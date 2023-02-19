@@ -19,8 +19,6 @@
 
 #include <vector>
 #include <string>
-#include "Sensor.h"
-#include "SensorStation.h"
 #include "VantageProtocolConstants.h"
 #include "VantageWeatherStation.h"
 #include "WeatherTypes.h"
@@ -186,20 +184,6 @@ private:
     StationId                retransmitId;
     bool                     logFinalTemperature;  // Whether to log temperature at the end of an archive period,
                                                    // false indicates that the average will be logged
-
-    /**
-     * Get the list of sensor stations.
-     *
-     * @return the list of sensor stations
-     */
-    //const std::vector<SensorStation> & getSensorStations() const;
-
-    /**
-     * Get the list of sensors attached to the sensor stations.
-     *
-     * @return The list of sensors
-     */
-    //const std::vector<Sensor> & getSensors() const;
 };
 
 }
