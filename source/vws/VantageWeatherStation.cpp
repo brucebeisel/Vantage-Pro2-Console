@@ -901,7 +901,10 @@ VantageWeatherStation::updateArchivePeriod(ArchivePeriod period) {
     command << SET_ARCHIVE_PERIOD_CMD << " " << static_cast<int>(period);
     logger.log(VantageLogger::VANTAGE_INFO) << "Updating archive period to: " << static_cast<int>(period) << endl;
 
-    return sendAckedCommand(command.str());
+    //
+    // Note that the Vantage protocol document claims this is an ACKed command, but it is really an OKed command
+    //
+    return sendOKedCommand(command.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

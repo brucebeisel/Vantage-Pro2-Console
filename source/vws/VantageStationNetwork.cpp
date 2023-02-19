@@ -34,19 +34,18 @@ using namespace VantageEepromConstants;
 using namespace ProtocolConstants;
 
 static const char *SENSOR_NAMES[] = {
-    "THERMOMETER",
-    "ULTRAVIOLET",
     "ANEMOMETER",
+    "BAROMETER",
+    "HYGROMETER",
     "LEAF_WETNESS",
     "LEAF_TEMPERATURE",
+    "RAIN_COLLECTOR",
     "SOLAR_RADIATION",
     "SOIL_MOISTURE",
     "SOIL_TEMPERATURE",
-    "HYGROMETER",
-    "RAIN_COLLECTOR",
-    "BAROMETER"
+    "THERMOMETER",
+    "ULTRAVIOLET"
 };
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,6 +104,7 @@ VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
     if (!firstLoopPacketReceived) {
         firstLoopPacketReceived = true;
         detectSensors(packet);
+        cout << "============== NETWORK ================" << formatJSON() << endl;
     }
 
     return true;
@@ -354,6 +354,15 @@ VantageStationNetwork::retrieveStationInfo() {
             windStationId = i + 1;
     }
 
+    for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
+        cout << "++++++++ STATION DATA +++++++" << endl;
+        cout << "ID: "  << stationData[i].stationId
+             << " Repeater ID: " << stationData[i].repeaterId
+             << " StationType: " << stationData[i].stationType
+             << " Extra Humidity: " << stationData[i].extraHumidityIndex
+             << " Extra Temperature: " << stationData[i].extraTemperatureIndex << endl;
+    }
+
     return true;
 }
 
@@ -480,7 +489,8 @@ VantageStationNetwork::formatJSON() const {
         if (!firstStation)
             oss << ", ";
 
-        oss << " { \"station\" : \"" << station.second.name << "\", \"type\" : \"" << stationTypeEnum.valueToString(station.second.stationData.stationType) << "\" "
+        oss << " { \"station\" : \"" << station.second.name
+            << "\", \"type\" : \"" << stationTypeEnum.valueToString(station.second.stationData.stationType) << "\", "
             << " \"sensors\" : [ ";
 
         first = true;
