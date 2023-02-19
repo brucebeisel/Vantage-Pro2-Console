@@ -67,15 +67,19 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
     ios_base::openmode mode = ios::binary ;
     struct stat fileinfo;
     int sr = stat(filename, &fileinfo);
-    if (sr < 0) {
+    if (sr == 0) {
         time_t now = time(0);
         long fileAge = now - fileinfo.st_mtim.tv_sec;
 
-        if (fileAge > 3600)
+        if (fileAge > 3600) {
             mode |= ios::trunc;
-        else
+        }
+        else {
             mode |= ios::app;
+        }
     }
+    else
+        mode |= ios::app;
 
     ofstream ofs(filename, mode);
     if (ofs.is_open()) {
