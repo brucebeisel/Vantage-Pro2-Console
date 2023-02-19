@@ -79,7 +79,6 @@ VantageStationNetwork::initializeNetwork() {
     else
         return initializeNetworkFromConsole();
 
-    console.consoleType = station.getConsoleType();
 
     return true;
 }
@@ -106,6 +105,7 @@ VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
     if (!firstLoopPacketReceived) {
         firstLoopPacketReceived = true;
         detectSensors(packet);
+        console.consoleType = station.getConsoleType();
         cout << "============== NETWORK ================" << endl << formatJSON() << endl;
     }
 
@@ -139,6 +139,7 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
     //
     // Add the sensors that are attached to the ISS
     //
+    sensor.name = "Rain Collector";
     sensor.sensorType = SensorType::RAIN_COLLECTOR;
     sensor.onStationId = issId;
     stations[issId].connectedSensors.push_back(sensor);
@@ -311,6 +312,9 @@ VantageStationNetwork::initializeNetworkFromConsole() {
         if (stationData[i].stationType != StationType::NO_STATION) {
             station.stationData = stationData[i];
             station.isBatteryGood = true;
+            if (stationData[i].stationType == StationType::INTEGRATED_SENSOR_STATION)
+                station.name = "ISS";
+
             stations[stationData[i].stationId] = station;
         }
     }
@@ -463,7 +467,7 @@ VantageStationNetwork::formatJSON() const {
         if (!firstChain)
             oss << ", ";
 
-        oss << " { \"name\" : \"" << chain.second.name << "\"";
+        oss << " { \"name\" : \"" << chain.second.name << "\", ";
 
         oss << "\"repeaters\" : [ ";
 
