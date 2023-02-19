@@ -79,6 +79,8 @@ VantageStationNetwork::initializeNetwork() {
     else
         return initializeNetworkFromConsole();
 
+    console.consoleType = station.getConsoleType();
+
     return true;
 }
 
@@ -94,7 +96,7 @@ VantageStationNetwork::initializeNetworkFromFile() {
 bool
 VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
     for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++)
-        stations[i].isBatteryGood = packet.isTransmitterBatteryGood(i);
+        stations.find(i + 1)->second.isBatteryGood = packet.isTransmitterBatteryGood(i);
 
     console.batteryVoltage = packet.getConsoleBatteryVoltage();
 
@@ -104,7 +106,7 @@ VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
     if (!firstLoopPacketReceived) {
         firstLoopPacketReceived = true;
         detectSensors(packet);
-        cout << "============== NETWORK ================" << formatJSON() << endl;
+        cout << "============== NETWORK ================" << endl << formatJSON() << endl;
     }
 
     return true;
@@ -142,24 +144,28 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
     stations[issId].connectedSensors.push_back(sensor);
 
     if (packet.getOutsideTemperature().isValid()) {
+        sensor.name = "Outside Temperature";
         sensor.sensorType = SensorType::THERMOMETER;
         sensor.onStationId = issId;
         stations[issId].connectedSensors.push_back(sensor);
     }
 
     if (packet.getOutsideHumidity().isValid()) {
+        sensor.name = "Outside Humidity";
         sensor.sensorType = SensorType::HYGROMETER;
         sensor.onStationId = issId;
         stations[issId].connectedSensors.push_back(sensor);
     }
 
     if (packet.getSolarRadiation().isValid()) {
+        sensor.name = "Solar Radiation";
         sensor.sensorType = SensorType::SOLAR_RADIATION_SENSOR;
         sensor.onStationId = issId;
         stations[issId].connectedSensors.push_back(sensor);
     }
 
     if (packet.getUvIndex().isValid()) {
+        sensor.name = "UV Index";
         sensor.sensorType = SensorType::ULTRAVIOLET_SENSOR;
         sensor.onStationId = issId;
         stations[issId].connectedSensors.push_back(sensor);
@@ -169,18 +175,21 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
     // See what sensors the console supports
     //
     if (packet.getInsideTemperature().isValid()) {
+        sensor.name = "Inside Temperature";
         sensor.sensorType = SensorType::THERMOMETER;
         sensor.onStationId = 0;       // TODO determine the station ID of the console
         console.connectedSensors.push_back(sensor);
     }
 
     if (packet.getInsideHumidity().isValid()) {
+        sensor.name = "Inside Humidity";
         sensor.sensorType = SensorType::HYGROMETER;
         sensor.onStationId = 0;       // TODO determine the station ID of the console
         console.connectedSensors.push_back(sensor);
     }
 
     if (packet.getBarometricPressure().isValid()) {
+        sensor.name = "Barometric Pressure";
         sensor.sensorType = SensorType::BAROMETER;
         sensor.onStationId = 0;       // TODO determine the station ID of the console
         console.connectedSensors.push_back(sensor);
@@ -189,16 +198,14 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
     //
     // Add the anemometer to the proper sensor station
     //
-    if (windStationId == issId) {
-        sensor.sensorType = SensorType::ANEMOMETER;
+    sensor.name = "Wind";
+    sensor.sensorType = SensorType::ANEMOMETER;
+    if (windStationId == issId)
         sensor.onStationId = issId;
-        stations[issId].connectedSensors.push_back(sensor);
-    }
-    else {
-        sensor.sensorType = SensorType::ANEMOMETER;
+    else
         sensor.onStationId = windStationId;
-        stations[windStationId].connectedSensors.push_back(sensor);
-    }
+
+    stations[sensor.onStationId].connectedSensors.push_back(sensor);
 
     //
     // Now find the sensors on the leaf/soil sensor stations.
@@ -284,14 +291,6 @@ VantageStationNetwork::createRepeaterChains() {
         }
     }
 
-    //
-    // Add the special console chain that contains no repeaters
-    //
-    RepeaterChain chain;
-    chain.name = "Console";
-    chain.hasRepeater = false;
-    chain.endPoint = RepeaterId::NO_REPEATER;
-    chains[RepeaterId::NO_REPEATER] = chain;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -319,9 +318,29 @@ VantageStationNetwork::initializeNetworkFromConsole() {
     //
     // Create the network from the raw data
     //
-    RepeaterChain noRepeaterChain;
     findRepeaters();
     createRepeaterChains();
+
+    //
+    // Add the special console chain that contains no repeaters
+    //
+    RepeaterChain chain;
+    chain.name = "Console";
+    chain.hasRepeater = false;
+    chain.endPoint = RepeaterId::NO_REPEATER;
+
+    //
+    // Add the stations that directly communicate with the console to the
+    // Console object and to the chain without any repeaters.
+    //
+    for (auto station : stations) {
+        if (station.second.stationData.repeaterId == RepeaterId::NO_REPEATER) {
+            chain.chainStations.push_back(station.second.stationData.stationId);
+            console.connectedStations.push_back(station.second.stationData.stationId);
+        }
+    }
+
+    chains[RepeaterId::NO_REPEATER] = chain;
 
     return true;
 }
@@ -354,8 +373,8 @@ VantageStationNetwork::retrieveStationInfo() {
             windStationId = i + 1;
     }
 
+    cout << "++++++++ STATION DATA +++++++" << endl;
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
-        cout << "++++++++ STATION DATA +++++++" << endl;
         cout << "ID: "  << stationData[i].stationId
              << " Repeater ID: " << stationData[i].repeaterId
              << " StationType: " << stationData[i].stationType
@@ -410,15 +429,29 @@ VantageStationNetwork::formatJSON() const {
 
     oss << "{ \"weatherStationNetwork\" : { ";
 
-    oss << " \"console\" : { \"type\" : \"" << consoleTypeEnum.valueToString(console.consoleType) << "\", "
-        << "\"stations\" : [";
+    oss << " \"console\" : { \"type\" : \"" << consoleTypeEnum.valueToString(console.consoleType) << "\", ";
+
+    oss << "\"stations\" : [";
 
     bool first = true;
-    for (StationId id : console.connectedStations) {
+    for (auto stationId : console.connectedStations) {
         if (!first)
             oss << ", ";
 
-        oss << id;
+        oss << stationId;
+        first = false;
+    }
+    oss << " ], ";
+
+    oss << "\"sensors\" : [";
+
+    first = true;
+    for (auto sensor : console.connectedSensors) {
+        if (!first)
+            oss << ", ";
+
+        oss << "{ \"sensor\" : \"" << sensor.name << "\", \"type\" : \"" << SENSOR_NAMES[sensor.sensorType] << "\" }";
+        first = false;
     }
 
     oss << "] }, ";
