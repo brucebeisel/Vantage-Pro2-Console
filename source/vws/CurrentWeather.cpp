@@ -92,8 +92,8 @@ CurrentWeather::formatJSON() const {
        << ", \"wind\" : { \"speed\" : " << windSpeed << ", \"direction\" : " <<  windDirection << " }"
        << ", \"windGust\" : { \"speed\" : " <<  loop2Packet.getWindGust10Minute()
        << ", \"direction\" : " <<  loop2Packet.getWindGustDirection10Minute() << " }"
-       << ", \"windSpeed10MinAvg\" : " <<  windSpeed10MinuteAverage
-       << ", \"windSpeed2MinAvg\" : " << loop2Packet.getWindSpeed2MinuteAverage();
+       << windSpeed10MinuteAverage.formatJSON("windSpeed10MinAvg", true)
+       << loop2Packet.getWindSpeed2MinuteAverage().formatJSON("windSpeed2MinAvg", true);
 
     ss << ", \"dominantWindDirections\" : [";
     for (unsigned int i = 0; i < dominantWindDirections.size(); i++) {
