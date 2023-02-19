@@ -82,6 +82,11 @@ SerialPort::close() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 SerialPort::write(const void * buffer, int nbytes) {
+    if (!isOpen()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Cannot write to console, serial port not open" << endl;
+        return false;
+    }
+
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Writing " << nbytes << " bytes" << endl;
     DWORD dwWritten;
     if (!WriteFile(commPort, static_cast<LPCVOID>(buffer), nbytes, &dwWritten, nullptr))
@@ -158,6 +163,11 @@ SerialPort::close() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 SerialPort::write(const void * buffer, int nbytes) {
+    if (!isOpen()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Cannot write to console, serial port not open" << endl;
+        return false;
+    }
+
     ssize_t bytesWritten = ::write(commPort, buffer, nbytes);
 
     if (bytesWritten != nbytes) {

@@ -83,16 +83,19 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         // Initialize objects that require it before entering the main loop
         //
         logger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
-        if (!commandSocket.initialize())
+        if (!currentWeatherPublisher.initialize())
             return;
 
-        if (!currentWeatherPublisher.initialize())
+        //
+        // The driver must be initialized before any communication is performed with the console
+        //
+        if (!driver.initialize())
             return;
 
         if (!network.initializeNetwork())
             return;
 
-        if (!driver.initialize())
+        if (!commandSocket.initialize())
             return;
 
         logger.log(VantageLogger::VANTAGE_INFO) << "Entering driver's main loop" << endl;
@@ -134,7 +137,7 @@ main(int argc, char *argv[]) {
         VantageLogger::setLogStream(logStream);
     }
 
-    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG1);
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     thread consoleThread(consoleThreadEntry, archiveFile, loopPacketArchiveDir, serialPortName, 19200);
 
     consoleThread.join();

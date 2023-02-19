@@ -1320,7 +1320,7 @@ VantageWeatherStation::consumeAck() {
         rv = false;
     }
     else if (b != ProtocolConstants::ACK) {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "consumeACK() read " << hex << static_cast<int>(b) << dec << " not an ACK" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "consumeACK() read 0x" << hex << static_cast<int>(b) << dec << " not an ACK" << endl;
         rv = false;
     }
 
