@@ -794,6 +794,7 @@ CommandHandler::handleQueryNetwork(const std::string & commandName, std::string 
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
     oss << network.formatJSON();
+    oss << " }";
 
     response = oss.str();
 }
