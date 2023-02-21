@@ -272,6 +272,7 @@ CommandHandler::handleQueryReceiverList(const std::string & commandName, std::st
                 oss << ", ";
             }
             oss << id;
+            first = false;
         }
 
         oss << " ] } }";
