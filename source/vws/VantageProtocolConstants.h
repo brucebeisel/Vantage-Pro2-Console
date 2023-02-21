@@ -171,7 +171,7 @@ enum class BaudRate {
     BAUDRATE_19200 = 19200
 };
 
-enum class RainCupSizeType {
+enum class RainBucketSizeType {
     POINT_01_INCH = 0,
     POINT_2_MM = 1,
     POINT_1_MM = 2
@@ -238,6 +238,17 @@ enum class BarometerTrend {
     UNKNOWN =         255
 };
 
+enum class WindCupSize {
+    SMALL_WIND_CUP = 0,
+    LARGE_WIND_CUP = 1
+};
+
+enum class VueWindCupSize {
+    UNDEFINED_VUE_WIND_CUP = 0,
+    SMALL_VUE_WIND_CUP = 1,
+    LARGE_VUE_WIND_CUP = 2,
+    OTHER_VUE_WIND_CUP = 3
+};
 
 //
 // LOOP packet forecast icons

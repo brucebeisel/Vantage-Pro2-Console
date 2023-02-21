@@ -28,11 +28,6 @@ namespace vws {
 const int SECONDS_PER_HOUR = 3600;
 const int TIME_STRUCT_YEAR_OFFSET = 1900;
 
-class WindData {
-    Measurement<Speed> windSpeed;
-    Heading            windDirection;
-};
-
 /**
  * Utility container class for various functions.
  */

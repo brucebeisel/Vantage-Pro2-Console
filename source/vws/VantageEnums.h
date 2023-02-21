@@ -543,6 +543,73 @@ operator<<(std::ostream & os, ProtocolConstants::ConsoleType value) {
     return os;
 }
 
+/****************************************
+ * Rain Bucket Type Enumeration
+ ****************************************/
+static const NameValuePair<ProtocolConstants::RainBucketSizeType> rbtMappings[] = {
+    { ".01 inch", ProtocolConstants::RainBucketSizeType::POINT_01_INCH },
+    { ".1 mm", ProtocolConstants::RainBucketSizeType::POINT_1_MM },
+    { ".2 mm", ProtocolConstants::RainBucketSizeType::POINT_2_MM }
+};
+
+class RainBucketSizeTypeEnum : public VantageEnum<ProtocolConstants::RainBucketSizeType,sizeof(rbtMappings)/sizeof(rbtMappings[0])>  {
+public:
+    RainBucketSizeTypeEnum() {};
+    virtual ~RainBucketSizeTypeEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::RainBucketSizeType> * getMappings() const {
+        return rbtMappings;
+    }
+};
+
+static RainBucketSizeTypeEnum rainBucketSizeTypeEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::RainBucketSizeType value) {
+    os << rainBucketSizeTypeEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static Rainfall
+rainBucketEnumValueToRain(ProtocolConstants::RainBucketSizeType rainBucketType) {
+    Rainfall rain = .01;
+    switch (rainBucketType) {
+        case ProtocolConstants::RainBucketSizeType::POINT_01_INCH:
+            rain = ProtocolConstants::POINT_01_INCH_SIZE;
+            break;
+
+        case ProtocolConstants::RainBucketSizeType::POINT_1_MM:
+            rain = ProtocolConstants::POINT_1_MM_SIZE;
+            break;
+
+        case ProtocolConstants::RainBucketSizeType::POINT_2_MM:
+            rain = ProtocolConstants::POINT_2_MM_SIZE;
+            break;
+    }
+
+    return rain;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static ProtocolConstants::RainBucketSizeType
+rainToRainBucketEnumValue(Rainfall rain) {
+    ProtocolConstants::RainBucketSizeType type = ProtocolConstants::RainBucketSizeType::POINT_01_INCH;
+
+    if (rain == ProtocolConstants::POINT_01_INCH_SIZE)
+        type = ProtocolConstants::RainBucketSizeType::POINT_01_INCH;
+    else if (rain == ProtocolConstants::POINT_1_MM_SIZE)
+        type = ProtocolConstants::RainBucketSizeType::POINT_1_MM;
+    else if (rain == ProtocolConstants::POINT_2_MM_SIZE)
+        type = ProtocolConstants::RainBucketSizeType::POINT_2_MM;
+
+    return type;
+}
+
 }
 
 #endif

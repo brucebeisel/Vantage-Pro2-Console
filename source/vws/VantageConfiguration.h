@@ -85,7 +85,7 @@ struct SetupBits {
     bool isCurrentlyAM;
     bool isDayMonthDisplay;
     bool isWindCupLarge;
-    ProtocolConstants::RainCupSizeType rainCollectorSizeType;
+    ProtocolConstants::RainBucketSizeType rainBucketSizeType;
     bool isNorthLatitude;
     bool isEastLongitude;
 };
@@ -173,7 +173,7 @@ private:
     void decodeUnitsSettings(const byte * buffer, int offset, UnitsSettings & unitsSettings);
     void decodeSetupBits(const byte * buffer, int offset, SetupBits & setupBits);
 
-    void saveRainCollectorSize(ProtocolConstants::RainCupSizeType rainCupType);
+    void saveRainBucketSize(ProtocolConstants::RainBucketSizeType rainBucketType);
 
     static const int EEPROM_CONFIG_SIZE = 46;
 

@@ -279,9 +279,9 @@ VantageConfiguration::updateSetupBits(const SetupBits & setupBits) {
     buffer |= setupBits.isWindCupLarge ? 0x8 : 0;
     buffer |= setupBits.isNorthLatitude ? 0x40 : 0;
     buffer |= setupBits.isEastLongitude ? 0x80 : 0;
-    buffer |= (static_cast<int>(setupBits.rainCollectorSizeType) & 0x3) << 4;
+    buffer |= (static_cast<int>(setupBits.rainBucketSizeType) & 0x3) << 4;
     if (station.eepromBinaryWrite(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, &buffer, 1)) {
-        saveRainCollectorSize(setupBits.rainCollectorSizeType);
+        saveRainBucketSize(setupBits.rainBucketSizeType);
 
         //
         // Per the serial protocol documentation, when the setup bits byte is changed, the
@@ -303,7 +303,7 @@ VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
     if (station.eepromBinaryRead(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, 1, &buffer)) {
         decodeSetupBits(&buffer, 0, setupBits);
         success = true;
-        saveRainCollectorSize(setupBits.rainCollectorSizeType);
+        saveRainBucketSize(setupBits.rainBucketSizeType);
     }
 
     return success;
@@ -319,7 +319,7 @@ VantageConfiguration::decodeSetupBits(const byte * buffer, int offset, SetupBits
         setupBits.isWindCupLarge = (buffer[offset] & 0x8) != 0;
         setupBits.isNorthLatitude = (buffer[offset] & 0x40) != 0;
         setupBits.isEastLongitude = (buffer[offset] & 0x80) != 0;
-        setupBits.rainCollectorSizeType = static_cast<ProtocolConstants::RainCupSizeType>((buffer[offset] >> 4) & 0x3);
+        setupBits.rainBucketSizeType = static_cast<ProtocolConstants::RainBucketSizeType>((buffer[offset] >> 4) & 0x3);
 
 }
 
@@ -373,7 +373,7 @@ VantageConfiguration::retrieveAllConfigurationData() {
             << ", \"eastLongitude\" : " << setupBits.isEastLongitude
             << ", \"northLatitude\" : " << setupBits.isNorthLatitude
             << ", \"windCupLarge\" : " << setupBits.isWindCupLarge
-            << ", \"rainCollectorSize\" : " << static_cast<int>(setupBits.rainCollectorSizeType)
+            << ", \"rainBucketSize\" : \"" << rainBucketSizeTypeEnum.valueToString(setupBits.rainBucketSizeType) << "\""
             << " }, \"miscellaneous\" : {"
             << " \"2ndWindCupSize\" : " << secondaryWindCupSize
             << ", \"rainSeasonStartMonth\" : \"" << monthEnum.valueToString(rainSeasonStartMonth) << "\""
@@ -389,25 +389,10 @@ VantageConfiguration::retrieveAllConfigurationData() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantageConfiguration::saveRainCollectorSize(RainCupSizeType rainCupType) {
-    Rainfall rainCollectorSize = ProtocolConstants::POINT_01_INCH_SIZE;
+VantageConfiguration::saveRainBucketSize(RainBucketSizeType rainBucketType) {
 
-    switch (rainCupType) {
-        case RainCupSizeType::POINT_01_INCH:
-            rainCollectorSize = ProtocolConstants::POINT_01_INCH_SIZE;
-            break;
-        case ProtocolConstants::RainCupSizeType::POINT_2_MM:
-            rainCollectorSize = ProtocolConstants::POINT_2_MM_SIZE;
-            break;
-        case RainCupSizeType::POINT_1_MM:
-            rainCollectorSize = ProtocolConstants::POINT_1_MM_SIZE;
-            break;
-        default:
-            logger.log(VantageLogger::VANTAGE_WARNING) << "Rain collector size type not valid. Using .01 inches as default" << endl;
-            break;
-    }
-
-    VantageDecoder::setRainCollectorSize(rainCollectorSize);
+    Rainfall rainBucketSize = rainBucketEnumValueToRain(rainBucketType);
+    VantageDecoder::setRainCollectorSize(rainBucketSize);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
