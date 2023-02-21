@@ -231,7 +231,14 @@ VantageConfiguration::updateUnitsSettings(const UnitsSettings & unitsSettings) {
 
     buffer[1] = ~buffer[0];
 
-    return station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, buffer, sizeof(buffer));
+    if (station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, buffer, sizeof(buffer)))
+        //
+        // Though the protocol document does not specifically say to initialize the console when
+        // the units are changed, it did not work without it
+        //
+        return station.initializeSetup();
+    else
+        return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -279,6 +286,7 @@ VantageConfiguration::updateSetupBits(const SetupBits & setupBits) {
         //
         // Per the serial protocol documentation, when the setup bits byte is changed, the
         // console must be reinitialized.
+        //
         success = station.initializeSetup();
     }
 

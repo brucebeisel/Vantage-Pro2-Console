@@ -418,7 +418,13 @@ public:
      *      1. Lat/Lon
      *      2. Elevation
      *      3. Any value in the EEPROM byte 0x2B (Decimal 43)
-     * This command is private as it can only be triggered by a command that changes the configuration.
+     *      4. Any value in the EEPROM byte 0x29 (Decimal 41)
+     *      5. Other EEPROM bytes that have not been determined yet
+     * Note that an "R" will appear in the lower right corner of the console display to
+     * indicate the console is performing the setup. Even though the console will return control
+     * back to the caller quickly, the R will remain on the screen for quite a while. The amount
+     * of time the R remains on the console is not consistent as well as the time it takes for the
+     * display units to change.
      *
      * @return True if successful
      */

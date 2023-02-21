@@ -379,6 +379,7 @@ VantageStationNetwork::retrieveStationInfo() {
     }
 
     cout << "++++++++ STATION DATA +++++++" << endl;
+    cout << "Monitored Station Mask: " << monitoredStationMask << endl;
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
         cout << "ID: "  << stationData[i].stationId
              << " Repeater ID: " << stationData[i].repeaterId
@@ -437,7 +438,7 @@ VantageStationNetwork::formatJSON() const {
     bool first = true;
     oss << " \"monitoredStationIds\" : [";
     for (int i = 0; i < MAX_STATIONS; i++) {
-        if (monitoredStationMask & (1 << i) != 0) {
+        if ((monitoredStationMask & (1 << i)) != 0) {
             if (!first)
                 oss << ", ";
 

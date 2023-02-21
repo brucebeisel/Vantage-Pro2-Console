@@ -256,7 +256,7 @@ VantageWeatherStation::retrieveReceiverList(std::vector<StationId> * sensorStati
     stationIds.clear();
 
     for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
-        if (stations & (1 << i) != 0) {
+        if ((stations & (1 << i)) != 0) {
             if (sensorStations != nullptr)
                 sensorStations->push_back(i + 1);
 
@@ -943,6 +943,10 @@ VantageWeatherStation::stopArchiving() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::initializeSetup() {
+    //
+    // Note that an "R" will appear in the lower right corner of the console display to
+    // indicate the console is initializing
+    //
     logger.log(VantageLogger::VANTAGE_INFO) << "**************************" << endl;
     logger.log(VantageLogger::VANTAGE_INFO) << "* Reinitializing console *" << endl;
     logger.log(VantageLogger::VANTAGE_INFO) << "**************************" << endl;
