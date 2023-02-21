@@ -222,20 +222,16 @@ VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSe
 bool
 VantageConfiguration::updateUnitsSettings(const UnitsSettings & unitsSettings) {
     bool success = false;
-    byte buffer;
-    buffer = static_cast<int>(unitsSettings.baroUnits) & 0x3;
-    buffer |= (static_cast<int>(unitsSettings.temperatureUnits) & 0x3) << 2;
-    buffer |= (static_cast<int>(unitsSettings.elevationUnits) & 0x1) << 4;
-    buffer |= (static_cast<int>(unitsSettings.rainUnits) & 0x1) << 5;
-    buffer |= (static_cast<int>(unitsSettings.windUnits) & 0x3) << 6;
+    byte buffer[2];
+    buffer[0] = static_cast<int>(unitsSettings.baroUnits) & 0x3;
+    buffer[0] |= (static_cast<int>(unitsSettings.temperatureUnits) & 0x3) << 2;
+    buffer[0] |= (static_cast<int>(unitsSettings.elevationUnits) & 0x1) << 4;
+    buffer[0] |= (static_cast<int>(unitsSettings.rainUnits) & 0x1) << 5;
+    buffer[0] |= (static_cast<int>(unitsSettings.windUnits) & 0x3) << 6;
 
-    byte invertedBuffer = ~buffer;
-    if (station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, &buffer, 1) &&
-        station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS + 1, &invertedBuffer, 1)) {
-        success = true;
-    }
+    buffer[1] = ~buffer[0];
 
-    return success;
+    return station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, buffer, sizeof(buffer));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -94,7 +94,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
 
         if (commandName == "backlight") {
-            handleBacklightCommand(commandName, argumentList, responseJson);
+            handleBacklight(commandName, argumentList, responseJson);
         }
         else if (commandName == "clear-active-alarms") {
             handleNoArgCommand(&VantageWeatherStation::clearActiveAlarms, commandName, responseJson);
@@ -109,7 +109,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             handleNoArgCommand(&VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets, commandName, responseJson);
         }
         else if (commandName == "clear-cumulative-values") {
-            handleClearCumulativeValueCommand(commandName, argumentList, responseJson);
+            handleClearCumulativeValue(commandName, argumentList, responseJson);
         }
         else if (commandName == "clear-current-data") {
             handleNoArgCommand(&VantageWeatherStation::clearCurrentData, commandName, responseJson);
@@ -118,16 +118,16 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             handleNoArgCommand(&VantageWeatherStation::clearGraphPoints, commandName, responseJson);
         }
         else if (commandName == "clear-high-values") {
-            handleClearHighValuesCommand(commandName, argumentList, responseJson);
+            handleClearHighValues(commandName, argumentList, responseJson);
         }
         else if (commandName == "clear-highs") {
-            handleClearHighValuesCommand(commandName, argumentList, responseJson);
+            handleClearHighValues(commandName, argumentList, responseJson);
         }
         else if (commandName == "clear-low-values") {
-            handleClearLowValuesCommand(commandName, argumentList, responseJson);
+            handleClearLowValues(commandName, argumentList, responseJson);
         }
         else if (commandName == "clear-lows") {
-            handleClearLowValuesCommand(commandName, argumentList, responseJson);
+            handleClearLowValues(commandName, argumentList, responseJson);
         }
         else if (commandName == "console-diagnostics") {
             handleQueryConsoleDiagnostics(commandName, responseJson);
@@ -151,7 +151,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             handleQueryConsoleType(commandName, responseJson);
         }
         else if (commandName == "query-firmware") {
-            handleQueryFirmwareCommand(commandName, responseJson);
+            handleQueryFirmware(commandName, responseJson);
         }
         else if (commandName == "query-highlows") {
             handleQueryHighLows(commandName, responseJson);
@@ -160,22 +160,22 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             handleQueryNetwork(commandName, responseJson);
         }
         else if (commandName == "query-receiver-list") {
-            handleQueryReceiverListCommand(commandName, responseJson);
+            handleQueryReceiverList(commandName, responseJson);
         }
         else if (commandName == "query-units") {
-            handleQueryUnitsCommand(commandName, responseJson);
+            handleQueryUnits(commandName, responseJson);
         }
         else if (commandName == "put-year-rain") {
-            handlePutYearRainCommand(commandName, argumentList, responseJson);
+            handlePutYearRain(commandName, argumentList, responseJson);
         }
         else if (commandName == "put-year-et") {
-            handlePutYearETCommand(commandName, argumentList, responseJson);
+            handlePutYearET(commandName, argumentList, responseJson);
         }
         else if (commandName == "update-archive-period") {
             handleUpdateArchivePeriod(commandName, argumentList, responseJson);
         }
         else if (commandName == "update-units") {
-            handleUpdateUnitsCommand(commandName, argumentList, responseJson);
+            handleUpdateUnits(commandName, argumentList, responseJson);
         }
         else {
             ostringstream oss;
@@ -236,7 +236,7 @@ CommandHandler::handleQueryConsoleType(const std::string & commandName, std::str
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryFirmwareCommand(const std::string & commandName, std::string & responseJson) {
+CommandHandler::handleQueryFirmware(const std::string & commandName, std::string & responseJson) {
     string firmwareDate;
     string firmwareVersion;
 
@@ -258,7 +258,7 @@ CommandHandler::handleQueryFirmwareCommand(const std::string & commandName, std:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryReceiverListCommand(const std::string & commandName, std::string & responseJson) {
+CommandHandler::handleQueryReceiverList(const std::string & commandName, std::string & responseJson) {
     std::vector<StationId> sensorStations;
 
     ostringstream oss;
@@ -335,7 +335,7 @@ CommandHandler::handleQueryHighLows(const std::string & commandName, std::string
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handlePutYearRainCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+CommandHandler::handlePutYearRain(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     Rainfall yearRain = -1.0; // Use negative number as the "not set" value
 
     ostringstream oss;
@@ -359,7 +359,7 @@ CommandHandler::handlePutYearRainCommand(const std::string & commandName, const 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handlePutYearETCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+CommandHandler::handlePutYearET(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     Evapotranspiration yearET = -1.0; // Use negative number as the "not set" value
 
     ostringstream oss;
@@ -400,7 +400,7 @@ CommandHandler::handleQueryBarometerData(const std::string & commandName, std::s
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleClearCumulativeValueCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+CommandHandler::handleClearCumulativeValue(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     CumulativeValue value;
 
     ostringstream oss;
@@ -433,7 +433,7 @@ CommandHandler::handleClearCumulativeValueCommand(const std::string & commandNam
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleClearHighValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+CommandHandler::handleClearHighValues(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     ExtremePeriod extremePeriod;
 
     ostringstream oss;
@@ -465,7 +465,7 @@ CommandHandler::handleClearHighValuesCommand(const std::string & commandName, co
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleClearLowValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+CommandHandler::handleClearLowValues(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     ExtremePeriod extremePeriod;
 
     ostringstream oss;
@@ -579,7 +579,7 @@ CommandHandler::handleQueryArchivePeriod(const std::string & commandName, std::s
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+CommandHandler::handleBacklight(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     bool lampOn;
     bool success = true;
 
@@ -614,47 +614,54 @@ CommandHandler::handleBacklightCommand(const std::string & commandName, const Co
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleUpdateUnitsCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-
-    BarometerUnits baroUnits;
-    TemperatureUnits temperatureUnits;
-    ElevationUnits elevationUnits;
-    RainUnits rainUnits;
-    WindUnits windUnits;
+CommandHandler::handleUpdateUnits(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    bool success = true;
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     //
     // First get the current units settings, then change the ones in the JSON command
     //
     UnitsSettings unitsSettings;
     configurator.retrieveUnitsSettings(unitsSettings);
+    string unitType;
 
-    for (CommandArgument arg : argumentList) {
-        if (arg.first == "baroUnits") {
-            unitsSettings.baroUnits = barometerUnitsEnum.stringToValue(arg.second);
-        }
-        else if (arg.first == "temperatureUnits") {
-            unitsSettings.temperatureUnits = temperatureUnitsEnum.stringToValue(arg.second);
-        }
-        else if (arg.first == "elevationUnits") {
-            unitsSettings.elevationUnits = elevationUnitsEnum.stringToValue(arg.second);
-        }
-        else if (arg.first == "rainUnits") {
-            unitsSettings.rainUnits = rainUnitsEnum.stringToValue(arg.second);
-        }
-        else if (arg.first == "windUnits") {
-            unitsSettings.windUnits = windUnitsEnum.stringToValue(arg.second);
-        }
-        else {
-             // TODO Error
+    try {
+        for (CommandArgument arg : argumentList) {
+            unitType = arg.second;
+            if (arg.first == "baroUnits") {
+                unitsSettings.baroUnits = barometerUnitsEnum.stringToValue(arg.second);
+            }
+            else if (arg.first == "temperatureUnits") {
+                unitsSettings.temperatureUnits = temperatureUnitsEnum.stringToValue(arg.second);
+            }
+            else if (arg.first == "elevationUnits") {
+                unitsSettings.elevationUnits = elevationUnitsEnum.stringToValue(arg.second);
+            }
+            else if (arg.first == "rainUnits") {
+                unitsSettings.rainUnits = rainUnitsEnum.stringToValue(arg.second);
+            }
+            else if (arg.first == "windUnits") {
+                unitsSettings.windUnits = windUnitsEnum.stringToValue(arg.second);
+            }
+            else {
+                oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid unit type argument " << arg.first << "\" }";
+                success = false;
+                break;
+            }
         }
     }
+    catch (const std::invalid_argument & e) {
+        success = false;
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid unit value argument " << unitType << "\" }";
+    }
 
-    ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
-    if (configurator.updateUnitsSettings(unitsSettings))
-        oss << SUCCESS_TOKEN;
-    else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error or invalid argument\" } ]";
+    if (success) {
+        if (configurator.updateUnitsSettings(unitsSettings))
+            oss << SUCCESS_TOKEN;
+        else
+            oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Console command error\" } ";
+    }
 
     oss << " }";
 
@@ -664,7 +671,7 @@ CommandHandler::handleUpdateUnitsCommand(const std::string & commandName, const 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryUnitsCommand(const std::string & commandName, std::string & response) {
+CommandHandler::handleQueryUnits(const std::string & commandName, std::string & response) {
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 

@@ -67,9 +67,9 @@ private:
     //
     void handleQueryConsoleType(const std::string & commandName, std::string & response);
 
-    void handleQueryFirmwareCommand(const std::string & commandName, std::string & response);
+    void handleQueryFirmware(const std::string & commandName, std::string & response);
 
-    void handleQueryReceiverListCommand(const std::string & commandName, std::string & response);
+    void handleQueryReceiverList(const std::string & commandName, std::string & response);
 
     void handleQueryConsoleDiagnostics(const std::string & commandName, std::string & response);
 
@@ -78,16 +78,16 @@ private:
     //
     void handleQueryHighLows(const std::string & commandName, std::string & response);
 
-    void handlePutYearRainCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    void handlePutYearRain(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    void handlePutYearETCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    void handlePutYearET(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     //
     // EEPROM Commands
     //
-    void handleUpdateUnitsCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateUnits(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    void handleQueryUnitsCommand(const std::string & commandName, std::string & response);
+    void handleQueryUnits(const std::string & commandName, std::string & response);
 
     void handleQuerySensorStations(const std::string & commandName, std::string & response);
 
@@ -107,11 +107,11 @@ private:
     //     5. Clear Active Alarms
     //     6. Clear Current Data
     //
-    void handleClearCumulativeValueCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    void handleClearCumulativeValue(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    void handleClearHighValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    void handleClearHighValues(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    void handleClearLowValuesCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    void handleClearLowValues(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleQueryArchivePeriod(const std::string & commandName, std::string & response);
 
@@ -122,7 +122,7 @@ private:
 
     void handleUpdateArchivePeriod(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    void handleBacklightCommand(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    void handleBacklight(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleQueryConfigurationData(const std::string & commandName, std::string & response);
 

@@ -50,7 +50,7 @@ static const char *SENSOR_NAMES[] = {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 VantageStationNetwork::VantageStationNetwork(VantageWeatherStation & station, const string & file) : station(station),
-                                                                                                     transmitterMask(0),
+                                                                                                     monitoredStationMask(0),
                                                                                                      networkFile(file),
                                                                                                      windStationLinkQuality(0),
                                                                                                      windStationId(UNKNOWN_STATION_ID),
@@ -94,10 +94,8 @@ VantageStationNetwork::initializeNetworkFromFile() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
-    for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
-        StationMap::iterator it = stations.find(i + 1);
-        if (it != stations.end())
-            it->second.isBatteryGood = packet.isTransmitterBatteryGood(i);
+    for (auto station : stations) {
+        station.second.isBatteryGood = packet.isTransmitterBatteryGood(station.second.stationData.stationId - 1);
     }
 
     console.batteryVoltage = packet.getConsoleBatteryVoltage();
@@ -363,7 +361,7 @@ VantageStationNetwork::retrieveStationInfo() {
     if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
         return false;
 
-    if (!station.eepromBinaryRead(EE_USED_TRANSMITTERS_ADDRESS, 1, &transmitterMask))
+    if (!station.eepromBinaryRead(EE_USED_TRANSMITTERS_ADDRESS, 1, &monitoredStationMask))
         return false;
 
     windStationId = UNKNOWN_STATION_ID;
@@ -397,7 +395,7 @@ VantageStationNetwork::retrieveStationInfo() {
 /*
         { "weatherStationNetwork" :
             {
-                "usedStations" : [ 1, 2, 3, 4, 8],  // Theoretically each of the stations listed here must be in the network data
+                "monitoredStationIds" : [ 1, 2, 3, 4, 8],  // Theoretically each of the stations listed here must be in the network data
                 "console" : {
                     "type" : "Vantage Pro2", "stations" : [ 1, 2, 3 ]
                 },
@@ -412,7 +410,7 @@ VantageStationNetwork::retrieveStationInfo() {
                     { "repeater" : "Repeater D", "stations" : [3, 4] }
                 ],
                 "stations" : [
-                    { "station" : "ISS", "type" : "ISS", "id" : 1,
+                    { "station" : "ISS", "type" : "ISS", "id" : 1,                       // The name for the ISS can be hard-coded as there can only be one
                         "sensors" : [
                             { "sensor" : "Outside Temperature", "type" : "Thermometer" },
                             { "sensor" : "Outside Humidity", "type" : "Hygrometer" },
@@ -436,11 +434,24 @@ VantageStationNetwork::formatJSON() const {
 
     oss << "{ \"weatherStationNetwork\" : { ";
 
+    bool first = true;
+    oss << " \"monitoredStationIds\" : [";
+    for (int i = 0; i < MAX_STATIONS; i++) {
+        if (monitoredStationMask & (1 << i) != 0) {
+            if (!first)
+                oss << ", ";
+
+            oss << (i + 1);
+            first = false;
+        }
+    }
+    oss << "], ";
+
     oss << " \"console\" : { \"type\" : \"" << consoleTypeEnum.valueToString(console.consoleType) << "\", ";
 
     oss << "\"stations\" : [";
 
-    bool first = true;
+    first = true;
     for (auto stationId : console.connectedStations) {
         if (!first)
             oss << ", ";

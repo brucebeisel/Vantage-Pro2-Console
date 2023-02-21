@@ -166,7 +166,7 @@ private:
     VantageLogger &         logger;
     VantageWeatherStation & station;
     std::string             networkFile;                     // The file in which the network configuration is stored. This includes user inputs.
-    byte                    transmitterMask;                 // The mask of transmitters that the console is monitoring
+    byte                    monitoredStationMask;            // The mask of station IDs that the console is monitoring
 
     RepeaterChainMap        chains;                          // The chains of repeaters and their sensor stations in the network
     RepeaterMap             repeaters;                       // The repeaters in the network
