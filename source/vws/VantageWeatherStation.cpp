@@ -31,6 +31,7 @@
 #include "HiLowPacket.h"
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
+#include "TemperatureHumidityCalibrationDataPacket.h"
 #include "VantageCRC.h"
 #include "BitConverter.h"
 #include "ProtocolException.h"
@@ -608,7 +609,36 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::updateElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg) {
+VantageWeatherStation::retrieveTemperatureHumidityCalibrationData(TemperatureHumidityCalibrationDataPacket & calibrationPacket) {
+    if (!sendAckedCommand(GET_TEMPERATURE_HUMIDITY_CALIBRATION)) {
+        return false;
+    }
+
+    if (!serialPort.read(buffer, TemperatureHumidityCalibrationDataPacket::CALIBRATION_DATA_BLOCK_SIZE + CRC_BYTES)) {
+        logger.log(VantageLogger::VantageLogger::VANTAGE_ERROR) << "Failed to read response to CALED command" << endl;
+        return false;
+    }
+
+    if (!VantageCRC::checkCRC(buffer, TemperatureHumidityCalibrationDataPacket::CALIBRATION_DATA_BLOCK_SIZE)) {
+        return false;
+    }
+
+    calibrationPacket.decodePacket(buffer);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageWeatherStation::updateTemperatureHumidityCalibrationData(const TemperatureHumidityCalibrationDataPacket & calibrationData) {
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageWeatherStation::updateElevationAndBarometerOffset(int elevationFeet, Pressure baroOffsetInHg) {
     ostringstream command;
     command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroOffsetInHg * 1000.0) << " " << elevationFeet;
 
@@ -623,7 +653,7 @@ bool
 VantageWeatherStation::retrieveBarometerCalibrationData(BarometerCalibrationData & baroCalData) {
     static constexpr int NUM_LINES = 9;
 
-    if (!sendOKedCommand(SET_BAROMETRIC_CAL_DATA_CMD))
+    if (!sendOKedCommand(GET_BAROMETRIC_CAL_DATA_CMD))
         return false;
 
     //

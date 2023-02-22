@@ -81,10 +81,10 @@ static const std::string READ_EEPROM_AS_BINARY_CMD = "EEBRD";        // Read EEP
 //
 // Calibration Commands
 //
-static const std::string CALIBRATE_TEMPERATURE_HUMIDITY = "CALED";   // Send temperature and humidity calibration values
-static const std::string CALIBRATE_TEMPERATURE_HUMIDITY2 = "CALFIX"; // Updates the display when calibration numbers have changed
-static const std::string SET_BAROMETRIC_DATA_CMD = "BAR=";            // Sets barometric offset using local reading and/or elevation
-static const std::string SET_BAROMETRIC_CAL_DATA_CMD = "BARDATA";    // Get the current barometer calibration parameters
+static const std::string GET_TEMPERATURE_HUMIDITY_CALIBRATION = "CALED";  // Send temperature and humidity calibration values
+static const std::string SET_TEMPERATURE_HUMIDITY_CALIBRATION = "CALFIX"; // Updates the display when calibration numbers have changed
+static const std::string SET_BAROMETRIC_DATA_CMD = "BAR=";                // Sets barometric offset using local reading and/or elevation
+static const std::string GET_BAROMETRIC_CAL_DATA_CMD = "BARDATA";         // Get the current barometer calibration parameters
 
 //
 // Clearing Commands

@@ -33,6 +33,7 @@ namespace vws {
 class HiLowPacket;
 class LoopPacket;
 class Loop2Packet;
+class TemperatureHumidityCalibrationDataPacket;
 
 /**
  * Class that handles the command protocols with the Vantage console.
@@ -327,8 +328,11 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // Calibration Commands
     /////////////////////////////////////////////////////////////////////////////////
+    bool retrieveTemperatureHumidityCalibrationData(TemperatureHumidityCalibrationDataPacket & calibrationData);
 
-    bool updateElevationAndBarometerOffset(int elevationFeet, double baroOffsetInHg);
+    bool updateTemperatureHumidityCalibrationData(const TemperatureHumidityCalibrationDataPacket & calibrationData);
+
+    bool updateElevationAndBarometerOffset(int elevationFeet, Pressure baroOffsetInHg);
 
     bool retrieveBarometerCalibrationData(BarometerCalibrationData & baroCalData);
 

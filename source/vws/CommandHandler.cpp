@@ -32,6 +32,7 @@
 #include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 #include "VantageStationNetwork.h"
+#include "TemperatureHumidityCalibrationDataPacket.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -162,6 +163,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-receiver-list") {
             handleQueryReceiverList(commandName, responseJson);
         }
+        else if (commandName == "query-th-cal-data") {
+            handleQueryTemperatureHumidityCalibrationData(commandName, responseJson);
+        }
         else if (commandName == "query-units") {
             handleQueryUnits(commandName, responseJson);
         }
@@ -179,14 +183,14 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
         else {
             ostringstream oss;
-            oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"unrecognized command\" } ] }";
+            oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"unrecognized command\" } }";
             responseJson = oss.str();
         }
     }
     catch (const std::exception & e) {
         ostringstream oss;
         oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << ", "
-            << DATA_TOKEN << " : [ { \"error\" : \"console processing error: " << e.what() << "\" } ] }";;
+            << DATA_TOKEN << " : { \"error\" : \"console processing error: " << e.what() << "\" } }";;
         responseJson = oss.str();
         cout << "Exception: " << e.what() << endl;
     }
@@ -202,7 +206,7 @@ CommandHandler::handleNoArgCommand(bool (VantageWeatherStation::*handler)(), con
     if ((station.*handler)())
         oss << SUCCESS_TOKEN;
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error\" } ]";;
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";;
 
     oss << " }";
 
@@ -247,7 +251,7 @@ CommandHandler::handleQueryFirmware(const std::string & commandName, std::string
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"firmwareVersion\" : \"" << firmwareVersion << "\", \"firmwareDate\" : \"" << firmwareDate << "\"}";
     }
     else {
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error\" } ]";;
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";;
     }
 
     oss << " }";
@@ -278,7 +282,7 @@ CommandHandler::handleQueryReceiverList(const std::string & commandName, std::st
         oss << " ] } }";
     }
     else {
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error\" } ] }";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } }";
     }
 
     responseJson = oss.str();
@@ -303,7 +307,7 @@ CommandHandler::handleQueryConsoleDiagnostics(const std::string & commandName, s
             << " } }";
     }
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
     oss << " }";
 
@@ -326,7 +330,7 @@ CommandHandler::handleQueryHighLows(const std::string & commandName, std::string
         oss << packet.formatJSON();
     }
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
     oss << " }";
 
@@ -350,7 +354,7 @@ CommandHandler::handlePutYearRain(const std::string & commandName, const Command
     if (yearRain > 0 && station.putYearlyRain(yearRain))
         oss << SUCCESS_TOKEN;
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"Invalid argument or command error\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
 
     oss << " }";
 
@@ -374,7 +378,7 @@ CommandHandler::handlePutYearET(const std::string & commandName, const CommandAr
     if (yearET > 0 && station.putYearlyET(yearET))
         oss << SUCCESS_TOKEN;
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"Invalid argument or command error\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
 
     oss << " }";
 
@@ -390,6 +394,27 @@ CommandHandler::handlePutYearET(const std::string & commandName, const CommandAr
 /******************************************************************************
  *                    CALIBRATION COMMANDS                                    *
  ******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryTemperatureHumidityCalibrationData(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    TemperatureHumidityCalibrationDataPacket packet;
+
+    if (station.retrieveTemperatureHumidityCalibrationData(packet)) {
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << packet.formatJSON();
+    }
+    else
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
+
+    oss << " }";
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryBarometerData(const std::string & commandName, std::string & response) {
 
@@ -419,10 +444,10 @@ CommandHandler::handleClearCumulativeValue(const std::string & commandName, cons
         if (argFound && station.clearCumulativeValue(value))
             oss << SUCCESS_TOKEN;
         else
-            oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"Invalid argument or command error\" } ]";
+            oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
     }
     catch (std::exception & e) {
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"Invalid argument exception\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument exception\" } ";
         logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception: " << e.what() << endl;
     }
 
@@ -452,7 +477,7 @@ CommandHandler::handleClearHighValues(const std::string & commandName, const Com
         if (argFound && station.clearHighValues(extremePeriod))
             oss << SUCCESS_TOKEN;
         else
-            oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"Invalid argument or command error\" } ]";
+            oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
     }
     catch (std::exception & e) {
         oss << FAILURE_TOKEN;
@@ -484,10 +509,10 @@ CommandHandler::handleClearLowValues(const std::string & commandName, const Comm
         if (argFound && station.clearLowValues(extremePeriod))
             oss << SUCCESS_TOKEN;
         else
-            oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"Invalid argument or command error\" } ]";
+            oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
     }
     catch (std::exception & e) {
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"Invalid argument exception\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument exception\" } ";
         logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception: " << e.what() << endl;
     }
 
@@ -520,7 +545,7 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
         period == ArchivePeriod::TWO_HOURS) && station.updateArchivePeriod(period))
         oss << SUCCESS_TOKEN;
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"Invalid argument or command error\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
 
     oss << " }";
 
@@ -547,7 +572,7 @@ CommandHandler::handleQueryConsoleTime(const std::string & commandName, std::str
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"time\" : \"" << timeString << "\" } ";
     }
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
     oss << " }";
 
@@ -570,7 +595,7 @@ CommandHandler::handleQueryArchivePeriod(const std::string & commandName, std::s
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"period\" : " << periodValue << " } ";
     }
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
     oss << " }";
 
@@ -605,7 +630,7 @@ CommandHandler::handleBacklight(const std::string & commandName, const CommandAr
     if (success)
         oss << SUCCESS_TOKEN;
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error or invalid argument\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error or invalid argument\" } ";
 
     oss << " }";
 
@@ -686,7 +711,7 @@ CommandHandler::handleQueryUnits(const std::string & commandName, std::string & 
         oss << "\"windUnits\" : \"" << windUnitsEnum.valueToString(unitsSettings.windUnits) << "\" }";
     }
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : [ { \"error\" : \"console command error\" } ]";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
     oss << " }";
 

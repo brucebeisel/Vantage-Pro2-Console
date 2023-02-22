@@ -21,6 +21,7 @@ SRCS=\
 	main.cpp \
 	ProtocolException.cpp \
  	SerialPort.cpp \
+    TemperatureHumidityCalibrationDataPacket.cpp \
 	UnitConverter.cpp \
 	VantageCRC.cpp \
 	VantageConfiguration.cpp \

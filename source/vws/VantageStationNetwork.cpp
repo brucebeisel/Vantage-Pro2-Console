@@ -34,17 +34,17 @@ using namespace VantageEepromConstants;
 using namespace ProtocolConstants;
 
 static const char *SENSOR_NAMES[] = {
-    "ANEMOMETER",
-    "BAROMETER",
-    "HYGROMETER",
-    "LEAF_WETNESS",
-    "LEAF_TEMPERATURE",
-    "RAIN_COLLECTOR",
-    "SOLAR_RADIATION",
-    "SOIL_MOISTURE",
-    "SOIL_TEMPERATURE",
-    "THERMOMETER",
-    "ULTRAVIOLET"
+    "Anemometer",
+    "Barometer",
+    "Hygrometer",
+    "Leaf Wetness Sensor",
+    "Leaf Temperature Sensor",
+    "Rain Gauge",
+    "Solar Radiation Sensor",
+    "Soil Moisture Sensor",
+    "Soil Temperature Sensor",
+    "Thermometer",
+    "Ultraviolet Sensor"
 };
 
 ////////////////////////////////////////////////////////////////////////////////
