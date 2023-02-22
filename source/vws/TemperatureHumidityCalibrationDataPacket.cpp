@@ -16,7 +16,7 @@
  */
 #include <sstream>
 #include "TemperatureHumidityCalibrationDataPacket.h"
-#include "VantageDecoder.h"
+#include "BitConverter.h"
 
 using namespace std;
 
@@ -28,8 +28,9 @@ using namespace ProtocolConstants;
 TemperatureHumidityCalibrationDataPacket::TemperatureHumidityCalibrationDataPacket() :
                                                                     insideTemperatureAdjustment(0.0),
                                                                     outsideTemperatureAdjustment(0.0),
-                                                                    insideHumidityAdjustment(0.0),
-                                                                    outsideHumidityAdjustment(0.0) {
+                                                                    insideHumidityAdjustment(0),
+                                                                    outsideHumidityAdjustment(0),
+                                                                    windDirectionAdjustment(0) {
 
 }
 
@@ -42,23 +43,34 @@ TemperatureHumidityCalibrationDataPacket::~TemperatureHumidityCalibrationDataPac
 ////////////////////////////////////////////////////////////////////////////////
 bool
 TemperatureHumidityCalibrationDataPacket::decodePacket(const byte buffer[]) {
-    insideTemperatureAdjustment = VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
-    outsideTemperatureAdjustment = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
+    uint8 value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
+    insideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
 
-    for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++)
-        extraTemperatureAdjustments[i] = VantageDecoder::decode16BitTemperature(buffer, EXTRA_TEMPERATURE_ADJUSTMENTS_OFFSET + (i * 2));
+    value8 = BitConverter::toInt8(buffer, OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
+    outsideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
 
-    for (int i = 0; i < MAX_SOIL_TEMPERATURES; i++)
-        soilTemperatureAdjustments[i] = VantageDecoder::decode16BitTemperature(buffer, SOIL_TEMPERATURE_ADJUSTMENTS_OFFSET + (i * 2));
+    for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
+        value8 = BitConverter::toInt8(buffer, EXTRA_TEMPERATURE_ADJUSTMENTS_OFFSET + i);
+        extraTemperatureAdjustments[i] = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
+    }
 
-    for (int i = 0; i < MAX_LEAF_TEMPERATURES; i++)
-        leafTemperatureAdjustments[i] = VantageDecoder::decode16BitTemperature(buffer, LEAF_TEMPERATURE_ADJUSTMENTS_OFFSET + (i * 2));
+    for (int i = 0; i < MAX_SOIL_TEMPERATURES; i++) {
+        value8 = BitConverter::toInt8(buffer, SOIL_TEMPERATURE_ADJUSTMENTS_OFFSET + i);
+        soilTemperatureAdjustments[i] = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
+    }
 
-    insideHumidityAdjustment = VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_ADJUSTMENT_OFFSET);
-    outsideHumidityAdjustment = VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_ADJUSTMENT_OFFSET);
+    for (int i = 0; i < MAX_LEAF_TEMPERATURES; i++) {
+        value8 = BitConverter::toInt8(buffer, LEAF_TEMPERATURE_ADJUSTMENTS_OFFSET + i);
+        leafTemperatureAdjustments[i] = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
+    }
+
+    insideHumidityAdjustment = BitConverter::toInt8(buffer, INSIDE_HUMIDITY_ADJUSTMENT_OFFSET);
+    outsideHumidityAdjustment = BitConverter::toInt8(buffer, OUTSIDE_HUMIDITY_ADJUSTMENT_OFFSET);
 
     for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++)
-        extraHumidityAdjustments[i] = VantageDecoder::decodeHumidity(buffer, EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET + i);
+        extraHumidityAdjustments[i] = BitConverter::toInt8(buffer, EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET + i);
+
+    windDirectionAdjustment = BitConverter::toInt16(buffer, WIND_DIRECTION_ADJUSTMENT_OFFSET);
 
     return true;
 
@@ -120,7 +132,10 @@ TemperatureHumidityCalibrationDataPacket::formatJSON() const {
         first = false;
     }
 
-    oss << " ] } }";
+    oss << " ], ";
+    oss << "\"windDirectionAdjustment\" : " << windDirectionAdjustment;
+
+    oss << " } }";
 
     return oss.str();
 

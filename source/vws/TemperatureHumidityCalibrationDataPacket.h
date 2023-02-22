@@ -25,7 +25,7 @@ namespace vws {
 
 class TemperatureHumidityCalibrationDataPacket {
 public:
-    static constexpr int CALIBRATION_DATA_BLOCK_SIZE = 43;
+    static constexpr int CALIBRATION_DATA_BLOCK_SIZE = 29;
 
     TemperatureHumidityCalibrationDataPacket();
     virtual ~TemperatureHumidityCalibrationDataPacket();
@@ -40,21 +40,25 @@ private:
 
     static constexpr int INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET = 0;
     static constexpr int OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET = 2;
-    static constexpr int EXTRA_TEMPERATURE_ADJUSTMENTS_OFFSET = 4;
-    static constexpr int SOIL_TEMPERATURE_ADJUSTMENTS_OFFSET = 18;
-    static constexpr int LEAF_TEMPERATURE_ADJUSTMENTS_OFFSET = 26;
-    static constexpr int INSIDE_HUMIDITY_ADJUSTMENT_OFFSET = 34;
-    static constexpr int OUTSIDE_HUMIDITY_ADJUSTMENT_OFFSET = 35;
-    static constexpr int EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET = 36;
+    static constexpr int EXTRA_TEMPERATURE_ADJUSTMENTS_OFFSET = 3;
+    static constexpr int SOIL_TEMPERATURE_ADJUSTMENTS_OFFSET = 10;
+    static constexpr int LEAF_TEMPERATURE_ADJUSTMENTS_OFFSET = 14;
+    static constexpr int INSIDE_HUMIDITY_ADJUSTMENT_OFFSET = 18;
+    static constexpr int OUTSIDE_HUMIDITY_ADJUSTMENT_OFFSET = 19;
+    static constexpr int EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET = 20;
+    static constexpr int WIND_DIRECTION_ADJUSTMENT_OFFSET = 27;
+
+    static constexpr Temperature TEMPERATURE_ADJUSTMENT_SCALE = 10.0;
 
     Temperature insideTemperatureAdjustment;
     Temperature outsideTemperatureAdjustment;
     Temperature extraTemperatureAdjustments[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
     Temperature soilTemperatureAdjustments[ProtocolConstants::MAX_SOIL_TEMPERATURES];
     Temperature leafTemperatureAdjustments[ProtocolConstants::MAX_LEAF_TEMPERATURES];
-    Humidity    insideHumidityAdjustment;
-    Humidity    outsideHumidityAdjustment;
-    Humidity    extraHumidityAdjustments[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
+    int16       insideHumidityAdjustment;
+    int16       outsideHumidityAdjustment;
+    int16       extraHumidityAdjustments[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
+    int16       windDirectionAdjustment;
 };
 
 } /* namespace vws */

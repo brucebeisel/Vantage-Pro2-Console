@@ -610,18 +610,8 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveTemperatureHumidityCalibrationData(TemperatureHumidityCalibrationDataPacket & calibrationPacket) {
-    if (!sendAckedCommand(GET_TEMPERATURE_HUMIDITY_CALIBRATION)) {
+    if (!eepromBinaryRead(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, TemperatureHumidityCalibrationDataPacket::CALIBRATION_DATA_BLOCK_SIZE, buffer))
         return false;
-    }
-
-    if (!serialPort.read(buffer, TemperatureHumidityCalibrationDataPacket::CALIBRATION_DATA_BLOCK_SIZE + CRC_BYTES)) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_ERROR) << "Failed to read response to CALED command" << endl;
-        return false;
-    }
-
-    if (!VantageCRC::checkCRC(buffer, TemperatureHumidityCalibrationDataPacket::CALIBRATION_DATA_BLOCK_SIZE)) {
-        return false;
-    }
 
     calibrationPacket.decodePacket(buffer);
 

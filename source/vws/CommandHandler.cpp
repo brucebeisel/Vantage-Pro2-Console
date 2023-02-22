@@ -411,6 +411,7 @@ CommandHandler::handleQueryTemperatureHumidityCalibrationData(const std::string 
 
     oss << " }";
 
+    response = oss.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
