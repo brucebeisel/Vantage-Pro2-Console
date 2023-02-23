@@ -181,6 +181,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "update-archive-period") {
             handleUpdateArchivePeriod(commandName, argumentList, responseJson);
         }
+        else if (commandName == "update-baro-offset-elevation") {
+            handleUpdateBarometerOffsetAndElevation(commandName, argumentList, responseJson);
+        }
         else if (commandName == "update-units") {
             handleUpdateUnits(commandName, argumentList, responseJson);
         }
@@ -406,7 +409,7 @@ CommandHandler::handleQueryCalibrationAdjustments(const std::string & commandNam
 
     CalibrationAdjustmentsPacket packet;
 
-    if (station.retrieveTemperatureHumidityCalibrationData(packet)) {
+    if (station.retrieveCalibrationAdjustments(packet)) {
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << packet.formatJSON();
     }
     else
@@ -430,11 +433,8 @@ CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & co
         return;
     }
 
-    //
-    // TODO add the 1000.0 factor to a header file somewhere
-    //
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"barometerCalibrationParameters\" : { "
-        << " \"recentMeasurement\" : " << (baroCalParams.recentMeasurement / 1000.0) << ", "
+        << " \"recentMeasurement\" : " << (baroCalParams.recentMeasurement / BAROMETER_SCALE) << ", "
         << " \"elevation\" : " << baroCalParams.elevation << ", "
         << " \"dewPoint\" : " << baroCalParams.dewPoint << ", "
         << " \"virtualTemperature\" : " << baroCalParams.avgTemperature12Hour << ", "
@@ -445,6 +445,42 @@ CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & co
         << " \"fixedOffset\" : " << baroCalParams.fixedOffset
         << " } } }";
 
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleUpdateBarometerOffsetAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+
+    Pressure baroOffsetInHg = 0.0;
+    int elevationFeet = -9999;
+
+    for (CommandArgument arg : argumentList) {
+        if (arg.first == "elevation") {
+            elevationFeet = atoi(arg.second.c_str());
+        }
+        else if (arg.first == "baroOffset") {
+            baroOffsetInHg = atof(arg.second.c_str());
+        }
+    }
+
+    if (baroOffsetInHg == 0.0 || elevationFeet == -9999) {
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"missing argument\" }";
+        return;
+    }
+
+    if (!station.updateBarometerOffsetAndElevation(baroOffsetInHg, elevationFeet)) {
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
+        return;
+    }
+    else {
+        oss << SUCCESS_TOKEN;
+    }
+
+    oss << " }";
     response = oss.str();
 }
 

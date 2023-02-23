@@ -328,11 +328,11 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // Calibration Commands
     /////////////////////////////////////////////////////////////////////////////////
-    bool retrieveTemperatureHumidityCalibrationData(CalibrationAdjustmentsPacket & calibrationData);
+    bool retrieveCalibrationAdjustments(CalibrationAdjustmentsPacket & calibrationData);
 
-    bool updateTemperatureHumidityCalibrationData(const CalibrationAdjustmentsPacket & calibrationData);
+    bool updateCalibrationAdjustments(const CalibrationAdjustmentsPacket & calibrationData);
 
-    bool updateElevationAndBarometerOffset(int elevationFeet, Pressure baroOffsetInHg);
+    bool updateBarometerOffsetAndElevation(Pressure baroOffsetInHg, int elevationFeet);
 
     bool retrieveBarometerCalibrationParameters(BarometerCalibrationParameters & baroCalParams);
 

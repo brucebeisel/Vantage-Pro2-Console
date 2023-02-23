@@ -609,7 +609,7 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::retrieveTemperatureHumidityCalibrationData(CalibrationAdjustmentsPacket & calibrationPacket) {
+VantageWeatherStation::retrieveCalibrationAdjustments(CalibrationAdjustmentsPacket & calibrationPacket) {
     if (!eepromBinaryRead(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE, buffer))
         return false;
 
@@ -621,16 +621,16 @@ VantageWeatherStation::retrieveTemperatureHumidityCalibrationData(CalibrationAdj
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::updateTemperatureHumidityCalibrationData(const CalibrationAdjustmentsPacket & calibrationData) {
+VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustmentsPacket & calibrationAdjustments) {
     return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::updateElevationAndBarometerOffset(int elevationFeet, Pressure baroOffsetInHg) {
+VantageWeatherStation::updateBarometerOffsetAndElevation(Pressure baroOffsetInHg, int elevationFeet) {
     ostringstream command;
-    command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroOffsetInHg * 1000.0) << " " << elevationFeet;
+    command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroOffsetInHg * BAROMETER_SCALE) << " " << elevationFeet;
 
     //
     // TBD This is the one "OK" response command that can also receive a NACK response.

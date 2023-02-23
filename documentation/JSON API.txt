@@ -151,7 +151,7 @@ Archive query
                   (CALED and CALFIX are not being used in favor of the calibration offsets in the EEPROM)
     "BAR=<bar value to display (in Hg * 1000)-decimal> <elevation (ft)-decimal>"
                 Sets the elevation and barometer offset values when setting the barometer for a new location.
-    "BARDATA"   Displays of the current barometer calibration parameters in text.
+    ++ "BARDATA"   Displays of the current barometer calibration parameters in text.
 
 6. Clearing Commands
     + "CLRLOG"    Clears the archive data.

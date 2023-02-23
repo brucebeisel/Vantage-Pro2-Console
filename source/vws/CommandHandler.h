@@ -100,6 +100,8 @@ private:
 
     void handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response);
 
+    void handleUpdateBarometerOffsetAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     //
     // Clearing Commands. Note: the following commands do not require an argument and are handled using handleNoArgCommand()
     //     1. Clear Archive

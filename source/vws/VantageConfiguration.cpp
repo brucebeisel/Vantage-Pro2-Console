@@ -117,8 +117,9 @@ VantageConfiguration::updatePosition(const PositionData & position) {
     value16 = std::lround(position.longitude * LAT_LON_SCALE);
     BitConverter::getBytes(value16, buffer, 2, 2);
 
+    // TODO, fix this to get the value of the BARO OFFSET before calling to change the elevation
     if (station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
-        if (station.updateElevationAndBarometerOffset(position.elevation, 0.0)) {
+        if (station.updateBarometerOffsetAndElevation(0.0, position.elevation)) {
             success = true;
         }
     }
