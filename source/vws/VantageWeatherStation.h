@@ -58,15 +58,15 @@ public:
     };
 
     struct BarometerCalibrationParameters {
-        int         recentMeasurement;         // In 1/1000 of an inch
-        Elevation   elevation;                 // In feet
-        Temperature dewPoint;                  // Fahrenheit
-        Temperature avgTemperature12Hour;      // Fahrenheit
-        Humidity    humidityCorrectionFactor;  // %
-        double      correctionRatio;           // Unknown units
-        double      offsetCorrectionFactor;    // Unknown units
-        int         fixedGain;                 // Unknown units, fixed per console
-        int         fixedOffset;               // Unknown units, fixed per console
+        int recentMeasurement;         // In 1/1000 of an inch
+        int elevation;                 // In feet
+        int dewPoint;                  // Fahrenheit
+        int avgTemperature12Hour;      // Fahrenheit
+        int humidityCorrectionFactor;  // %
+        int correctionRatio;           // Unknown units
+        int offsetCorrectionFactor;    // Unknown units
+        int fixedGain;                 // Unknown units, fixed per console
+        int fixedOffset;               // Unknown units, fixed per console
     };
 
     /**

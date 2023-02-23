@@ -96,7 +96,7 @@ private:
     //
     // Calibration Commands
     //
-    void handleQueryTemperatureHumidityCalibrationData(const std::string & commandName, std::string & response);
+    void handleQueryCalibrationAdjustments(const std::string & commandName, std::string & response);
 
     void handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response);
 

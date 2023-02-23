@@ -146,7 +146,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             handleQueryBarometerCalibrationParameters(commandName, responseJson);
         }
         else if (commandName == "query-cal-adjustments") {
-            handleQueryTemperatureHumidityCalibrationData(commandName, responseJson);
+            handleQueryCalibrationAdjustments(commandName, responseJson);
         }
         else if (commandName == "query-configuration-data") {
             handleQueryConfigurationData(commandName, responseJson);
@@ -400,7 +400,7 @@ CommandHandler::handlePutYearET(const std::string & commandName, const CommandAr
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryTemperatureHumidityCalibrationData(const std::string & commandName, std::string & response) {
+CommandHandler::handleQueryCalibrationAdjustments(const std::string & commandName, std::string & response) {
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 

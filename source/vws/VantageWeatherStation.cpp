@@ -1,4 +1,3 @@
-
 /* 
  * Copyright (C) 2023 Bruce Beisel
  *
@@ -663,7 +662,7 @@ VantageWeatherStation::retrieveBarometerCalibrationParameters(BarometerCalibrati
     buffer[offset] = '\0';
     string response(buffer);
 
-    regex lineRegex("[^\\r]+\r\n");
+    regex lineRegex("[^\\n]+\n\r");
 
     auto linesBegin = sregex_iterator(response.begin(), response.end(), lineRegex);
     auto linesEnd = sregex_iterator();
@@ -676,52 +675,53 @@ VantageWeatherStation::retrieveBarometerCalibrationParameters(BarometerCalibrati
 
     int linesProcessed = 0;
     for (std::sregex_iterator it = linesBegin; it != linesEnd; ++it) {
-        string line = (*it).str();
-        if (strncmp(line.c_str(), "BAR", strlen("BAR")) == 0) {
+        string lineString = (*it).str();
+        const char *line = lineString.c_str();
+        if (strncmp(line, "BAR ", strlen("BAR ")) == 0) {
             linesProcessed++;
-            baroCalParams.recentMeasurement = 0;
+            baroCalParams.recentMeasurement = atoi(&line[strlen("BAR ")]);
         }
-        else if (strncmp(line.c_str(), "ELEVATION", strlen("ELEVATION")) == 0) {
+        else if (strncmp(line, "ELEVATION", strlen("ELEVATION")) == 0) {
             linesProcessed++;
-            baroCalParams.elevation = 0;
+            baroCalParams.elevation = atoi(&line[strlen("ELEVATION")]);
         }
-        else if (strncmp(line.c_str(), "DEW POINT", strlen("DEW POINT")) == 0) {
+        else if (strncmp(line, "DEW POINT", strlen("DEW POINT")) == 0) {
             linesProcessed++;
-            baroCalParams.dewPoint = 0;
+            baroCalParams.dewPoint = atoi(&line[strlen("DEW POINT")]);
         }
-        else if (strncmp(line.c_str(), "VIRTUAL TEMP", strlen("VIRTUAL TEMP")) == 0) {
+        else if (strncmp(line, "VIRTUAL TEMP", strlen("VIRTUAL TEMP")) == 0) {
             linesProcessed++;
-            baroCalParams.avgTemperature12Hour = 0;
+            baroCalParams.avgTemperature12Hour = atoi(&line[strlen("VIRTUAL TEMP")]);
         }
-        else if (strncmp(line.c_str(), "C", strlen("C")) == 0) {
+        else if (strncmp(line, "C", strlen("C")) == 0) {
             linesProcessed++;
-            baroCalParams.humidityCorrectionFactor = 0;
+            baroCalParams.humidityCorrectionFactor = atoi(&line[1]);
         }
-        else if (strncmp(line.c_str(), "R", strlen("R")) == 0) {
+        else if (strncmp(line, "R", strlen("R")) == 0) {
             linesProcessed++;
-            baroCalParams.correctionRatio = 0.0;
+            baroCalParams.correctionRatio = atoi(&line[1]);
         }
-        else if (strncmp(line.c_str(), "BARCAL", strlen("BARCAL")) == 0) {
+        else if (strncmp(line, "BARCAL", strlen("BARCAL")) == 0) {
             linesProcessed++;
-            baroCalParams.offsetCorrectionFactor = 0.0;
+            baroCalParams.offsetCorrectionFactor = atoi(&line[strlen("BARCAL")]);
         }
-        else if (strncmp(line.c_str(), "GAIN", strlen("GAIN")) == 0) {
+        else if (strncmp(line, "GAIN", strlen("GAIN")) == 0) {
             linesProcessed++;
-            baroCalParams.fixedGain = 0.0;
+            baroCalParams.fixedGain = atoi(&line[strlen("GAIN")]);
         }
-        else if (strncmp(line.c_str(), "OFFSET", strlen("OFFSET")) == 0) {
+        else if (strncmp(line, "OFFSET", strlen("OFFSET")) == 0) {
             linesProcessed++;
-            baroCalParams.fixedOffset = 0.0;
+            baroCalParams.fixedOffset = atoi(&line[strlen("OFFSET")]);
         }
         else {
-            ; // Error
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Received invalid token in response to BARDATA: " << line << endl;
             return false;
         }
+    }
 
-        if (linesProcessed != NUM_LINES) {
-            ; // Error
-            return false;
-        }
+    if (linesProcessed != NUM_LINES) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Processed the wrong number of lines from BARDATA command. Expected: " << NUM_LINES << " Got: " << linesProcessed << endl;
+        return false;
     }
 
     return true;
