@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <sstream>
-#include "TemperatureHumidityCalibrationDataPacket.h"
 #include "BitConverter.h"
+#include "CalibrationAdjustmentsPacket.h"
 
 using namespace std;
 
@@ -25,7 +25,7 @@ using namespace ProtocolConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-TemperatureHumidityCalibrationDataPacket::TemperatureHumidityCalibrationDataPacket() :
+CalibrationAdjustmentsPacket::CalibrationAdjustmentsPacket() :
                                                                     insideTemperatureAdjustment(0.0),
                                                                     outsideTemperatureAdjustment(0.0),
                                                                     insideHumidityAdjustment(0),
@@ -36,13 +36,13 @@ TemperatureHumidityCalibrationDataPacket::TemperatureHumidityCalibrationDataPack
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-TemperatureHumidityCalibrationDataPacket::~TemperatureHumidityCalibrationDataPacket() {
+CalibrationAdjustmentsPacket::~CalibrationAdjustmentsPacket() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-TemperatureHumidityCalibrationDataPacket::decodePacket(const byte buffer[]) {
+CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
     uint8 value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
     insideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
 
@@ -79,10 +79,10 @@ TemperatureHumidityCalibrationDataPacket::decodePacket(const byte buffer[]) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-TemperatureHumidityCalibrationDataPacket::formatJSON() const {
+CalibrationAdjustmentsPacket::formatJSON() const {
     ostringstream oss;
 
-    oss << "{ \"temperatureHumidityCalibrationData\" : { "
+    oss << "{ \"calibrationAdjustments\" : { "
         << " \"insideTemperatureAdjustment\" : " << insideTemperatureAdjustment << ", "
         << " \"outsideTemperatureAdjustment\" : " << outsideTemperatureAdjustment << ", "
         << " \"extraTemperatureAdjustments\" : [";
@@ -144,7 +144,7 @@ TemperatureHumidityCalibrationDataPacket::formatJSON() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-TemperatureHumidityCalibrationDataPacket::parseJSON(std::string & s) {
+CalibrationAdjustmentsPacket::parseJSON(std::string & s) {
     return true;
 
 }

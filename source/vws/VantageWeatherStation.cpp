@@ -1,3 +1,4 @@
+
 /* 
  * Copyright (C) 2023 Bruce Beisel
  *
@@ -31,7 +32,7 @@
 #include "HiLowPacket.h"
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
-#include "TemperatureHumidityCalibrationDataPacket.h"
+#include "CalibrationAdjustmentsPacket.h"
 #include "VantageCRC.h"
 #include "BitConverter.h"
 #include "ProtocolException.h"
@@ -609,8 +610,8 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::retrieveTemperatureHumidityCalibrationData(TemperatureHumidityCalibrationDataPacket & calibrationPacket) {
-    if (!eepromBinaryRead(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, TemperatureHumidityCalibrationDataPacket::CALIBRATION_DATA_BLOCK_SIZE, buffer))
+VantageWeatherStation::retrieveTemperatureHumidityCalibrationData(CalibrationAdjustmentsPacket & calibrationPacket) {
+    if (!eepromBinaryRead(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE, buffer))
         return false;
 
     calibrationPacket.decodePacket(buffer);
@@ -621,7 +622,7 @@ VantageWeatherStation::retrieveTemperatureHumidityCalibrationData(TemperatureHum
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::updateTemperatureHumidityCalibrationData(const TemperatureHumidityCalibrationDataPacket & calibrationData) {
+VantageWeatherStation::updateTemperatureHumidityCalibrationData(const CalibrationAdjustmentsPacket & calibrationData) {
     return true;
 }
 
@@ -640,7 +641,7 @@ VantageWeatherStation::updateElevationAndBarometerOffset(int elevationFeet, Pres
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::retrieveBarometerCalibrationData(BarometerCalibrationData & baroCalData) {
+VantageWeatherStation::retrieveBarometerCalibrationParameters(BarometerCalibrationParameters & baroCalParams) {
     static constexpr int NUM_LINES = 9;
 
     if (!sendOKedCommand(GET_BAROMETRIC_CAL_DATA_CMD))
@@ -678,39 +679,39 @@ VantageWeatherStation::retrieveBarometerCalibrationData(BarometerCalibrationData
         string line = (*it).str();
         if (strncmp(line.c_str(), "BAR", strlen("BAR")) == 0) {
             linesProcessed++;
-            baroCalData.recentMeasurement = 0;
+            baroCalParams.recentMeasurement = 0;
         }
         else if (strncmp(line.c_str(), "ELEVATION", strlen("ELEVATION")) == 0) {
             linesProcessed++;
-            baroCalData.elevation = 0;
+            baroCalParams.elevation = 0;
         }
         else if (strncmp(line.c_str(), "DEW POINT", strlen("DEW POINT")) == 0) {
             linesProcessed++;
-            baroCalData.dewPoint = 0;
+            baroCalParams.dewPoint = 0;
         }
         else if (strncmp(line.c_str(), "VIRTUAL TEMP", strlen("VIRTUAL TEMP")) == 0) {
             linesProcessed++;
-            baroCalData.avgTemperature12Hour = 0;
+            baroCalParams.avgTemperature12Hour = 0;
         }
         else if (strncmp(line.c_str(), "C", strlen("C")) == 0) {
             linesProcessed++;
-            baroCalData.humidityCorrectionFactor = 0;
+            baroCalParams.humidityCorrectionFactor = 0;
         }
         else if (strncmp(line.c_str(), "R", strlen("R")) == 0) {
             linesProcessed++;
-            baroCalData.correctionRatio = 0.0;
+            baroCalParams.correctionRatio = 0.0;
         }
         else if (strncmp(line.c_str(), "BARCAL", strlen("BARCAL")) == 0) {
             linesProcessed++;
-            baroCalData.offsetCorrectionFactor = 0.0;
+            baroCalParams.offsetCorrectionFactor = 0.0;
         }
         else if (strncmp(line.c_str(), "GAIN", strlen("GAIN")) == 0) {
             linesProcessed++;
-            baroCalData.fixedGain = 0.0;
+            baroCalParams.fixedGain = 0.0;
         }
         else if (strncmp(line.c_str(), "OFFSET", strlen("OFFSET")) == 0) {
             linesProcessed++;
-            baroCalData.fixedOffset = 0.0;
+            baroCalParams.fixedOffset = 0.0;
         }
         else {
             ; // Error

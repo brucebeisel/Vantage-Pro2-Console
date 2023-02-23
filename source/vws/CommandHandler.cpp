@@ -26,13 +26,13 @@
 #include "CommandHandler.h"
 #include "ArchiveManager.h"
 #include "ArchivePacket.h"
+#include "CalibrationAdjustmentsPacket.h"
 #include "HiLowPacket.h"
 #include "VantageConfiguration.h"
 #include "VantageEnums.h"
 #include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 #include "VantageStationNetwork.h"
-#include "TemperatureHumidityCalibrationDataPacket.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -142,6 +142,12 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-archive-period") {
             handleQueryArchivePeriod(commandName, responseJson);
         }
+        else if (commandName == "query-baro-cal-params") {
+            handleQueryBarometerCalibrationParameters(commandName, responseJson);
+        }
+        else if (commandName == "query-cal-adjustments") {
+            handleQueryTemperatureHumidityCalibrationData(commandName, responseJson);
+        }
         else if (commandName == "query-configuration-data") {
             handleQueryConfigurationData(commandName, responseJson);
         }
@@ -162,9 +168,6 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
         else if (commandName == "query-receiver-list") {
             handleQueryReceiverList(commandName, responseJson);
-        }
-        else if (commandName == "query-th-cal-data") {
-            handleQueryTemperatureHumidityCalibrationData(commandName, responseJson);
         }
         else if (commandName == "query-units") {
             handleQueryUnits(commandName, responseJson);
@@ -401,7 +404,7 @@ CommandHandler::handleQueryTemperatureHumidityCalibrationData(const std::string 
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
-    TemperatureHumidityCalibrationDataPacket packet;
+    CalibrationAdjustmentsPacket packet;
 
     if (station.retrieveTemperatureHumidityCalibrationData(packet)) {
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << packet.formatJSON();
@@ -417,8 +420,32 @@ CommandHandler::handleQueryTemperatureHumidityCalibrationData(const std::string 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryBarometerData(const std::string & commandName, std::string & response) {
+CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
+    VantageWeatherStation::BarometerCalibrationParameters baroCalParams;
+    if (!station.retrieveBarometerCalibrationParameters(baroCalParams)) {
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
+        return;
+    }
+
+    //
+    // TODO add the 1000.0 factor to a header file somewhere
+    //
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"barometerCalibrationParameters\" : { "
+        << " \"recentMeasurement\" : " << (baroCalParams.recentMeasurement / 1000.0) << ", "
+        << " \"elevation\" : " << baroCalParams.elevation << ", "
+        << " \"dewPoint\" : " << baroCalParams.dewPoint << ", "
+        << " \"virtualTemperature\" : " << baroCalParams.avgTemperature12Hour << ", "
+        << " \"humidityCorrectionFactor\" : " << baroCalParams.humidityCorrectionFactor << ", "
+        << " \"correctionRatio\" : " << baroCalParams.correctionRatio << ", "
+        << " \"offsetCorrectionFactor\" : " << baroCalParams.offsetCorrectionFactor << ", "
+        << " \"fixedGain\" : " << baroCalParams.fixedGain << ", "
+        << " \"fixedOffset\" : " << baroCalParams.fixedOffset
+        << " } } }";
+
+    response = oss.str();
 }
 
 /******************************************************************************

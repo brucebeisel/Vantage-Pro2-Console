@@ -15,20 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEMPERATURE_HUMIDITY_CALIBRATION_DATA_PACKET_H
-#define TEMPERATURE_HUMIDITY_CALIBRATION_DATA_PACKET_H
+#ifndef CALIBRATION_ADJUSTMENTS_PACKET_H
+#define CALIBRATION_ADJUSTMENTS_PACKET_H
 
 #include "Weather.h"
 #include "VantageProtocolConstants.h"
 
 namespace vws {
 
-class TemperatureHumidityCalibrationDataPacket {
+class CalibrationAdjustmentsPacket {
 public:
     static constexpr int CALIBRATION_DATA_BLOCK_SIZE = 29;
 
-    TemperatureHumidityCalibrationDataPacket();
-    virtual ~TemperatureHumidityCalibrationDataPacket();
+    CalibrationAdjustmentsPacket();
+    virtual ~CalibrationAdjustmentsPacket();
 
     bool decodePacket(const byte buffer[]);
 

@@ -33,7 +33,7 @@ namespace vws {
 class HiLowPacket;
 class LoopPacket;
 class Loop2Packet;
-class TemperatureHumidityCalibrationDataPacket;
+class CalibrationAdjustmentsPacket;
 
 /**
  * Class that handles the command protocols with the Vantage console.
@@ -57,7 +57,7 @@ public:
         int crcErrorCount;
     };
 
-    struct BarometerCalibrationData {
+    struct BarometerCalibrationParameters {
         int         recentMeasurement;         // In 1/1000 of an inch
         Elevation   elevation;                 // In feet
         Temperature dewPoint;                  // Fahrenheit
@@ -328,13 +328,13 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // Calibration Commands
     /////////////////////////////////////////////////////////////////////////////////
-    bool retrieveTemperatureHumidityCalibrationData(TemperatureHumidityCalibrationDataPacket & calibrationData);
+    bool retrieveTemperatureHumidityCalibrationData(CalibrationAdjustmentsPacket & calibrationData);
 
-    bool updateTemperatureHumidityCalibrationData(const TemperatureHumidityCalibrationDataPacket & calibrationData);
+    bool updateTemperatureHumidityCalibrationData(const CalibrationAdjustmentsPacket & calibrationData);
 
     bool updateElevationAndBarometerOffset(int elevationFeet, Pressure baroOffsetInHg);
 
-    bool retrieveBarometerCalibrationData(BarometerCalibrationData & baroCalData);
+    bool retrieveBarometerCalibrationParameters(BarometerCalibrationParameters & baroCalParams);
 
     /////////////////////////////////////////////////////////////////////////////////
     // End Calibration Commands

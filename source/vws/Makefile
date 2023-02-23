@@ -7,6 +7,7 @@ SRCS=\
 	ArchiveManager.cpp \
 	ArchivePacket.cpp \
 	BitConverter.cpp \
+    CalibrationAdjustmentsPacket.cpp \
 	CommandHandler.cpp \
 	CommandSocket.cpp \
 	CurrentWeather.cpp \
@@ -21,7 +22,6 @@ SRCS=\
 	main.cpp \
 	ProtocolException.cpp \
  	SerialPort.cpp \
-    TemperatureHumidityCalibrationDataPacket.cpp \
 	UnitConverter.cpp \
 	VantageCRC.cpp \
 	VantageConfiguration.cpp \

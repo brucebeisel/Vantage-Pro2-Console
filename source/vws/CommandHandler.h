@@ -98,7 +98,7 @@ private:
     //
     void handleQueryTemperatureHumidityCalibrationData(const std::string & commandName, std::string & response);
 
-    void handleQueryBarometerData(const std::string & commandName, std::string & response);
+    void handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response);
 
     //
     // Clearing Commands. Note: the following commands do not require an argument and are handled using handleNoArgCommand()
