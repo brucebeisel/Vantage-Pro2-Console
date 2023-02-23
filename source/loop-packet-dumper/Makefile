@@ -17,6 +17,8 @@ VWSOBJS = \
 	$(VWSOBJDIR)/VantageLogger.o \
 	$(VWSOBJDIR)/LoopPacket.o \
 	$(VWSOBJDIR)/Loop2Packet.o \
+	$(VWSOBJDIR)/CurrentWeather.o \
+	$(VWSOBJDIR)/ForecastRule.o \
 	$(VWSOBJDIR)/VantageCRC.o
 
 

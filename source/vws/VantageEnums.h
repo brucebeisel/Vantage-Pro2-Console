@@ -81,7 +81,7 @@ public:
         }
 
         std::ostringstream oss;
-        oss << INVALID_ENUM_VALUE << " (" << value << ")";
+        oss << INVALID_ENUM_VALUE << " (" << (int)value << ")";
         return oss.str();
     }
 

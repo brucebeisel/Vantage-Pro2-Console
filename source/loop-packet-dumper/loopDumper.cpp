@@ -23,6 +23,7 @@
 #include "Loop2Packet.h"
 #include "VantageProtocolConstants.h"
 #include "VantageDecoder.h"
+#include "CurrentWeather.h"
 #include "Weather.h"
 
 using namespace std;
@@ -68,6 +69,7 @@ main(int argc, char *argv[]) {
     char *buffer;
     long bufferLength;
     string loopString;
+    CurrentWeather cw;
 
     int record = 0;
     while (true) {
@@ -91,6 +93,7 @@ main(int argc, char *argv[]) {
             loopPacket.decodeLoopPacket(loopBuffer);
             buffer = loopBuffer;
             bufferLength = sizeof(loopBuffer);
+            cw.setLoopData(loopPacket);
         }
         else if (packetType == Loop2Packet::LOOP2_PACKET_TYPE) {
             loopString = "LOOP2 ";
@@ -102,13 +105,14 @@ main(int argc, char *argv[]) {
             loop2Packet.decodeLoop2Packet(loop2Buffer);
             buffer = loop2Buffer;
             bufferLength = sizeof(loop2Buffer);
+            cw.setLoop2Data(loop2Packet);
         }
 
         if (verbose) {
             if (dumpBinary)
                 cout << Weather::dumpBuffer(buffer, bufferLength);
 
-            //cout << packet.formatJSON() << endl << endl;
+            cout << cw.formatJSON() << endl << endl;
         }
         else {
             cout << loopString << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(time) << endl; // @suppress("Invalid overload") @suppress("Ambiguous problem")
