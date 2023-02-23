@@ -23,6 +23,7 @@
 #include "VantageEepromConstants.h"
 #include "VantageProtocolConstants.h"
 #include "VantageEnums.h"
+#include "VantageLogger.h"
 
 using namespace std;
 
@@ -111,15 +112,20 @@ VantageConfiguration::updatePosition(const PositionData & position) {
     bool success = false;
     char buffer[4];
 
+    // TODO Ensure that the BAR CAL value is the proper values as input to BAR=
+    station.eepromBinaryRead(VantageEepromConstants::EE_BAR_CAL_ADDRESS, 2, buffer);
+    double baroOffset = static_cast<double>(BitConverter::toInt16(buffer, 0)) / ProtocolConstants::BAROMETER_SCALE;
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Using " << baroOffset << " as barometer offset when updating position" << endl;
+
     int16 value16 = std::lround(position.latitude * LAT_LON_SCALE);
     BitConverter::getBytes(value16, buffer, 0, 2);
 
     value16 = std::lround(position.longitude * LAT_LON_SCALE);
     BitConverter::getBytes(value16, buffer, 2, 2);
 
-    // TODO, fix this to get the value of the BARO OFFSET before calling to change the elevation
     if (station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
-        if (station.updateBarometerOffsetAndElevation(0.0, position.elevation)) {
+        if (station.updateBarometerOffsetAndElevation(baroOffset, position.elevation)) {
             success = true;
         }
     }

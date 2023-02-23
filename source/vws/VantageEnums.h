@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <utility>
 #include <stdexcept>
 
@@ -79,7 +80,9 @@ public:
                 return mappings[i].first;
         }
 
-        return std::string(INVALID_ENUM_VALUE);
+        std::ostringstream oss;
+        oss << INVALID_ENUM_VALUE << " (" << value << ")";
+        return oss.str();
     }
 
     /**
@@ -96,7 +99,7 @@ public:
                 return mappings[i].second;
         }
 
-        throw std::invalid_argument("Invalid enum value string");
+        throw std::invalid_argument("Invalid enum value string (" + valueString + ")");
     }
 
     /**
