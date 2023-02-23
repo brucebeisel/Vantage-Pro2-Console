@@ -650,8 +650,10 @@ Alarm::Alarm(const AlarmProperties & properties) : properties(properties),
 ////////////////////////////////////////////////////////////////////////////////
 void
 Alarm::setThreshold(int eepromThreshold) {
+    cout << "########## Setting threshold for alarm " + properties.alarmName + " Not set value = " << properties.eepromNotSetThreshold;
     this->eepromThreshold = eepromThreshold;
     if (this->eepromThreshold == properties.eepromNotSetThreshold) {
+        cout << "######### Clearing threshold for alarm " + properties.alarmName;
         alarmThresholdSet = false;
         alarmTriggered = false;
         actualThreshold = 0.0;
@@ -660,6 +662,7 @@ Alarm::setThreshold(int eepromThreshold) {
         alarmThresholdSet = true;
         alarmTriggered = false;
         actualThreshold = static_cast<float>(eepromThreshold - properties.eepromThresholdOffset) / properties.eepromThresholdScale;
+        cout << "######### Setting threshold for alarm " << properties.alarmName << " to " << actualThreshold;
     }
 }
 
@@ -749,6 +752,7 @@ AlarmManager::formatAlarmThresholdsJSON() const {
             oss << ", \"threshold\" : " << alarm.getThreshold();
 
         oss << " }";
+        first = false;
     }
 
     oss << " ] }";
