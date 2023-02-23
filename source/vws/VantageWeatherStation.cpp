@@ -633,7 +633,8 @@ VantageWeatherStation::updateBarometerOffsetAndElevation(Pressure baroOffsetInHg
     command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroOffsetInHg * BAROMETER_SCALE) << " " << elevationFeet;
 
     //
-    // TBD This is the one "OK" response command that can also receive a NACK response.
+    // TODO This is the one "OK" response command that can also receive a NACK response.
+    //
     return sendOKedCommand(command.str());
 }
 

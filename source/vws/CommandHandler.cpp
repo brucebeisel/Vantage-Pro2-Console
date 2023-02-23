@@ -430,20 +430,23 @@ CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & co
     VantageWeatherStation::BarometerCalibrationParameters baroCalParams;
     if (!station.retrieveBarometerCalibrationParameters(baroCalParams)) {
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
-        return;
+    }
+    else {
+
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"barometerCalibrationParameters\" : { "
+            << " \"recentMeasurement\" : " << (baroCalParams.recentMeasurement / BAROMETER_SCALE) << ", "
+            << " \"elevation\" : " << baroCalParams.elevation << ", "
+            << " \"dewPoint\" : " << baroCalParams.dewPoint << ", "
+            << " \"virtualTemperature\" : " << baroCalParams.avgTemperature12Hour << ", "
+            << " \"humidityCorrectionFactor\" : " << baroCalParams.humidityCorrectionFactor << ", "
+            << " \"correctionRatio\" : " << baroCalParams.correctionRatio << ", "
+            << " \"offsetCorrectionFactor\" : " << baroCalParams.offsetCorrectionFactor << ", "
+            << " \"fixedGain\" : " << baroCalParams.fixedGain << ", "
+            << " \"fixedOffset\" : " << baroCalParams.fixedOffset
+            << " } }";
     }
 
-    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"barometerCalibrationParameters\" : { "
-        << " \"recentMeasurement\" : " << (baroCalParams.recentMeasurement / BAROMETER_SCALE) << ", "
-        << " \"elevation\" : " << baroCalParams.elevation << ", "
-        << " \"dewPoint\" : " << baroCalParams.dewPoint << ", "
-        << " \"virtualTemperature\" : " << baroCalParams.avgTemperature12Hour << ", "
-        << " \"humidityCorrectionFactor\" : " << baroCalParams.humidityCorrectionFactor << ", "
-        << " \"correctionRatio\" : " << baroCalParams.correctionRatio << ", "
-        << " \"offsetCorrectionFactor\" : " << baroCalParams.offsetCorrectionFactor << ", "
-        << " \"fixedGain\" : " << baroCalParams.fixedGain << ", "
-        << " \"fixedOffset\" : " << baroCalParams.fixedOffset
-        << " } } }";
+    oss << " }";
 
     response = oss.str();
 }
@@ -452,10 +455,11 @@ CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & co
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleUpdateBarometerOffsetAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    cout << "BAR= " << endl;
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
-    Pressure baroOffsetInHg = 0.0;
+    Pressure baroOffsetInHg = 99.0;
     int elevationFeet = -9999;
 
     for (CommandArgument arg : argumentList) {
@@ -467,14 +471,13 @@ CommandHandler::handleUpdateBarometerOffsetAndElevation(const std::string & comm
         }
     }
 
-    if (baroOffsetInHg == 0.0 || elevationFeet == -9999) {
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"missing argument\" }";
-        return;
-    }
+    cout << "Baro Offset: " << baroOffsetInHg << " Elevation: " << elevationFeet << endl;
 
-    if (!station.updateBarometerOffsetAndElevation(baroOffsetInHg, elevationFeet)) {
+    if (baroOffsetInHg == 99.0 || elevationFeet == -9999) {
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"missing argument\" }";
+    }
+    else if (!station.updateBarometerOffsetAndElevation(baroOffsetInHg, elevationFeet)) {
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
-        return;
     }
     else {
         oss << SUCCESS_TOKEN;
