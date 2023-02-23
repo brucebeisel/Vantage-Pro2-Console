@@ -167,7 +167,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
         leafWetness[i] = VantageDecoder::decodeLeafWetness(packetData, LEAF_WETNESSES_OFFSET + i);
 
     for (int i = 0; i < ALARM_BYTES; i++) {
-        int alarms = BitConverter::toUint8(packetData, ALARMS_OFFSET + i);
+        uint8 alarms = BitConverter::toUint8(packetData, ALARMS_OFFSET + i);
         for (int j = 0; j < 8; j++) {
             int bit = (i * 8) + j;
             alarmBits[bit] = (alarms & (1 << j)) == 0 ? 0 : 1;

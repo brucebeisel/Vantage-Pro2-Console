@@ -33,6 +33,8 @@
 #include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 #include "VantageStationNetwork.h"
+#include "Alarm.h"
+#include "CurrentWeatherManager.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -58,11 +60,15 @@ using namespace ProtocolConstants;
 CommandHandler::CommandHandler(VantageWeatherStation & station,
                                VantageConfiguration & configurator,
                                ArchiveManager & archiveManager,
-                               VantageStationNetwork & stationNetwork) : station(station),
-                                                                         logger(VantageLogger::getLogger("CommandHandler")),
-                                                                         configurator(configurator),
-                                                                         network(stationNetwork),
-                                                                         archiveManager(archiveManager) {
+                               VantageStationNetwork & stationNetwork,
+                               AlarmManager & alarmManager,
+                               CurrentWeatherManager & cwManager) : station(station),
+                                                                    logger(VantageLogger::getLogger("CommandHandler")),
+                                                                    configurator(configurator),
+                                                                    network(stationNetwork),
+                                                                    alarmManager(alarmManager),
+                                                                    currentWeatherManager(cwManager),
+                                                                    archiveManager(archiveManager) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +141,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
         else if (commandName == "get-timezones") {
             handleGetTimezones(commandName, responseJson);
+        }
+        else if (commandName == "query-alarm-thresholds") {
+            handleQueryAlarmThresholds(commandName, responseJson);
         }
         else if (commandName == "query-archive") {
             handleQueryArchive(commandName, argumentList, responseJson);
@@ -895,6 +904,19 @@ CommandHandler::handleQueryNetwork(const std::string & commandName, std::string 
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
     oss << network.formatJSON();
     oss << " }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryAlarmThresholds(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : "
+        << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : "
+        << alarmManager.formatAlarmThresholdsJSON()
+        << " }";
 
     response = oss.str();
 }

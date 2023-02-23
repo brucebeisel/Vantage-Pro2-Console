@@ -68,8 +68,6 @@ VantageStationNetwork::~VantageStationNetwork() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageStationNetwork::initializeNetwork() {
-    station.addLoopPacketListener(*this);
-
     //
     // See if the saved file exists
     //

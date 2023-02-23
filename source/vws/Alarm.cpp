@@ -16,18 +16,22 @@
  */
 #include "Alarm.h"
 #include "BitConverter.h"
+#include "VantageEepromConstants.h"
+#include "VantageLogger.h"
+#include "VantageWeatherStation.h"
 
 using namespace std;
 
 namespace vws {
+using namespace VantageEepromConstants;
 
 static const AlarmProperties alarmProperties[] = {
     {
         "Barometer Falling",
-         1,    1,
-         0, 1000,
-         0,
-         0
+         1,    1,                 // EEPROM threshold byte, threshold size
+         0, 1000,                 // Value offset, value scale
+         0,                       // Not set value
+         0                        // Triggered bit within LOOP packet alarms
     },
     {
         "Barometer Rising",
@@ -188,287 +192,287 @@ static const AlarmProperties alarmProperties[] = {
          23,    1,
          90,    1,
         255,
-         (14 * 8) +    4
+         (14 * 8) + 4
     },
     {
         "Soil/Leaf 4 - Low Leaf Temperature",
          24,   1,
          90,   1,
         255,
-         (15 * 8) +   4
+         (15 * 8) + 4
     },
     {
         "Extra Temperature/Humidity 1 - High Temperature",
          25,    1,
          90,    1,
         255,
-          (5 * 8) +    1
+          (5 * 8) + 1
     },
     {
         "Extra Temperature/Humidity 2 - High Temperature",
          26,    1,
          90,    1,
         255,
-          (6 * 8) +    1
+          (6 * 8) + 1
     },
     {
         "Extra Temperature/Humidity 3 - High Temperature",
          27,    1,
          90,    1,
         255,
-          (7 * 8) +    1
+          (7 * 8) + 1
     },
     {
         "Extra Temperature/Humidity 4 - High Temperature",
          28,    1,
          90,    1,
         255,
-          (8 * 8) +    1
+          (8 * 8) + 1
     },
     {
         "Extra Temperature/Humidity 5 - High Temperature",
          29,    1,
          90,    1,
         255,
-          (9 * 8) +    1
+          (9 * 8) + 1
     },
     {
         "Extra Temperature/Humidity 6 - High Temperature",
          30,    1,
          90,    1,
         255,
-         (10 * 8) +    1
+         (10 * 8) + 1
     },
     {
         "Extra Temperature/Humidity 7 - High Temperature",
          31,    1,
          90,    1,
         255,
-         (11 * 8) +    1
+         (11 * 8) + 1
     },
     {
         "Soil/Leaf 1 - High Soil Temperature",
          32,    1,
          90,    1,
         255,
-         (12 * 8) +    7
+         (12 * 8) + 7
     },
     {
         "Soil/Leaf 2 - High Soil Temperature",
          33,    1,
          90,    1,
         255,
-         (13 * 8) +    7
+         (13 * 8) + 7
     },
     {
         "Soil/Leaf 3 - High Soil Temperature",
          34,    1,
          90,    1,
         255,
-         (14 * 8) +    7
+         (14 * 8) + 7
     },
     {
         "Soil/Leaf 4 - High Soil Temperature",
          35,    1,
          90,    1,
         255,
-         (15 * 8) +    7
+         (15 * 8) + 7
     },
     {
         "Soil/Leaf 1 - High Leaf Temperature",
          36,    1,
          90,    1,
         255,
-         (12 * 8) +    5
+         (12 * 8) + 5
     },
     {
         "Soil/Leaf 2 - High Leaf Temperature",
          37,    1,
          90,    1,
         255,
-         (13 * 8) +    5
+         (13 * 8) + 5
     },
     {
         "Soil/Leaf 3 - High Leaf Temperature",
          38,    1,
          90,    1,
         255,
-         (14 * 8) +    5
+         (14 * 8) + 5
     },
     {
         "Soil/Leaf 4 - High Leaf Temperature",
          39,   1,
          90,   1,
         255,
-         (15 * 8) +   5
+         (15 * 8) + 5
     },
     {
         "Low Outside Humidity",
          42,   1,
           0,   1,
         255,
-          (4 * 8) +   2
+          (4 * 8) + 2
     },
     {
         "Extra Temperature/Humidity 1 - Low Humidity",
          43,   1,
           0,   1,
         255,
-          (5 * 8) +   2
+          (5 * 8) + 2
     },
     {
         "Extra Temperature/Humidity 2 - Low Humidity",
          44,   1,
           0,   1,
         255,
-          (6 * 8) +   2
+          (6 * 8) + 2
     },
     {
         "Extra Temperature/Humidity 3 - Low Humidity",
          45,   1,
           0,   1,
         255,
-          (7 * 8) +   2
+          (7 * 8) + 2
     },
     {
         "Extra Temperature/Humidity 4 - Low Humidity",
          46,   1,
           0,   1,
         255,
-          (8 * 8) +   2
+          (8 * 8) + 2
     },
     {
         "Extra Temperature/Humidity 5 - Low Humidity",
          47,   1,
           0,   1,
         255,
-          (9 * 8) +   2
+          (9 * 8) + 2
     },
     {
         "Extra Temperature/Humidity 6 - Low Humidity",
          48,   1,
           0,   1,
         255,
-          (0 * 8) +   2
+          (0 * 8) + 2
     },
     {
         "Extra Temperature/Humidity 7 - Low Humidity",
          49,   1,
           0,   1,
         255,
-          (1 * 8) +   2
+          (1 * 8) + 2
     },
     {
         "High Outside Humidity",
          50,   1,
           0,   1,
         255,
-          (4 * 8) +   3
+          (4 * 8) + 3
     },
     {
         "Extra Temperature/Humidity 1 - High Humidity",
          51,   1,
           0,   1,
         255,
-          (5 * 8) +   3
+          (5 * 8) + 3
     },
     {
         "Extra Temperature/Humidity 2 - High Humidity",
          52,   1,
           0,   1,
         255,
-          (6 * 8) +   3
+          (6 * 8) + 3
     },
     {
         "Extra Temperature/Humidity 3 - High Humidity",
          43,   1,
           0,   1,
         255,
-          (7 * 8) +   3
+          (7 * 8) + 3
     },
     {
         "Extra Temperature/Humidity 4 - High Humidity",
          54,   1,
           0,   1,
         255,
-          (8 * 8) +   3
+          (8 * 8) + 3
     },
     {
         "Extra Temperature/Humidity 5 - High Humidity",
          55,   1,
           0,   1,
         255,
-          (9 * 8) +   3
+          (9 * 8) + 3
     },
     {
         "Extra Temperature/Humidity 6 - High Humidity",
          56,   1,
           0,   1,
         255,
-         (10 * 8) +   3
+         (10 * 8) + 3
     },
     {
         "Extra Temperature/Humidity 7 - High Humidity",
          57,   1,
           0,   1,
         255,
-         (11 * 8) +   3
+         (11 * 8) + 3
     },
     {
         "Low Dew Point",
          58,   1,
         120,   1,
         255,
-          (2 * 8) +   4
+          (2 * 8) + 4
     },
     {
         "High Dew Point",
          59,   1,
         120,   1,
         255,
-          (2 * 8) +   5
+          (2 * 8) + 5
     },
     {
         "Low Wind Chill",
          60,   1,
         120,   1,
         255,
-          (2 * 8) +   7
+          (2 * 8) + 7
     },
     {
         "High Heat Index",
          61,   1,
          90,   1,
         255,
-          (2 * 8) +   6
+          (2 * 8) + 6
     },
     {
         "High THSW",
          62,   1,
          90,   1,
         255,
-          (3 * 8) +   0
+          (3 * 8) + 0
     },
     {
         "Wind Speed",
          63,   1,
           0,   1,
         255,
-          (2 * 8) +   2
+          (2 * 8) + 2
     },
     {
         "10 Minute Average Wind Speed",
          64,   1,
           0,   1,
         255,
-          (2 * 8) +   3
+          (2 * 8) + 3
     },
     {
         "High UV",
          65,   1,
           0,  10,
         255,
-          (3 * 8) +   2
+          (3 * 8) + 2
     },
     {
         "UNAVAILABLE",
@@ -482,154 +486,154 @@ static const AlarmProperties alarmProperties[] = {
          67,   1,
           0,   1,
         255,
-         (12 * 8) +   2
+         (12 * 8) + 2
     },
     {
         "Soil/Leaf 2 - Low Soil Moisture",
          68,   1,
           0,   1,
         255,
-         (13 * 8) +   2
+         (13 * 8) + 2
     },
     {
         "Soil/Leaf 3 - Low Soil Moisture",
          69,   1,
           0,   1,
         255,
-         (14 * 8) +   2
+         (14 * 8) + 2
     },
     {
         "Soil/Leaf 4 - Low Soil Moisture",
          70,   1,
           0,   1,
         255,
-         (15 * 8) +   2
+         (15 * 8) + 2
     },
     {
         "Soil/Leaf 1 - High Soil Moisture",
          71,   1,
           0,   1,
         255,
-         (12 * 8) +   3
+         (12 * 8) + 3
     },
     {
         "Soil/Leaf 2 - High Soil Moisture",
          72,   1,
           0,   1,
         255,
-         (13 * 8) +   3
+         (13 * 8) + 3
     },
     {
         "Soil/Leaf 3 - High Soil Moisture",
          73,   1,
           0,   1,
         255,
-         (14 * 8) +   3
+         (14 * 8) + 3
     },
     {
         "Soil/Leaf 4 - High Soil Moisture",
          74,   1,
           0,   1,
         255,
-         (15 * 8) +   3
+         (15 * 8) + 3
     },
     {
         "Soil/Leaf 1 - Low Leaf Wetness",
          75,   1,
           0,   1,
         255,
-         (12 * 8) +   0
+         (12 * 8) + 0
     },
     {
         "Soil/Leaf 2 - Low Leaf Wetness",
          76,   1,
           0,   1,
         255,
-         (13 * 8) +   0
+         (13 * 8) + 0
     },
     {
         "Soil/Leaf 3 - Low Leaf Wetness",
          77,   1,
           0,   1,
         255,
-         (14 * 8) +   0
+         (14 * 8) + 0
     },
     {
         "Soil/Leaf 4 - Low Leaf Wetness",
          78,   1,
           0,   1,
         255,
-         (15 * 8) +   0
+         (15 * 8) + 0
     },
     {
         "Soil/Leaf 1 - High Leaf Wetness",
          79,   1,
           0,   1,
         255,
-         (12 * 8) +   1
+         (12 * 8) + 1
     },
     {
         "Soil/Leaf 2 - High Leaf Wetness",
          80,   1,
           0,   1,
         255,
-         (13 * 8) +   1
+         (13 * 8) + 1
     },
     {
         "Soil/Leaf 3 - High Leaf Wetness",
          81,   1,
           0,   1,
         255,
-         (14 * 8) +   1
+         (14 * 8) + 1
     },
     {
         "Soil/Leaf 4 - High Leaf Wetness",
          82,   1,
           0,   1,
         255,
-         (15 * 8) +   1
+         (15 * 8) + 1
     },
     {
         "High Solar Radiation",
          83,   2,
           0,   1,
       65535,
-          (3 * 8) +   1
+          (3 * 8) + 1
     },
     { // TBD, rate alarm need rain collector size
         "High Rain Rate",
          85,   2,
           0,   1,
       65535,
-          (1 * 8) +   0
+          (1 * 8) + 0
     },
     { // TBD, rate alarm need rain collector size
         "15 Minute Rain",
          87,   2,
           0,   1,
       65535,
-          (1 * 8) +   1
+          (1 * 8) + 1
     },
     { // TBD, rate alarm need rain collector size
         "24 Hour Rain",
          89,   2,
           0,   1,
       65535,
-          (1 * 8) +   1
+          (1 * 8) + 1
     },
     { // TBD, rate alarm need rain collector size
         "Storm Total Rain",
          91,   2,
           0,   1,
       65535,
-          (1 * 8) +   3
+          (1 * 8) + 3
     },
     { 
         "Daily ET",
          93,   2,
           0,1000,
         255,
-          (1 * 8) +   4
+          (1 * 8) + 4
     }
 };
 
@@ -661,6 +665,20 @@ Alarm::setThreshold(int eepromThreshold) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+double
+Alarm::getThreshold() const {
+    return actualThreshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+Alarm::isThresholdSet() const {
+    return alarmThresholdSet;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
 Alarm::setTriggered(bool triggered) {
     alarmTriggered = triggered;
@@ -675,40 +693,27 @@ Alarm::getAlarmProperties() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
+std::string
+Alarm::getAlarmName() const {
+    return properties.alarmName;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+AlarmManager::AlarmManager(VantageWeatherStation & station) : station(station), logger(VantageLogger::getLogger("AlarmManager")) {
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
 AlarmManager::initialize() {
     for (int i = 0; i < sizeof(alarmProperties) / sizeof(alarmProperties[0]); i++) {
         Alarm alarm(alarmProperties[i]);
         alarms.push_back(alarm);
     }
-}
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-AlarmManager::loadThresholds(const byte buffer[]) {
-    for (vector<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
-        AlarmProperties props = it->getAlarmProperties();
-        int offset = props.eepromThresholdByte;
-        int thresholdValue = 0;
-
-        if (props.eepromThresholdSize == 1) 
-            thresholdValue = BitConverter::toInt8(buffer, offset);
-        else
-            thresholdValue = BitConverter::toInt16(buffer, offset);
-
-        it->setThreshold(thresholdValue);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-AlarmManager::setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits) {
-    for (vector<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
-        AlarmProperties props = it->getAlarmProperties();
-        it->setTriggered(alarmBits[props.alarmBit] == 1);
-    }
+    return loadThresholds();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -723,6 +728,69 @@ AlarmManager::processLoopPacket(const LoopPacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 AlarmManager::processLoop2Packet(const Loop2Packet & packet) {
+    // LOOP2 packet is of no concern to this class
     return true;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+AlarmManager::formatAlarmThresholdsJSON() const {
+    ostringstream oss;
+
+    oss << "{ \"alarmThreshholds\" : [ ";
+    bool first = true;
+    for (auto alarm : alarms) {
+        if (!first) oss << ", ";
+        oss << "{ \"alarmName\" : \"" << alarm.getAlarmName() << "\", "
+            << "\"isThresholdSet\" : " << std::boolalpha << alarm.isThresholdSet();
+
+        if (alarm.isThresholdSet())
+            oss << ", \"threshold\" : " << alarm.getThreshold();
+
+        oss << " }";
+    }
+
+    oss << " ] }";
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+AlarmManager::loadThresholds() {
+    byte buffer[EE_ALARM_THRESHOLDS_SIZE];
+
+    if (!station.eepromBinaryRead(EE_ALARM_THRESHOLDS_ADDRESS, EE_ALARM_THRESHOLDS_SIZE, buffer)) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed reading alarm threshold data from EEPROM" << endl;
+        return false;
+    }
+
+    for (vector<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
+        AlarmProperties props = it->getAlarmProperties();
+        int offset = props.eepromThresholdByte;
+        int thresholdValue = 0;
+
+        if (props.eepromThresholdSize == 1) 
+            thresholdValue = BitConverter::toInt8(buffer, offset);
+        else
+            thresholdValue = BitConverter::toInt16(buffer, offset);
+
+        it->setThreshold(thresholdValue);
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+AlarmManager::setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits) {
+    for (vector<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
+        AlarmProperties props = it->getAlarmProperties();
+        if (props.alarmBit >= 0)
+            it->setTriggered(alarmBits[props.alarmBit] == 1);
+    }
+}
+
 }

@@ -34,6 +34,7 @@
 #include "VantageStationNetwork.h"
 #include "CurrentWeatherSocket.h"
 #include "CurrentWeatherManager.h"
+#include "Alarm.h"
 
 using namespace std;
 using namespace vws;
@@ -68,7 +69,8 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         ArchiveManager archiveManager(archiveFile, station);
         VantageConfiguration configuration(station);
         VantageStationNetwork network(station, "");
-        CommandHandler commandHandler(station, configuration, archiveManager, network);
+        AlarmManager alarmManager(station);
+        CommandHandler commandHandler(station, configuration, archiveManager, network, alarmManager, currentWeatherManager);
         EventManager eventManager(commandHandler);
         CommandSocket commandSocket(11462, eventManager);
         VantageDriver driver(station, configuration, archiveManager, eventManager);
@@ -78,6 +80,9 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         //
         logger.log(VantageLogger::VANTAGE_INFO) << "Configuring runtime objects" << endl;
         station.addLoopPacketListener(currentWeatherManager);
+        station.addLoopPacketListener(alarmManager);
+        station.addLoopPacketListener(network);
+        station.addLoopPacketListener(driver);
 
         //
         // Initialize objects that require it before entering the main loop
@@ -96,6 +101,9 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
             return;
 
         if (!commandSocket.initialize())
+            return;
+
+        if (!alarmManager.initialize())
             return;
 
         logger.log(VantageLogger::VANTAGE_INFO) << "Entering driver's main loop" << endl;

@@ -23,6 +23,7 @@
 #include "VantageWeatherStation.h"
 
 namespace vws {
+struct VantageLogger;
 
 struct AlarmProperties {
     std::string alarmName;
@@ -46,6 +47,8 @@ public:
     AlarmProperties getAlarmProperties() const;
 
     void setThreshold(int eepromThreshold);
+    double getThreshold() const;
+    bool isThresholdSet() const;
 
     void setTriggered(bool triggered);
     bool isTriggered() const;
@@ -54,7 +57,7 @@ public:
 private:
     AlarmProperties properties;
     int             eepromThreshold;
-    float           actualThreshold;   // This can be either a float or an integer
+    double          actualThreshold;   // This can be either a float or an integer
     bool            alarmThresholdSet; // Whether the alarm threshold is set to a value other that the "not set" value
     bool            alarmTriggered;    // Whether the alarm is currently triggered
 };
@@ -65,19 +68,24 @@ private:
 class AlarmManager : public VantageWeatherStation::LoopPacketListener {
 public:
     static const int NUM_ALARMS = 86;
+    AlarmManager(VantageWeatherStation & station);
 
-    void initialize();
-
-    void loadThresholds(const byte buffer[]);
-    void setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits);
+    bool initialize();
 
     void getTriggeredList(std::vector<Alarm> & triggeredList) const;
 
     virtual bool processLoopPacket(const LoopPacket & packet);
     virtual bool processLoop2Packet(const Loop2Packet & packet);
 
+    std::string formatAlarmThresholdsJSON() const;
+
 private:
-    std::vector<Alarm>  alarms;
+    bool loadThresholds();
+    void setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits);
+
+    VantageLogger &         logger;
+    std::vector<Alarm>      alarms;
+    VantageWeatherStation & station;
 };
 
 }

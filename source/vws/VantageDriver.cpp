@@ -68,8 +68,6 @@ bool
 VantageDriver::initialize() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Initializing..." << endl;
 
-    station.addLoopPacketListener(*this);
-
     if (!station.openStation()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open weather station" << endl;
         return false;

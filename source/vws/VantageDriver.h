@@ -36,7 +36,7 @@ class CurrentWeatherSocket;
 /**
  * Class that coordinates the communications with the Vantage console.
  */
-class VantageDriver : VantageWeatherStation::LoopPacketListener {
+class VantageDriver : public VantageWeatherStation::LoopPacketListener {
 public:
     /**
      * Constructor.
