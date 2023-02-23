@@ -597,40 +597,40 @@ static const AlarmProperties alarmProperties[] = {
         "High Solar Radiation",
          83,   2,
           0,   1,
-      65535,
+      32767,
           (3 * 8) + 1
     },
     { // TBD, rate alarm need rain collector size
         "High Rain Rate",
          85,   2,
           0,   1,
-      65535,
+         -1,
           (1 * 8) + 0
     },
     { // TBD, rate alarm need rain collector size
         "15 Minute Rain",
          87,   2,
           0,   1,
-      65535,
+         -1,
           (1 * 8) + 1
     },
     { // TBD, rate alarm need rain collector size
         "24 Hour Rain",
          89,   2,
           0,   1,
-      65535,
+         -1,
           (1 * 8) + 1
     },
     { // TBD, rate alarm need rain collector size
         "Storm Total Rain",
          91,   2,
           0,   1,
-      65535,
+         -1,
           (1 * 8) + 3
     },
     { 
         "Daily ET",
-         93,   2,
+         93,   1,
           0,1000,
         255,
           (1 * 8) + 4
@@ -741,7 +741,7 @@ std::string
 AlarmManager::formatAlarmThresholdsJSON() const {
     ostringstream oss;
 
-    oss << "{ \"alarmThreshholds\" : [ ";
+    oss << "{ \"alarmThresholds\" : [ ";
     bool first = true;
     for (auto alarm : alarms) {
         if (!first) oss << ", ";
@@ -776,7 +776,7 @@ AlarmManager::loadThresholds() {
         int thresholdValue = 0;
 
         if (props.eepromThresholdSize == 1) 
-            thresholdValue = BitConverter::toInt8(buffer, offset);
+            thresholdValue = BitConverter::toUint8(buffer, offset);
         else
             thresholdValue = BitConverter::toInt16(buffer, offset);
 
