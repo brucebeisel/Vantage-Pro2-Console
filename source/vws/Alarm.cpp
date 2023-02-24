@@ -72,14 +72,14 @@ static const AlarmProperties alarmProperties[] = {
         "Time Alarm",
          2,     2,
          0,     1,
-         0xffff,
+        -1,
          6
     },
     {
         "Time Alarm 2s-Compliment",
          4,     2,
          0,     1,
-         0xffff,
+         0,
          -1
     },
     {
@@ -689,6 +689,13 @@ Alarm::setTriggered(bool triggered) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+bool
+Alarm::isTriggered() const {
+    return alarmTriggered;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 AlarmProperties
 Alarm::getAlarmProperties() const {
     return properties;
@@ -738,7 +745,8 @@ AlarmManager::processLoop2Packet(const Loop2Packet & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-AlarmManager::formatAlarmThresholdsJSON() const {
+AlarmManager::formatAlarmThresholdsJSON() {
+    loadThresholds();
     ostringstream oss;
 
     oss << "{ \"alarmThresholds\" : [ ";
@@ -756,6 +764,25 @@ AlarmManager::formatAlarmThresholdsJSON() const {
     }
 
     oss << " ] }";
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+AlarmManager::formatActiveAlarmsJSON() {
+    ostringstream oss;
+    oss << "{ \"activeAlarms\" : [ ";
+    bool first = true;
+    for (auto alarm : alarms) {
+        if (alarm.isTriggered()) {
+            if (first) first = false; else oss << ", ";
+            oss << alarm.getAlarmName();
+        }
+    }
+
+    oss << " ] }";
+
     return oss.str();
 }
 

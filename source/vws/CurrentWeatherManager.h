@@ -17,6 +17,7 @@
 #ifndef CURRENT_WEATHER_MANAGER_H
 #define CURRENT_WEATHER_MANAGER_H
 
+#include <fstream>
 #include "CurrentWeather.h"
 #include "DominantWindDirections.h"
 #include "VantageLogger.h"
@@ -40,16 +41,6 @@ public:
      */
     virtual ~CurrentWeatherManager();
 
-    //
-    // TODO Add methods to write the LOOP and LOOP2 packet data to a ring buffer that can
-    // hold 24 hours of data.
-    // Also write methods to query the archived data.
-    //
-    /**
-     * Save the LOOP/LOOP2 packet pair to the archive file
-     */
-    void writeLoopArchive(DateTime packetTime, int packetType, const byte * packetData, size_t length);
-
     /**
      * Process a LOOP packet in a callback.
      *
@@ -66,13 +57,34 @@ public:
      */
     virtual bool processLoop2Packet(const Loop2Packet & packet);
 
+    /**
+     * Build current weather records using the LOOP packets stored in the archive.
+     * Note that a current weather record will be store when a LOOP2 packet is encountered.
+     * Theoretically, the archive will alternate between LOOP and LOOP2
+     *
+     * @param hours How many hours to go back into the archive. The archive file will not be searched, but
+     *              the records will start at the top of the hour. So if it's 2:30 and hours=2, then all
+     *              records after 12 PM will be retrieved.
+     * @param list  The vector into which the current weather records will be written
+     *
+     */
+    void queryCurrentWeatherArchive(int hours, std::vector<CurrentWeather> & list);
+
 private:
+    /**
+     * Save the LOOP/LOOP2 packet pair to the archive file
+     */
+    void writeLoopArchive(DateTime packetTime, int packetType, const byte * packetData, size_t length);
+    void readArchiveFile(std::ifstream & ifs, std::vector<CurrentWeather> & list);
+    std::string archiveFilename(DateTime time);
+    std::string archiveFilenameByHour(int hour);
+
     std::string               archiveDirectory;
     CurrentWeatherPublisher & currentWeatherPublisher;
     CurrentWeather            currentWeather;
     bool                      firstLoop2PacketReceived;
     DominantWindDirections    dominantWindDirections;   // The past wind direction measurements used to determine the arrows on the wind display
-    VantageLogger             logger;
+    VantageLogger &           logger;
 };
 
 } /* namespace vws */

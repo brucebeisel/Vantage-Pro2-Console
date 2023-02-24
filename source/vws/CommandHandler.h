@@ -142,11 +142,17 @@ private:
     //
     void handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    void handleQueryLoopArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     void handleGetTimezones(const std::string & commandName, std::string & response);
 
     void handleQueryNetwork(const std::string & commandName, std::string & response);
 
     void handleQueryAlarmThresholds(const std::string & commandName, std::string & response);
+
+    void handleUpdateAlarmThresholds(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
+    void handleInitialization(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     VantageWeatherStation & station;
     VantageConfiguration &  configurator;

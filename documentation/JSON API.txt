@@ -13,7 +13,7 @@ This file contains the JSON API used to communicate the the Vantage Pro2 driver.
 {
     "response" : "<command name>",
     "result"   : "<success|failure>",
-    "data"  : "<Any additional information>"
+    "data"  : { "<Any additional information>" }
 }
 
 {
@@ -68,6 +68,31 @@ This file contains the JSON API used to communicate the the Vantage Pro2 driver.
         ]
     }
 }
+
+{
+    "command" : "initialization", "arguments" : {
+        "latitude" : 54.4,
+        "longitude" : -120.3,
+        "elevation" : 24,
+        "timezone" : "timezone text",
+        "useDaylightSavings" : true,
+        "dstMode" : "auto",                   // or "manual"
+        "dstOn" : false,                      // Not sure if this is needed if autoDST is true
+        "rainYearStart" : "January",
+        "clockFormat" : "12",                 // or "24"
+        "dateFormat"  : "Day/Month/Year",     // or "Month/Day/Year"
+        "windCupSize" : "large",              // or "small"
+        "rainBucketSize" : ".01 in",          // or ".1 mm" or ".2 mm"
+        "retransmitId" : 1,                   // 1 - 8, missing element indicates no retransmit 
+        "temperatureArchiveMode" : "average", // or "end of period"
+        "baroUnits": "inHg",                  // or "mm", "mbar", "hPa"
+        "elevationUnits": "feet",             // or "meters"
+        "rainUnits": "inches",                // or "mm"
+        "temperatureUnits": ".1F",            // or "F", ".1C", "C"
+        "windUnits": "mph"                    // or "mps", "kph", "kts"
+    }
+}
+
 
 General response:
 Backlight command:
@@ -155,7 +180,7 @@ Archive query
 
 6. Clearing Commands
     + "CLRLOG"    Clears the archive data.
-    + "CLRALM"    Clears all the alarm thresholds.
+    ++ "CLRALM"    Clears all the alarm thresholds.
     + "CLRCAL"    Clears all the Temperature and Humidity calibration offsets.
     + "CLRGRA"    Clears all of the graph points on the Vantage console.
     + "CLRVAR <Data variable-decimal>"

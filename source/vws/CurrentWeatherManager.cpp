@@ -55,18 +55,14 @@ CurrentWeatherManager::~CurrentWeatherManager() {
  */
 void
 CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, const byte * packetData, size_t length) {
-    struct tm tm;
-
-    Weather::localtime(packetTime, tm);
-    char filename[100];
-    snprintf(filename, sizeof(filename), "%s/LoopPacketArchive_%02d.dat", archiveDirectory.c_str(), tm.tm_hour);
+    string filename = archiveFilename(packetTime);
 
     //
     // If the hour file exists and it is more than an hour since it has changed, truncate it.
     //
     ios_base::openmode mode = ios::binary ;
     struct stat fileinfo;
-    int sr = stat(filename, &fileinfo);
+    int sr = stat(filename.c_str(), &fileinfo);
     if (sr == 0) {
         time_t now = time(0);
         long fileAge = now - fileinfo.st_mtim.tv_sec;
@@ -134,6 +130,80 @@ CurrentWeatherManager::processLoop2Packet(const Loop2Packet & packet) {
     dominantWindDirections.dumpData();
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+CurrentWeatherManager::archiveFilename(DateTime time) {
+    struct tm tm;
+    Weather::localtime(time, tm);
+    return archiveFilenameByHour(tm.tm_hour);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+CurrentWeatherManager::archiveFilenameByHour(int hour) {
+    char filename[100];
+    snprintf(filename, sizeof(filename), "%s/LoopPacketArchive_%02d.dat", archiveDirectory.c_str(), hour);
+    return std::string(filename);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CurrentWeatherManager::readArchiveFile(std::ifstream & ifs, vector<CurrentWeather> & list) {
+    int packetTime;
+    int packetType;
+    byte buffer[LoopPacket::LOOP_PACKET_SIZE];
+    CurrentWeather cw;
+
+    while (ifs.good()) {
+        ifs.read(reinterpret_cast<byte *>(&packetTime), sizeof(packetTime)).
+            read(reinterpret_cast<byte *>(&packetType), sizeof(packetType)).
+            read(buffer, sizeof(buffer));
+
+        if (ifs.eof())
+            return;
+
+        if (packetType == LoopPacket::LOOP_PACKET_TYPE) {
+            LoopPacket loopPacket;
+            loopPacket.decodeLoopPacket(buffer);
+            cw.setLoopData(loopPacket);
+            cw.setPacketTime(packetTime);
+        }
+        else if (packetType == Loop2Packet::LOOP2_PACKET_TYPE) {
+            Loop2Packet loop2Packet;
+            loop2Packet.decodeLoop2Packet(buffer);
+            cw.setLoop2Data(loop2Packet);
+            cw.setPacketTime(packetTime);
+            list.push_back(cw);
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<CurrentWeather> & list) {
+    list.clear();
+
+    struct tm tm;
+    Weather::localtime(time(0), tm);
+
+    ios_base::openmode mode = ios::binary | ios::in;
+
+    for (int currentHour = tm.tm_hour - hours; currentHour <= tm.tm_hour; currentHour++) {
+        string filename = archiveFilenameByHour(currentHour);
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading loop archive file " << filename << endl;
+        ifstream ifs(filename.c_str(), mode);
+        if (ifs.is_open()) {
+            readArchiveFile(ifs, list);
+            ifs.close();
+        }
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Current weather archive records found: " << list.size() << endl;
+    }
 }
 
 } /* namespace vws */

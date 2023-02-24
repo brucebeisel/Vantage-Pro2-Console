@@ -48,19 +48,17 @@ public:
      * @param loop2Packet The LOOP2 packet that was read in the most recent loop through the current weather processor
      * @param The dominant directions that the wind has been blowing over the last hour
      */
-    //void setData(const LoopPacket & loopPacket, const Loop2Packet & loop2Packet, const WindDirectionSlices  & pastWindDirs);
     void setLoopData(const LoopPacket & loopPacket);
     void setLoop2Data(const Loop2Packet & loopPacket);
+    void setPacketTime(DateTime time);
     void setDominantWindDirectionData(const std::vector<std::string> & windDirs);
 
-    /**
-     * Get the next packet field that was extracted from the LOOP packet.
-     * 
-     * @return The next packet field
-     * TODO Can this be removed in favor of passing the next packet value in as a constructor argument or passed as an 
-     * argument to processCurrentWeather()
-     */
-    int getNextPacket() const;
+    const LoopPacket & getLoopPacket() const;
+    const Loop2Packet & getLoop2Packet() const;
+    DateTime getPacketTime() const;
+    const Measurement<Speed> & getWindSpeed() const;
+    const Measurement<Heading> & getWindDirection() const;
+    const Measurement<Speed> & getWindSpeed10MinuteAverage() const;
 
     /**
      * Format the Current Weather JSON message.
@@ -72,6 +70,7 @@ public:
 private:
     LoopPacket               loopPacket;
     Loop2Packet              loop2Packet;
+    DateTime                 packetTime;
     std::vector<std::string> dominantWindDirections;
 
     //

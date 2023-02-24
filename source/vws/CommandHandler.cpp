@@ -859,14 +859,47 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
         first = false;
         Measurement<Temperature> t = p.getOutsideTemperature();
         if (t.isValid())
-            oss << p.getOutsideTemperature();
+            oss << t;
         else
             oss << "null";
     }
 
     oss << " ]} ";
-
     oss << "] } }";
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryLoopArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    vector<CurrentWeather> list;
+    currentWeatherManager.queryCurrentWeatherArchive(1, list);
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"datasets\" : [ ";
+
+    oss << " { \"time\" : [ ";
+    bool first = true;
+    for (CurrentWeather cw : list) {
+        if (first) first = false; else  oss << ", ";
+        oss << cw.getPacketTime();
+    }
+    oss << " ] }, ";
+
+    oss << " { \"windSpeed\" : [ ";
+    first = true;
+    for (CurrentWeather cw : list) {
+        if (first) first = false; else  oss << ", ";
+        Measurement<Speed> s = cw.getWindSpeed();
+        if (s.isValid())
+            oss << s;
+        else
+            oss << "null";
+    }
+    oss << " ] } ";
+
+    oss << " ] } }";
 
     response = oss.str();
 }
@@ -916,6 +949,30 @@ CommandHandler::handleQueryAlarmThresholds(const std::string & commandName, std:
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : "
         << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : "
         << alarmManager.formatAlarmThresholdsJSON()
+        << " }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleUpdateAlarmThresholds(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : "
+        << SUCCESS_TOKEN
+        << " }";
+
+    response = oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleInitialization(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : "
+        << SUCCESS_TOKEN
         << " }";
 
     response = oss.str();

@@ -48,6 +48,7 @@ public:
 
     void setThreshold(int eepromThreshold);
     double getThreshold() const;
+
     bool isThresholdSet() const;
 
     void setTriggered(bool triggered);
@@ -56,8 +57,8 @@ public:
 
 private:
     AlarmProperties properties;
-    int             eepromThreshold;
-    double          actualThreshold;   // This can be either a float or an integer
+    int             eepromThreshold;   // The threshold as stored in the EEPROM
+    double          actualThreshold;   // The actual threshold after offset and scale applied
     bool            alarmThresholdSet; // Whether the alarm threshold is set to a value other that the "not set" value
     bool            alarmTriggered;    // Whether the alarm is currently triggered
 };
@@ -77,7 +78,8 @@ public:
     virtual bool processLoopPacket(const LoopPacket & packet);
     virtual bool processLoop2Packet(const Loop2Packet & packet);
 
-    std::string formatAlarmThresholdsJSON() const;
+    std::string formatAlarmThresholdsJSON();
+    std::string formatActiveAlarmsJSON();
 
 private:
     bool loadThresholds();
