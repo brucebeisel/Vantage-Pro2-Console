@@ -101,13 +101,6 @@ public:
     static bool archivePacketContainsData(const byte * buffer, int offset);
 
     /**
-     * Format the Archive packet as XML.
-     *
-     * @return The formatted message
-     */
-    std::string formatXML() const;
-
-    /**
      * Format the Archive packet as JSON.
      * 
      * @return The formatted message

@@ -41,7 +41,6 @@ public:
      */
     bool decodeHiLowPacket(byte buffer[]);
 
-    std::string formatXML() const;
     std::string formatJSON() const;
 
     //
@@ -185,7 +184,6 @@ private:
         Measurement<T> monthExtremeValue;
         Measurement<T> yearExtremeValue;
         bool isValid() const;
-        std::string    formatXML(bool low) const;
         std::string    formatJSON(bool low) const;
         std::string    formatExtremeValueTime() const;
     };
@@ -198,7 +196,6 @@ private:
         Values<T>   lows;
         Values<T>   highs;
         bool isValid() const;
-        std::string formatXML() const;
         std::string formatJSON() const;
     };
 

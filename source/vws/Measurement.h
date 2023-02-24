@@ -114,20 +114,6 @@ public:
     }
 
     /**
-     * Format an XML string for the measurement.
-     *
-     * @param element The XML element name to be used
-     * @return An XML element with the element name provided and the value OR a blank string if the measurement is not valid
-     */
-    std::string formatXML(const std::string & element) const {
-        std::ostringstream ss;
-        if (valid) 
-            ss << "<" << element << ">" << value << "</" << element << ">";
-
-        return ss.str();
-    }
-            
-    /**
      * Format a JSON string for the measurement.
      *
      * @param element The JSON element name to be used

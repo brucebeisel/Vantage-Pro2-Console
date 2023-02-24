@@ -166,6 +166,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-console-type") {
             handleQueryConsoleType(commandName, responseJson);
         }
+        else if (commandName == "query-current-weather") {
+            handleQueryLoopArchive(commandName, argumentList, responseJson);
+        }
         else if (commandName == "query-firmware") {
             handleQueryFirmware(commandName, responseJson);
         }
@@ -873,8 +876,15 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryLoopArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    int hours = 1;
+    for (CommandArgument arg : argumentList) {
+        if (arg.first == "hours") {
+            hours = atoi(arg.second.c_str());
+        }
+    }
+
     vector<CurrentWeather> list;
-    currentWeatherManager.queryCurrentWeatherArchive(1, list);
+    currentWeatherManager.queryCurrentWeatherArchive(hours, list);
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"datasets\" : [ ";
