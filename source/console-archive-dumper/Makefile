@@ -15,6 +15,13 @@ VWSOBJS = \
 	$(VWSOBJDIR)/Weather.o \
 	$(VWSOBJDIR)/VantageDecoder.o \
 	$(VWSOBJDIR)/VantageLogger.o \
+	$(VWSOBJDIR)/VantageWeatherStation.o \
+	$(VWSOBJDIR)/SerialPort.o \
+	$(VWSOBJDIR)/VantageCRC.o \
+	$(VWSOBJDIR)/LoopPacket.o \
+	$(VWSOBJDIR)/Loop2Packet.o \
+	$(VWSOBJDIR)/HiLowPacket.o \
+	$(VWSOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSOBJDIR)/ArchivePacket.o
 
 

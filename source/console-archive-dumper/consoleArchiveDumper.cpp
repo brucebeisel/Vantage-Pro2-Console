@@ -23,17 +23,18 @@
 #include "VantageProtocolConstants.h"
 #include "VantageDecoder.h"
 #include "Weather.h"
+#include "VantageWeatherStation.h"
 
 using namespace std;
 using namespace vws;
 
-static const char USAGE_MESSAGE[] = "Usage: archive-dumper [-v] [-b] <filename>";
+static const char USAGE_MESSAGE[] = "Usage: console-archive-dumper [-v] [-b] <device name>";
 
 int
 main(int argc, char *argv[]) {
     bool verbose = false;
     bool dumpBinary = false;
-    char *file = NULL;
+    char *device = NULL;
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -47,10 +48,10 @@ main(int argc, char *argv[]) {
             }
         }
         else
-            file = argv[i];
+            device = argv[i];
     }
 
-    if (file == NULL) {
+    if (device == NULL) {
         cerr << USAGE_MESSAGE << endl;
         exit(1);
     }
@@ -58,19 +59,27 @@ main(int argc, char *argv[]) {
 
     VantageDecoder::setRainCollectorSize(.01);
 
-    char buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
+    VantageWeatherStation ws(device, 19200);
 
-    ifstream stream(file, ifstream::in | ios::binary);
+    if (!ws.openStation()) {
+        cerr << "Could not open weather console" << endl;
+        exit(1);
+    }
+
+    if (!ws.wakeupStation()) {
+        cerr << "Could not wake up console" << endl;
+        exit(2);
+    }
+
+    vector<ArchivePacket> packets;
+
+    ws.dump(packets);
+
+    cout << "Retrieved " << packets.size() << " packets from console's archive" << endl;
 
     int record = 0;
-    while (true) {
-        stream.read(buffer, sizeof(buffer));
-        if (!stream) {
-            stream.close();
-            exit(0);
-        }
-
-        ArchivePacket packet(buffer, 0);
+    for (auto packet : packets) {
+        const char * buffer = packet.getBuffer();
 
         if (verbose) {
             if (dumpBinary)
@@ -79,13 +88,10 @@ main(int argc, char *argv[]) {
             cout << packet.formatJSON() << endl << endl;
         }
         else {
-            Measurement<Temperature> t = packet.getOutsideTemperature();
-
             cout << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(packet.getDateTime()) << endl;
             if (dumpBinary)
                 cout << Weather::dumpBuffer(buffer, sizeof(buffer));
         }
-
         record++;
     }
 }
