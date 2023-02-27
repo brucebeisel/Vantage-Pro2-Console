@@ -182,12 +182,12 @@ Archive query
     + "CLRLOG"    Clears the archive data.
     ++ "CLRALM"    Clears all the alarm thresholds.
     + "CLRCAL"    Clears all the Temperature and Humidity calibration offsets.
-    + "CLRGRA"    Clears all of the graph points on the Vantage console.
+    ++ "CLRGRA"    Clears all of the graph points on the Vantage console.
     + "CLRVAR <Data variable-decimal>"
                 Clears a rain or ET data value.
-    + "CLRHIGHS <0, 1, or 2>"
+    ++ "CLRHIGHS <0, 1, or 2>"
                 Clears all of the daily (0), monthly (1), or yearly (2) high values.
-    + "CLRLOWS <0, 1, or 2>"
+    ++ "CLRLOWS <0, 1, or 2>"
                 Clears all of the daily (0), monthly (1), or yearly (2) low values.
     ++ "CLRBITS"   Clears the active alarm bits. Alarms will be reactivated if the alarm condition is still present.
     ++ "CLRDATA"   Clears all current data values to dashes.

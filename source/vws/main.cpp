@@ -34,6 +34,7 @@
 #include "VantageStationNetwork.h"
 #include "CurrentWeatherSocket.h"
 #include "CurrentWeatherManager.h"
+#include "SerialPort.h"
 #include "Alarm.h"
 
 using namespace std;
@@ -65,7 +66,8 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         //
         CurrentWeatherSocket currentWeatherPublisher;
         CurrentWeatherManager currentWeatherManager(loopPacketArchiveDir, currentWeatherPublisher);
-        VantageWeatherStation station(serialPortName, baudRate);
+        SerialPort serialPort(serialPortName, baudRate);
+        VantageWeatherStation station(serialPort);
         ArchiveManager archiveManager(archiveFile, station);
         VantageConfiguration configuration(station);
         VantageStationNetwork network(station, "");

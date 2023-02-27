@@ -36,6 +36,7 @@
 #include "BitConverter.h"
 #include "ProtocolException.h"
 #include "VantageWeatherStation.h"
+#include "SerialPort.h"
 #include "VantageEnums.h"
 #include "Weather.h"
 
@@ -49,13 +50,12 @@ static constexpr int NUM_PROTECTED_EEPROM_BYTES = sizeof(protectedEepromBytes) /
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageWeatherStation::VantageWeatherStation(const string & portName, int baudRate) : serialPort(portName, baudRate),
-                                                                                      consoleType(VANTAGE_PRO_2),
-                                                                                      consoleBatteryVoltage(0.0),
-                                                                                      baudRate(baudRate),
-                                                                                      archivePeriod(0),
-                                                                                      windSensorStationId(0),
-                                                                                      logger(VantageLogger::getLogger("VantageWeatherStation")) {
+VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
+                                                                        consoleType(VANTAGE_PRO_2),
+                                                                        consoleBatteryVoltage(0.0),
+                                                                        archivePeriod(0),
+                                                                        windSensorStationId(0),
+                                                                        logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////

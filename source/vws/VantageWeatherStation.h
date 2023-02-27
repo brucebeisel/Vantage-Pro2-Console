@@ -23,7 +23,6 @@
 
 #include "ArchivePacket.h"
 #include "BitConverter.h"
-#include "SerialPort.h"
 #include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
 
@@ -34,6 +33,7 @@ class HiLowPacket;
 class LoopPacket;
 class Loop2Packet;
 class CalibrationAdjustmentsPacket;
+class SerialPort;
 
 /**
  * Class that handles the command protocols with the Vantage console.
@@ -72,10 +72,9 @@ public:
     /**
      * Constructor.
      * 
-     * @param portName The name of he serial port to open
-     * @param baudRate The baud rate to use on the serial port
+     * @param serialPort The serial port to use to communicate with the console
      */
-    VantageWeatherStation(const std::string & portName, int baudRate);
+    VantageWeatherStation(SerialPort & serialPort);
 
     /**
      * Destructor.
@@ -633,8 +632,7 @@ private:
     typedef std::vector<LoopPacketListener *> LoopPacketListenerList;
 
     VantageLogger              logger;
-    SerialPort                 serialPort;               // The serial port object that communicates with the console
-    int                        baudRate;                 // The baud rate for communicating with the console
+    SerialPort &               serialPort;               // The serial port object that communicates with the console
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
     LoopPacketListenerList     loopPacketListenerList;   // The list of Loop Packet listeners
 

@@ -1,11 +1,11 @@
 ../../target/vws/Alarm.o: Alarm.cpp Alarm.h LoopPacket.h Measurement.h \
  VantageLogger.h VantageProtocolConstants.h WeatherTypes.h \
- VantageWeatherStation.h ArchivePacket.h BitConverter.h SerialPort.h \
+ VantageWeatherStation.h ArchivePacket.h BitConverter.h \
  VantageEepromConstants.h
 ../../target/vws/ArchiveManager.o: ArchiveManager.cpp ArchiveManager.h \
  VantageLogger.h WeatherTypes.h ArchivePacket.h Measurement.h \
  VantageProtocolConstants.h VantageWeatherStation.h BitConverter.h \
- SerialPort.h Weather.h
+ Weather.h
 ../../target/vws/ArchivePacket.o: ArchivePacket.cpp ArchivePacket.h \
  WeatherTypes.h Measurement.h BitConverter.h VantageDecoder.h \
  VantageEepromConstants.h VantageLogger.h VantageProtocolConstants.h \
@@ -21,10 +21,10 @@
  CommandHandler.h ArchiveManager.h VantageLogger.h ArchivePacket.h \
  CalibrationAdjustmentsPacket.h VantageProtocolConstants.h HiLowPacket.h \
  VantageConfiguration.h VantageWeatherStation.h BitConverter.h \
- SerialPort.h VantageEnums.h VantageEepromConstants.h \
- VantageStationNetwork.h VantageDecoder.h Alarm.h LoopPacket.h \
- CurrentWeatherManager.h CurrentWeather.h DominantWindDirections.h \
- WindDirectionSlice.h Loop2Packet.h
+ VantageEnums.h VantageEepromConstants.h VantageStationNetwork.h \
+ VantageDecoder.h Alarm.h LoopPacket.h CurrentWeatherManager.h \
+ CurrentWeather.h DominantWindDirections.h WindDirectionSlice.h \
+ Loop2Packet.h
 ../../target/vws/CommandSocket.o: CommandSocket.cpp ../3rdParty/json.hpp \
  CommandSocket.h ResponseHandler.h VantageLogger.h EventManager.h
 ../../target/vws/CurrentWeather.o: CurrentWeather.cpp CurrentWeather.h \
@@ -35,14 +35,14 @@
  CurrentWeatherManager.h CurrentWeather.h DominantWindDirections.h \
  VantageLogger.h WeatherTypes.h WindDirectionSlice.h Loop2Packet.h \
  Measurement.h LoopPacket.h VantageProtocolConstants.h \
- VantageWeatherStation.h ArchivePacket.h BitConverter.h SerialPort.h \
+ VantageWeatherStation.h ArchivePacket.h BitConverter.h \
  CurrentWeatherPublisher.h Weather.h
 ../../target/vws/CurrentWeatherSocket.o: CurrentWeatherSocket.cpp \
  CurrentWeatherSocket.h CurrentWeather.h DominantWindDirections.h \
  VantageLogger.h WeatherTypes.h WindDirectionSlice.h Loop2Packet.h \
  Measurement.h LoopPacket.h VantageProtocolConstants.h \
  CurrentWeatherPublisher.h VantageWeatherStation.h ArchivePacket.h \
- BitConverter.h SerialPort.h
+ BitConverter.h
 ../../target/vws/DominantWindDirections.o: DominantWindDirections.cpp \
  DominantWindDirections.h VantageLogger.h WeatherTypes.h \
  WindDirectionSlice.h Weather.h Measurement.h
@@ -62,11 +62,10 @@
  WeatherTypes.h CommandSocket.h ResponseHandler.h CommandHandler.h \
  VantageDriver.h EventManager.h VantageConfiguration.h \
  VantageProtocolConstants.h VantageWeatherStation.h ArchivePacket.h \
- Measurement.h BitConverter.h SerialPort.h VantageStationNetwork.h \
- VantageDecoder.h VantageEepromConstants.h CurrentWeatherSocket.h \
- CurrentWeather.h DominantWindDirections.h WindDirectionSlice.h \
- Loop2Packet.h LoopPacket.h CurrentWeatherPublisher.h \
- CurrentWeatherManager.h Alarm.h
+ Measurement.h BitConverter.h VantageStationNetwork.h VantageDecoder.h \
+ VantageEepromConstants.h CurrentWeatherSocket.h CurrentWeather.h \
+ DominantWindDirections.h WindDirectionSlice.h Loop2Packet.h LoopPacket.h \
+ CurrentWeatherPublisher.h CurrentWeatherManager.h SerialPort.h Alarm.h
 ../../target/vws/ProtocolException.o: ProtocolException.cpp \
  ProtocolException.h
 ../../target/vws/SerialPort.o: SerialPort.cpp VantageLogger.h Weather.h \
@@ -78,8 +77,7 @@
 ../../target/vws/VantageConfiguration.o: VantageConfiguration.cpp \
  VantageConfiguration.h VantageProtocolConstants.h WeatherTypes.h \
  VantageWeatherStation.h ArchivePacket.h Measurement.h BitConverter.h \
- SerialPort.h VantageLogger.h VantageDecoder.h VantageEepromConstants.h \
- VantageEnums.h
+ VantageLogger.h VantageDecoder.h VantageEepromConstants.h VantageEnums.h
 ../../target/vws/VantageDecoder.o: VantageDecoder.cpp VantageDecoder.h \
  Measurement.h VantageEepromConstants.h WeatherTypes.h VantageLogger.h \
  VantageProtocolConstants.h BitConverter.h Weather.h
@@ -87,16 +85,16 @@
  WeatherTypes.h ArchiveManager.h VantageLogger.h EventManager.h \
  ResponseHandler.h VantageConfiguration.h VantageProtocolConstants.h \
  VantageWeatherStation.h ArchivePacket.h Measurement.h BitConverter.h \
- SerialPort.h Alarm.h LoopPacket.h CurrentWeather.h \
- DominantWindDirections.h WindDirectionSlice.h Loop2Packet.h \
- HiLowPacket.h VantageDecoder.h VantageEepromConstants.h Weather.h
+ Alarm.h LoopPacket.h CurrentWeather.h DominantWindDirections.h \
+ WindDirectionSlice.h Loop2Packet.h HiLowPacket.h VantageDecoder.h \
+ VantageEepromConstants.h Weather.h
 ../../target/vws/VantageLogger.o: VantageLogger.cpp VantageLogger.h \
  Weather.h Measurement.h WeatherTypes.h
 ../../target/vws/VantageStationNetwork.o: VantageStationNetwork.cpp \
  VantageStationNetwork.h VantageLogger.h VantageDecoder.h Measurement.h \
  VantageEepromConstants.h WeatherTypes.h VantageProtocolConstants.h \
- VantageWeatherStation.h ArchivePacket.h BitConverter.h SerialPort.h \
- VantageEnums.h LoopPacket.h
+ VantageWeatherStation.h ArchivePacket.h BitConverter.h VantageEnums.h \
+ LoopPacket.h
 ../../target/vws/VantageWeatherStation.o: VantageWeatherStation.cpp \
  VantageProtocolConstants.h WeatherTypes.h VantageEepromConstants.h \
  HiLowPacket.h Measurement.h VantageLogger.h LoopPacket.h Loop2Packet.h \
