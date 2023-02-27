@@ -94,10 +94,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             argumentList.push_back(argument);
         }
 
-        cout <<     "Command: " << commandName << endl;
-        cout <<     "    Arguments:" << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Handling command: " << commandName << " with arguments:" << endl;
         for (int i = 0; i < argumentList.size(); i++) {
-            cout << "          [" << i << "]: " << argumentList[i].first << "=" << argumentList[i].second << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "    [" << i << "]: " << argumentList[i].first << "=" << argumentList[i].second << endl;
         }
 
         if (commandName == "backlight") {
@@ -210,7 +209,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << ", "
             << DATA_TOKEN << " : { \"error\" : \"console processing error: " << e.what() << "\" } }";;
         responseJson = oss.str();
-        cout << "Exception: " << e.what() << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception while processing command: " << commandName << " Error: " << e.what() << endl;
     }
 }
 
@@ -467,7 +466,6 @@ CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & co
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleUpdateBarometerOffsetAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    cout << "BAR= " << endl;
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
@@ -482,8 +480,6 @@ CommandHandler::handleUpdateBarometerOffsetAndElevation(const std::string & comm
             baroOffsetInHg = atof(arg.second.c_str());
         }
     }
-
-    cout << "Baro Offset: " << baroOffsetInHg << " Elevation: " << elevationFeet << endl;
 
     if (baroOffsetInHg == 99.0 || elevationFeet == -9999) {
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"missing argument\" }";

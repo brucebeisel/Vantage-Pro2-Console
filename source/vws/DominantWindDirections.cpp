@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 
 #include "DominantWindDirections.h"
 #include "VantageLogger.h"
@@ -114,6 +115,8 @@ DominantWindDirections::startWindow(DateTime time) {
     endOf10MinuteTimeWindow = startOf10MinuteTimeWindow + AGE_SPAN;
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Starting new window: " << dateFormat(startOf10MinuteTimeWindow) << "-" << dateFormat(endOf10MinuteTimeWindow) << endl;
+
+    saveCheckpoint();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -228,9 +231,16 @@ DominantWindDirections::saveCheckpoint() const {
 
     for (int i = 0; i < NUM_SLICES; i++) {
         Heading heading = windSlices[i].getCenter();
-        DateTime time = windSlices[i].getLast10MinuteDominantTime();
+        DateTime dtime = windSlices[i].getLast10MinuteDominantTime();
         int count = windSlices[i].getSampleCount();
-        ofs << heading << " " << time << " " << count << endl;
+        //
+        // Note the time string at the end of the line is for readability only
+        //
+        char buffer[100];
+        struct tm tm;
+        Weather::localtime(dtime, tm);
+        strftime(buffer, sizeof(buffer), "%H:%M:%S", &tm);
+        ofs << heading << " " << dtime << " " << count << " " << buffer << endl;
     }
 
     ofs.close();
@@ -305,6 +315,7 @@ DominantWindDirections::restoreCheckpoint() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 DominantWindDirections::dumpDataShort() const {
+    ostringstream oss;
     for (int i = 0; i < NUM_SLICES; i++) {
         char buffer[100];
         DateTime dtime = windSlices[i].getLast10MinuteDominantTime();
@@ -316,16 +327,17 @@ DominantWindDirections::dumpDataShort() const {
         else
             strcpy(buffer, "Never");
 
-        cout << "[" << setw(3) << windSlices[i].getName() << " " << windSlices[i].getSampleCount() << "], ";
+        oss << "[" << setw(3) << windSlices[i].getName() << " " << windSlices[i].getSampleCount() << "], ";
     }
 
-    cout << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << oss.str() << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 DominantWindDirections::dumpData() const {
+    ostringstream oss;
     for (int i = 0; i < NUM_SLICES; i++) { 
         char buffer[100];
         DateTime dtime = windSlices[i].getLast10MinuteDominantTime();
@@ -337,10 +349,12 @@ DominantWindDirections::dumpData() const {
         else
             strcpy(buffer, "Never");
 
-        cout << "Direction: " << setw(3) << windSlices[i].getName() << " (" << setw(5) << windSlices[i].getCenter()
-             << ") Count: " << setw(3) << windSlices[i].getSampleCount() << " Last Dominant Time: " << setw(8) << buffer
-             << endl;
+        oss << "Direction: " << setw(3) << windSlices[i].getName() << " (" << setw(5) << windSlices[i].getCenter()
+            << ") Count: " << setw(3) << windSlices[i].getSampleCount() << " Last Dominant Time: " << setw(8) << buffer
+            << endl;
     }
+
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << oss.str() << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

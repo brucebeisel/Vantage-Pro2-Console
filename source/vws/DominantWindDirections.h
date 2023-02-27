@@ -76,12 +76,12 @@ public:
     const std::vector<std::string> & dominantDirectionsForPastHour() const;
 
     /**
-     * Dump the internal data to cout.
+     * Dump the internal data to debug.
      */
     void dumpData() const;
 
     /**
-     * Dump a short version of the internal data to cout.
+     * Dump a short version of the internal data to debug.
      */
     void dumpDataShort() const;
 

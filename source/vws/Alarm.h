@@ -30,7 +30,7 @@ struct AlarmProperties {
     int         eepromThresholdByte;
     int         eepromThresholdSize;
     int         eepromThresholdOffset;
-    int         eepromThresholdScale;
+    float       eepromThresholdScale;
     int         eepromNotSetThreshold;
     int         alarmBit;
 };
@@ -61,6 +61,7 @@ private:
     double          actualThreshold;   // The actual threshold after offset and scale applied
     bool            alarmThresholdSet; // Whether the alarm threshold is set to a value other that the "not set" value
     bool            alarmTriggered;    // Whether the alarm is currently triggered
+    VantageLogger & logger;
 };
 
 /**

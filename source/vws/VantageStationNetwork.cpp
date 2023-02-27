@@ -105,7 +105,7 @@ VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
         firstLoopPacketReceived = true;
         detectSensors(packet);
         console.consoleType = station.getConsoleType();
-        cout << "============== NETWORK ================" << endl << formatJSON() << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "============== NETWORK ================" << endl << formatJSON() << endl;
     }
 
     return true;
@@ -376,14 +376,14 @@ VantageStationNetwork::retrieveStationInfo() {
             windStationId = i + 1;
     }
 
-    cout << "++++++++ STATION DATA +++++++" << endl;
-    cout << "Monitored Station Mask: " << monitoredStationMask << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "++++++++ STATION DATA +++++++" << endl
+                                              << "Monitored Station Mask: " << monitoredStationMask << endl;
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
-        cout << "ID: "  << stationData[i].stationId
-             << " Repeater ID: " << stationData[i].repeaterId
-             << " StationType: " << stationData[i].stationType
-             << " Extra Humidity: " << stationData[i].extraHumidityIndex
-             << " Extra Temperature: " << stationData[i].extraTemperatureIndex << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "ID: "  << stationData[i].stationId
+                                                  << " Repeater ID: " << stationData[i].repeaterId
+                                                  << " StationType: " << stationData[i].stationType
+                                                  << " Extra Humidity: " << stationData[i].extraHumidityIndex
+                                                  << " Extra Temperature: " << stationData[i].extraTemperatureIndex << endl;
     }
 
     return true;
@@ -391,42 +391,6 @@ VantageStationNetwork::retrieveStationInfo() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-/*
-        { "weatherStationNetwork" :
-            {
-                "monitoredStationIds" : [ 1, 2, 3, 4, 8],  // Theoretically each of the stations listed here must be in the network data
-                "console" : {
-                    "type" : "Vantage Pro2", "stations" : [ 1, 2, 3 ]
-                },
-                "chains" : [
-                    { "name" : "Repeater C", "repeaters" : [ "Repeater A", "Repeater B" : "Repeater C" ], "stations" : [ 1, 2, 8 ] }, // The default name is the last node
-                    { "name" : "Repeater D", "repeaters" : [ "Repeater D" ], "stations" : [ 3, 4 ] },
-                ],
-                "repeaters" : [
-                    { "repeater" : "Repeater A", "stations" : [1, 2] },
-                    { "repeater" : "Repeater B", "stations" : [8] },
-                    { "repeater" : "Repeater C", "stations" : [] },
-                    { "repeater" : "Repeater D", "stations" : [3, 4] }
-                ],
-                "stations" : [
-                    { "station" : "ISS", "type" : "ISS", "id" : 1,                       // The name for the ISS can be hard-coded as there can only be one
-                        "sensors" : [
-                            { "sensor" : "Outside Temperature", "type" : "Thermometer" },
-                            { "sensor" : "Outside Humidity", "type" : "Hygrometer" },
-                            { "sensor" : "Solar Radiation", "type" : "Solar Radiation" },
-                            { "sensor" : "UV Index", "type" : "Ultra-violet" },
-                            { "sensor" : "Rain", "type" : "Rain" },
-                            { "sensor" : "Wind", "type" : "Anemometer" },
-                            { "sensor" : "Barometer", "type" : "Barometer" },
-                            { "sensor" : "Inside Temperature", "type" : "Thermometer" },
-                            { "sensor" : "Inside Humidity", "type" : "Hygrometer" }
-                        ]
-                    }
-                    { "station" : "Pool", "type" : "Temperature", "id" : 2, "sensors" : [] }
-                ]
-            }
-        }
-*/
 std::string
 VantageStationNetwork::formatJSON() const {
     ostringstream oss;

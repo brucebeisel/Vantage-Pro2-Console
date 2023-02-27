@@ -643,17 +643,18 @@ Alarm::Alarm(const AlarmProperties & properties) : properties(properties),
                                                    eepromThreshold(properties.eepromNotSetThreshold),
                                                    actualThreshold(0.0),
                                                    alarmThresholdSet(false),
-                                                   alarmTriggered(false) {
+                                                   alarmTriggered(false),
+                                                   logger(VantageLogger::getLogger("Alarm")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 Alarm::setThreshold(int eepromThreshold) {
-    cout << "########## Setting threshold for alarm " + properties.alarmName + " Not set value = " << properties.eepromNotSetThreshold;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "########## Setting threshold for alarm " + properties.alarmName + " Not set value = " << properties.eepromNotSetThreshold;
     this->eepromThreshold = eepromThreshold;
     if (this->eepromThreshold == properties.eepromNotSetThreshold) {
-        cout << "######### Clearing threshold for alarm " + properties.alarmName;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "######### Clearing threshold for alarm " + properties.alarmName;
         alarmThresholdSet = false;
         alarmTriggered = false;
         actualThreshold = 0.0;
@@ -662,8 +663,24 @@ Alarm::setThreshold(int eepromThreshold) {
         alarmThresholdSet = true;
         alarmTriggered = false;
         actualThreshold = static_cast<float>(eepromThreshold - properties.eepromThresholdOffset) / properties.eepromThresholdScale;
-        cout << "######### Setting threshold for alarm " << properties.alarmName << " to " << actualThreshold;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "######### Setting threshold for alarm " << properties.alarmName << " to " << actualThreshold;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+float
+fromEepromToActualThreshold(int eepromValue, int offset, float scale) {
+    float actualThreshold = static_cast<float>(eepromValue - offset) / scale;
+    return actualThreshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+int
+fromActualToEepromThreshold(float actualValue, int offset, int scale) {
+    int eepromThreshold = static_cast<int>(actualValue * scale) + offset;
+    return eepromThreshold;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -748,6 +765,8 @@ std::string
 AlarmManager::formatAlarmThresholdsJSON() {
     loadThresholds();
     ostringstream oss;
+
+            //<< "\"minValue\" : " << alarm.getAlarmProperties().
 
     oss << "{ \"alarmThresholds\" : [ ";
     bool first = true;
