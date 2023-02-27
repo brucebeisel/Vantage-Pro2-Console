@@ -70,6 +70,8 @@ public:
      */
     void queryCurrentWeatherArchive(int hours, std::vector<CurrentWeather> & list);
 
+    void getCurrentWeatherDatasetNames(std::vector<std::string> datasetNames);
+
 private:
     /**
      * Save the LOOP/LOOP2 packet pair to the archive file

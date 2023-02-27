@@ -903,6 +903,42 @@ CommandHandler::handleQueryLoopArchive(const std::string & commandName, const Co
         else
             oss << "null";
     }
+    oss << " ] }, ";
+
+    oss << " { \"todayRain\" : [ ";
+    first = true;
+    for (CurrentWeather cw : list) {
+        if (first) first = false; else  oss << ", ";
+        Rainfall r = cw.getLoopPacket().getDayRain();
+        oss << r;
+    }
+    oss << " ] }, ";
+
+    oss << " { \"hourRain\" : [ ";
+    first = true;
+    for (CurrentWeather cw : list) {
+        if (first) first = false; else  oss << ", ";
+        Rainfall r = cw.getLoop2Packet().getRainHour();
+        oss << r;
+    }
+    oss << " ] }, ";
+
+    oss << " { \"15MinuteRain\" : [ ";
+    first = true;
+    for (CurrentWeather cw : list) {
+        if (first) first = false; else  oss << ", ";
+        Rainfall r = cw.getLoop2Packet().getRain15Minute();
+        oss << r;
+    }
+    oss << " ] }, ";
+
+    oss << " { \"rainRate\" : [ ";
+    first = true;
+    for (CurrentWeather cw : list) {
+        if (first) first = false; else  oss << ", ";
+        Rainfall r = cw.getLoopPacket().getRainRate();
+        oss << r;
+    }
     oss << " ] } ";
 
     oss << " ] } }";

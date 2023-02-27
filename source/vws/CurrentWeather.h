@@ -60,6 +60,9 @@ public:
     const Measurement<Heading> & getWindDirection() const;
     const Measurement<Speed> & getWindSpeed10MinuteAverage() const;
 
+    template<typename T>
+    const Measurement<T> & getMeasurementByName(const std::string & fieldName);
+
     /**
      * Format the Current Weather JSON message.
      * 

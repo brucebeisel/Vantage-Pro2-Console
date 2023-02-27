@@ -205,3 +205,17 @@ Archive query
     "START"     Enables the creation of archive records, if they have been halted with the STOP command.
     ++ "NEWSETUP"  Re-initialize the Vantage console after making certain configuration changes.
     ++ "LAMPS <Lamp state: '0' (off) or '1' (on)>"
+    
+8. Addition Commands using EEPROM
+    get-timezones - Gets the list of timezone that the console supports
+    query-archive - Query the historical archive
+    query-archive-dataset-names - Query the names of the datasets that can be queried with query-archive
+    query-current-weather - Query the current weather, also know as LOOP packet, archive
+    query-current-weather-dataset-names - Query the names of the datasets that can be queried with query-current-weather
+    query-network - Query the configuration of the devices that make up with weather station
+    update-network - Update the network data with user inputs
+    query-alarm-thresholds - Query the current alarm thresholds
+    update-alarm-threshold - Update the alarm thresholds
+    update-configuration-data - Update the configuration data that are needed to start using the weather station.
+
+    
