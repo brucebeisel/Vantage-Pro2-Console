@@ -32,7 +32,8 @@ namespace vws {
 CurrentWeatherManager::CurrentWeatherManager(const string & archiveDir, CurrentWeatherPublisher & cwPublisher) : archiveDirectory(archiveDir),
                                                                                                                  currentWeatherPublisher(cwPublisher),
                                                                                                                  firstLoop2PacketReceived(false),
-                                                                                                                 logger(VantageLogger::getLogger("CurrentWeatherManager")){
+                                                                                                                 dominantWindDirections(archiveDir),
+                                                                                                                 logger(VantageLogger::getLogger("CurrentWeatherManager")) {
 
 }
 

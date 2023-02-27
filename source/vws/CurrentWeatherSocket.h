@@ -22,7 +22,6 @@
 
 #include "CurrentWeather.h"
 #include "CurrentWeatherPublisher.h"
-#include "DominantWindDirections.h"
 #include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 

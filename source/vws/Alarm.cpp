@@ -97,210 +97,210 @@ static const AlarmProperties alarmProperties[] = {
          17,
     },
     {
-        "Extra Temperature/Humidity 1 - Low Temperature",
+        "Low Extra Temperature 1",
          10,    1,
          90,    1,
         255,
          40,
     },
     {
-        "Extra Temperature/Humidity 2 - Low Temperature",
+        "Low Extra Temperature 2",
          11,    1,
          90,    1,
         255,
          48,
     },
     {
-        "Extra Temperature/Humidity 3 - Low Temperature",
+        "Low Extra Temperature 3",
          12,    1,
          90,    1,
         255,
          56,
     },
     {
-        "Extra Temperature/Humidity 4 - Low Temperature",
+        "Low Extra Temperature 4",
          13,    1,
          90,    1,
         255,
          64,
     },
     {
-        "Extra Temperature/Humidity 5 - Low Temperature",
+        "Low Extra Temperature 5",
          14,    1,
          90,    1,
         255,
          72,
     },
     {
-        "Extra Temperature/Humidity 6 - Low Temperature",
+        "Low Extra Temperature 6",
          15,    1,
          90,    1,
         255,
          80,
     },
     {
-        "Extra Temperature/Humidity 7 - Low Temperature",
+        "Low Extra Temperature 7",
          16,    1,
          90,    1,
         255,
          88,
     },
     {
-        "Soil/Leaf 1 - Low Soil Temperature",
+        "Low Soil Temperature 1",
          17,    1,
          90,    1,
         255,
         102,
     },
     {
-        "Soil/Leaf 2 - Low Soil Temperature",
+        "Low Soil Temperature 2",
          18,    1,
          90,    1,
         255,
         (13 * 8) + 6,
     },
     {
-        "Soil/Leaf 3 - Low Soil Temperature",
+        "Low Soil Temperature 3",
          19,    1,
          90,    1,
         255,
          (14 * 8) + 6
     },
     {
-        "Soil/Leaf 4 - Low Soil Temperature",
+        "Low Soil Temperature 4",
          20,    1,
          90,    1,
         255,
          (15 * 8) + 6
     },
     {
-        "Soil/Leaf 1 - Low Leaf Temperature",
+        "Low Leaf Temperature 1",
          21,    1,
          90,    1,
         255,
          (12 * 8) + 4
     },
     {
-        "Soil/Leaf 2 - Low Leaf Temperature",
+        "Low Leaf Temperature 2",
          22,    1,
          90,    1,
         255,
          (13 * 8) + 4
     },
     {
-        "Soil/Leaf 3 - Low Leaf Temperature",
+        "Low Leaf Temperature 3",
          23,    1,
          90,    1,
         255,
          (14 * 8) + 4
     },
     {
-        "Soil/Leaf 4 - Low Leaf Temperature",
+        "Low Leaf Temperature 4",
          24,   1,
          90,   1,
         255,
          (15 * 8) + 4
     },
     {
-        "Extra Temperature/Humidity 1 - High Temperature",
+        "High Extra Temperature 1",
          25,    1,
          90,    1,
         255,
           (5 * 8) + 1
     },
     {
-        "Extra Temperature/Humidity 2 - High Temperature",
+        "High Extra Temperature 2",
          26,    1,
          90,    1,
         255,
           (6 * 8) + 1
     },
     {
-        "Extra Temperature/Humidity 3 - High Temperature",
+        "High Extra Temperature 3",
          27,    1,
          90,    1,
         255,
           (7 * 8) + 1
     },
     {
-        "Extra Temperature/Humidity 4 - High Temperature",
+        "High Extra Temperature 4",
          28,    1,
          90,    1,
         255,
           (8 * 8) + 1
     },
     {
-        "Extra Temperature/Humidity 5 - High Temperature",
+        "High Extra Temperature 5",
          29,    1,
          90,    1,
         255,
           (9 * 8) + 1
     },
     {
-        "Extra Temperature/Humidity 6 - High Temperature",
+        "High Extra Temperature 6",
          30,    1,
          90,    1,
         255,
          (10 * 8) + 1
     },
     {
-        "Extra Temperature/Humidity 7 - High Temperature",
+        "High Extra Temperature 7",
          31,    1,
          90,    1,
         255,
          (11 * 8) + 1
     },
     {
-        "Soil/Leaf 1 - High Soil Temperature",
+        "High Soil Temperature 1",
          32,    1,
          90,    1,
         255,
          (12 * 8) + 7
     },
     {
-        "Soil/Leaf 2 - High Soil Temperature",
+        "High Soil Temperature 2",
          33,    1,
          90,    1,
         255,
          (13 * 8) + 7
     },
     {
-        "Soil/Leaf 3 - High Soil Temperature",
+        "High Soil Temperature 3",
          34,    1,
          90,    1,
         255,
          (14 * 8) + 7
     },
     {
-        "Soil/Leaf 4 - High Soil Temperature",
+        "High Soil Temperature 4",
          35,    1,
          90,    1,
         255,
          (15 * 8) + 7
     },
     {
-        "Soil/Leaf 1 - High Leaf Temperature",
+        "High Leaf Temperature 1",
          36,    1,
          90,    1,
         255,
          (12 * 8) + 5
     },
     {
-        "Soil/Leaf 2 - High Leaf Temperature",
+        "High Leaf Temperature 2",
          37,    1,
          90,    1,
         255,
          (13 * 8) + 5
     },
     {
-        "Soil/Leaf 3 - High Leaf Temperature",
+        "High Leaf Temperature 3",
          38,    1,
          90,    1,
         255,
          (14 * 8) + 5
     },
     {
-        "Soil/Leaf 4 - High Leaf Temperature",
+        "High Leaf Temperature 4",
          39,   1,
          90,   1,
         255,
@@ -314,49 +314,49 @@ static const AlarmProperties alarmProperties[] = {
           (4 * 8) + 2
     },
     {
-        "Extra Temperature/Humidity 1 - Low Humidity",
+        "Low Extra Humidity 1",
          43,   1,
           0,   1,
         255,
           (5 * 8) + 2
     },
     {
-        "Extra Temperature/Humidity 2 - Low Humidity",
+        "Low Extra Humidity 2",
          44,   1,
           0,   1,
         255,
           (6 * 8) + 2
     },
     {
-        "Extra Temperature/Humidity 3 - Low Humidity",
+        "Low Extra Humidity 3",
          45,   1,
           0,   1,
         255,
           (7 * 8) + 2
     },
     {
-        "Extra Temperature/Humidity 4 - Low Humidity",
+        "Low Extra Humidity 4",
          46,   1,
           0,   1,
         255,
           (8 * 8) + 2
     },
     {
-        "Extra Temperature/Humidity 5 - Low Humidity",
+        "Low Extra Humidity 5",
          47,   1,
           0,   1,
         255,
           (9 * 8) + 2
     },
     {
-        "Extra Temperature/Humidity 6 - Low Humidity",
+        "Low Extra Humidity 6",
          48,   1,
           0,   1,
         255,
           (0 * 8) + 2
     },
     {
-        "Extra Temperature/Humidity 7 - Low Humidity",
+        "Low Extra Humidity 7",
          49,   1,
           0,   1,
         255,
@@ -370,49 +370,49 @@ static const AlarmProperties alarmProperties[] = {
           (4 * 8) + 3
     },
     {
-        "Extra Temperature/Humidity 1 - High Humidity",
+        "High Extra Humidity 1",
          51,   1,
           0,   1,
         255,
           (5 * 8) + 3
     },
     {
-        "Extra Temperature/Humidity 2 - High Humidity",
+        "High Extra Humidity 2",
          52,   1,
           0,   1,
         255,
           (6 * 8) + 3
     },
     {
-        "Extra Temperature/Humidity 3 - High Humidity",
+        "High Extra Humidity 3",
          43,   1,
           0,   1,
         255,
           (7 * 8) + 3
     },
     {
-        "Extra Temperature/Humidity 4 - High Humidity",
+        "High Extra Humidity 4",
          54,   1,
           0,   1,
         255,
           (8 * 8) + 3
     },
     {
-        "Extra Temperature/Humidity 5 - High Humidity",
+        "High Extra Humidity 5",
          55,   1,
           0,   1,
         255,
           (9 * 8) + 3
     },
     {
-        "Extra Temperature/Humidity 6 - High Humidity",
+        "High Extra Humidity 6",
          56,   1,
           0,   1,
         255,
          (10 * 8) + 3
     },
     {
-        "Extra Temperature/Humidity 7 - High Humidity",
+        "High Extra Humidity 7",
          57,   1,
           0,   1,
         255,
@@ -482,112 +482,112 @@ static const AlarmProperties alarmProperties[] = {
          -1
     },
     {
-        "Soil/Leaf 1 - Low Soil Moisture",
+        "Low Soil Moisture 1",
          67,   1,
           0,   1,
         255,
          (12 * 8) + 2
     },
     {
-        "Soil/Leaf 2 - Low Soil Moisture",
+        "Low Soil Moisture 2",
          68,   1,
           0,   1,
         255,
          (13 * 8) + 2
     },
     {
-        "Soil/Leaf 3 - Low Soil Moisture",
+        "Low Soil Moisture 3",
          69,   1,
           0,   1,
         255,
          (14 * 8) + 2
     },
     {
-        "Soil/Leaf 4 - Low Soil Moisture",
+        "Low Soil Moisture 4",
          70,   1,
           0,   1,
         255,
          (15 * 8) + 2
     },
     {
-        "Soil/Leaf 1 - High Soil Moisture",
+        "High Soil Moisture 1",
          71,   1,
           0,   1,
         255,
          (12 * 8) + 3
     },
     {
-        "Soil/Leaf 2 - High Soil Moisture",
+        "High Soil Moisture 2",
          72,   1,
           0,   1,
         255,
          (13 * 8) + 3
     },
     {
-        "Soil/Leaf 3 - High Soil Moisture",
+        "High Soil Moisture 3",
          73,   1,
           0,   1,
         255,
          (14 * 8) + 3
     },
     {
-        "Soil/Leaf 4 - High Soil Moisture",
+        "High Soil Moisture 4",
          74,   1,
           0,   1,
         255,
          (15 * 8) + 3
     },
     {
-        "Soil/Leaf 1 - Low Leaf Wetness",
+        "Low Leaf Wetness 1",
          75,   1,
           0,   1,
         255,
          (12 * 8) + 0
     },
     {
-        "Soil/Leaf 2 - Low Leaf Wetness",
+        "Low Leaf Wetness 2",
          76,   1,
           0,   1,
         255,
          (13 * 8) + 0
     },
     {
-        "Soil/Leaf 3 - Low Leaf Wetness",
+        "Low Leaf Wetness 3",
          77,   1,
           0,   1,
         255,
          (14 * 8) + 0
     },
     {
-        "Soil/Leaf 4 - Low Leaf Wetness",
+        "Low Leaf Wetness 4",
          78,   1,
           0,   1,
         255,
          (15 * 8) + 0
     },
     {
-        "Soil/Leaf 1 - High Leaf Wetness",
+        "High Leaf Wetness 1",
          79,   1,
           0,   1,
         255,
          (12 * 8) + 1
     },
     {
-        "Soil/Leaf 2 - High Leaf Wetness",
+        "High Leaf Wetness 2",
          80,   1,
           0,   1,
         255,
          (13 * 8) + 1
     },
     {
-        "Soil/Leaf 3 - High Leaf Wetness",
+        "High Leaf Wetness 3",
          81,   1,
           0,   1,
         255,
          (14 * 8) + 1
     },
     {
-        "Soil/Leaf 4 - High Leaf Wetness",
+        "High Leaf Wetness 4",
          82,   1,
           0,   1,
         255,

@@ -189,13 +189,13 @@ Archive query
                 Clears all of the daily (0), monthly (1), or yearly (2) high values.
     + "CLRLOWS <0, 1, or 2>"
                 Clears all of the daily (0), monthly (1), or yearly (2) low values.
-    + "CLRBITS"   Clears the active alarm bits. Alarms will be reactivated if the alarm condition is still present.
+    ++ "CLRBITS"   Clears the active alarm bits. Alarms will be reactivated if the alarm condition is still present.
     ++ "CLRDATA"   Clears all current data values to dashes.
 
 7. Configuration Commands
     - "BAUD <New baud rate-decimal>"
                 Sets the console to a new baud rate. Valid values are 1200, 2400, 4800, 9600, 14400, and 19200.
-    + "SETTIME"   Sets the time and date on the Vantage console. Data in a binary format is sent after ACK.
+    ++ "SETTIME"   Sets the time and date on the Vantage console. Data in a binary format is sent after ACK.
     - "GAIN <Gain State: '0' (off) or '1' (on)>"
                 Sets the gain of the radio receiver. This command is currently not supported in Vantage Pro2.
     ++ "GETTIME"   Retrieves the current time and date on the Vantage console. Data is sent in a binary format.

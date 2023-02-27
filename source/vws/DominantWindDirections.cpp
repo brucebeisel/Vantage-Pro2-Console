@@ -20,6 +20,7 @@
 #include <vector>
 #include <algorithm>
 #include <iomanip>
+#include <fstream>
 
 #include "DominantWindDirections.h"
 #include "VantageLogger.h"
@@ -45,19 +46,23 @@ dateFormat(time_t t) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DominantWindDirections::DominantWindDirections() : startOf10MinuteTimeWindow(0),
-                                                   endOf10MinuteTimeWindow(0),
-                                                   logger(VantageLogger::getLogger("DominantWindDirections")) {
+DominantWindDirections::DominantWindDirections(const std::string & cpd) : startOf10MinuteTimeWindow(0),
+                                                                          endOf10MinuteTimeWindow(0),
+                                                                          checkpointDirectory(cpd),
+                                                                          logger(VantageLogger::getLogger("DominantWindDirections")) {
     Heading heading = -HALF_SLICE;
     for (int i = 0; i < NUM_SLICES; i++) {
         windSlices[i].setValues(i, SLICE_NAMES[i], heading, heading + DEGREES_PER_SLICE);
         heading += DEGREES_PER_SLICE;
     }
+
+    restoreCheckpoint();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DominantWindDirections::~DominantWindDirections() {
+    saveCheckpoint();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +217,77 @@ DominantWindDirections::getDominantDirectionsCount() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
+DominantWindDirections::saveCheckpoint() const {
+    string path = checkpointDirectory + "/" + CHECKPOINT_FILE;
+    ofstream ofs(path.c_str(), ios::trunc);
+
+    if (!ofs.is_open()) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open Dominant Wind Direction checkpoint file for writing" << endl;
+        return;
+    }
+
+    for (int i = 0; i < NUM_SLICES; i++) {
+        Heading heading = windSlices[i].getCenter();
+        DateTime time = windSlices[i].getLast10MinuteDominantTime();
+        int count = windSlices[i].getSampleCount();
+        ofs << heading << " " << time << " " << count << endl;
+    }
+
+    ofs.close();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DominantWindDirections::restoreCheckpoint() {
+    string path = checkpointDirectory + "/" + CHECKPOINT_FILE;
+    ifstream ifs(path.c_str());
+
+    if (!ifs.is_open()) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to open Dominant Wind Direction checkpoint file for reading" << endl;
+        return;
+    }
+
+    Heading heading;
+    DateTime dtime;
+    int count;
+    std::string line;
+    DateTime newestTime = 0;
+    DateTime now = time(0);
+
+    while (std::getline(ifs, line)) {
+        sscanf(line.c_str(), "%f %d %d", heading, time, count);
+
+        newestTime = ::max(newestTime, dtime);
+
+        //
+        // Only save the dominant time if it's less than an hour old
+        //
+        for (int i = 0; i < NUM_SLICES; i++) {
+            if (now - dtime > DOMINANT_DIR_DURATION) {
+                if (windSlices[i].isInSlice(heading)) {
+                    windSlices[i].setLast10MinuteDominantTime(dtime);
+                    windSlices[i].setSampleCount(count);
+                }
+            }
+        }
+
+        //
+        // If the latest dominant time is more than 10 minutes old, then
+        // clear out the sample counts.
+        //
+        if (now - newestTime > AGE_SPAN) {
+            for (int i = 0; i < NUM_SLICES; i++) {
+                windSlices[i].clearSamples();
+            }
+        }
+    }
+    ifs.close();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
 DominantWindDirections::dumpDataShort() const {
     for (int i = 0; i < NUM_SLICES; i++) {
         char buffer[100];
@@ -262,8 +338,8 @@ DominantWindDirections::dominantDirectionsForPastHour(vector<std::string> & head
     const std::vector<std::string> & dwd = dominantDirectionsForPastHour();
     headings.assign(dwd.begin(), dwd.end());
 }
-////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const std::vector<std::string> &
 DominantWindDirections::dominantDirectionsForPastHour() const {

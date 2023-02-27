@@ -102,6 +102,14 @@ public:
     int getSampleCount() const;
 
     /**
+     * Set the sample count.
+     * This is used to restore a checkpoint.
+     *
+     * @param count The count from the checkpoint
+     */
+    void setSampleCount(int count);
+
+    /**
      * Set the last time this heading was the 10 minute dominant wind direction.
      *
      * @param The time this heading was the 10 minute dominant wind direction

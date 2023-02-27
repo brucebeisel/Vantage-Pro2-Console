@@ -45,12 +45,13 @@ namespace vws {
  * is detected. The start of the period will be moved back to the beginning of the current minute
  * so that all 10 minute periods start on a even minute boundary.
  */
+static const std::string CHECKPOINT_FILE = "dominant-wind-checkpoint.dat";
 class DominantWindDirections {
 public:
     /**
      * Constructor.
      */
-    DominantWindDirections();
+    DominantWindDirections(const std::string & checkpointDir);
 
     /**
      * Destructor.
@@ -85,6 +86,7 @@ public:
     void dumpDataShort() const;
 
 private:
+
     /**
      * Find the dominant wind direction for the current 10 minute window.
      *
@@ -120,6 +122,17 @@ private:
      */
     int getDominantDirectionsCount() const;
 
+    /**
+     * Checkpoint the dominant wind data so it can be recovered if the process is
+     * restarted in less than an hour.
+     */
+    void saveCheckpoint() const;
+
+    /**
+     * Restore the dominant wind data from the checkpoint file, ensuring the data is not too old.
+     */
+    void restoreCheckpoint();
+
     static constexpr Heading MAX_HEADING = 360.0;
 
     /**
@@ -150,11 +163,12 @@ private:
      */
     static const int DOMINANT_DIR_DURATION = 3600;
 
-    VantageLogger            logger;
+    VantageLogger &          logger;
     WindDirectionSlice       windSlices[NUM_SLICES];
     time_t                   startOf10MinuteTimeWindow;
     time_t                   endOf10MinuteTimeWindow;
     std::vector<std::string> dominantWindDirectionList;
+    std::string              checkpointDirectory;
 };
 }
 
