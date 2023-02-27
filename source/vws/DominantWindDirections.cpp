@@ -268,6 +268,7 @@ DominantWindDirections::restoreCheckpoint() {
                 if (windSlices[i].isInSlice(heading)) {
                     windSlices[i].setLast10MinuteDominantTime(dtime);
                     windSlices[i].setSampleCount(count);
+                    dominantWindDirectionList.push_back(windSlices[i].getName());
                 }
             }
         }
