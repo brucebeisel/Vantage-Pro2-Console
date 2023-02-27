@@ -423,10 +423,11 @@ void
 VantageWeatherStation::dump(vector<ArchivePacket> & list) {
     logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Dumping archive..." << endl;
     list.clear();
+    list.reserve(NUM_ARCHIVE_RECORDS);
 
     if (sendAckedCommand(DUMP_ARCHIVE_CMD)) {
         for (int i = 0; i < NUM_ARCHIVE_PAGES; i++) {
-            readNextArchivePage(list, 0, time(0));
+            readNextArchivePage(list, 0, 0);
             if (!serialPort.write(DMP_SEND_NEXT_PAGE)) {
                 break;
             }

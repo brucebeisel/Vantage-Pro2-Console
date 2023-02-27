@@ -24,17 +24,19 @@
 #include "VantageDecoder.h"
 #include "Weather.h"
 #include "VantageWeatherStation.h"
+#include "VantageLogger.h"
 
 using namespace std;
 using namespace vws;
 
-static const char USAGE_MESSAGE[] = "Usage: console-archive-dumper [-v] [-b] <device name>";
+static const char USAGE_MESSAGE[] = "Usage: console-archive-dumper [-v] [-b] [-t]  <device name>";
 
 int
 main(int argc, char *argv[]) {
     bool verbose = false;
     bool dumpBinary = false;
     char *device = NULL;
+    bool terse = false;
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -42,6 +44,8 @@ main(int argc, char *argv[]) {
                 verbose = true;
             else if (strcmp(argv[i], "-b") == 0)
                 dumpBinary = true;
+            else if (strcmp(argv[i], "-t") == 0)
+                terse = true;
             else  {
                 cerr << USAGE_MESSAGE << endl;
                 exit(1);
@@ -58,6 +62,8 @@ main(int argc, char *argv[]) {
 
 
     VantageDecoder::setRainCollectorSize(.01);
+
+    //VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
 
     VantageWeatherStation ws(device, 19200);
 
@@ -77,21 +83,38 @@ main(int argc, char *argv[]) {
 
     cout << "Retrieved " << packets.size() << " packets from console's archive" << endl;
 
+    DateTime oldestRecord = 0;
+    DateTime newestRecord = 0;
     int record = 0;
     for (auto packet : packets) {
-        const char * buffer = packet.getBuffer();
-
-        if (verbose) {
-            if (dumpBinary)
-                cout << Weather::dumpBuffer(buffer, sizeof(buffer));
-
-            cout << packet.formatJSON() << endl << endl;
+        DateTime packetTime = packet.getDateTime();
+        if (oldestRecord == 0) {
+            oldestRecord = packetTime;
+            newestRecord = packetTime;
         }
         else {
-            cout << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(packet.getDateTime()) << endl;
-            if (dumpBinary)
-                cout << Weather::dumpBuffer(buffer, sizeof(buffer));
+            oldestRecord = ::min(oldestRecord, packetTime);
+            newestRecord = ::max(newestRecord, packetTime);
         }
-        record++;
+
+        if (!terse) {
+            const char * buffer = packet.getBuffer();
+            if (verbose) {
+                if (dumpBinary)
+                    cout << Weather::dumpBuffer(buffer, sizeof(buffer));
+
+                cout << packet.formatJSON() << endl << endl;
+            }
+            else {
+                cout << setw(5) << setfill('0') << record << " - " << Weather::formatDateTime(packetTime) << endl;
+                if (dumpBinary)
+                    cout << Weather::dumpBuffer(buffer, sizeof(buffer));
+            }
+            record++;
+        }
     }
+
+    cout << "Archive contains " << packets.size()
+         << " Date range: " << Weather::formatDateTime(oldestRecord)
+         << " to " << Weather::formatDateTime(newestRecord) << endl;
 }
