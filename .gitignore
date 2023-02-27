@@ -4,5 +4,15 @@ target
 .settings
 vws.exe
 *.exe
-source/test/DominantWindTest.exe
 source/vws/vws
+source/archive-dumper/archive-dumper
+source/console-archive-dumper/console-archive-dumper
+source/loop-packet-dumper/loop-dumper
+source/loop-packet-dumper/out
+source/test/BitConverterTest
+source/test/DominantWindTest
+source/test/EnumTest
+source/vws/archive.dat
+source/vws/log/
+source/vws/out
+
