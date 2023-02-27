@@ -256,15 +256,15 @@ DominantWindDirections::restoreCheckpoint() {
     DateTime now = time(0);
 
     while (std::getline(ifs, line)) {
-        sscanf(line.c_str(), "%f %d %d", heading, time, count);
+        sscanf(line.c_str(), "%f %d %d", &heading, &dtime, &count);
 
         newestTime = ::max(newestTime, dtime);
 
         //
         // Only save the dominant time if it's less than an hour old
         //
-        for (int i = 0; i < NUM_SLICES; i++) {
-            if (now - dtime > DOMINANT_DIR_DURATION) {
+        if (now - dtime <= DOMINANT_DIR_DURATION) {
+            for (int i = 0; i < NUM_SLICES; i++) {
                 if (windSlices[i].isInSlice(heading)) {
                     windSlices[i].setLast10MinuteDominantTime(dtime);
                     windSlices[i].setSampleCount(count);
