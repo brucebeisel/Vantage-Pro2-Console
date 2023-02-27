@@ -282,6 +282,21 @@ DominantWindDirections::restoreCheckpoint() {
                 windSlices[i].clearSamples();
             }
         }
+
+        //
+        // Set the time window based on the newest dominant time, if there is one.
+        // Use the newest time, then add 10 minutes to the start and end window times
+        // until the end window time is in the future.
+        //
+        if (newestTime != 0) {
+            startOf10MinuteTimeWindow = newestTime;
+            endOf10MinuteTimeWindow = newestTime + AGE_SPAN;
+            while (endOf10MinuteTimeWindow <= now) {
+                startOf10MinuteTimeWindow += AGE_SPAN;
+                endOf10MinuteTimeWindow += AGE_SPAN;
+            }
+
+        }
     }
     ifs.close();
 }
