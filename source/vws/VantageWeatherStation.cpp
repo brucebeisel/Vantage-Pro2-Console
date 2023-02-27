@@ -1244,11 +1244,13 @@ VantageWeatherStation::sendOKedWithDoneCommand(const string & command) {
         return false;
 
     //
-    // This may require a loop due to the console's delay between the "OK" and the "DONE".
-    // The serial port class only waits for 2 seconds for data before returning an error.
+    // The commands that receive "DONE" in the end can have a very long delay.
+    // Tell the serial port to wait up to a minute for the "DONE" response.
+    // This is acceptable because the console will not repond to any other
+    // command until the command that requires the DONE response is complete.
     //
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Waiting for 'DONE' to complete the command" << endl;
-    if (!serialPort.read(buffer, DONE_RESPONSE.length()))
+    if (!serialPort.read(buffer, DONE_RESPONSE.length(), 60000))
         success = false;
     else if (DONE_RESPONSE != buffer)
         success = false;

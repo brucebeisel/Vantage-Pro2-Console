@@ -227,7 +227,7 @@ SerialPort::write(const string & s) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-SerialPort::read(byte buffer[], int expectedBytes) {
+SerialPort::read(byte buffer[], int expectedBytes, int timeoutMillis) {
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Attempting to read " << expectedBytes << " bytes" << endl;
     int readIndex = 0;
     
@@ -235,7 +235,7 @@ SerialPort::read(byte buffer[], int expectedBytes) {
     // Keep reading until a timeout or the bytes read is correct
     //
     for (int i = 0; i < 2 && readIndex < expectedBytes; i++) {
-        int nbytes = this->read(buffer, readIndex, expectedBytes - readIndex);
+        int nbytes = this->read(buffer, readIndex, expectedBytes - readIndex, timeoutMillis);
         if (nbytes > 0) {
             readIndex += nbytes;
             logger.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << readIndex << " bytes of " << expectedBytes << " bytes" << endl;

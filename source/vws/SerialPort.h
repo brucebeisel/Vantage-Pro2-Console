@@ -32,6 +32,8 @@ namespace vws {
  */
 class SerialPort {
 public:
+    static constexpr int DEFAULT_TIMEOUT_MILLIS = 2500;
+
     /**
      * Constructor.
      * 
@@ -67,8 +69,7 @@ public:
      *
      * @return The number of bytes actually read
      */
-    static const int DEFAULT_TIMEOUT_MILLIS = 2500;
-    int read(byte * buffer, int index, int nbytes, int timeoutMillis = DEFAULT_TIMEOUT_MILLIS);
+    int read(byte * buffer, int index, int nbytes, int timeoutMillis);
 
     /**
      * Read from the serial port.
@@ -78,7 +79,7 @@ public:
      *
      * @return The number of bytes actually read
      */
-    bool read(byte * buffer, int nbytes);
+    bool read(byte * buffer, int nbytes, int timeoutMillis = DEFAULT_TIMEOUT_MILLIS);
 
     /**
      * Write a string to the serial port.
