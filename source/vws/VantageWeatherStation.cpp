@@ -1166,7 +1166,7 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
     //
     // Which page this is in a DMP or DMPAFT command
     //
-    int pageSequence = BitConverter::toInt8(buffer, 0);
+    int pageSequence = BitConverter::toUint8(buffer, 0);
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Decoding archive page " << pageSequence
                                               << ". Newest packet time = " << Weather::formatDateTime(newestPacketTime) << endl;
 
