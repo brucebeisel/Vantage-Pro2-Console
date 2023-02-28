@@ -811,9 +811,6 @@ CommandHandler::handleQueryConfigurationData(const std::string & commandName, st
 void
 CommandHandler::handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
 
-    ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
-    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"datasets\" : [ ";
 
     DateTime startTime = 0;
     DateTime endTime = 0;
@@ -837,34 +834,17 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
     vector<ArchivePacket> packets;
     archiveManager.queryArchiveRecords(startTime, endTime, packets);
 
-    oss << " { \"time\" : [ ";
+    ostringstream oss;
+    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : [ ";
+
     bool first = true;
-    for (ArchivePacket p : packets) {
-        if (!first)
-            oss << ", ";
-
-        first = false;
-        oss << p.getDateTime();
+    for (ArchivePacket packet : packets) {
+        if (!first) oss << ", "; else first = false;
+        oss << packet.formatJSON();
     }
 
-    oss << " ]}, ";
-
-    oss << " { \"outsideTemperature\" : [ ";
-    first = true;
-    for (ArchivePacket p : packets) {
-        if (!first)
-            oss << ", ";
-
-        first = false;
-        Measurement<Temperature> t = p.getOutsideTemperature();
-        if (t.isValid())
-            oss << t;
-        else
-            oss << "null";
-    }
-
-    oss << " ]} ";
-    oss << "] } }";
+    oss << "] }";
     response = oss.str();
 }
 
@@ -883,74 +863,15 @@ CommandHandler::handleQueryLoopArchive(const std::string & commandName, const Co
     currentWeatherManager.queryCurrentWeatherArchive(hours, list);
     ostringstream oss;
     oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
-    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"datasets\" : [ ";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : [ ";
 
-    oss << " { \"time\" : [ ";
     bool first = true;
     for (CurrentWeather cw : list) {
-        if (first) first = false; else  oss << ", ";
-        oss << cw.getPacketTime();
+        if (!first) oss << ", "; else first = false;
+        oss << cw.formatJSON();
     }
-    oss << " ] }, ";
 
-    oss << " { \"windSpeed\" : [ ";
-    first = true;
-    for (CurrentWeather cw : list) {
-        if (first) first = false; else  oss << ", ";
-        Measurement<Speed> s = cw.getWindSpeed();
-        if (s.isValid())
-            oss << s;
-        else
-            oss << "null";
-    }
-    oss << " ] }, ";
-
-    oss << " { \"todayRain\" : [ ";
-    first = true;
-    for (CurrentWeather cw : list) {
-        if (first) first = false; else  oss << ", ";
-        Rainfall r = cw.getLoopPacket().getDayRain();
-        oss << r;
-    }
-    oss << " ] }, ";
-
-    oss << " { \"hourRain\" : [ ";
-    first = true;
-    for (CurrentWeather cw : list) {
-        if (first) first = false; else  oss << ", ";
-        Rainfall r = cw.getLoop2Packet().getRainHour();
-        oss << r;
-    }
-    oss << " ] }, ";
-
-    oss << " { \"rain15Minute\" : [ ";
-    first = true;
-    for (CurrentWeather cw : list) {
-        if (first) first = false; else  oss << ", ";
-        Rainfall r = cw.getLoop2Packet().getRain15Minute();
-        oss << r;
-    }
-    oss << " ] }, ";
-
-    oss << " { \"rainRate\" : [ ";
-    first = true;
-    for (CurrentWeather cw : list) {
-        if (first) first = false; else  oss << ", ";
-        Rainfall r = cw.getLoopPacket().getRainRate();
-        oss << r;
-    }
-    oss << " ] }, ";
-
-    oss << " { \"stormRain\" : [ ";
-    first = true;
-    for (CurrentWeather cw : list) {
-        if (first) first = false; else  oss << ", ";
-        Rainfall r = cw.getLoopPacket().getStormRain();
-        oss << r;
-    }
-    oss << " ] } ";
-
-    oss << " ] } }";
+    oss << " ] }";
 
     response = oss.str();
 }

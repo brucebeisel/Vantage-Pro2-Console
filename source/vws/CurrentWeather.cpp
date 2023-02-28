@@ -137,9 +137,10 @@ CurrentWeather::formatJSON() const {
        << loop2Packet.getWindChill().formatJSON("windChill", true)
        << loop2Packet.getHeatIndex().formatJSON("heatIndex", true)
        << loop2Packet.getThsw().formatJSON("thsw", true)
-       << ", \"wind\" : { \"speed\" : " << windSpeed << ", \"direction\" : " <<  windDirection << " }"
-       << ", \"windGust\" : { \"speed\" : " <<  loop2Packet.getWindGust10Minute()
-       << ", \"direction\" : " <<  loop2Packet.getWindGustDirection10Minute() << " }"
+       << windSpeed.formatJSON("windSpeed", true)
+       << windDirection.formatJSON("windDirection", true)
+       << loop2Packet.getWindGust10Minute().formatJSON("gustSpeed", true)
+       << loop2Packet.getWindGustDirection10Minute().formatJSON("gustDirection", true)
        << windSpeed10MinuteAverage.formatJSON("windSpeed10MinAvg", true)
        << loop2Packet.getWindSpeed2MinuteAverage().formatJSON("windSpeed2MinAvg", true);
 
@@ -187,11 +188,8 @@ CurrentWeather::formatJSON() const {
     ss << ", \"extraTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++) {
         if (loopPacket.getExtraTemperature(i).isValid()) {
-            if (!firstValue)
-                ss << ", ";
-
+            if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraTemperature(i).getValue() << " }";
-            firstValue = false;
         }
     }
     ss << " ]";
@@ -200,11 +198,18 @@ CurrentWeather::formatJSON() const {
     ss << ", \"extraHumidities\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_HUMIDITIES; i++) {
         if (loopPacket.getExtraHumidity(i).isValid()) {
-            if (!firstValue)
-                ss << ", ";
-
+            if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraHumidity(i).getValue() << " }";
-            firstValue = false;
+        }
+    }
+    ss << " ],";
+
+    firstValue = true;
+    ss << ", \"soilTemperatures\" : [ ";
+    for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++) {
+        if (loopPacket.getSoilTemperature(i).isValid()) {
+            if (!firstValue) ss << ", "; else firstValue = false;
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getSoilMoisture(i).getValue() << " }";
         }
     }
     ss << " ]";
@@ -213,11 +218,18 @@ CurrentWeather::formatJSON() const {
     ss << ", \"soilMoistures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         if (loopPacket.getSoilMoisture(i).isValid()) {
-            if (!firstValue)
-                ss << ", ";
-
+            if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getSoilMoisture(i).getValue() << " }";
-            firstValue = false;
+        }
+    }
+    ss << " ]";
+
+    firstValue = true;
+    ss << ", \"leafTemperatures\" : [ ";
+    for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
+        if (loopPacket.getLeafTemperature(i).isValid()) {
+            if (!firstValue) ss << ", "; else firstValue = false;
+            ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getLeafTemperature(i).getValue() << " }";
         }
     }
     ss << " ]";
@@ -226,11 +238,8 @@ CurrentWeather::formatJSON() const {
     ss << ", \"leafWetnesses\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         if (loopPacket.getLeafWetness(i).isValid()) {
-            if (!firstValue)
-                ss << ", ";
-
+            if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getLeafWetness(i).getValue() << " }";
-            firstValue = false;
         }
     }
     ss << " ]";
