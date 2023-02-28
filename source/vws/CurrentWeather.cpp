@@ -202,7 +202,7 @@ CurrentWeather::formatJSON() const {
             ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getExtraHumidity(i).getValue() << " }";
         }
     }
-    ss << " ],";
+    ss << " ]";
 
     firstValue = true;
     ss << ", \"soilTemperatures\" : [ ";
