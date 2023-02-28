@@ -209,9 +209,7 @@ Archive query
 8. Addition Commands using EEPROM
     get-timezones - Gets the list of timezone that the console supports
     query-archive - Query the historical archive
-    query-archive-dataset-names - Query the names of the datasets that can be queried with query-archive
     query-current-weather - Query the current weather, also know as LOOP packet, archive
-    query-current-weather-dataset-names - Query the names of the datasets that can be queried with query-current-weather
     query-network - Query the configuration of the devices that make up with weather station
     update-network - Update the network data with user inputs
     query-alarm-thresholds - Query the current alarm thresholds

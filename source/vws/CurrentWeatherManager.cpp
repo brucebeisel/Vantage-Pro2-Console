@@ -27,27 +27,6 @@ using namespace std;
 
 namespace vws {
 
-static string DatasetNames[] = {
-    "Outside Temperature",
-    "Dew Point",
-    "Wind Chill",
-    "Heat Index",
-    "THSW",
-    "Outside Humidity",
-    "Inside Temperature",
-    "Inside Humidity",
-    "Barometer",
-    "Wind Speed",
-    "2 Minute Avg Wind Speed",
-    "10 Minute Avg Wind Speed",
-    "Solar Radiation",
-    "UV Index"
-    "15 Minute Rain",
-    "Hour Rain",
-    "Storm Rain",
-    "Today Rain"
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 CurrentWeatherManager::CurrentWeatherManager(const string & archiveDir, CurrentWeatherPublisher & cwPublisher) : archiveDirectory(archiveDir),
