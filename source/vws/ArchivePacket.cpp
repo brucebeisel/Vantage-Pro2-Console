@@ -150,7 +150,7 @@ std::string
 ArchivePacket::formatJSON() const {
     ostringstream ss;
     DateTime archiveTime = extractArchiveDate();
-    ss << "{ \"time\" : \"" << Weather::formatDateTime(archiveTime);
+    ss << "{ \"time\" : \"" << Weather::formatDateTime(archiveTime) << "\"";
 
     Measurement<Temperature> temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
     ss << temperature.formatJSON("avgOutsideTemperature", true);
@@ -242,10 +242,10 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"leafTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++) {
-        int leafTemperature = BitConverter::toInt8(buffer, LEAF_TEMPERATURE_BASE_OFFSET + i);
-        if (leafTemperature != ProtocolConstants::INVALID_LEAF_TEMPERATURE) {
+        temperature = VantageDecoder::decode8BitTemperature(buffer, LEAF_TEMPERATURE_BASE_OFFSET + i);
+        if (temperature.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << leafTemperature << " }";
+            ss << "{ \"index\" : " << i << ", \"value\" : " << temperature.getValue() << " }";
         }
     }
     ss << " ]";
@@ -253,7 +253,7 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"leafWetnesses\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++) {
-        int leafWetness = BitConverter::toInt8(buffer, LEAF_WETNESS_BASE_OFFSET + i);
+        int leafWetness = BitConverter::toUint8(buffer, LEAF_WETNESS_BASE_OFFSET + i);
         if (leafWetness != ProtocolConstants::INVALID_LEAF_WETNESS) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << leafWetness << " }";
@@ -264,10 +264,10 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"soilTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++) {
-        int soilTemperature = BitConverter::toInt8(buffer, SOIL_TEMPERATURE_BASE_OFFSET + i);
-        if (soilTemperature != ProtocolConstants::INVALID_SOIL_TEMPERATURE) {
+        temperature = VantageDecoder::decode8BitTemperature(buffer, SOIL_TEMPERATURE_BASE_OFFSET + i);
+        if (temperature.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << soilTemperature << " }";
+            ss << "{ \"index\" : " << i << ", \"value\" : " << temperature.getValue() << " }";
         }
     }
     ss << " ]";
@@ -275,7 +275,7 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"soilMoistures\" : [";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
-        int soilMoisture = BitConverter::toInt8(buffer, SOIL_MOISTURES_BASE_OFFSET + i);
+        int soilMoisture = BitConverter::toUint8(buffer, SOIL_MOISTURES_BASE_OFFSET + i);
         if (soilMoisture != ProtocolConstants::INVALID_SOIL_MOISTURE) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << soilMoisture << " }";
