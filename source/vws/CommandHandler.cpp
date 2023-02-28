@@ -923,7 +923,7 @@ CommandHandler::handleQueryLoopArchive(const std::string & commandName, const Co
     }
     oss << " ] }, ";
 
-    oss << " { \"15MinuteRain\" : [ ";
+    oss << " { \"rain15Minute\" : [ ";
     first = true;
     for (CurrentWeather cw : list) {
         if (first) first = false; else  oss << ", ";
@@ -937,6 +937,15 @@ CommandHandler::handleQueryLoopArchive(const std::string & commandName, const Co
     for (CurrentWeather cw : list) {
         if (first) first = false; else  oss << ", ";
         Rainfall r = cw.getLoopPacket().getRainRate();
+        oss << r;
+    }
+    oss << " ] }, ";
+
+    oss << " { \"stormRain\" : [ ";
+    first = true;
+    for (CurrentWeather cw : list) {
+        if (first) first = false; else  oss << ", ";
+        Rainfall r = cw.getLoopPacket().getStormRain();
         oss << r;
     }
     oss << " ] } ";
