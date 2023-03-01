@@ -33,7 +33,7 @@
 #include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 #include "VantageStationNetwork.h"
-#include "Alarm.h"
+#include "AlarmManager.h"
 #include "CurrentWeatherManager.h"
 
 using namespace std;

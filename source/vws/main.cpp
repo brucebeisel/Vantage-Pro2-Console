@@ -35,7 +35,7 @@
 #include "CurrentWeatherSocket.h"
 #include "CurrentWeatherManager.h"
 #include "SerialPort.h"
-#include "Alarm.h"
+#include "AlarmManager.h"
 
 using namespace std;
 using namespace vws;

@@ -4,6 +4,7 @@ PROGRAM= vws
 
 SRCS=\
 	Alarm.cpp \
+	AlarmManager.cpp \
 	AlarmProperties.cpp \
 	ArchiveManager.cpp \
 	ArchivePacket.cpp \
