@@ -4,6 +4,7 @@ PROGRAM= vws
 
 SRCS=\
 	Alarm.cpp \
+	AlarmProperties.cpp \
 	ArchiveManager.cpp \
 	ArchivePacket.cpp \
 	BitConverter.cpp \

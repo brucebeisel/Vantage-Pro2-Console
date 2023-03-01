@@ -21,23 +21,10 @@
 
 #include "LoopPacket.h"
 #include "VantageWeatherStation.h"
+#include "AlarmProperties.h"
 
 namespace vws {
 struct VantageLogger;
-
-struct AlarmProperties {
-    std::string alarmName;             // The name of this alarm
-    int         eepromThresholdByte;   // The byte within the EEPROM block that this alarm's threshold is stored
-    int         eepromThresholdSize;   // The number of bytes the threshold value uses
-    int         eepromThresholdOffset; // The amount to subtract from the value in the EEPROM
-    double      eepromThresholdScale;  // The amount to divide the EEPROM value by
-    int         eepromNotSetThreshold; // The value that is used to indicate that the threshold is not set
-    int         alarmBit;              // The bit within the LOOP packet that indicates if this alarm has been triggered
-    int         minimumValue;          // The minimum value the threshold can be
-    int         maximumValue;          // The maximum value the threshold can be
-    static int  getAlarmPropertyCount();
-    static const AlarmProperties * getAlarmProperties(int count);
-};
 
 /**
  * Class to manage a single alarm monitored by the console.
