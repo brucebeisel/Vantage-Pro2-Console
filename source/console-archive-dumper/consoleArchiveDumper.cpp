@@ -24,6 +24,7 @@
 #include "VantageDecoder.h"
 #include "Weather.h"
 #include "VantageWeatherStation.h"
+#include "SerialPort.h"
 #include "VantageLogger.h"
 
 using namespace std;
@@ -65,7 +66,8 @@ main(int argc, char *argv[]) {
 
     //VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
 
-    VantageWeatherStation ws(device, 19200);
+    SerialPort serialPort(device, 19200);
+    VantageWeatherStation ws(serialPort);
 
     if (!ws.openStation()) {
         cerr << "Could not open weather console" << endl;

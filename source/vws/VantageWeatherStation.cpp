@@ -623,7 +623,14 @@ VantageWeatherStation::retrieveCalibrationAdjustments(CalibrationAdjustmentsPack
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustmentsPacket & calibrationAdjustments) {
-    return true;
+    byte buffer[CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE];
+
+    calibrationAdjustments.encodePacket(buffer);
+
+    if (!eepromBinaryWrite(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE))
+        return false;
+    else
+        return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1033,28 +1040,6 @@ VantageWeatherStation::readLoopPacket(LoopPacket & loopPacket) {
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "LOOP packet read successfully" << endl;
     return true;
-
-    //
-    // First time through determine what sensors are attached to the weather station based on the valid data in
-    // the LOOP packet.
-    //
-    //if (!firstLoopPacketReceived) {
-    //    firstLoopPacketReceived = true;
-    //    //Sensor::detectSensors(loopPacket, sensors);
-    //}
-
-    //
-    // Save the battery voltage of the console
-    //
-    //consoleBatteryVoltage = loopPacket.getConsoleBatteryVoltage();
-
-    //
-    // Pull out the battery status for the sensor stations
-    //
-    //for (vector<SensorStation>::iterator it = sensorStations.begin(); it != sensorStations.end(); ++it) {
-    //    it->setBatteryStatus(loopPacket.isTransmitterBatteryGood(it->getSensorIndex()));
-    //}
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////

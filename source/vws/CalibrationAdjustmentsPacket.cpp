@@ -78,6 +78,41 @@ CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+void
+CalibrationAdjustmentsPacket::encodePacket(byte buffer[]) const {
+    uint8 value = static_cast<int>(insideTemperatureAdjustment * TEMPERATURE_ADJUSTMENT_SCALE);
+    BitConverter::getBytes(value, buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET, 1);
+    BitConverter::getBytes(~value, buffer, INSIDE_TEMPERATURE_ADJUSTMENT_1S_COMPLIMENT_OFFSET, 1);
+
+    value = static_cast<int>(outsideTemperatureAdjustment * TEMPERATURE_ADJUSTMENT_SCALE);
+    BitConverter::getBytes(value, buffer, OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET, 1);
+
+    for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
+        value = static_cast<int>(extraTemperatureAdjustments[i] * TEMPERATURE_ADJUSTMENT_SCALE);
+        BitConverter::getBytes(value, buffer, EXTRA_TEMPERATURE_ADJUSTMENTS_OFFSET + i, 1);
+    }
+
+    for (int i = 0; i < MAX_SOIL_TEMPERATURES; i++) {
+        value = static_cast<int>(soilTemperatureAdjustments[i] * TEMPERATURE_ADJUSTMENT_SCALE);
+        BitConverter::getBytes(value, buffer, SOIL_TEMPERATURE_ADJUSTMENTS_OFFSET + i, 1);
+    }
+
+    for (int i = 0; i < MAX_LEAF_TEMPERATURES; i++) {
+        value = static_cast<int>(leafTemperatureAdjustments[i] * TEMPERATURE_ADJUSTMENT_SCALE);
+        BitConverter::getBytes(value, buffer, LEAF_TEMPERATURE_ADJUSTMENTS_OFFSET + i, 1);
+    }
+
+    BitConverter::getBytes(insideHumidityAdjustment, buffer, INSIDE_HUMIDITY_ADJUSTMENT_OFFSET, 1);
+    BitConverter::getBytes(outsideHumidityAdjustment, buffer, OUTSIDE_HUMIDITY_ADJUSTMENT_OFFSET, 1);
+
+    for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++)
+        BitConverter::getBytes(extraHumidityAdjustments[i], buffer, EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET, 1);
+
+    BitConverter::getBytes(windDirectionAdjustment, buffer, WIND_DIRECTION_ADJUSTMENT_OFFSET, 2);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 std::string
 CalibrationAdjustmentsPacket::formatJSON() const {
     ostringstream oss;

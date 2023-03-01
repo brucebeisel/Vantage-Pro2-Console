@@ -79,7 +79,7 @@ CommandHandler::~CommandHandler() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleCommand(const std::string & commandJson, std::string & responseJson) {
+CommandHandler::handleCommand(const std::string & commandJson, std::string & response) {
     string commandName = "parse-error";
     try {
         json command = json::parse(commandJson.begin(), commandJson.end());
@@ -99,118 +99,126 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "    [" << i << "]: " << argumentList[i].first << "=" << argumentList[i].second << endl;
         }
 
+        //
+        // Pre-load the response with the common fields
+        //
+        response = "{ " + RESPONSE_TOKEN + " : \"" + commandName + "\", " + RESULT_TOKEN + " : ";
+
         if (commandName == "backlight") {
-            handleBacklight(commandName, argumentList, responseJson);
+            handleBacklight(commandName, argumentList, response);
         }
         else if (commandName == "clear-active-alarms") {
-            handleNoArgCommand(&VantageWeatherStation::clearActiveAlarms, commandName, responseJson);
+            handleNoArgCommand(&VantageWeatherStation::clearActiveAlarms, commandName, response);
         }
         else if (commandName == "clear-alarm-thresholds") {
-            handleNoArgCommand(&VantageWeatherStation::clearAlarmThresholds, commandName, responseJson);
+            handleNoArgCommand(&VantageWeatherStation::clearAlarmThresholds, commandName, response);
         }
         else if (commandName == "clear-archive") {
-            handleNoArgCommand(&VantageWeatherStation::clearArchive, commandName, responseJson);
+            handleNoArgCommand(&VantageWeatherStation::clearArchive, commandName, response);
         }
         else if (commandName == "clear-calibration-offsets") {
-            handleNoArgCommand(&VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets, commandName, responseJson);
+            handleNoArgCommand(&VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets, commandName, response);
         }
         else if (commandName == "clear-cumulative-values") {
-            handleClearCumulativeValue(commandName, argumentList, responseJson);
+            handleClearCumulativeValue(commandName, argumentList, response);
         }
         else if (commandName == "clear-current-data") {
-            handleNoArgCommand(&VantageWeatherStation::clearCurrentData, commandName, responseJson);
+            handleNoArgCommand(&VantageWeatherStation::clearCurrentData, commandName, response);
         }
         else if (commandName == "clear-graph-points") {
-            handleNoArgCommand(&VantageWeatherStation::clearGraphPoints, commandName, responseJson);
+            handleNoArgCommand(&VantageWeatherStation::clearGraphPoints, commandName, response);
         }
         else if (commandName == "clear-high-values") {
-            handleClearHighValues(commandName, argumentList, responseJson);
+            handleClearHighValues(commandName, argumentList, response);
         }
         else if (commandName == "clear-highs") {
-            handleClearHighValues(commandName, argumentList, responseJson);
+            handleClearHighValues(commandName, argumentList, response);
         }
         else if (commandName == "clear-low-values") {
-            handleClearLowValues(commandName, argumentList, responseJson);
+            handleClearLowValues(commandName, argumentList, response);
         }
         else if (commandName == "clear-lows") {
-            handleClearLowValues(commandName, argumentList, responseJson);
+            handleClearLowValues(commandName, argumentList, response);
         }
         else if (commandName == "console-diagnostics") {
-            handleQueryConsoleDiagnostics(commandName, responseJson);
+            handleQueryConsoleDiagnostics(commandName, response);
         }
         else if (commandName == "get-timezones") {
-            handleGetTimezones(commandName, responseJson);
+            handleGetTimezones(commandName, response);
         }
         else if (commandName == "query-alarm-thresholds") {
-            handleQueryAlarmThresholds(commandName, responseJson);
+            handleQueryAlarmThresholds(commandName, response);
         }
         else if (commandName == "query-archive") {
-            handleQueryArchive(commandName, argumentList, responseJson);
+            handleQueryArchive(commandName, argumentList, response);
         }
         else if (commandName == "query-archive-period") {
-            handleQueryArchivePeriod(commandName, responseJson);
+            handleQueryArchivePeriod(commandName, response);
         }
         else if (commandName == "query-baro-cal-params") {
-            handleQueryBarometerCalibrationParameters(commandName, responseJson);
+            handleQueryBarometerCalibrationParameters(commandName, response);
         }
         else if (commandName == "query-cal-adjustments") {
-            handleQueryCalibrationAdjustments(commandName, responseJson);
+            handleQueryCalibrationAdjustments(commandName, response);
         }
         else if (commandName == "query-configuration-data") {
-            handleQueryConfigurationData(commandName, responseJson);
+            handleQueryConfigurationData(commandName, response);
         }
         else if (commandName == "query-console-time") {
-            handleQueryConsoleTime(commandName, responseJson);
+            handleQueryConsoleTime(commandName, response);
         }
         else if (commandName == "query-console-type") {
-            handleQueryConsoleType(commandName, responseJson);
+            handleQueryConsoleType(commandName, response);
         }
         else if (commandName == "query-current-weather") {
-            handleQueryLoopArchive(commandName, argumentList, responseJson);
+            handleQueryLoopArchive(commandName, argumentList, response);
         }
         else if (commandName == "query-firmware") {
-            handleQueryFirmware(commandName, responseJson);
+            handleQueryFirmware(commandName, response);
         }
         else if (commandName == "query-highlows") {
-            handleQueryHighLows(commandName, responseJson);
+            handleQueryHighLows(commandName, response);
         }
         else if (commandName == "query-network") {
-            handleQueryNetwork(commandName, responseJson);
+            handleQueryNetwork(commandName, response);
         }
         else if (commandName == "query-receiver-list") {
-            handleQueryReceiverList(commandName, responseJson);
+            handleQueryReceiverList(commandName, response);
         }
         else if (commandName == "query-units") {
-            handleQueryUnits(commandName, responseJson);
+            handleQueryUnits(commandName, response);
         }
         else if (commandName == "put-year-rain") {
-            handlePutYearRain(commandName, argumentList, responseJson);
+            handlePutYearRain(commandName, argumentList, response);
         }
         else if (commandName == "put-year-et") {
-            handlePutYearET(commandName, argumentList, responseJson);
+            handlePutYearET(commandName, argumentList, response);
+        }
+        else if (commandName == "start-archiving") {
+            handleNoArgCommand(&VantageWeatherStation::startArchiving, commandName, response);
+        }
+        else if (commandName == "stop-archiving") {
+            handleNoArgCommand(&VantageWeatherStation::stopArchiving, commandName, response);
         }
         else if (commandName == "update-archive-period") {
-            handleUpdateArchivePeriod(commandName, argumentList, responseJson);
+            handleUpdateArchivePeriod(commandName, argumentList, response);
         }
         else if (commandName == "update-baro-offset-elevation") {
-            handleUpdateBarometerOffsetAndElevation(commandName, argumentList, responseJson);
+            handleUpdateBarometerOffsetAndElevation(commandName, argumentList, response);
         }
         else if (commandName == "update-units") {
-            handleUpdateUnits(commandName, argumentList, responseJson);
+            handleUpdateUnits(commandName, argumentList, response);
         }
         else {
-            ostringstream oss;
-            oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"unrecognized command\" } }";
-            responseJson = oss.str();
+            response.append(FAILURE_TOKEN + "," + DATA_TOKEN + " : { \"error\" : \"unrecognized command\" }");
         }
     }
     catch (const std::exception & e) {
-        ostringstream oss;
-        oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : " << FAILURE_TOKEN << ", "
-            << DATA_TOKEN << " : { \"error\" : \"console processing error: " << e.what() << "\" } }";;
-        responseJson = oss.str();
+        response.append(FAILURE_TOKEN + ", " + DATA_TOKEN + " : { \"error\" : \"console processing error: " + e.what() + "\" }");;
         logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception while processing command: " << commandName << " Error: " << e.what() << endl;
     }
+
+    response.append(" }");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -218,16 +226,13 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
 void
 CommandHandler::handleNoArgCommand(bool (VantageWeatherStation::*handler)(), const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     if ((station.*handler)())
         oss << SUCCESS_TOKEN;
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";;
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 /******************************************************************************
@@ -236,73 +241,58 @@ CommandHandler::handleNoArgCommand(bool (VantageWeatherStation::*handler)(), con
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryConsoleType(const std::string & commandName, std::string & responseJson) {
+CommandHandler::handleQueryConsoleType(const std::string & commandName, std::string & response) {
     string consoleType;
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
-    if (station.retrieveConsoleType(&consoleType)) {
+    if (station.retrieveConsoleType(&consoleType))
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"consoleType\" : \"" << consoleType << "\" }";
-    }
-    else {
-        oss << FAILURE_TOKEN;
-    }
+    else
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";;
 
-    oss << " }";
-
-    responseJson = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryFirmware(const std::string & commandName, std::string & responseJson) {
+CommandHandler::handleQueryFirmware(const std::string & commandName, std::string & response) {
     string firmwareDate;
     string firmwareVersion;
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
-    if (station.retrieveFirmwareDate(&firmwareDate) && station.retrieveFirmwareVersion(&firmwareVersion)) {
+    if (station.retrieveFirmwareDate(&firmwareDate) && station.retrieveFirmwareVersion(&firmwareVersion))
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"firmwareVersion\" : \"" << firmwareVersion << "\", \"firmwareDate\" : \"" << firmwareDate << "\"}";
-    }
-    else {
+    else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";;
-    }
 
-    oss << " }";
-
-    responseJson = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryReceiverList(const std::string & commandName, std::string & responseJson) {
+CommandHandler::handleQueryReceiverList(const std::string & commandName, std::string & response) {
     std::vector<StationId> sensorStations;
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     if (station.retrieveReceiverList(&sensorStations)) {
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"receiverList\" : [";
         bool first = true;
         for (int id : sensorStations) {
-            if (!first) {
-                first = false;
-                oss << ", ";
-            }
+            if (!first) oss << ", "; else first = false;
             oss << id;
-            first = false;
         }
 
-        oss << " ] } }";
+        oss << " ] }";
     }
     else {
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } }";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
     }
 
-    responseJson = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -310,7 +300,6 @@ CommandHandler::handleQueryReceiverList(const std::string & commandName, std::st
 void
 CommandHandler::handleQueryConsoleDiagnostics(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     VantageWeatherStation::ConsoleDiagnosticReport report;
     if (station.retrieveConsoleDiagnosticsReport(report)) {
@@ -326,9 +315,7 @@ CommandHandler::handleQueryConsoleDiagnostics(const std::string & commandName, s
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 /******************************************************************************
@@ -339,7 +326,6 @@ CommandHandler::handleQueryConsoleDiagnostics(const std::string & commandName, s
 void
 CommandHandler::handleQueryHighLows(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     HiLowPacket packet;
     if (station.retrieveHiLowValues(packet)) {
@@ -349,9 +335,7 @@ CommandHandler::handleQueryHighLows(const std::string & commandName, std::string
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -361,7 +345,6 @@ CommandHandler::handlePutYearRain(const std::string & commandName, const Command
     Rainfall yearRain = -1.0; // Use negative number as the "not set" value
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "value")
@@ -373,9 +356,7 @@ CommandHandler::handlePutYearRain(const std::string & commandName, const Command
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -385,7 +366,6 @@ CommandHandler::handlePutYearET(const std::string & commandName, const CommandAr
     Evapotranspiration yearET = -1.0; // Use negative number as the "not set" value
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "value")
@@ -397,9 +377,7 @@ CommandHandler::handlePutYearET(const std::string & commandName, const CommandAr
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 /******************************************************************************
@@ -416,19 +394,15 @@ CommandHandler::handlePutYearET(const std::string & commandName, const CommandAr
 void
 CommandHandler::handleQueryCalibrationAdjustments(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     CalibrationAdjustmentsPacket packet;
 
-    if (station.retrieveCalibrationAdjustments(packet)) {
+    if (station.retrieveCalibrationAdjustments(packet))
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << packet.formatJSON();
-    }
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -436,14 +410,9 @@ CommandHandler::handleQueryCalibrationAdjustments(const std::string & commandNam
 void
 CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     VantageWeatherStation::BarometerCalibrationParameters baroCalParams;
-    if (!station.retrieveBarometerCalibrationParameters(baroCalParams)) {
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
-    }
-    else {
-
+    if (station.retrieveBarometerCalibrationParameters(baroCalParams)) {
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"barometerCalibrationParameters\" : { "
             << " \"recentMeasurement\" : " << (baroCalParams.recentMeasurement / BAROMETER_SCALE) << ", "
             << " \"elevation\" : " << baroCalParams.elevation << ", "
@@ -456,10 +425,10 @@ CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & co
             << " \"fixedOffset\" : " << baroCalParams.fixedOffset
             << " } }";
     }
+    else
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -467,7 +436,6 @@ CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & co
 void
 CommandHandler::handleUpdateBarometerOffsetAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     Pressure baroOffsetInHg = 99.0;
     int elevationFeet = -9999;
@@ -484,15 +452,14 @@ CommandHandler::handleUpdateBarometerOffsetAndElevation(const std::string & comm
     if (baroOffsetInHg == 99.0 || elevationFeet == -9999) {
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"missing argument\" }";
     }
-    else if (!station.updateBarometerOffsetAndElevation(baroOffsetInHg, elevationFeet)) {
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
-    }
-    else {
+    else if (station.updateBarometerOffsetAndElevation(baroOffsetInHg, elevationFeet)) {
         oss << SUCCESS_TOKEN;
     }
+    else {
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
+    }
 
-    oss << " }";
-    response = oss.str();
+    response.append(oss.str());
 }
 
 /******************************************************************************
@@ -505,7 +472,6 @@ CommandHandler::handleClearCumulativeValue(const std::string & commandName, cons
     CumulativeValue value;
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     try {
         bool argFound = false;
@@ -526,9 +492,7 @@ CommandHandler::handleClearCumulativeValue(const std::string & commandName, cons
         logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception: " << e.what() << endl;
     }
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -538,7 +502,6 @@ CommandHandler::handleClearHighValues(const std::string & commandName, const Com
     ExtremePeriod extremePeriod;
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     try {
         bool argFound = false;
@@ -558,9 +521,7 @@ CommandHandler::handleClearHighValues(const std::string & commandName, const Com
         oss << FAILURE_TOKEN;
     }
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -570,7 +531,6 @@ CommandHandler::handleClearLowValues(const std::string & commandName, const Comm
     ExtremePeriod extremePeriod;
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     try {
         bool argFound = false;
@@ -591,9 +551,7 @@ CommandHandler::handleClearLowValues(const std::string & commandName, const Comm
         logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception: " << e.what() << endl;
     }
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 /******************************************************************************
@@ -606,7 +564,6 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
     int periodValue = 0;
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "period")
@@ -622,9 +579,7 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Invalid argument or command error\" } ";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -632,8 +587,6 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
 void
 CommandHandler::handleQueryConsoleTime(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
-
 
     DateTime consoleTime;
 
@@ -649,10 +602,7 @@ CommandHandler::handleQueryConsoleTime(const std::string & commandName, std::str
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
-    oss << " }";
-
-    response = oss.str();
-
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -660,9 +610,6 @@ CommandHandler::handleQueryConsoleTime(const std::string & commandName, std::str
 void
 CommandHandler::handleQueryArchivePeriod(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
-
-
     ArchivePeriod period;
 
     if (station.retrieveArchivePeriod(period)) {
@@ -672,9 +619,7 @@ CommandHandler::handleQueryArchivePeriod(const std::string & commandName, std::s
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -683,10 +628,7 @@ void
 CommandHandler::handleBacklight(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     bool lampOn;
     bool success = true;
-
     ostringstream oss;
-
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     if (argumentList[0].first != "state")
         success = false;
@@ -707,9 +649,7 @@ CommandHandler::handleBacklight(const std::string & commandName, const CommandAr
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error or invalid argument\" } ";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -718,7 +658,6 @@ void
 CommandHandler::handleUpdateUnits(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     bool success = true;
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     //
     // First get the current units settings, then change the ones in the JSON command
@@ -764,9 +703,7 @@ CommandHandler::handleUpdateUnits(const std::string & commandName, const Command
             oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Console command error\" } ";
     }
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -774,7 +711,6 @@ CommandHandler::handleUpdateUnits(const std::string & commandName, const Command
 void
 CommandHandler::handleQueryUnits(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
 
     UnitsSettings unitsSettings;
     if (configurator.retrieveUnitsSettings(unitsSettings)) {
@@ -788,9 +724,7 @@ CommandHandler::handleQueryUnits(const std::string & commandName, std::string & 
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";
 
-    oss << " }";
-
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -800,18 +734,15 @@ CommandHandler::handleQueryConfigurationData(const std::string & commandName, st
     string data = configurator.retrieveAllConfigurationData();
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
-    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << data << " }";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << data;
 
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-
-
     DateTime startTime = 0;
     DateTime endTime = 0;
 
@@ -835,7 +766,6 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
     archiveManager.queryArchiveRecords(startTime, endTime, packets);
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : [ ";
 
     bool first = true;
@@ -844,8 +774,8 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
         oss << packet.formatJSON();
     }
 
-    oss << "] }";
-    response = oss.str();
+    oss << "]";
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -862,7 +792,6 @@ CommandHandler::handleQueryLoopArchive(const std::string & commandName, const Co
     vector<CurrentWeather> list;
     currentWeatherManager.queryCurrentWeatherArchive(hours, list);
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : [ ";
 
     bool first = true;
@@ -871,9 +800,9 @@ CommandHandler::handleQueryLoopArchive(const std::string & commandName, const Co
         oss << cw.formatJSON();
     }
 
-    oss << " ] }";
+    oss << " ]";
 
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -884,20 +813,16 @@ CommandHandler::handleGetTimezones(const std::string & commandName, std::string 
     configurator.retrieveTimeZoneOptions(timezoneList);
 
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"timezones\" : [ ";
     bool first = true;
     for (string tzName : timezoneList) {
-        if (!first)
-            oss << ", ";
-
+        if (!first) oss << ", "; else first = false;
         oss << tzName;
-        first = false;
     }
 
-    oss << "] } }";
+    oss << "] }";
 
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -905,12 +830,10 @@ CommandHandler::handleGetTimezones(const std::string & commandName, std::string 
 void
 CommandHandler::handleQueryNetwork(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : ";
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
     oss << network.formatJSON();
-    oss << " }";
 
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -918,36 +841,30 @@ CommandHandler::handleQueryNetwork(const std::string & commandName, std::string 
 void
 CommandHandler::handleQueryAlarmThresholds(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : "
-        << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : "
-        << alarmManager.formatAlarmThresholdsJSON()
-        << " }";
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << alarmManager.formatAlarmThresholdsJSON();
 
-    response = oss.str();
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleUpdateAlarmThresholds(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : "
-        << SUCCESS_TOKEN
-        << " }";
+    for (auto arg : argumentList) {
+        if (arg.second != "")
+            alarmManager.setAlarmThreshold(arg.first, atof(arg.second.c_str()));
+        else
+            alarmManager.clearAlarmThreshold(arg.first);
+    }
 
-    response = oss.str();
+    response.append(SUCCESS_TOKEN);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleInitialization(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    ostringstream oss;
-    oss << "{ " << RESPONSE_TOKEN << " : \"" << commandName << "\", " << RESULT_TOKEN << " : "
-        << SUCCESS_TOKEN
-        << " }";
-
-    response = oss.str();
+    response.append(SUCCESS_TOKEN);
 }
 
 } // End namespace

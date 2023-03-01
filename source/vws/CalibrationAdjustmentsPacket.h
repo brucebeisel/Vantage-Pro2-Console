@@ -31,6 +31,7 @@ public:
     virtual ~CalibrationAdjustmentsPacket();
 
     bool decodePacket(const byte buffer[]);
+    void encodePacket(byte buffer[]) const;
 
     std::string formatJSON() const;
 
@@ -39,6 +40,7 @@ public:
 private:
 
     static constexpr int INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET = 0;
+    static constexpr int INSIDE_TEMPERATURE_ADJUSTMENT_1S_COMPLIMENT_OFFSET = 1;
     static constexpr int OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET = 2;
     static constexpr int EXTRA_TEMPERATURE_ADJUSTMENTS_OFFSET = 3;
     static constexpr int SOIL_TEMPERATURE_ADJUSTMENTS_OFFSET = 10;
