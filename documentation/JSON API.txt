@@ -183,7 +183,7 @@ Archive query
     ++ "CLRALM"    Clears all the alarm thresholds.
     + "CLRCAL"    Clears all the Temperature and Humidity calibration offsets.
     ++ "CLRGRA"    Clears all of the graph points on the Vantage console.
-    + "CLRVAR <Data variable-decimal>"
+    + (tested all but storm) "CLRVAR <Data variable-decimal>"
                 Clears a rain or ET data value.
     ++ "CLRHIGHS <0, 1, or 2>"
                 Clears all of the daily (0), monthly (1), or yearly (2) high values.

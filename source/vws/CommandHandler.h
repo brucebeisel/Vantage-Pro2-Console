@@ -69,77 +69,111 @@ private:
      */
     void handleNoArgCommand(bool (VantageWeatherStation::*handler)(), const std::string & commandName, std::string & response);
 
-    //
-    // Testing commands
-    //
+    ///////////////////////
+    // Testing commands  //
+    ///////////////////////
+
+    // WRD<0x12><0x4d>
     void handleQueryConsoleType(const std::string & commandName, std::string & response);
 
+    // NVER and VER
     void handleQueryFirmware(const std::string & commandName, std::string & response);
 
+    // RECEIVERS
     void handleQueryReceiverList(const std::string & commandName, std::string & response);
 
+    // RXCHECK
     void handleQueryConsoleDiagnostics(const std::string & commandName, std::string & response);
 
-    //
-    // Current Data Commands
-    //
+    ///////////////////////////
+    // Current Data Commands //
+    ///////////////////////////
+
+    // HILOWS
     void handleQueryHighLows(const std::string & commandName, std::string & response);
 
+    // PUTRAIN
     void handlePutYearRain(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    // PUTET
     void handlePutYearET(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    //
-    // EEPROM Commands
-    //
+    /////////////////////
+    // EEPROM Commands //
+    /////////////////////
+
+    // EEBWR
     void handleUpdateUnits(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+
+    // EEBRD
     void handleQueryUnits(const std::string & commandName, std::string & response);
 
+    // EEBRD
     void handleQuerySensorStations(const std::string & commandName, std::string & response);
 
     void handleRequestSensorStationsStatus(const std::string & commandName, std::string & response);
 
-    //
-    // Calibration Commands
-    //
+    // EEBRD
     void handleQueryCalibrationAdjustments(const std::string & commandName, std::string & response);
 
-    void handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response);
+    //////////////////////////
+    // Calibration Commands //
+    //////////////////////////
 
+    // BAR=
     void handleUpdateBarometerOffsetAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    //
-    // Clearing Commands. Note: the following commands do not require an argument and are handled using handleNoArgCommand()
-    //     1. Clear Archive
-    //     2. Clear Alarm Thresholds
-    //     3. Clear Calibration Offsets
-    //     4. Clear Graph Points
-    //     5. Clear Active Alarms
-    //     6. Clear Current Data
-    //
+    // BARDATA
+    void handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Clearing Commands.                                                                                 //
+    // Note: the following commands do not require an argument and are handled using handleNoArgCommand() //
+    //     1. Clear Archive             (CLRLOG)                                                          //
+    //     2. Clear Alarm Thresholds    (CLRALM)                                                          //
+    //     3. Clear Calibration Offsets (CLRCAL)                                                          //
+    //     4. Clear Graph Points        (CLRGRA)                                                          //
+    //     5. Clear Active Alarms       (CLRBITS)                                                         //
+    //     6. Clear Current Data        (CLRDATA)                                                         //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // CLRVAR
     void handleClearCumulativeValue(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    // CLRHIGHS
     void handleClearHighValues(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    // CLRLOWS
     void handleClearLowValues(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    // EEBRD
     void handleQueryArchivePeriod(const std::string & commandName, std::string & response);
 
-    //
-    // Configuration Commands
-    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Configuration Commands                                                                             //
+    // Note: the following commands do not require an argument and are handled using handleNoArgCommand() //
+    //     1. Start Archiving   (START)                                                                   //
+    //     2. Stop Archiving    (STOP)                                                                    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // GETTIME
     void handleQueryConsoleTime(const std::string & commandName, std::string & response);
 
+    // SETPER
     void handleUpdateArchivePeriod(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    void handleBacklight(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    // NEWSETUP
+    void handleInitialization(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    void handleQueryConfigurationData(const std::string & commandName, std::string & response);
+    // LAMPS
+    void handleBacklight(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     //
     // Other Commands
     //
+    void handleQueryConfigurationData(const std::string & commandName, std::string & response);
+
     void handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleQueryLoopArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
@@ -152,7 +186,6 @@ private:
 
     void handleUpdateAlarmThresholds(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
-    void handleInitialization(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     VantageWeatherStation & station;
     VantageConfiguration &  configurator;
