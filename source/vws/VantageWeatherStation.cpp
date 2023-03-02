@@ -957,16 +957,24 @@ VantageWeatherStation::retrieveArchivePeriod(ArchivePeriod & period) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::startArchiving() {
+    //
+    // Note that the Vantage serial protocol document does specify the command sequence
+    // of the START command. The OK sequence was determined by trial and error.
+    //
     logger.log(VantageLogger::VANTAGE_INFO) << "Starting to archive" << endl;
-    return sendAckedCommand(START_ARCHIVING_CMD);
+    return sendOKedCommand(START_ARCHIVING_CMD);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::stopArchiving() {
+    //
+    // Note that the Vantage serial protocol document does specify the command sequence
+    // of the STOP command. The OK sequence was determined by trial and error.
+    //
     logger.log(VantageLogger::VANTAGE_INFO) << "Stopping archiving" << endl;
-    return sendAckedCommand(STOP_ARCHIVING_CMD);
+    return sendOKedCommand(STOP_ARCHIVING_CMD);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

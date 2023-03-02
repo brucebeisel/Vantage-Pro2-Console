@@ -31,7 +31,7 @@ struct AlarmProperties {
     int         minimumValue;          // The minimum value the threshold can be
     int         maximumValue;          // The maximum value the threshold can be
     static int  getAlarmPropertyCount();
-    static const AlarmProperties * getAlarmProperties(int count);
+    static const AlarmProperties * getAlarmProperties(int & count);
 };
 }
 #endif

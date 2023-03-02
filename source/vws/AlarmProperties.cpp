@@ -728,7 +728,7 @@ AlarmProperties::getAlarmPropertyCount() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const AlarmProperties *
-AlarmProperties::getAlarmProperties(int count) {
+AlarmProperties::getAlarmProperties(int & count) {
     count = numProperties;
     return alarmProperties;
 }

@@ -40,13 +40,13 @@ Alarm::Alarm(const AlarmProperties & properties) : properties(properties),
 ////////////////////////////////////////////////////////////////////////////////
 void
 Alarm::setThreshold(int eepromThreshold) {
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "########## Setting threshold for alarm " + properties.alarmName + " Not set value = " << properties.eepromNotSetThreshold;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "########## Setting threshold for alarm " + properties.alarmName + " Not set value = " << properties.eepromNotSetThreshold << endl;
     this->eepromThreshold = eepromThreshold;
     if (this->eepromThreshold == properties.eepromNotSetThreshold) {
         clearThreshold();
     }
     else {
-        logger.log(VantageLogger::VANTAGE_DEBUG1) << "######### Setting threshold for alarm " << properties.alarmName << " to " << actualThreshold;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "######### Setting threshold for alarm " << properties.alarmName << " to " << actualThreshold << endl;
         alarmThresholdSet = true;
         alarmTriggered = false;
         actualThreshold = fromEepromToActualThreshold(eepromThreshold, properties.eepromThresholdOffset, properties.eepromThresholdScale);
@@ -65,7 +65,7 @@ Alarm::setThreshold(double actualThreshold) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 Alarm::clearThreshold() {
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "######### Clearing threshold for alarm " + properties.alarmName;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "######### Clearing threshold for alarm " + properties.alarmName << endl;
     eepromThreshold = properties.eepromNotSetThreshold;
     alarmThresholdSet = false;
     alarmTriggered = false;
