@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CommandSocket.h"
+
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <netinet/in.h>
@@ -24,9 +26,9 @@
 #include <vector>
 #include "json.hpp"
 
-#include "CommandSocket.h"
 #include "EventManager.h"
 #include "ResponseHandler.h"
+#include "VantageLogger.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -59,8 +61,8 @@ CommandSocket::~CommandSocket() {
         listenFd = -1;
     }
 
-    for (int i = 0; i < socketFdList.size(); i++)
-        close(socketFdList[i]);
+    for (int fd : socketFdList)
+        close(fd);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,27 +81,30 @@ CommandSocket::mainLoop() {
         FD_ZERO(&fd_read); // @suppress("Symbol is not resolved") @suppress("Statement has no effect")
         FD_SET(listenFd, &fd_read);
 
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Adding " << socketFdList.size() << " to fd mask" << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Adding " << socketFdList.size() << " to fd mask" << endl;
 
-        for (int i = 0; i < socketFdList.size(); i++)
-            FD_SET(socketFdList[i], &fd_read);
+        for (int fd : socketFdList)
+            FD_SET(fd, &fd_read);
 
+        //
+        // This single if statement works because socketFdList is sorted
+        //
         if (socketFdList.size() > 0)
             nfds = std::max(socketFdList[socketFdList.size() - 1], listenFd);
 
         nfds++;
 
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Entering select()  nfds = " << nfds << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Entering select()  nfds = " << nfds << endl;
         int n = select(nfds, &fd_read, NULL, NULL, &tv);
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "select()  returned  " << n << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "select()  returned  " << n << endl;
 
         if (FD_ISSET(listenFd, &fd_read))
             acceptConnection();
 
-        for (int i = 0; i < socketFdList.size(); i++) {
-            if (FD_ISSET(socketFdList[i], &fd_read)) {
-                logger.log(VantageLogger::VANTAGE_DEBUG2) << "Received data on fd " << i << endl;
-                readCommand(socketFdList[i]);
+        for (int fd : socketFdList) {
+            if (FD_ISSET(fd, &fd_read)) {
+                logger.log(VantageLogger::VANTAGE_DEBUG3) << "Received data on fd " << fd << endl;
+                readCommand(fd);
             }
         }
     }
@@ -144,8 +149,8 @@ CommandSocket::closeSocket(int fd) {
     // Since the list is sorted, deleting a single item will not change the sort order
     //
     socketFdList.erase(std::find(socketFdList.begin(), socketFdList.end(), fd));
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Closed socket that used fd = " << fd << endl;
     close(fd);
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Closed socket that used fd = " << fd << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +243,7 @@ CommandSocket::handleCommandResponse(const CommandData & commandData, const std:
 
     const char * responseBuffer = response.c_str();
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Write response " << response << " on fd " << commandData.fd << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response '" << response << "' on fd " << commandData.fd << endl;
 
     if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;

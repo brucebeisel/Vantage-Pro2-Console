@@ -15,12 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ArchivePacket.h"
+
 #include <time.h>
 #include <string>
 #include <ctime>
 #include <sstream>
 
-#include "ArchivePacket.h"
 #include "BitConverter.h"
 #include "VantageDecoder.h"
 #include "VantageLogger.h"

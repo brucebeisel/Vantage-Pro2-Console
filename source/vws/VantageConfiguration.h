@@ -25,6 +25,7 @@
 
 
 namespace vws {
+class VantageLogger;
 
 /**
  * This file will be use to evaluate the different types of data that the console contains so that

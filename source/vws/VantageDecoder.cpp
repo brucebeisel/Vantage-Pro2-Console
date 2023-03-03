@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "VantageDecoder.h"
+
 #include <iostream>
 
-#include "VantageDecoder.h"
 #include "BitConverter.h"
 #include "VantageEepromConstants.h"
 #include "VantageProtocolConstants.h"

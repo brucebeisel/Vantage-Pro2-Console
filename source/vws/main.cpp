@@ -25,17 +25,18 @@
 #include <thread>
 #include <atomic>
 #include <fstream>
-#include "VantageLogger.h"
+#include "AlarmManager.h"
 #include "ArchiveManager.h"
 #include "CommandSocket.h"
 #include "CommandHandler.h"
+#include "CurrentWeatherManager.h"
+#include "CurrentWeatherSocket.h"
+#include "EventManager.h"
+#include "SerialPort.h"
 #include "VantageDriver.h"
 #include "VantageConfiguration.h"
+#include "VantageLogger.h"
 #include "VantageStationNetwork.h"
-#include "CurrentWeatherSocket.h"
-#include "CurrentWeatherManager.h"
-#include "SerialPort.h"
-#include "AlarmManager.h"
 
 using namespace std;
 using namespace vws;

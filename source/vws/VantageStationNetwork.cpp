@@ -15,17 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "VantageStationNetwork.h"
+
 #include <sys/stat.h>
 #include <iostream>
 
-#include "VantageStationNetwork.h"
 #include "BitConverter.h"
+#include "LoopPacket.h"
 #include "VantageDecoder.h"
 #include "VantageEepromConstants.h"
 #include "VantageEnums.h"
+#include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 #include "WeatherTypes.h"
-#include "LoopPacket.h"
 
 using namespace std;
 

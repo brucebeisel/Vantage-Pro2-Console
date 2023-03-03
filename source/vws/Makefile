@@ -22,7 +22,6 @@ SRCS=\
 	Loop2Packet.cpp \
 	LoopPacket.cpp \
 	main.cpp \
-	ProtocolException.cpp \
  	SerialPort.cpp \
 	UnitConverter.cpp \
 	VantageCRC.cpp \

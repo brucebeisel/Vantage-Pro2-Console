@@ -15,13 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CurrentWeather.h"
+
 #include <time.h>
 #include <vector>
 #include <iomanip>
 #include <sstream>
 
-#include "CurrentWeather.h"
 #include "ForecastRule.h"
+#include "LoopPacket.h"
+#include "Loop2Packet.h"
 #include "Weather.h"
 
 using namespace std;

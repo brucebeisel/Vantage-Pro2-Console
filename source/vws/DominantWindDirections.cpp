@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DominantWindDirections.h"
+
 #include <time.h>
 #include <cstring>
 #include <vector>
@@ -23,7 +25,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "DominantWindDirections.h"
 #include "VantageLogger.h"
 #include "Weather.h"
 

@@ -18,17 +18,18 @@
 #define COMMAND_SOCKET_H_
 #include <string>
 #include <thread>
+#include <vector>
 
 #include "ResponseHandler.h"
-#include "VantageLogger.h"
 
 namespace vws {
-
+class VantageLogger;
 class EventManager;
 
 /**
- * The CommandSocket is a class that uses to thread to read commands from clients
- * and pass them onto the the event manager.
+ * The CommandSocket is a class that uses a thread to read commands from a TCP socket
+ * and pass them onto the the event manager. This class will accept and manager multiple
+ * connections.
  */
 class CommandSocket : ResponseHandler {
 public:
@@ -46,7 +47,10 @@ public:
     virtual ~CommandSocket();
 
     /**
+     * Format the console's response per the Vantage Weather Station protocol.
      *
+     * @param commandData The data that was the command
+     * @param response    The response to be sent back to the client
      */
     virtual void handleCommandResponse(const CommandData & commandData, const std::string & response);
 
@@ -101,13 +105,13 @@ private:
      */
     void closeSocket(int fd);
 
-    int              port;
-    int              listenFd;
-    std::vector<int> socketFdList;
-    EventManager &   eventManager;
-    VantageLogger    logger;
-    bool             terminating;
-    std::thread *    commandThread;
+    int              port;            // The port on which the console will listen for client connections
+    int              listenFd;        // The file description on which this thread is listening
+    std::vector<int> socketFdList;    // The list of client file descriptors currently open
+    EventManager &   eventManager;    // The event manager to which commands are forwarded for processing
+    bool             terminating;     // True if this thread's main loop should exit
+    std::thread *    commandThread;   // The thread that reads the commands
+    VantageLogger &  logger;
 };
 
 } /* namespace vws */

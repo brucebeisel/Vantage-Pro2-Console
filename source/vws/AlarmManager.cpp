@@ -15,9 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sstream>
 #include "AlarmManager.h"
+
+#include <sstream>
 #include "VantageEepromConstants.h"
+#include "VantageLogger.h"
 
 using namespace std;
 

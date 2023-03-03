@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CommandHandler.h"
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
@@ -23,7 +25,6 @@
 #include "json.hpp"
 
 #include "Weather.h"
-#include "CommandHandler.h"
 #include "ArchiveManager.h"
 #include "ArchivePacket.h"
 #include "CalibrationAdjustmentsPacket.h"

@@ -22,11 +22,11 @@
 
 #include "CurrentWeather.h"
 #include "CurrentWeatherPublisher.h"
-#include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 
 namespace vws {
 class CurrentWeather;
+class VantageLogger;
 
 /**
  * Class that publishes the current weather using a UDP broadcast socket.
@@ -79,7 +79,7 @@ private:
     static const int         NO_SOCKET = -1;
     int                      socketId;
     struct sockaddr_in       groupAddr;
-    VantageLogger            logger;
+    VantageLogger &          logger;
 };
 }
 

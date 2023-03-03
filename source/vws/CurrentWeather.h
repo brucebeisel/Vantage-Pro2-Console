@@ -18,8 +18,8 @@
 #define CURRENTWEATHER_H
 
 #include <string>
+#include <vector>
 
-#include "DominantWindDirections.h"
 #include "Loop2Packet.h"
 #include "LoopPacket.h"
 
@@ -42,26 +42,69 @@ public:
     virtual ~CurrentWeather();
 
     /**
-     * Set the underlying data.
+     * Set the underlying LOOP data.
      *
      * @param loopPacket The LOOP packet that was read in the most recent loop through the current weather processor
-     * @param loop2Packet The LOOP2 packet that was read in the most recent loop through the current weather processor
-     * @param The dominant directions that the wind has been blowing over the last hour
      */
     void setLoopData(const LoopPacket & loopPacket);
+
+    /**
+     * Set the underlying LOOP2 data.
+     *
+     * @param loop2Packet The LOOP2 packet that was read in the most recent loop through the current weather processor
+     */
     void setLoop2Data(const Loop2Packet & loopPacket);
+
+    /**
+     * Set the time that the loop data was created.
+     * This is needed because the LOOP and LOOP2 packets do not have a time field.
+     *
+     * @param time The time to associate with the current weather data
+     */
     void setPacketTime(DateTime time);
-    void setDominantWindDirectionData(const std::vector<std::string> & windDirs);
 
-    const LoopPacket & getLoopPacket() const;
-    const Loop2Packet & getLoop2Packet() const;
+    /**
+     * Get the time that the loop data was created.
+     *
+     * @return The packet time
+     */
     DateTime getPacketTime() const;
-    const Measurement<Speed> & getWindSpeed() const;
-    const Measurement<Heading> & getWindDirection() const;
-    const Measurement<Speed> & getWindSpeed10MinuteAverage() const;
 
-    template<typename T>
-    const Measurement<T> & getMeasurementByName(const std::string & fieldName);
+    /**
+     * Set the dominant wind direction data that is used to create the dominant wind direction element.
+     *
+     * @param dominantWindDirData The dominant wind direction data
+     */
+    void setDominantWindDirectionData(const std::vector<std::string> & dominantWindDirData);
+
+    /**
+     * Get the underlying LOOP packet.
+     *
+     * @return A reference to the LOOP packet
+     */
+    const LoopPacket & getLoopPacket() const;
+
+    /**
+     * Get the underlying LOOP2 packet.
+     *
+     * @return A reference to the LOOP2 packet
+     */
+    const Loop2Packet & getLoop2Packet() const;
+
+    /**
+     * Get the most recent wind speed, which can be from either the LOOP or LOOP2 packet.
+     */
+    const Measurement<Speed> & getWindSpeed() const;
+
+    /**
+     * Get the most recent wind direction, which can be from either the LOOP or LOOP2 packet.
+     */
+    const Measurement<Heading> & getWindDirection() const;
+
+    /**
+     * Get the most recent wind speed 10 minute average, which can be from either the LOOP or LOOP2 packet.
+     */
+    const Measurement<Speed> & getWindSpeed10MinuteAverage() const;
 
     /**
      * Format the Current Weather JSON message.

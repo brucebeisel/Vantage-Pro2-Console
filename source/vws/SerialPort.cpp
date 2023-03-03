@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "SerialPort.h"
+
 #ifndef __CYGWIN__
 #include <fcntl.h>
 #include <termios.h>
@@ -27,7 +29,6 @@ static const int INVALID_HANDLE_VALUE = -1;
 #include <iostream>
 #include "VantageLogger.h"
 #include "Weather.h"
-#include "SerialPort.h"
 
 using namespace std;
 
@@ -35,12 +36,16 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-SerialPort::SerialPort(const std::string & device, int baudRate) : commPort(INVALID_HANDLE_VALUE), device(device), baudRate(baudRate), logger(VantageLogger::getLogger("SerialPort")) {
+SerialPort::SerialPort(const std::string & device, int baudRate) : commPort(INVALID_HANDLE_VALUE),
+                                                                   device(device),
+                                                                   baudRate(baudRate),
+                                                                   logger(VantageLogger::getLogger("SerialPort")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 SerialPort::~SerialPort(){
+    close();
 }
 
 #ifdef __CYGWIN__
@@ -181,7 +186,7 @@ SerialPort::write(const void * buffer, int nbytes) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-SerialPort::read(byte buffer[], int index, int nbytes, int timeoutMillis) {
+SerialPort::read(byte buffer[], int index, int requiredBytes, int timeoutMillis) {
     ssize_t bytesRead = 0;
     struct timeval timeout;
     fd_set readSet;
@@ -201,7 +206,7 @@ SerialPort::read(byte buffer[], int index, int nbytes, int timeoutMillis) {
     }
     else {
         if (FD_ISSET(commPort, &readSet)) {
-            bytesRead = ::read(commPort, &buffer[index], nbytes);
+            bytesRead = ::read(commPort, &buffer[index], requiredBytes);
             logger.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << bytesRead << " bytes" << endl;
         }
     }
@@ -227,31 +232,31 @@ SerialPort::write(const string & s) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-SerialPort::read(byte buffer[], int expectedBytes, int timeoutMillis) {
-    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Attempting to read " << expectedBytes << " bytes" << endl;
+SerialPort::readBytes(byte buffer[], int requiredBytes, int timeoutMillis) {
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Attempting to read " << requiredBytes << " bytes" << endl;
     int readIndex = 0;
     
     //
-    // Keep reading until a timeout or the bytes read is correct
+    // Keep reading until the require number of bytes are read.
     //
-    for (int i = 0; i < 2 && readIndex < expectedBytes; i++) {
-        int nbytes = this->read(buffer, readIndex, expectedBytes - readIndex, timeoutMillis);
+    for (int i = 0; i < READ_TRIES && readIndex < requiredBytes; i++) {
+        int nbytes = this->read(buffer, readIndex, requiredBytes - readIndex, timeoutMillis);
         if (nbytes > 0) {
             readIndex += nbytes;
-            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << readIndex << " bytes of " << expectedBytes << " bytes" << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << readIndex << " bytes of " << requiredBytes << " bytes" << endl;
         }
         else if (nbytes < 0) {
             break;
         }
     }
 
-    if (readIndex < expectedBytes) {
+    if (readIndex < requiredBytes) {
         this->discardInBuffer();
-        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read requested bytes. Expected=" << expectedBytes << ", Actual=" << readIndex << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read requested bytes. Required=" << requiredBytes << ", Actual=" << readIndex << endl;
         return false;
     }
     else {
-        logger.log(VantageLogger::VANTAGE_DEBUG3) << Weather::dumpBuffer(buffer, expectedBytes);
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << Weather::dumpBuffer(buffer, requiredBytes);
         return true;
     }
 }

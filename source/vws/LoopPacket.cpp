@@ -15,15 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "LoopPacket.h"
+
 #include <time.h>
 #include <cstring>
 #include <iostream>
 
-#include "LoopPacket.h"
 #include "BitConverter.h"
 #include "VantageCRC.h"
 #include "VantageDecoder.h"
 #include "VantageEnums.h"
+#include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
 
 using namespace std;
@@ -33,7 +35,7 @@ using namespace ProtocolConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-LoopPacket::LoopPacket(void) : logger(VantageLogger::getLogger("LoopPacket")),
+LoopPacket::LoopPacket(void) : logger(&VantageLogger::getLogger("LoopPacket")),
                                packetType(-1),
                                rainRate(0.0),
                                stormRain(0.0),
@@ -72,7 +74,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     // Perform a number of validation on the Loop packet before decoding all of the values
     //
     if (packetData[L_OFFSET] != 'L' || packetData[FIRST_O_OFFSET] != 'O' || packetData[SECOND_O_OFFSET] != 'O') {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP packet data does not begin with LOO:"
+        logger->log(VantageLogger::VANTAGE_ERROR) << "LOOP packet data does not begin with LOO:"
                                                  << " [0] = " << packetData[L_OFFSET]
                                                  << " [1] = " << packetData[FIRST_O_OFFSET]
                                                  << " [2] = " << packetData[SECOND_O_OFFSET] << endl;
@@ -80,20 +82,20 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     }
 
     if (!VantageCRC::checkCRC(packetData, CRC_OFFSET)) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP packet failed CRC check" << endl;
+        logger->log(VantageLogger::VANTAGE_ERROR) << "LOOP packet failed CRC check" << endl;
         return false;
     }
 
     packetType = BitConverter::toInt8(packetData, PACKET_TYPE_OFFSET);
 
     if (packetType != LOOP_PACKET_TYPE) {
-        logger.log(VantageLogger::VANTAGE_ERROR)<< "Invalid packet type for LOOP packet. Expected: "
+        logger->log(VantageLogger::VANTAGE_ERROR)<< "Invalid packet type for LOOP packet. Expected: "
                                      << LOOP_PACKET_TYPE << " Received: " << packetType << endl;
         return false;
     }
 
     if (packetData[LINE_FEED_OFFSET] != ProtocolConstants::LINE_FEED || packetData[CARRIAGE_RETURN_OFFSET] != ProtocolConstants::CARRIAGE_RETURN) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
+        logger->log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
         return false;
     }
 
@@ -111,7 +113,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
                 barometerTrend = static_cast<BarometerTrend>(baroTrendValue);
                 break;
             default:
-                logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid barometer trend 0x" << hex << (int)packetData[BAROMETER_TREND_OFFSET] << dec << endl;
+                logger->log(VantageLogger::VANTAGE_ERROR) << "Invalid barometer trend 0x" << hex << (int)packetData[BAROMETER_TREND_OFFSET] << dec << endl;
                 barometerTrend = BarometerTrend::UNKNOWN;
                 return false;
         }
@@ -175,10 +177,10 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     }
 
     transmitterBatteryStatus = BitConverter::toInt8(packetData, TRANSMITTER_BATTERY_STATUS_OFFSET);
-    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Transmitter Battery Status: " << transmitterBatteryStatus << endl;
+    logger->log(VantageLogger::VANTAGE_DEBUG2) << "Transmitter Battery Status: " << transmitterBatteryStatus << endl;
 
     consoleBatteryVoltage = VantageDecoder::decodeConsoleBatteryVoltage(packetData, CONSOLE_BATTERY_VOLTAGE_OFFSET);
-    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Console Battery Voltage: " << consoleBatteryVoltage << endl;
+    logger->log(VantageLogger::VANTAGE_DEBUG2) << "Console Battery Voltage: " << consoleBatteryVoltage << endl;
 
     forecastIcon = static_cast<Forecast>(BitConverter::toInt8(packetData, FORECAST_ICONS_OFFSET));
     forecastRuleIndex = BitConverter::toInt8(packetData, FORECAST_RULE_NUMBER_OFFSET);

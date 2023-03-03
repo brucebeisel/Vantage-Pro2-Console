@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "VantageDriver.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
@@ -22,13 +24,15 @@
 #include <vector>
 #include <atomic>
 
-#include "VantageDriver.h"
 #include "Alarm.h"
+#include "ArchiveManager.h"
+#include "EventManager.h"
 #include "CurrentWeather.h"
 #include "HiLowPacket.h"
 #include "VantageDecoder.h"
 #include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
+#include "VantageConfiguration.h"
 #include "Weather.h"
 
 using namespace std;

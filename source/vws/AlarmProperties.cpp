@@ -18,6 +18,9 @@
 
 namespace vws {
 
+/**
+ * An array of alarm properties, one for each entry in the Alarm Threshold block in the EEPROM.
+ */
 static const AlarmProperties alarmProperties[] = {
     {
         "Barometer Falling",

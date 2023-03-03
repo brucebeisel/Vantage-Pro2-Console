@@ -15,13 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "VantageLogger.h"
+
 #include <iomanip>
 #include <fstream>
 #include <stdio.h>
 #include <time.h>
 #include <mutex>
 
-#include "VantageLogger.h"
 #include "Weather.h"
 
 using namespace std;

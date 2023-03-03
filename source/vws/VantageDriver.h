@@ -23,15 +23,15 @@
 
 #include <string>
 #include "WeatherTypes.h"
-#include "ArchiveManager.h"
-#include "EventManager.h"
-#include "VantageConfiguration.h"
 #include "VantageWeatherStation.h"
 
 namespace vws {
+class ArchiveManager;
+class EventManager;
 class VantageLogger;
 class CurrentWeather;
 class CurrentWeatherSocket;
+class VantageConfiguration;
 
 /**
  * Class that coordinates the communications with the Vantage console.
@@ -120,8 +120,7 @@ private:
     int                       previousNextRecord;
     DateTime                  lastArchivePacketTime;
     DateTime                  consoleTimeSetTime;
-    //DateTime                  sensorStationSendTime;
-    VantageLogger             logger;
+    VantageLogger &           logger;
 };
 
 }

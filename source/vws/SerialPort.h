@@ -23,12 +23,13 @@
 typedef int HANDLE;
 #endif
 #include <string>
-#include "VantageLogger.h"
+#include "WeatherTypes.h"
 
 namespace vws {
+class VantageLogger;
 
 /**
- * Class to communicate over the serial port to the Vantage console.
+ * Class to communicate with the Vantage console using a serial port interface.
  */
 class SerialPort {
 public:
@@ -43,7 +44,7 @@ public:
     SerialPort(const std::string & device, int baudRate);
 
     /**
-     * Destructor.
+     * Destructor, that will close the serial port.
      */
     ~SerialPort();
 
@@ -60,26 +61,27 @@ public:
     void close();
 
     /**
-     * Read from the serial port.
+     * Read from the serial port into the specified location of a buffer.
      * 
-     * @param buffer The buffer into which the data will be read
-     * @param index  The index into the buffer where bytes read will be stored
-     * @param nbytes The number of bytes to read
+     * @param buffer        The buffer into which the data will be read
+     * @param index         The index into the buffer where bytes read will be stored
+     * @param requiredBytes The number of bytes that are required by this call
      * @param timeoutMillis The number of milliseconds to wait for data to be available
      *
      * @return The number of bytes actually read
      */
-    int read(byte * buffer, int index, int nbytes, int timeoutMillis);
+    int read(byte buffer[], int index, int requiredBytes, int timeoutMillis);
 
     /**
-     * Read from the serial port.
+     * Read from the serial port into the beginning of a buffer.
      * 
-     * @param buffer The buffer into which the data will be read
-     * @param nbytes The number of bytes to read
+     * @param buffer        The buffer into which the data will be read
+     * @param requiredBytes The number of bytes that are required by this call
+     * @param timeoutMillis The number of milliseconds to wait for the expected bytes
      *
-     * @return The number of bytes actually read
+     * @return True if the number of bytes read is equal to the required number of bytes
      */
-    bool read(byte * buffer, int nbytes, int timeoutMillis = DEFAULT_TIMEOUT_MILLIS);
+    bool readBytes(byte * buffer, int requiredBytes, int timeoutMillis = DEFAULT_TIMEOUT_MILLIS);
 
     /**
      * Write a string to the serial port.
@@ -119,11 +121,15 @@ public:
     bool isOpen() const;
 
 private:
+    /**
+     * The number of time read() will be called to read the number of required bytes
+     */
+    static constexpr int READ_TRIES = 3;
 
-    HANDLE        commPort;    // The file descriptor of the open port
-    std::string   device;     // The name of the serial port to be opened
-    int           baudRate;   // The baud rate used to communicate over the serial port
-    VantageLogger logger;
+    HANDLE          commPort;    // The file descriptor of the open port
+    std::string     device;     // The name of the serial port to be opened
+    int             baudRate;   // The baud rate used to communicate over the serial port
+    VantageLogger & logger;
 };
 }
 #endif

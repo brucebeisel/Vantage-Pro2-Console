@@ -35,7 +35,7 @@ public:
      * Convert one byte to a integer.
      * 
      * @param buffer The buffer from which to do the conversion
-     * @param index The index within the buffer to do the conversion
+     * @param index  The index within the buffer to do the conversion
      * @return The converted integer
      */
     static int8 toInt8(const byte buffer[], int index);
@@ -44,14 +44,10 @@ public:
     /**
      * Convert two bytes to a integer.
      * 
-     * @param buffer The buffer from which to do the conversion
-     * @param index The index within the buffer to do the conversion
+     * @param buffer       The buffer from which to do the conversion
+     * @param index        The index within the buffer to do the conversion
      * @param littleEndian True if the buffer holds the integer in little endian format
      * @return The converted integer
-     *
-     * TODO Figure out how to handle negative numbers. Not all 16 bit values will
-     * be signed. Perhaps add unsigned version of toInt8(), toInt16() and toInt32()
-     * For instance "static unsigned int toUint16(...)"
      */
     static int16 toInt16(const byte buffer[], int index, bool littleEndian = true);
     static uint16 toUint16(const byte buffer[], int index, bool littleEndian = true);
@@ -59,8 +55,8 @@ public:
     /**
      * Convert four bytes to a integer.
      * 
-     * @param buffer The buffer from which to do the conversion
-     * @param index The index within the buffer to do the conversion
+     * @param buffer       The buffer from which to do the conversion
+     * @param index        The index within the buffer to do the conversion
      * @param littleEndian True if the buffer holds the integer in little endian format
      * @return The converted integer
      */
@@ -105,10 +101,10 @@ private:
     BitConverter();
 
     /**
-     * Utility function to covert bytes in a buffer to any form of integer.
+     * Utility function to convert bytes in a buffer to any form of integer.
      * 
      * @param bits         The buffer containing the integer to be converted
-     * @param littleEndian Whether the integer is store in the buffer as little endian
+     * @param littleEndian Whether the integer is stored in the buffer as little endian
      * @param isSigned     Whether the input should be treated as signed or unsigned
      * @return The integer
      */

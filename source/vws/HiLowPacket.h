@@ -20,11 +20,11 @@
 #include <string>
 
 #include "Measurement.h"
-#include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
 #include "WeatherTypes.h"
 
 namespace vws {
+class VantageLogger;
 /**
  * Class that decodes and stores the data from the High/Low packet.
  */
@@ -221,7 +221,7 @@ private:
     HighLowValues<Humidity>     extraHumidity[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
     HighLowValues<SoilMoisture> soilMoisture[ProtocolConstants::MAX_SOIL_MOISTURES];
     HighLowValues<LeafWetness>  leafWetness[ProtocolConstants::MAX_LEAF_WETNESSES];
-    VantageLogger               logger;
+    VantageLogger &             logger;
 };
 }
 #endif

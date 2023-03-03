@@ -23,7 +23,6 @@
 
 #include "ArchivePacket.h"
 #include "BitConverter.h"
-#include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
 
 using namespace vws::ProtocolConstants;
@@ -34,6 +33,7 @@ class LoopPacket;
 class Loop2Packet;
 class CalibrationAdjustmentsPacket;
 class SerialPort;
+class VantageLogger;
 
 /**
  * Class that handles the command protocols with the Vantage console.
@@ -631,7 +631,6 @@ private:
 private:
     typedef std::vector<LoopPacketListener *> LoopPacketListenerList;
 
-    VantageLogger              logger;
     SerialPort &               serialPort;               // The serial port object that communicates with the console
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
     LoopPacketListenerList     loopPacketListenerList;   // The list of Loop Packet listeners
@@ -655,6 +654,7 @@ private:
     std::vector<StationId>     stationIds;               // The ID of the stations that the console can hear
     int                        windSensorStationId;      // The ID of the sensor station containing the anemometer
     int                        archivePeriod;            // The archive period used to calculate reception percentage
+    VantageLogger &            logger;
 };
 }
 

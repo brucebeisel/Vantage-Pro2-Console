@@ -18,10 +18,10 @@
 #define LOOP2_PACKET_H
 
 #include "Measurement.h"
-#include "VantageLogger.h"
 #include "WeatherTypes.h"
 
 namespace vws {
+class VantageLogger;
 
 /**
  * Class that decodes and holds the data from the Vantage LOOP2 packet.
@@ -100,7 +100,7 @@ private:
     Rainfall                 rainHour;
     Rainfall                 rain24Hour;
     Measurement<Pressure>    atmPressure;
-    VantageLogger            logger;
+    VantageLogger *          logger;
 };
 }
 #endif

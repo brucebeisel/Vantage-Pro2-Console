@@ -23,6 +23,7 @@
 #include "Alarm.h"
 
 namespace vws {
+class VantageLogger;
 
 /**
  * Class to manage all of the alarms of the console.

@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "CalibrationAdjustmentsPacket.h"
+
 #include <sstream>
 #include "BitConverter.h"
-#include "CalibrationAdjustmentsPacket.h"
 
 using namespace std;
 

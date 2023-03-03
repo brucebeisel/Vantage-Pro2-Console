@@ -34,7 +34,7 @@ const int TIME_STRUCT_YEAR_OFFSET = 1900;
 class Weather {
 public:
     /**
-     * Format the given date/time into the format used by the WeatherSense collector.
+     * Format the given date/time into the format used by the Vantage Weather Station software.
      * 
      * @param time The date/time to format
      * @return The formatted date/time
@@ -42,7 +42,7 @@ public:
     static std::string formatDateTime(DateTime time);
 
     /**
-     * Format the given date into the format used by the WeatherSense collector.
+     * Format the given date into the format used by the Vantage Weather Station software.
      * 
      * @param time The date to format
      * @return The formatted date

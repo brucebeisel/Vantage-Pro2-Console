@@ -15,15 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "VantageConfiguration.h"
+
 #include <cmath>
 
-#include "VantageConfiguration.h"
 #include "BitConverter.h"
 #include "VantageDecoder.h"
 #include "VantageEepromConstants.h"
-#include "VantageProtocolConstants.h"
 #include "VantageEnums.h"
 #include "VantageLogger.h"
+#include "VantageProtocolConstants.h"
 
 using namespace std;
 

@@ -20,15 +20,15 @@
 #include <string>
 #include <vector>
 
-#include "VantageLogger.h"
 #include "WeatherTypes.h"
 
 namespace vws {
 class ArchivePacket;
 class VantageWeatherStation;
+class VantageLogger;
 
 /**
- * The ArchiveManager class manages a file that contains the raw data read from the DUMP and DMPAFT command of the Vantage console.
+ * The ArchiveManager class manages a file that contains the raw data read from the DMP and DMPAFT command of the Vantage console.
  * This archive acts as augmented storage for the console.
  */
 class ArchiveManager {
@@ -46,7 +46,7 @@ public:
     ~ArchiveManager();
 
     /**
-     * Synchronize the archive file with the contents from the weather station.
+     * Synchronize the archive file with the contents from the console.
      *
      * @return True if successful
      */
@@ -94,6 +94,7 @@ private:
 
     /**
      * Add a single packet to the archive.
+     *
      * @param packet The packet to add to the archive
      */
     void addPacketToArchive(const ArchivePacket & packet);
@@ -110,11 +111,11 @@ private:
      */
     void findArchivePacketTimeRange();
 
-    std::string              archiveFile;
-    DateTime                 newestPacketTime;
-    DateTime                 oldestPacketTime;
-    VantageWeatherStation &  station;
-    VantageLogger            logger;
+    std::string              archiveFile;       // The name of the archive file
+    DateTime                 newestPacketTime;  // The time of the newest packet in the archive file
+    DateTime                 oldestPacketTime;  // The time of the oldest packet in the archive file
+    VantageWeatherStation &  station;           // Reference to the Vantage weather station object
+    VantageLogger &          logger;
 };
 }
 

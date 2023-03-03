@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "VantageCRC.h"
+
 #include <iostream>
 
-#include "VantageCRC.h"
 #include "BitConverter.h"
 #include "VantageLogger.h"
 

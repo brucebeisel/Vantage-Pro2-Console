@@ -19,11 +19,11 @@
 
 #include <vector>
 
-#include "VantageLogger.h"
 #include "WeatherTypes.h"
 #include "WindDirectionSlice.h"
 
 namespace vws {
+class VantageLogger;
 /**
  * Class that keeps track of the most recent wind direction tendencies.
  * This algorithm does its best to approximate what the Vantage console is displaying.

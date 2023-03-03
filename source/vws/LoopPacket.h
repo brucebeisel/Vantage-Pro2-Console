@@ -21,11 +21,12 @@
 #include <bitset>
 
 #include "Measurement.h"
-#include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
 #include "WeatherTypes.h"
 
 namespace vws {
+class VantageLogger;
+
 /**
  * Class that decodes and stores the data from the LOOP packet.
  */
@@ -178,7 +179,7 @@ private:
     int                               forecastRuleIndex;
     DateTime                          sunriseTime;
     DateTime                          sunsetTime;
-    VantageLogger                     logger;
+    VantageLogger *                   logger;
 };
 }
 #endif

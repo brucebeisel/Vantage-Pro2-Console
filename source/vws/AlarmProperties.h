@@ -20,6 +20,9 @@
 
 namespace vws {
 
+/**
+ * Properties for a single alarm threshold stored in the EEPROM.
+ */
 struct AlarmProperties {
     std::string alarmName;             // The name of this alarm
     int         eepromThresholdByte;   // The byte within the EEPROM block that this alarm's threshold is stored
@@ -30,7 +33,20 @@ struct AlarmProperties {
     int         alarmBit;              // The bit within the LOOP packet that indicates if this alarm has been triggered
     int         minimumValue;          // The minimum value the threshold can be
     int         maximumValue;          // The maximum value the threshold can be
+
+    /**
+     * Get the number of alarm properties.
+     *
+     * @return The number of alarm property structures
+     */
     static int  getAlarmPropertyCount();
+
+    /**
+     * Get the entire list of alarm properties.
+     *
+     * @param [O] count The number of properties in the array returned
+     * @return An array of alarm properties
+     */
     static const AlarmProperties * getAlarmProperties(int & count);
 };
 }

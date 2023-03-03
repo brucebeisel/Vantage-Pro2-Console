@@ -15,12 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CurrentWeatherManager.h"
+
 #include <fstream>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "CurrentWeatherManager.h"
 #include "CurrentWeatherPublisher.h"
+#include "VantageLogger.h"
 #include "Weather.h"
 
 using namespace std;
@@ -68,7 +70,7 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
         time_t now = time(0);
         long fileAge = now - fileinfo.st_mtim.tv_sec;
 
-        if (fileAge > 3600) {
+        if (fileAge > SECONDS_PER_HOUR) {
             mode |= ios::trunc;
         }
         else {
@@ -193,7 +195,7 @@ CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<Current
     if (hours >= 24)
         hours = 23;
 
-    DateTime archiveTime = time(0) - (3600 * hours);
+    DateTime archiveTime = time(0) - (SECONDS_PER_HOUR * hours);
 
     ios_base::openmode mode = ios::binary | ios::in;
 
@@ -207,7 +209,7 @@ CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<Current
             readArchiveFile(ifs, list);
             ifs.close();
         }
-        archiveTime += 3600;
+        archiveTime += SECONDS_PER_HOUR;
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Current weather archive records found: " << list.size() << endl;
     }
 }

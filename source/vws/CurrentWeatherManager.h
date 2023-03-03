@@ -20,11 +20,10 @@
 #include <fstream>
 #include "CurrentWeather.h"
 #include "DominantWindDirections.h"
-#include "VantageLogger.h"
 #include "VantageWeatherStation.h"
 
 namespace vws {
-
+class VantageLogger;
 class CurrentWeatherPublisher;
 
 class CurrentWeatherManager : public VantageWeatherStation::LoopPacketListener {

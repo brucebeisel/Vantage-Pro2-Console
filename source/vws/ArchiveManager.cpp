@@ -15,15 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ArchiveManager.h"
+
 #include <time.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 
-#include "ArchiveManager.h"
 #include "ArchivePacket.h"
 #include "VantageProtocolConstants.h"
 #include "VantageWeatherStation.h"
+#include "VantageLogger.h"
 #include "Weather.h"
 
 using namespace std;

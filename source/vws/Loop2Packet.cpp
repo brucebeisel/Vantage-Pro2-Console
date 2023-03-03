@@ -15,16 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Loop2Packet.h"
+
 #include <iostream>
 #include <cstring>
 
-#include "Loop2Packet.h"
 #include "BitConverter.h"
 #include "VantageCRC.h"
 #include "VantageDecoder.h"
+#include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
-
-
 
 using namespace std;
 
@@ -32,7 +32,7 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Loop2Packet::Loop2Packet() : logger(VantageLogger::getLogger("Loop2Packet")),
+Loop2Packet::Loop2Packet() : logger(&VantageLogger::getLogger("Loop2Packet")),
                              packetType(-1),
                              rain15Minute(0.0),
                              rainHour(0.0),
@@ -166,12 +166,12 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
     // Perform packet validation before decoding the actual data
     //
     if (!VantageCRC::checkCRC(packetData, 97)) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP2 packet failed CRC check" << endl;
+        logger->log(VantageLogger::VANTAGE_ERROR) << "LOOP2 packet failed CRC check" << endl;
         return false;
     }
 
     if (packetData[0] != 'L' || packetData[1] != 'O' || packetData[2] != 'O') {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "LOOP2 packet data does not begin with LOO: "
+        logger->log(VantageLogger::VANTAGE_ERROR) << "LOOP2 packet data does not begin with LOO: "
                                       << "[0] = " << packetData[0] << " [1] = " << packetData[1] << " [2] = " << packetData[2] << endl;
         return false;
     }
@@ -179,13 +179,13 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
     packetType = BitConverter::toInt8(packetData, 4);
 
     if (packetType != LOOP2_PACKET_TYPE) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid packet type for LOOP2 packet. "
+        logger->log(VantageLogger::VANTAGE_ERROR) << "Invalid packet type for LOOP2 packet. "
                                       << "Expected " << LOOP2_PACKET_TYPE << " Received: " << packetType << endl;
         return false;
     }
 
     if (packetData[95] != ProtocolConstants::LINE_FEED || packetData[96] != ProtocolConstants::CARRIAGE_RETURN) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
+        logger->log(VantageLogger::VANTAGE_ERROR) << "<LF><CR> not found" << endl;
         return false;
     }
 

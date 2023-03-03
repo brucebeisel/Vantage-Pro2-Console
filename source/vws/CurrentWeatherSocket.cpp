@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CurrentWeatherSocket.h"
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -24,7 +26,6 @@
 #include <string.h>
 #include <string>
 
-#include "CurrentWeatherSocket.h"
 #include "CurrentWeather.h"
 #include "VantageLogger.h"
 

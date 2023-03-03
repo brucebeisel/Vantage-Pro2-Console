@@ -20,12 +20,12 @@
 #include <vector>
 #include <bitset>
 
-#include "VantageLogger.h"
 #include "VantageDecoder.h"
 #include "VantageProtocolConstants.h"
 #include "VantageWeatherStation.h"
 
 namespace vws {
+class VantageLogger;
 
 
 /**
