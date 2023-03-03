@@ -197,7 +197,7 @@ CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<Current
 
     ios_base::openmode mode = ios::binary | ios::in;
 
-    for (int i = 0; i < hours; i++) {
+    for (int i = 0; i <= hours; i++) {
         struct tm tm;
         Weather::localtime(archiveTime, tm);
         string filename = archiveFilenameByHour(tm.tm_hour);
