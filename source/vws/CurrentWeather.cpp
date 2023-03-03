@@ -193,8 +193,8 @@ CurrentWeather::formatJSON() const {
     Weather::localtime(loopPacket.getSunsetTime(), sunsetTm);
 
     ss << setfill('0') << setw(2);
-    ss << ", \"sunrise\" : \"" << sunriseTm.tm_hour << ":" << sunriseTm.tm_min << "\""
-       << ", \"sunset\" : \"" << sunsetTm.tm_hour << ":" << sunsetTm.tm_min << "\"";
+    ss << ", \"sunrise\" : \"" << setw(2) << sunriseTm.tm_hour << ":" << setw(2) << sunriseTm.tm_min << "\""
+       << ", \"sunset\" : \"" << setw(2) << sunsetTm.tm_hour << ":" << setw(2) << sunsetTm.tm_min << "\"";
 
     bool firstValue = true;
     ss << ", \"extraTemperatures\" : [ ";
