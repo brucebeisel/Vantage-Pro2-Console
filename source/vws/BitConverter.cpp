@@ -32,13 +32,16 @@ BitConverter::~BitConverter() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int8
+int
 BitConverter::toInt8(const byte buffer[], int index) {
-    int8 result = (static_cast<int8>(buffer[index]) & ONE_BYTE_MASK);
-    if (buffer[index] & SIGN_BIT)
-        result *= -1;
+    int value8 = buffer[index];
 
-    return result;
+    if (buffer[index] & SIGN_BIT) {
+        value8 = (~buffer[index] & 0x7f) + 1;
+        value8 *=  -1;
+    }
+
+    return value8;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

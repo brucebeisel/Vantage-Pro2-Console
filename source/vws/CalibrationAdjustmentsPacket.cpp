@@ -44,13 +44,13 @@ CalibrationAdjustmentsPacket::~CalibrationAdjustmentsPacket() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
-    int8 value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
+    int value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
     insideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
 
 
     value8 = BitConverter::toInt8(buffer, OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
     outsideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
-    cout << "Converted outside temperature adjustment from byte " << hex << buffer[OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET] << " to value " << value8 << " and temperature " << outsideTemperatureAdjustment;
+    cout << "Converted outside temperature adjustment from byte " << hex << (int)buffer[OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET] << dec << " to value " << (int)value8 << " and temperature " << outsideTemperatureAdjustment;
 
     for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
         value8 = BitConverter::toInt8(buffer, EXTRA_TEMPERATURE_ADJUSTMENTS_OFFSET + i);

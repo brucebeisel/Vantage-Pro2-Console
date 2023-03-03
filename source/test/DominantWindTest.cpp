@@ -21,7 +21,7 @@ main(int argc, char * argv[]) {
     struct tm tm;
 
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
-    DominantWindDirections dominantWinds;
+    DominantWindDirections dominantWinds("foo.dat");
 
     memset(&tm, 0, sizeof(tm));
     tm.tm_year = 122;

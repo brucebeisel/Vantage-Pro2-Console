@@ -86,7 +86,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
         return false;
     }
 
-    packetType = BitConverter::toInt8(packetData, PACKET_TYPE_OFFSET);
+    packetType = BitConverter::toUint8(packetData, PACKET_TYPE_OFFSET);
 
     if (packetType != LOOP_PACKET_TYPE) {
         logger->log(VantageLogger::VANTAGE_ERROR)<< "Invalid packet type for LOOP packet. Expected: "
@@ -176,14 +176,14 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
         }
     }
 
-    transmitterBatteryStatus = BitConverter::toInt8(packetData, TRANSMITTER_BATTERY_STATUS_OFFSET);
+    transmitterBatteryStatus = BitConverter::toUint8(packetData, TRANSMITTER_BATTERY_STATUS_OFFSET);
     logger->log(VantageLogger::VANTAGE_DEBUG2) << "Transmitter Battery Status: " << transmitterBatteryStatus << endl;
 
     consoleBatteryVoltage = VantageDecoder::decodeConsoleBatteryVoltage(packetData, CONSOLE_BATTERY_VOLTAGE_OFFSET);
     logger->log(VantageLogger::VANTAGE_DEBUG2) << "Console Battery Voltage: " << consoleBatteryVoltage << endl;
 
-    forecastIcon = static_cast<Forecast>(BitConverter::toInt8(packetData, FORECAST_ICONS_OFFSET));
-    forecastRuleIndex = BitConverter::toInt8(packetData, FORECAST_RULE_NUMBER_OFFSET);
+    forecastIcon = static_cast<Forecast>(BitConverter::toUint8(packetData, FORECAST_ICONS_OFFSET));
+    forecastRuleIndex = BitConverter::toUint8(packetData, FORECAST_RULE_NUMBER_OFFSET);
 
     sunriseTime = VantageDecoder::decodeTime(packetData, SUNRISE_TIME_OFFSET);
     sunsetTime = VantageDecoder::decodeTime(packetData, SUNSET_TIME_OFFSET);

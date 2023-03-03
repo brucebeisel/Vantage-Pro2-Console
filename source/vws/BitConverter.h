@@ -38,7 +38,7 @@ public:
      * @param index  The index within the buffer to do the conversion
      * @return The converted integer
      */
-    static int8 toInt8(const byte buffer[], int index);
+    static int toInt8(const byte buffer[], int index);
     static uint8 toUint8(const byte buffer[], int index);
 
     /**

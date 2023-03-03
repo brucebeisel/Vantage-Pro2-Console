@@ -63,7 +63,7 @@ ArchivePacket::updateArchivePacketData(const byte buffer[], int offset) {
         this->buffer[i] = buffer[offset + i];
     }
 
-    windSampleCount = BitConverter::toInt16(this->buffer, NUM_WIND_SAMPLES_OFFSET);
+    windSampleCount = BitConverter::toUint16(this->buffer, NUM_WIND_SAMPLES_OFFSET);
     packetTime = extractArchiveDate();
 }
 
@@ -103,7 +103,7 @@ ArchivePacket::archivePacketContainsData(const byte * buffer, int offset) {
     // Any bytes that is not equal to 0xFF means that there is data
     //
     for (int i = 0; i < BYTES_PER_ARCHIVE_PACKET; i++) {
-        if (BitConverter::toInt8(buffer, offset + i) != PACKET_NO_VALUE) {
+        if (BitConverter::toUint8(buffer, offset + i) != PACKET_NO_VALUE) {
             containsData = true;
             break;
         }
@@ -116,8 +116,8 @@ ArchivePacket::archivePacketContainsData(const byte * buffer, int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 ArchivePacket::extractArchiveDate() const {
-    int date = BitConverter::toInt16(buffer, DATE_STAMP_OFFSET);
-    int time = BitConverter::toInt16(buffer, TIME_STAMP_OFFSET);
+    int date = BitConverter::toUint16(buffer, DATE_STAMP_OFFSET);
+    int time = BitConverter::toUint16(buffer, TIME_STAMP_OFFSET);
     int year = ((date >> 9) & 0x3F) + 2000;
     int month = (date >> 5) & 0xF;
     int day = date & 0x1F;
@@ -206,7 +206,7 @@ ArchivePacket::formatJSON() const {
     uvIndex = VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET);
     ss << uvIndex.formatJSON("highUvIndex", true);
 
-    int forecastRule = BitConverter::toInt8(buffer, FORECAST_RULE_OFFSET);
+    int forecastRule = BitConverter::toUint8(buffer, FORECAST_RULE_OFFSET);
     ss << ", \"forcastRule\" : " << forecastRule;
 
     bool firstValue = true;

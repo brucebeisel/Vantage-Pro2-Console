@@ -176,7 +176,7 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
         return false;
     }
 
-    packetType = BitConverter::toInt8(packetData, 4);
+    packetType = BitConverter::toUint8(packetData, 4);
 
     if (packetType != LOOP2_PACKET_TYPE) {
         logger->log(VantageLogger::VANTAGE_ERROR) << "Invalid packet type for LOOP2 packet. "

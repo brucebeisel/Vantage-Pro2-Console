@@ -136,7 +136,7 @@ VantageWeatherStation::retrieveConfigurationData() {
     if (!eepromBinaryRead(VantageEepromConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
         return false;
 
-    archivePeriod = BitConverter::toInt8(buffer, 0);
+    archivePeriod = BitConverter::toUint8(buffer, 0);
 
     logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Configuration Data: " <<  " Archive Period: " << archivePeriod << endl;
 
@@ -961,7 +961,7 @@ VantageWeatherStation::retrieveArchivePeriod(ArchivePeriod & period) {
     if (!eepromBinaryRead(VantageEepromConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
         return false;
 
-    int archivePeriodValue = BitConverter::toInt8(buffer, 0);
+    int archivePeriodValue = BitConverter::toUint8(buffer, 0);
     period = static_cast<ArchivePeriod>(archivePeriodValue);
 
     logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) <<  " Archive Period: " << archivePeriodValue << endl;

@@ -205,7 +205,7 @@ VantageConfiguration::retrieveTimeSettings(TimeSettings & timeSettings) {
 void
 VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSettings & timeSettings) {
     const char * tzName = "";
-    int tzIndex = BitConverter::toInt8(buffer, offset);
+    int tzIndex = BitConverter::toUint8(buffer, offset);
 
     for (int i = 0; i < NUM_TIME_ZONES; i++) {
         if (TIME_ZONES[i].index == tzIndex) {
@@ -215,14 +215,14 @@ VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSe
     }
 
     timeSettings.timezoneName = tzName;
-    timeSettings.manualDaylightSavingsTime = BitConverter::toInt8(buffer, offset + 1) == 1;
-    timeSettings.manualDaylightSavingsTimeOn = BitConverter::toInt8(buffer, offset + 2) == 1;
+    timeSettings.manualDaylightSavingsTime = BitConverter::toUint8(buffer, offset + 1) == 1;
+    timeSettings.manualDaylightSavingsTimeOn = BitConverter::toUint8(buffer, offset + 2) == 1;
 
     int16 value16 = BitConverter::toInt16(buffer, offset + 3);
 
     //timeSettings.gmtOffsetMinutes = ((value16 / 100) * 60) + (value16 % 100);
     timeSettings.gmtOffsetMinutes = value16;
-    timeSettings.useGmtOffset = BitConverter::toInt8(buffer, offset + 5) == 1;
+    timeSettings.useGmtOffset = BitConverter::toUint8(buffer, offset + 5) == 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
