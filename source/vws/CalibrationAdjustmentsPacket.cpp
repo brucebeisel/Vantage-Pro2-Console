@@ -50,7 +50,6 @@ CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
 
     value8 = BitConverter::toInt8(buffer, OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
     outsideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
-    cout << "Converted outside temperature adjustment from byte " << hex << (int)buffer[OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET] << dec << " to value " << (int)value8 << " and temperature " << outsideTemperatureAdjustment;
 
     for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
         value8 = BitConverter::toInt8(buffer, EXTRA_TEMPERATURE_ADJUSTMENTS_OFFSET + i);

@@ -218,6 +218,6 @@ Archive query
     ++ query-calibration-adjustments - Query the calibration adjustment section of the EEPROM
     update-calibration-adjustments - Update the calibration adjustment section of the EEPROM
     
-    OTHER ITEMS: Sunrise, sunset, console battery voltage, station battery status, wind sample count (transmission quality)
+    OTHER ITEMS: wind sample count (transmission quality)
 
     

@@ -187,6 +187,15 @@ CurrentWeather::formatJSON() const {
     ss << ", \"forecastRule\" : \"" << ForecastRule::forecastString(loopPacket.getForecastRuleIndex()) << "\""
         << ", \"forecast\" : \"" << loopPacket.getForecastIconString() << "\"";
 
+    struct tm sunriseTm;
+    struct tm sunsetTm;
+    Weather::localtime(loopPacket.getSunriseTime(), sunriseTm);
+    Weather::localtime(loopPacket.getSunsetTime(), sunsetTm);
+
+    ss << setfill('0') << setw(2);
+    ss << ", \"sunrise\" : \"" << sunriseTm.tm_hour << ":" << sunriseTm.tm_min << "\""
+       << ", \"sunset\" : \"" << sunsetTm.tm_hour << ":" << sunsetTm.tm_min << "\"";
+
     bool firstValue = true;
     ss << ", \"extraTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++) {
