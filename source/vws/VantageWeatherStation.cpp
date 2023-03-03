@@ -574,8 +574,10 @@ VantageWeatherStation::eepromBinaryRead(unsigned address, unsigned count, char *
 bool
 VantageWeatherStation::eepromWriteByte(unsigned address, byte value) {
     for (int i = 0; i < NUM_PROTECTED_EEPROM_BYTES; i++) {
-        if (protectedEepromBytes[i] == address)
+        if (protectedEepromBytes[i] == address) {
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Skipping write to EEPROM address " << address << " because it is a protected byte" << endl;
             return false;
+        }
     }
 
     ostringstream command;
@@ -588,8 +590,19 @@ VantageWeatherStation::eepromWriteByte(unsigned address, byte value) {
 bool 
 VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], unsigned count) {
     //
-    // TODO check protected EEPROM bytes
+    // Check the address range against the protected bytes
     //
+    for (int i = 0; i < count; i++) {
+        unsigned addressToCheck = address + i;
+        for (int i = 0; i < NUM_PROTECTED_EEPROM_BYTES; i++) {
+            if (protectedEepromBytes[i] == addressToCheck) {
+                logger.log(VantageLogger::VANTAGE_ERROR) << "Skipping write to EEPROM address " << address
+                                                         << " with size " << count << " because overlaps at least one protected byte" << endl;
+                return false;
+            }
+        }
+    }
+
     ostringstream command;
     command << WRITE_EEPROM_AS_BINARY_CMD << " " << uppercase << hex << address << " " << count << nouppercase;
 
@@ -609,6 +622,7 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
 //
 // Calibration Commands
 //
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
@@ -1007,7 +1021,6 @@ VantageWeatherStation::controlConsoleLamp(bool on) {
 //
 // EEPROM retrieval commands
 //
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

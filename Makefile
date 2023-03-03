@@ -1,13 +1,11 @@
-all: vws archive-dumper console-archive-dumper loop-dumper
+TOPTARGETS := all clean depend
 
-vws: source/vws/vws
-	cd source/vws; make all; cd ../..
+SUBDIRS := source/vws source/archive-dumper source/console-archive-dumper source/loop-packet-dumper
 
-archive-dumper: source/archive-dumper/archive-dumper
-	cd source/archive-dumper; make all; cd ../..
+$(TOPTARGETS): $(SUBDIRS)
 
-console-archive-dumper: source/console-archive-dumper/console-archive-dumper
-	cd source/console-archive-dumper; make all; cd ../..
+.PHONY: $(TOPTARGETS) $(SUBDIRS)
 
-loop-dumper: source/loop-packet-dumper/loop-dumper
-	cd source/loop-packet-dumper; make all; cd ../..
+$(SUBDIRS):
+	$(MAKE) -C $@ $(MAKECMDGOALS)
+

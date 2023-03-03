@@ -28,13 +28,13 @@
 using namespace std;
 
 namespace vws {
-VantageLogger::Level VantageLogger::currentLevel = VantageLogger::VANTAGE_INFO;
-ostream * VantageLogger::loggerStream = &cerr;
-ostream VantageLogger::nullStream(0);
-map<string, VantageLogger *> VantageLogger::loggers;
-int VantageLogger::maxFileSize;
-int VantageLogger::maxFiles;
-string VantageLogger::logFilePattern;
+VantageLogger::Level     VantageLogger::currentLevel = VantageLogger::VANTAGE_INFO;
+VantageLogger::LoggerMap VantageLogger::loggers;
+ostream *                VantageLogger::loggerStream = &cerr;
+ostream                  VantageLogger::nullStream(0);
+int                      VantageLogger::maxFileSize;
+int                      VantageLogger::maxFiles;
+string                   VantageLogger::logFilePattern;
 
 const static char *LEVEL_STRINGS[] = {"ERROR  ", "WARNING", "INFO   ", "DEBUG1 ", "DEBUG2 ", "DEBUG3 "};
 
@@ -54,10 +54,12 @@ VantageLogger::~VantageLogger() {
 ////////////////////////////////////////////////////////////////////////////////
 VantageLogger &
 VantageLogger::getLogger(const std::string & name) {
-    LogIterator logger = loggers.find(name);
+    LoggerMap::iterator loggerIterator = loggers.find(name);
 
-    if (logger != loggers.end())
-        return *(logger->second);
+    if (loggerIterator != loggers.end()) {
+        VantageLogger * logger = loggerIterator->second;
+        return *logger;
+    }
 
     VantageLogger * newLogger = new VantageLogger(name);
     loggers.insert(std::pair<string,VantageLogger *>(name, newLogger));
@@ -117,13 +119,13 @@ VantageLogger::checkFileSize() {
 ////////////////////////////////////////////////////////////////////////////////
 ostream &
 VantageLogger::log(Level level) const {
-    char buffer[100];
+    char timeString[100];
     if (isLogEnabled(level)) {
         time_t now = time(0);
         struct tm tm;
         Weather::localtime(now, tm);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &tm);
-        *loggerStream << setw(20) << loggerName << ": " << buffer << " --- " << LEVEL_STRINGS[level] << " --- ";
+        strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", &tm);
+        *loggerStream << setw(20) << loggerName << ": " << timeString << " --- " << LEVEL_STRINGS[level] << " --- ";
         return *loggerStream;
     }
     else

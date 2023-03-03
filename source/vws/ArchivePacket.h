@@ -81,8 +81,6 @@ public:
      */
     DateTime getDateTime() const;
 
-    Measurement<Temperature> getOutsideTemperature() const;
-
     /**
      * Check whether this is an empty packet, the empty packet concept is used to avoid the use of NULL.
      * 

@@ -75,7 +75,7 @@ class VantageLogger;
 
 struct TimeSettings {
     bool        useGmtOffset;
-    std::string timezoneName;               // Only used if useGmtOffset is false
+    std::string timezoneName;                // Only used if useGmtOffset is false
     int         gmtOffsetMinutes;            // Only used if useGmtOffset is true
     bool        manualDaylightSavingsTime;
     bool        manualDaylightSavingsTimeOn; // This will change twice a year, but only if manualDaylightSavingsTime is true
@@ -83,7 +83,7 @@ struct TimeSettings {
 
 struct SetupBits {
     bool is24HourMode;
-    bool isCurrentlyAM;
+    bool isCurrentlyAM;           // TODO determine what this field means as it always is true
     bool isDayMonthDisplay;
     bool isWindCupLarge;
     ProtocolConstants::RainBucketSizeType rainBucketSizeType;
@@ -125,7 +125,16 @@ struct ConsoleConfigurationData {
  */
 class VantageConfiguration {
 public:
+    /**
+     * Constructor.
+     *
+     * @param station The weather station object used to communicate with the console
+     */
     VantageConfiguration(VantageWeatherStation & station);
+
+    /**
+     * Destructor.
+     */
     virtual ~VantageConfiguration();
 
     /**
@@ -134,19 +143,36 @@ public:
     bool retrieveConfigurationParameters();
 
     /**
-     * Update the position of the weather station.
+     * Update the position of the console.
      *
-     * @param position  The position of the station (not the ISS)
+     * @param position  The position of the console (not the ISS)
      * @return True if the position was updated
      */
     bool updatePosition(const PositionData & position);
+
+    /**
+     * Retrieve the position of the console.
+     *
+     * @param position  The object into which the position will be copied
+     * @return True if the position was retrieved
+     */
     bool retrievePosition(PositionData & position);
 
 
     /**
      * Update the DST and time zone settings.
+     *
+     * @param timeSettings The time settings retrieved from the console
+     * @return True if the time settings were successfully updated
      */
     bool updateTimeSettings(const TimeSettings & timeSettings);
+
+    /**
+     * Retrieve the DST and time zone settings.
+     *
+     * @param timeSettings The object into which the time settings will be copied
+     * @return True if the time settings were successfully retrieved
+     */
     bool retrieveTimeSettings(TimeSettings & timeSettings);
 
     /**
@@ -155,16 +181,41 @@ public:
      * updating them all simultaneously will reduce EEPROM writes. Also note that these settings
      * only change the displayed values, not the values reported in the serial protocol.
      *
-     * @param unitsSettings    The settings for all of the unit of display
+     * @param unitsSettings The settings for all of the unit of display
      * @return True if the units setting were written successfully
      */
     bool updateUnitsSettings(const UnitsSettings & unitsSettings);
+
+    /**
+     * Retrieve the units settings.
+     *
+     * @param unitsSettings  The object into which units settings will be copied
+     * @return True if the units setting were written retrieved
+     */
     bool retrieveUnitsSettings(UnitsSettings & unitsSettings);
 
+    /**
+     * Update the general setup bits.
+     *
+     * @param setupBits The bits that will be written to the console
+     * @return True if the bits were successfully updated
+     */
     bool updateSetupBits(const SetupBits & setupBits);
+
+    /**
+     * Retrieve the general setup bits.
+     *
+     * @param setupBits The object into which the setup bits will be copied
+     * @return True if the bits were successfully retrieved
+     */
     bool retrieveSetupBits(SetupBits & setupBits);
 
-    void retrieveTimeZoneOptions(std::vector<std::string> & timezoneList);
+    /**
+     * Get the time zones that the console supports so it can be presented to a user for selection.
+     *
+     * @param timezoneList The list of time zones as strings
+     */
+    void getTimeZoneOptions(std::vector<std::string> & timezoneList);
 
     std::string retrieveAllConfigurationData();
 

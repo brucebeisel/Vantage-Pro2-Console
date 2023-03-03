@@ -64,7 +64,7 @@ public:
     /**
      * Set the pattern to use for multiple log files.
      * 
-     * @param pattern The pattern to be used for the files. The pattern must contain a printf formaatting string for integers.
+     * @param pattern The pattern to be used for the files. The pattern must contain a printf formatting string for integers.
      * @param maxFiles The maximum number of files that will be maintained. Files beyond this value will be deleted
      * @param maxFileSizeMb The maximum file size in megabytes. A new file will be created when the current file exceeds this size.
      */
@@ -93,6 +93,8 @@ public:
 
 private:
     static const int MAX_FILE_SIZE_INFINITE = -1;
+    typedef std::map<std::string, VantageLogger *> LoggerMap;
+
     /**
      * Private constructor, only getLogger() can create a new logger.
      * 
@@ -106,13 +108,13 @@ private:
     /**
      * Collection of loggers, so that only one is create per name.
      */
-    static std::map<std::string, VantageLogger *> loggers;
-    typedef std::map<std::string, VantageLogger *>::iterator LogIterator;
+    static LoggerMap loggers;
 
     /**
      * The current log level.
      */
     static Level currentLevel;
+
     /**
      * The stream used when the log level is enabled
      */
@@ -124,8 +126,8 @@ private:
     static std::ostream nullStream;
 
     static std::string logFilePattern;
-    static int maxFiles;
-    static int maxFileSize;
+    static int         maxFiles;
+    static int         maxFileSize;
 
     std::string loggerName;
 };

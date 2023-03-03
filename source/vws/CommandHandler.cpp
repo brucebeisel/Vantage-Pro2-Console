@@ -40,6 +40,9 @@
 using namespace std;
 using json = nlohmann::json;
 
+/*
+ * Various strings used in the standard responses
+ */
 static const string RESPONSE_TOKEN = "\"response\"";
 static const string RESULT_TOKEN = "\"result\"";
 static const string DATA_TOKEN = "\"data\"";
@@ -219,6 +222,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception while processing command: " << commandName << " Error: " << e.what() << endl;
     }
 
+    //
+    // Terminate the JSON element
+    //
     response.append(" }");
 }
 
@@ -226,14 +232,10 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleNoArgCommand(bool (VantageWeatherStation::*handler)(), const std::string & commandName, std::string & response) {
-    ostringstream oss;
-
     if ((station.*handler)())
-        oss << SUCCESS_TOKEN;
+        response.append(SUCCESS_TOKEN);
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";;
-
-    response.append(oss.str());
+        response.append(FAILURE_TOKEN + "," + DATA_TOKEN + " : { \"error\" : \"console command error\" } ");
 }
 
 /******************************************************************************
@@ -811,7 +813,7 @@ CommandHandler::handleQueryLoopArchive(const std::string & commandName, const Co
 void
 CommandHandler::handleGetTimezones(const std::string & commandName, std::string & response) {
     vector<string> timezoneList;
-    configurator.retrieveTimeZoneOptions(timezoneList);
+    configurator.getTimeZoneOptions(timezoneList);
 
     ostringstream oss;
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"timezones\" : [ ";

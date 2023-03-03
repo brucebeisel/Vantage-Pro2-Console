@@ -50,17 +50,34 @@ public:
     ~LoopPacket();
 
     /**
+     * Get the type of this packet.
+     * It can only be one value, but by providing this method it decouples the hard-coded value from the caller.
+     *
+     * @return The LOOP packet type
+     */
+    int getPacketType() const;
+
+    /**
      * Parse the LOOP packet buffer.
      * 
      * @param buffer The buffer to decode
      * @return True if the LOOP packet was decoded successfully
      */
-    bool                                    decodeLoopPacket(byte buffer[]);
+    bool decodeLoopPacket(byte buffer[]);
 
-    const byte *                            getPacketData() const;
+    /**
+     * Get the underlying data buffer that contains the values.
+     *
+     * @return The internal buffer
+     */
+    const byte * getPacketData() const;
+
+    /**
+     * Get various values from the LOOP packet.
+     * Note that any return value that is a Measurement<> template can have and invalid value.
+     */
     ProtocolConstants::BarometerTrend       getBarometerTrend() const;
     std::string                             getBarometerTrendString() const;
-    int                                     getPacketType() const;
     int                                     getNextRecord() const;
     const Measurement<Pressure> &           getBarometricPressure() const;
     const Measurement<Temperature> &        getInsideTemperature() const;

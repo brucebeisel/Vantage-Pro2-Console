@@ -26,7 +26,9 @@
 namespace vws {
 
 /**
- * Class that contains static methods for converting bytes in a buffer into measurement values
+ * Class that contains static methods for converting bytes in a buffer into measurement values.
+ * The decoding rules are from the Vantage Serial Protocol document and can include value offset
+ * and scaling rules.
  */
 class VantageDecoder {
 public:
@@ -41,7 +43,6 @@ public:
     static Measurement<Temperature> decode16BitTemperature(const byte buffer[], int offset, bool scaleValue = true);
 
     static Measurement<Temperature> decode8BitTemperature(const byte buffer[], int offset);
-
 
     static Measurement<Humidity> decodeHumidity(const byte buffer[], int offset);
 
@@ -69,8 +70,6 @@ public:
 
     static Rainfall decodeStormRain(const byte buffer[], int offset);
 
-    static void setRainCollectorSize(Rainfall collectorSize);
-
     static Rainfall decodeRain(const byte buffer[], int offset);
 
     static DateTime decodeStormStartDate(const byte buffer[], int offset);
@@ -81,18 +80,23 @@ public:
 
     static Measurement<SoilMoisture> decodeSoilMoisture(const byte buffer[], int offset);
     
-
     static DateTime decodeTime(const byte buffer[], int offset);
-    static DateTime decodeDate(const byte buffer[], int offset);
-    static DateTime decodeDateTime(const byte buffer[], int dateOffset, int timeOffset);
+
+    /**
+     * Set the rain collector size needed to decode rain measurements that are usually in bucket tips.
+     * This value comes from the configuration bytes in the EEPROM.
+     *
+     * @param collectorSize The number of inches of rainfall per bucket tip
+     */
+    static void setRainCollectorSize(Rainfall collectorSize);
 
 private:
-    static Rainfall rainCollectorSizeInches;
-    static bool     rainCollectorSizeSet;
+    static Rainfall rainCollectorSizeInches; // The amount of rainfall per rain bucket tip. This is needed to decode most rain values
+    static bool     rainCollectorSizeSet;    // True if rainCollectorSizeInches has been set
 
-    VantageDecoder();
-    ~VantageDecoder();
-    VantageDecoder(const VantageDecoder &);
+    VantageDecoder() = delete;
+    ~VantageDecoder() = delete;
+    VantageDecoder(const VantageDecoder &) = delete;
 };
 
 }

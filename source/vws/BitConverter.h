@@ -32,7 +32,7 @@ public:
     virtual ~BitConverter();
 
     /**
-     * Convert one byte to a integer.
+     * Convert one byte to a signed or unsigned integer.
      * 
      * @param buffer The buffer from which to do the conversion
      * @param index  The index within the buffer to do the conversion
@@ -42,7 +42,7 @@ public:
     static uint8 toUint8(const byte buffer[], int index);
 
     /**
-     * Convert two bytes to a integer.
+     * Convert two bytes to a signed or unsigned integer.
      * 
      * @param buffer       The buffer from which to do the conversion
      * @param index        The index within the buffer to do the conversion
@@ -53,7 +53,7 @@ public:
     static uint16 toUint16(const byte buffer[], int index, bool littleEndian = true);
 
     /**
-     * Convert four bytes to a integer.
+     * Convert four bytes to a signed or unsigned integer.
      * 
      * @param buffer       The buffer from which to do the conversion
      * @param index        The index within the buffer to do the conversion
@@ -93,7 +93,7 @@ public:
 private:
     static const byte UPPER_NIBBLE_MASK = 0xF0;
     static const byte LOWER_NIBBLE_MASK = 0x0F;
-    static const int NIBBLE_BITS = 4;
+    static const int  NIBBLE_BITS = 4;
 
     /**
      * Constructor for which there is no implementation.
@@ -101,12 +101,13 @@ private:
     BitConverter();
 
     /**
-     * Utility function to convert bytes in a buffer to any form of integer.
+     * Utility template function to convert bytes in a buffer to any form of integer.
+     * Note that "typename T" must be some form of integer.
      * 
      * @param bits         The buffer containing the integer to be converted
      * @param littleEndian Whether the integer is stored in the buffer as little endian
      * @param isSigned     Whether the input should be treated as signed or unsigned
-     * @return The integer
+     * @return The resulting integer.
      */
     template <typename T> static T bitsToInt(const byte bits[], bool littleEndian, bool isSigned);
 };

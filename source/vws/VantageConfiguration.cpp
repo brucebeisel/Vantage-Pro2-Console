@@ -406,7 +406,7 @@ VantageConfiguration::saveRainBucketSize(RainBucketSizeType rainBucketType) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantageConfiguration::retrieveTimeZoneOptions(std::vector<std::string> & timezoneList) {
+VantageConfiguration::getTimeZoneOptions(std::vector<std::string> & timezoneList) {
     for (int i = 0; i < NUM_TIME_ZONES; i++) {
         timezoneList.push_back(string(TIME_ZONES[i].name));
     }

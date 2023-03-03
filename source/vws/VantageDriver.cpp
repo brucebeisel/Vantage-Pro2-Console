@@ -98,8 +98,6 @@ VantageDriver::initialize() {
     if (!retrieveConfiguration())
         return false;
 
-    //AlarmManager::getInstance().initialize();
-
     logger.log(VantageLogger::VANTAGE_INFO) << "Initialization complete." << endl;
 
     return true;
@@ -131,8 +129,6 @@ VantageDriver::retrieveConfiguration() {
         return false;
     }
 
-    // TBD Figure out what to extract from the loop packet for initialization purposes.
-
     return true;
 }
 
@@ -143,48 +139,6 @@ VantageDriver::stop() {
     exitLoop = true;
     station.closeStation();
 }
-
-/*
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-VantageDriver::processArchive(const vector<ArchivePacket> & archive) {
-
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Processing " << archive.size() << " archive packets" << endl;
-
-    for (vector<ArchivePacket>::const_iterator it = archive.begin(); it != archive.end(); ++it) {
-        DateTime now = time(0);
-        DateTime age = now - it->getDateTime();
-        if (age < SECONDS_PER_HOUR) {
-            int maxPackets = static_cast<int>(((static_cast<float>(station.getArchivePeriod()) * 60.0F) / ((41.0F + 1.0F - 1.0F) / 16.0F)));
-            int actualPackets = it->getWindSampleCount();
-            int issReception = (actualPackets * 100) / maxPackets;
-            if (issReception > 100)
-                issReception = 100;
-
-            logger.log(VantageLogger::VANTAGE_DEBUG2) << "IIS Reception for archive interval ending at " << it->getDateTime()
-                                           << " is " << issReception
-                                           << ". Max Packets = " << maxPackets
-                                           << ", Actual Packets - " << actualPackets << endl;
-
-            vector<SensorStation> sensorStations = station.getSensorStations();
-            for (vector<SensorStation>::iterator it2 = sensorStations.begin(); it2 != sensorStations.end(); ++it2) {
-                if (it2->getSensorStationType() == SensorStation::INTEGRATED_SENSOR_STATION)
-                    it2->setLinkQuality(issReception);
-            }
-
-            string ssMessage = SensorStation::formatSensorStationStatusMessage(sensorStations, it->getDateTime());
-            socket.sendData(ssMessage);
-        }
-
-        string message = it->formatMessage();
-        logger.log(VantageLogger::VANTAGE_INFO) << "=== Archive === " << Weather::formatDateTime(it->getDateTime()) << " =============" << endl;
-        socket.sendData(message);
-    }
-
-    return true;
-}
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,17 +157,13 @@ VantageDriver::reopenStation() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageDriver::mainLoop() {
+    //
+    // Synchronize the historical archive data from the console to disk
+    //
     if (!archiveManager.synchronizeArchive()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read the archive during initialization" << endl;
         return;
     }
-
-    /*
-    if (!station.wakeupStation()) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to wake up console after initialization" << endl;
-        return;
-    }
-    */
 
     while (!exitLoop) {
         try {
@@ -230,12 +180,6 @@ VantageDriver::mainLoop() {
                 continue;
             }
 
-            DateTime consoleTime;
-            if (station.retrieveConsoleTime(consoleTime))
-                logger.log(VantageLogger::VANTAGE_INFO) << "Station Time: " << Weather::formatDateTime(consoleTime) << endl;
-            else
-                logger.log(VantageLogger::VANTAGE_WARNING) << "Station Time retrieval failed" << endl;
-
             //
             // If it has been a while since the time was set, set the time
             //
@@ -249,7 +193,7 @@ VantageDriver::mainLoop() {
             }
 
             //
-            // Get the current weather values for about a minute
+            // Get the current weather values for about a minute or until an event occurs that requires the end of the loop
             //
             station.currentValuesLoop(LOOP_PACKET_CYCLES);
 

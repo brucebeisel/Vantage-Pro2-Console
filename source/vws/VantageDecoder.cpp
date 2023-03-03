@@ -28,9 +28,9 @@ namespace vws {
 using namespace ProtocolConstants;
 using namespace VantageEepromConstants;
 
-Rainfall VantageDecoder::rainCollectorSizeInches = static_cast<Rainfall>(0.0);
+Rainfall VantageDecoder::rainCollectorSizeInches = static_cast<Rainfall>(0.01);
 bool VantageDecoder::rainCollectorSizeSet = false;
-VantageLogger * log = nullptr;
+VantageLogger * logger = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -272,11 +272,11 @@ VantageDecoder::setRainCollectorSize(Rainfall collectorSize) {
 Rainfall
 VantageDecoder::decodeRain(const byte buffer[], int offset) {
 
-    if (log == nullptr)
-        log = &VantageLogger::getLogger("VantageDecoder");
+    if (logger == nullptr)
+        logger = &VantageLogger::getLogger("VantageDecoder");
 
     if (!rainCollectorSizeSet)
-        log->log(VantageLogger::VANTAGE_WARNING) << "Decoding rain value before rain collector size has been set. Using .01 inches" << std::endl;
+        logger->log(VantageLogger::VANTAGE_WARNING) << "Decoding rain value before rain collector size has been set. Using .01 inches" << std::endl;
     
     int16 value16 = BitConverter::toInt16(buffer, offset);
     Rainfall rain = static_cast<Rainfall>(value16) * rainCollectorSizeInches;

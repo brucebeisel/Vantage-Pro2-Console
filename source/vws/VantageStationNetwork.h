@@ -136,14 +136,47 @@ typedef std::map<StationId,std::vector<Sensor>> stationSensors;
 
 class VantageStationNetwork : public VantageWeatherStation::LoopPacketListener {
 public:
+    /**
+     * Constructor.
+     *
+     * @param station     The object used to communicate with the console
+     * @param networkFile The file to read/write the network configuration data
+     */
     VantageStationNetwork(VantageWeatherStation & station, const std::string & networkFile);
+
+    /**
+     * Destructor.
+     */
     virtual ~VantageStationNetwork();
 
+    /**
+     * Initialize the network data from the file or the console.
+     *
+     * @return True if successful
+     */
     bool initializeNetwork();
 
+    /**
+     * Format the JSON message containing the network data.
+     *
+     * @param string The JSON message
+     */
     std::string formatJSON() const;
 
+    /**
+     * Process a LOOP packet as part of the LoopPacketListener interface.
+     *
+     * @param packet The LOOP packet
+     * @return True if the LOOP packets loop should continue
+     */
     virtual bool processLoopPacket(const LoopPacket & packet);
+
+    /**
+     * Process a LOOP2 packet as part of the LoopPacketListener interface.
+     *
+     * @param packet The LOOP2 packet
+     * @return True if the LOOP packets loop should continue
+     */
     virtual bool processLoop2Packet(const Loop2Packet & packet);
 
 private:

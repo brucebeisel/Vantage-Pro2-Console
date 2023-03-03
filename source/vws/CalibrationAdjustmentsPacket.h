@@ -25,17 +25,49 @@ namespace vws {
 
 class CalibrationAdjustmentsPacket {
 public:
+    /**
+     * The number of bytes of the calibration block in the EEPROM.
+     */
     static constexpr int CALIBRATION_DATA_BLOCK_SIZE = 29;
 
+    /**
+     * Constructor.
+     */
     CalibrationAdjustmentsPacket();
+
+    /**
+     * Destructor.
+     */
     virtual ~CalibrationAdjustmentsPacket();
 
+    /**
+     * Decode the calibration block into members.
+     *
+     * @param buffer The buffer from which to decode the calibration block
+     * @return True if the decoding was successful
+     */
     bool decodePacket(const byte buffer[]);
+
+    /**
+     * Encode the calibration members into the provided buffer.
+     *
+     * @param buffer The buffer into which the calibration values will be encoded
+     */
     void encodePacket(byte buffer[]) const;
 
+    /**
+     * Format the JSON message.
+     *
+     * @return The JSON message
+     */
     std::string formatJSON() const;
 
-    bool parseJSON(std::string & s);
+    /**
+     * Parse a JSON message into calibration value.
+     *
+     * @return True if the parsing was successful
+     */
+    bool parseJSON(const std::string & s);
 
 private:
 
@@ -50,6 +82,9 @@ private:
     static constexpr int EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET = 20;
     static constexpr int WIND_DIRECTION_ADJUSTMENT_OFFSET = 27;
 
+    /**
+     * Temperature adjustments are stored in tenths of degrees.
+     */
     static constexpr Temperature TEMPERATURE_ADJUSTMENT_SCALE = 10.0;
 
     Temperature insideTemperatureAdjustment;

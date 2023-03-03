@@ -237,7 +237,9 @@ SerialPort::readBytes(byte buffer[], int requiredBytes, int timeoutMillis) {
     int readIndex = 0;
     
     //
-    // Keep reading until the require number of bytes are read.
+    // Keep reading until the require number of bytes are read or the number of tries had been reached.
+    // Note that the timeout can expire READ_TRIES times, so the total timeout delay can be up to
+    // timeoutMillis * READ_TRIES.
     //
     for (int i = 0; i < READ_TRIES && readIndex < requiredBytes; i++) {
         int nbytes = this->read(buffer, readIndex, requiredBytes - readIndex, timeoutMillis);
@@ -250,6 +252,9 @@ SerialPort::readBytes(byte buffer[], int requiredBytes, int timeoutMillis) {
         }
     }
 
+    //
+    // After all is done, check to see if the desired number of bytes were read
+    //
     if (readIndex < requiredBytes) {
         this->discardInBuffer();
         logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read requested bytes. Required=" << requiredBytes << ", Actual=" << readIndex << endl;

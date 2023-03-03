@@ -1,3 +1,7 @@
-../../target/test/archiveDumper.o: archiveDumper.cpp \
- ../vws/ArchivePacket.h ../vws/WeatherTypes.h \
- ../vws/VantageProtocolConstants.h ../vws/Weather.h ../vws/Measurement.h
+../../target/test/loopDumper.o: loopDumper.cpp ../vws/LoopPacket.h \
+ ../vws/Measurement.h ../vws/VantageProtocolConstants.h \
+ ../vws/WeatherTypes.h ../vws/Loop2Packet.h \
+ ../vws/VantageProtocolConstants.h ../vws/VantageDecoder.h \
+ ../vws/VantageEepromConstants.h ../vws/VantageLogger.h \
+ ../vws/CurrentWeather.h ../vws/Loop2Packet.h ../vws/LoopPacket.h \
+ ../vws/Weather.h

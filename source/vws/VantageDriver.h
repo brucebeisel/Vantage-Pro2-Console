@@ -41,9 +41,10 @@ public:
     /**
      * Constructor.
      * 
-     * @param archiveManager The archive manager that will maintain the file containing the raw archive packets
-     * @param cwp            The publisher that will be called each time a current weather record has been received
      * @param station        The object that handles the command protocols with the Vantage console
+     * @param configuration  The object that handles configuration changes and retrievals with the console
+     * @param archiveManager The archive manager that will maintain the file containing the raw archive packets
+     * @param eventManager   The event manager that will provide commands coming in from clients
      */
     VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager, EventManager & eventManager);
 

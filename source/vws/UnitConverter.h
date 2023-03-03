@@ -22,7 +22,7 @@
 namespace vws {
 
 /**
- * Class that contains utility routines to convert from Vantage weather console units to WeatherSense units.
+ * Class that contains utility routines to convert from Vantage weather console units to other units.
  */
 class UnitConverter {
 public:

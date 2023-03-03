@@ -34,7 +34,7 @@ public:
     static const std::string & forecastString(int rule);
 
 private:
-    ForecastRule();
+    ForecastRule() = delete;
     /**
      * The array of forecast strings.
      */

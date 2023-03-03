@@ -89,7 +89,6 @@ BitConverter::getBytes(int value, byte buffer[], int index, int nbytes, bool lit
 
         buffer[bufferIndex] = (value >> (BITS_PER_BYTE * i)) & ONE_BYTE_MASK;
     }
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +125,5 @@ BitConverter::getUpperNibble(byte value) {
 int
 BitConverter::getLowerNibble(byte value) {
     return value & LOWER_NIBBLE_MASK;
-
 }
 }

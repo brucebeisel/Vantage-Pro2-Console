@@ -27,6 +27,8 @@ namespace vws {
 class VantageLogger;
 /**
  * Class that decodes and stores the data from the High/Low packet.
+ * Note that the current Davis Instruments philosophy does not seem to include
+ * this packet.
  */
 class HiLowPacket {
 public:

@@ -126,20 +126,20 @@ public:
 
 private:
     /**
-     * Calculate the display threshold value from the provided properties.
+     * Calculate the display threshold value from the provided offset and scale.
      *
-     * @param eeprom The EEPROM value of the threshold
-     * @param offset The value to be subtracted from the EEPROM value
-     * @param offset The value by which to divide the EEPROM
+     * @param eepromValue The EEPROM value of the threshold
+     * @param offset      The value to be subtracted from the EEPROM value
+     * @param scale       The value by which to divide the EEPROM
      */
     static double fromEepromToActualThreshold(int eepromValue, int offset, double scale);
 
     /**
-     * Calculate the ACTUAL threshold value from the provided properties.
+     * Calculate the ACTUAL threshold value from the provided offset and scale.
      *
      * @param actualValue The ACTUAL value of the threshold
-     * @param offset The value to be subtracted from the ACTUAL value
-     * @param offset The value by which to divide the ACTUAL
+     * @param offset      The value to be subtracted from the ACTUAL value
+     * @param scale       The value by which to divide the ACTUAL
      */
     static int fromActualToEepromThreshold(double actualValue, int offset, int scale);
 

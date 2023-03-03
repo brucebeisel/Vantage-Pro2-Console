@@ -28,8 +28,13 @@ class EventManager;
 
 /**
  * The CommandSocket is a class that uses a thread to read commands from a TCP socket
- * and pass them onto the the event manager. This class will accept and manager multiple
+ * and pass them onto the the event manager. This class will accept and manage multiple
  * connections.
+ * The command must be formatted as follows:
+ * VANTAGE ######\n
+ * {command}
+ *
+ * where VANTAGE is a fixed string and ###### is a zero filled number indicating the length of the command that follows.
  */
 class CommandSocket : ResponseHandler {
 public:
@@ -48,6 +53,7 @@ public:
 
     /**
      * Format the console's response per the Vantage Weather Station protocol.
+     * This is the implementation of the ResponseHandler interface.
      *
      * @param commandData The data that was the command
      * @param response    The response to be sent back to the client

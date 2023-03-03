@@ -50,6 +50,8 @@ class DominantWindDirections {
 public:
     /**
      * Constructor.
+     *
+     * @param checkpointDir The directory into which the checkpoint file will be written
      */
     DominantWindDirections(const std::string & checkpointDir);
 
@@ -73,6 +75,12 @@ public:
      * @param headings The directions that the wind has been blowing most often in the last hour
      */
     void dominantDirectionsForPastHour(std::vector<std::string> & headings) const;
+
+    /**
+     * Get the dominant wind directions from the last hour.
+     *
+     * @return The list of dominant wind direction as compass points (N, SSW, etc)
+     */
     const std::vector<std::string> & dominantDirectionsForPastHour() const;
 
     /**

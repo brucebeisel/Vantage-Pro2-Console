@@ -42,16 +42,17 @@ public:
      * @return True if the CRC in the buffer is correct
      */
     static bool checkCRC(const byte * buffer, int length);
+
 private:
     /**
      * Constructor with no implementation.
      */
-    VantageCRC();
+    VantageCRC() = delete;
 
     /**
      * Destructor with no implementation.
      */
-    virtual ~VantageCRC();
+    virtual ~VantageCRC() = delete;
 };
 }
 #endif /* VANTAGE_CRC_H */

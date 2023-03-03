@@ -66,8 +66,25 @@ public:
      */
     bool decodeLoop2Packet(const byte[]);
 
+    /**
+     * Get the underlying data buffer that contains the values.
+     *
+     * @return The internal buffer
+     */
     const byte *                     getPacketData() const;
+
+    /**
+     * Get the type of this packet.
+     * It can only be one value, but by providing this method it decouples the hard-coded value from the caller.
+     *
+     * @return The LOOP2 packet type
+     */
     int                              getPacketType() const;
+
+    /**
+     * Get various values from the LOOP2 packet.
+     * Note that any return value that is a Measurement<> template can have and invalid value.
+     */
     const Measurement<Speed> &       getWindSpeed() const;
     const Measurement<Heading> &     getWindDirection() const;
     const Measurement<Speed> &       getWindGust10Minute() const;

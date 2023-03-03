@@ -403,11 +403,8 @@ VantageStationNetwork::formatJSON() const {
     oss << " \"monitoredStationIds\" : [";
     for (int i = 0; i < MAX_STATIONS; i++) {
         if ((monitoredStationMask & (1 << i)) != 0) {
-            if (!first)
-                oss << ", ";
-
+            if (!first) oss << ", "; else first = false;
             oss << (i + 1);
-            first = false;
         }
     }
     oss << "], ";
@@ -418,11 +415,8 @@ VantageStationNetwork::formatJSON() const {
 
     first = true;
     for (auto stationId : console.connectedStations) {
-        if (!first)
-            oss << ", ";
-
+        if (!first) oss << ", "; else first = false;
         oss << stationId;
-        first = false;
     }
     oss << " ], ";
 
@@ -430,11 +424,8 @@ VantageStationNetwork::formatJSON() const {
 
     first = true;
     for (auto sensor : console.connectedSensors) {
-        if (!first)
-            oss << ", ";
-
+        if (!first) oss << ", "; else first = false;
         oss << "{ \"sensor\" : \"" << sensor.name << "\", \"type\" : \"" << SENSOR_NAMES[sensor.sensorType] << "\" }";
-        first = false;
     }
 
     oss << "] }, ";
@@ -443,8 +434,7 @@ VantageStationNetwork::formatJSON() const {
 
     bool firstChain = true;
     for (auto chain : chains) {
-        if (!firstChain)
-            oss << ", ";
+        if (!firstChain) oss << ", "; else firstChain = false;
 
         oss << " { \"name\" : \"" << chain.second.name << "\", ";
 
@@ -452,11 +442,8 @@ VantageStationNetwork::formatJSON() const {
 
         first = true;
         for (auto id : chain.second.repeaters) {
-            if (!first)
-                oss << ", ";
-
+            if (!first) oss << ", "; else first = false;
             oss << "\"" << repeaterIdEnum.valueToString(id) << "\"";
-            first = false;
         }
 
         oss << "], ";
@@ -464,14 +451,11 @@ VantageStationNetwork::formatJSON() const {
         oss << "\"stations\" : [ ";
         first = true;
         for (auto id : chain.second.chainStations) {
-            if (!first)
-                oss << ", ";
-
+            if (!first) oss << ", "; else first = false;
             oss << id;
         }
 
         oss << "] } ";
-        firstChain = false;
     }
 
     oss << "], ";
@@ -480,21 +464,15 @@ VantageStationNetwork::formatJSON() const {
 
     bool firstRepeater = true;
     for (auto repeater : repeaters) {
-        if (!firstRepeater)
-            oss << ", ";
+        if (!firstRepeater) oss << ", "; else firstRepeater = false;
 
         oss << " { \"repeater\" : \"" << repeaterIdEnum.valueToString(repeater.second.repeaterId) << "\", \"stations\" : [";
         first = true;
         for (auto stationId : repeater.second.connectedStations) {
-            if (!first)
-                oss << ", ";
-
+            if (!first) oss << ", "; else first = false;
             oss << stationId;
-            first = false;
         }
         oss << " } ";
-
-        firstRepeater = false;
     }
 
     oss << " ], ";
@@ -502,8 +480,7 @@ VantageStationNetwork::formatJSON() const {
     oss << " \"stations\" : [ ";
     bool firstStation = true;
     for (auto station : stations) {
-        if (!firstStation)
-            oss << ", ";
+        if (!firstStation) oss << ", "; else firstStation = false;
 
         oss << " { \"station\" : \"" << station.second.name
             << "\", \"type\" : \"" << stationTypeEnum.valueToString(station.second.stationData.stationType) << "\", "
@@ -511,16 +488,11 @@ VantageStationNetwork::formatJSON() const {
 
         first = true;
         for (auto sensor : station.second.connectedSensors) {
-            if (!first)
-                oss << ", ";
-
+            if (!first) oss << ", "; else first = false;
             oss << "{ \"sensor\" : \"" << sensor.name << "\", \"type\" : \"" << SENSOR_NAMES[sensor.sensorType] << "\" }";
-            first = false;
         }
 
         oss << "] } ";
-
-        firstStation = false;
     }
     oss << " ] ";
 

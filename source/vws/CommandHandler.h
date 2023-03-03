@@ -36,6 +36,13 @@ public:
 
     /**
      * Constructor.
+     *
+     * @param station               The weather station object that is used to send commands to the console
+     * @param configurator          The object that manages many EEPROM related commands
+     * @param archiveManager        The object that is used to retrieve historical data from the archive
+     * @param network               The object that is used to read and write the weather station network data
+     * @param alarmManager          The object that manages the alarm thresholds and alarm triggered states
+     * @param currentWeatherManager The object that is used to retrieve historical current weather data
      */
     CommandHandler(VantageWeatherStation & station,
                    VantageConfiguration & configurator,
@@ -53,8 +60,8 @@ public:
      * Handle a command and write the response to the provided string.
      * Note that there will always be a response.
      *
-     * @param command  The command in JSON text form
-     * @param response The string to which the JSON response will be written
+     * @param       command  The command in JSON text form
+     * @param [out] response The string to which the JSON response will be written
      */
     void handleCommand(const std::string & command, std::string & response);
 
@@ -63,12 +70,27 @@ private:
     /**
      * Generic handler that calls the provided member function and builds the response JSON
      *
-     * @param handle      Pointer to the VantageWeatherStation member function that executes the command on the console
-     * @param commandName The name of the command from the JSON string
-     * @param response    The string into which the response will be written
+     * @param handler         Pointer to the VantageWeatherStation member function that executes the command on the console
+     * @param commandName     The name of the command from the JSON string
+     * @param [out] response  The string into which the response will be written
      */
     void handleNoArgCommand(bool (VantageWeatherStation::*handler)(), const std::string & commandName, std::string & response);
 
+    //
+    // The following handler methods process commands received on the interface socket. Each method has a preceding comment
+    // that indicates which console command is being processed by the handler. There are also comment blocks that
+    // identify the sections of the Vantage Serial Protocol that document the command.
+    // The methods have one of two signatures:
+    //
+    // void methodName(commandName, response)
+    // @param commandName The name of the command to be processed
+    // @param [out]       The response to the command
+    //
+    // void methodName(commandName, arguments, response)
+    // @param commandName The name of the command to be processed
+    // @param arguments   The arguments to the command
+    // @param [out]       The response to the command
+    //
     ///////////////////////
     // Testing commands  //
     ///////////////////////
@@ -80,6 +102,11 @@ private:
     void handleQueryFirmware(const std::string & commandName, std::string & response);
 
     // RECEIVERS
+    // Note that this command will have inconsistent results. For a period of time after the console exits
+    // the "Receiving From..." screen the receiver list will contain data. After the time period is over
+    // the receiver list will be empty. Only putting the console back on the "Receiving From..." screen will
+    // the receiver list populate with data again.
+    //
     void handleQueryReceiverList(const std::string & commandName, std::string & response);
 
     // RXCHECK
