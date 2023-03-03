@@ -44,7 +44,7 @@ CalibrationAdjustmentsPacket::~CalibrationAdjustmentsPacket() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
-    uint8 value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
+    int8 value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
     insideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
 
     value8 = BitConverter::toInt8(buffer, OUTSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
