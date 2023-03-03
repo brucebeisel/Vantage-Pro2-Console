@@ -190,19 +190,24 @@ void
 CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<CurrentWeather> & list) {
     list.clear();
 
-    struct tm tm;
-    Weather::localtime(time(0), tm);
+    if (hours >= 24)
+        hours = 23;
+
+    DateTime archiveTime = time(0) - (3600 * hours);
 
     ios_base::openmode mode = ios::binary | ios::in;
 
-    for (int currentHour = tm.tm_hour - hours; currentHour <= tm.tm_hour; currentHour++) {
-        string filename = archiveFilenameByHour(currentHour);
+    for (int i = 0; i < hours; i++) {
+        struct tm tm;
+        Weather::localtime(archiveTime, tm);
+        string filename = archiveFilenameByHour(tm.tm_hour);
         logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading loop archive file " << filename << endl;
         ifstream ifs(filename.c_str(), mode);
         if (ifs.is_open()) {
             readArchiveFile(ifs, list);
             ifs.close();
         }
+        archiveTime += 3600;
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Current weather archive records found: " << list.size() << endl;
     }
 }

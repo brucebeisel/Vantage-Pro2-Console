@@ -160,10 +160,10 @@ Archive query
     ++ "DMPAFT"    Downloads the records after a specified date and time. See the sections X.6 and X.4 for more details.
 
 4. EEPROM Commands
-    + "GETEE"     Reads the full 4K EEPROM in one data block.
-    + "EEWR <EE address-hex> <EE data-hex>"
+    - "GETEE"     Reads the full 4K EEPROM in one data block.
+    - "EEWR <EE address-hex> <EE data-hex>"
                 Writes one byte of data to the specified address in the EEPROM.
-    + "EERD <EE address-hex> <number of bytes to read-hex>"
+    - "EERD <EE address-hex> <number of bytes to read-hex>"
                 Reads the specified number of bytes starting at the specified address. Results are given as hex strings, one byte per line.
     ++ "EEBWR <EE address-hex> <number of bytes to write-hex>"
                 Writes data to the EEPROM. The data and CRC are given in binary format following an ACK response.
@@ -201,14 +201,14 @@ Archive query
     ++ "GETTIME"   Retrieves the current time and date on the Vantage console. Data is sent in a binary format.
     ++ "SETPER <Archive interval in minutes-decimal>"
                 Sets the Vantage archive interval. Valid values are (1, 5, 10, 15, 30, 60, and 120).
-    + "STOP"      Disables the creation of archive records.
-    + "START"     Enables the creation of archive records, if they have been halted with the STOP command.
+    ++ "STOP"      Disables the creation of archive records.
+    ++ "START"     Enables the creation of archive records, if they have been halted with the STOP command.
     ++ "NEWSETUP"  Re-initialize the Vantage console after making certain configuration changes.
     ++ "LAMPS <Lamp state: '0' (off) or '1' (on)>"
     
 8. Addition Commands using EEPROM
     + get-timezones - Gets the list of timezone that the console supports
-    + query-archive - Query the historical archive
+    ++ query-archive - Query the historical archive
     ++ query-current-weather - Query the current weather, also know as LOOP packet, archive
     ++ query-network - Query the configuration of the devices that make up with weather station
     update-network - Update the network data with user inputs
