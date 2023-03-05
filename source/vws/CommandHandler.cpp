@@ -204,6 +204,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "stop-archiving") {
             handleNoArgCommand(&VantageWeatherStation::stopArchiving, commandName, response);
         }
+        else if (commandName == "update-alarm-thresholds") {
+            handleUpdateAlarmThresholds(commandName, argumentList, response);
+        }
         else if (commandName == "update-archive-period") {
             handleUpdateArchivePeriod(commandName, argumentList, response);
         }
@@ -846,7 +849,7 @@ CommandHandler::handleGetTimezones(const std::string & commandName, std::string 
     bool first = true;
     for (string tzName : timezoneList) {
         if (!first) oss << ", "; else first = false;
-        oss << tzName;
+        oss << "\"" << tzName << "\"";
     }
 
     oss << "] }";

@@ -643,11 +643,11 @@ VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustments
 
     calibrationAdjustments.encodePacket(buffer);
 
-    cout << "Calibration Adjustment buffer: " << Weather::dumpBuffer(buffer, sizeof(buffer)) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Calibration Adjustment buffer: " << Weather::dumpBuffer(buffer, sizeof(buffer)) << endl;
 
-    //if (!eepromBinaryWrite(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE))
-        //return false;
-    //else
+    if (!eepromBinaryWrite(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE))
+        return false;
+    else
         return true;
 }
 

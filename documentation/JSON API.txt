@@ -217,7 +217,7 @@ Archive query
     + update-alarm-threshold - Update the alarm thresholds
     update-configuration-data - Update the configuration data that are needed to start using the weather station.
     ++ query-calibration-adjustments - Query the calibration adjustment section of the EEPROM
-    update-calibration-adjustments - Update the calibration adjustment section of the EEPROM
+    ++ update-calibration-adjustments - Update the calibration adjustment section of the EEPROM
     
     OTHER ITEMS: wind sample count (transmission quality)
 
