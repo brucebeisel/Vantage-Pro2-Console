@@ -378,7 +378,7 @@ VantageConfiguration::retrieveAllConfigurationData() {
             << ", \"temperatureUnits\" : \"" << temperatureUnitsEnum.valueToString(unitsSettings.temperatureUnits) << "\""
             << ", \"windUnits\" : \"" << windUnitsEnum.valueToString(unitsSettings.windUnits) << "\""
             << " }, \"setupBits\" : {"
-            << " \"24hourMode\" : " << setupBits.is24HourMode
+            << " \"clock24hourMode\" : " << setupBits.is24HourMode
             << ", \"currentlyAm\" : " << setupBits.isCurrentlyAM
             << ", \"dayMonthDisplay\" : " << setupBits.isDayMonthDisplay
             << ", \"eastLongitude\" : " << setupBits.isEastLongitude
