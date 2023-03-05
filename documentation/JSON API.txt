@@ -208,7 +208,7 @@ Archive query
     ++ "LAMPS <Lamp state: '0' (off) or '1' (on)>"
     
 8. Addition Commands using EEPROM
-    + get-timezones - Gets the list of timezone that the console supports
+    ++ get-timezones - Gets the list of timezone that the console supports
     ++ query-archive - Query the historical archive
     ++ query-current-weather - Query the current weather, also know as LOOP packet, archive
     query-network - Query the configuration of the devices that make up with weather station (Needs load/store from file capability)

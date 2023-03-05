@@ -337,11 +337,14 @@ string
 VantageConfiguration::retrieveAllConfigurationData() {
     byte buffer[EEPROM_CONFIG_SIZE];
     byte logFinalTemperatureValue;
+    byte secondaryWindCupSizeValue;
 
     //
     // Read the entire configuration section of the EEPROM
     //
-    if (station.eepromBinaryRead(1U, sizeof(buffer), buffer) && station.eepromBinaryRead(VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS, 1, &logFinalTemperatureValue)) {
+    if (station.eepromBinaryRead(1U, sizeof(buffer), buffer) &&
+        station.eepromBinaryRead(VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS, 1, &secondaryWindCupSizeValue) &&
+        station.eepromBinaryRead(VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS, 1, &logFinalTemperatureValue)) {
         PositionData positionData;
         SetupBits setupBits;
         UnitsSettings unitsSettings;
@@ -350,10 +353,10 @@ VantageConfiguration::retrieveAllConfigurationData() {
         decodeSetupBits(buffer, VantageEepromConstants::EE_SETUP_BITS_ADDRESS - 1, setupBits);
         decodeUnitsSettings(buffer, VantageEepromConstants::EE_UNIT_BITS_ADDRESS - 1, unitsSettings);
         decodeTimeSettings(buffer, VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS - 1, timeSettings);
-        secondaryWindCupSize = buffer[VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS - 1] & 0x3;
         rainSeasonStartMonth = static_cast<ProtocolConstants::Month>(buffer[VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS - 1]);
         retransmitId = buffer[VantageEepromConstants::EE_RETRANSMIT_ID_ADDRESS - 1];
         logFinalTemperature = logFinalTemperatureValue != 0;
+        secondaryWindCupSize = secondaryWindCupSizeValue & 0x3;
 
         ostringstream oss;
         oss << std::boolalpha
