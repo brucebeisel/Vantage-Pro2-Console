@@ -213,9 +213,7 @@ CalibrationAdjustmentsPacket::findJsonArray(json root, const string & name, T & 
 bool
 CalibrationAdjustmentsPacket::parseJSON(const std::string & s) {
 
-    json argument = json::parse(s.begin(), s.end());
-
-    json adjustments = argument.at("adjustments");
+    json adjustments = json::parse(s.begin(), s.end());
 
     if (!findJsonValue(adjustments, "insideTemperatureAdjustment", this->insideTemperatureAdjustment))
         return false;
