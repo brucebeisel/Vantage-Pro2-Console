@@ -639,19 +639,16 @@ VantageWeatherStation::retrieveCalibrationAdjustments(CalibrationAdjustmentsPack
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustmentsPacket & calibrationAdjustments) {
-    /*
     byte buffer[CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE];
 
     calibrationAdjustments.encodePacket(buffer);
 
-    if (!eepromBinaryWrite(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE))
-        return false;
-    else
+    cout << "Calibration Adjustment buffer: " << Weather::dumpBuffer(buffer, sizeof(buffer)) << endl;
+
+    //if (!eepromBinaryWrite(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE))
+        //return false;
+    //else
         return true;
-        */
-    // TODO uncomment the real code
-    cout << "Packet with updated calibration adjustments: " << calibrationAdjustments.formatJSON() << endl;
-    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
