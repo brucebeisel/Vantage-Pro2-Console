@@ -111,7 +111,7 @@ CalibrationAdjustmentsPacket::encodePacket(byte buffer[]) const {
     BitConverter::getBytes(outsideHumidityAdjustment, buffer, OUTSIDE_HUMIDITY_ADJUSTMENT_OFFSET, 1);
 
     for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++)
-        BitConverter::getBytes(extraHumidityAdjustments[i], buffer, EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET, 1);
+        BitConverter::getBytes(extraHumidityAdjustments[i], buffer, EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET + i, 1);
 
     BitConverter::getBytes(windDirectionAdjustment, buffer, WIND_DIRECTION_ADJUSTMENT_OFFSET, 2);
 }
