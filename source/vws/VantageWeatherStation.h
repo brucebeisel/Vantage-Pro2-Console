@@ -331,7 +331,7 @@ public:
 
     bool updateCalibrationAdjustments(const CalibrationAdjustmentsPacket & calibrationData);
 
-    bool updateBarometerOffsetAndElevation(Pressure baroOffsetInHg, int elevationFeet);
+    bool updateBarometerReadingAndElevation(Pressure baroReadingInHg, int elevationFeet);
 
     bool retrieveBarometerCalibrationParameters(BarometerCalibrationParameters & baroCalParams);
 

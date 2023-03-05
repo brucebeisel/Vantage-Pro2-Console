@@ -639,6 +639,7 @@ VantageWeatherStation::retrieveCalibrationAdjustments(CalibrationAdjustmentsPack
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustmentsPacket & calibrationAdjustments) {
+    /*
     byte buffer[CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE];
 
     calibrationAdjustments.encodePacket(buffer);
@@ -647,14 +648,18 @@ VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustments
         return false;
     else
         return true;
+        */
+    // TODO uncomment the real code
+    cout << "Packet with updated calibration adjustments: " << calibrationAdjustments.formatJSON() << endl;
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::updateBarometerOffsetAndElevation(Pressure baroOffsetInHg, int elevationFeet) {
+VantageWeatherStation::updateBarometerReadingAndElevation(Pressure baroReadingInHg, int elevationFeet) {
     ostringstream command;
-    command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroOffsetInHg * BAROMETER_SCALE) << " " << elevationFeet;
+    command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroReadingInHg * BAROMETER_SCALE) << " " << elevationFeet;
 
     //
     // TODO This is the one "OK" response command that can also receive a NACK response.

@@ -207,8 +207,11 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "update-archive-period") {
             handleUpdateArchivePeriod(commandName, argumentList, response);
         }
-        else if (commandName == "update-baro-offset-elevation") {
-            handleUpdateBarometerOffsetAndElevation(commandName, argumentList, response);
+        else if (commandName == "update-baro-reading-elevation") {
+            handleUpdateBarometerReadingAndElevation(commandName, argumentList, response);
+        }
+        else if (commandName == "update-cal-adjustments") {
+            handleUpdateCalibrationAdjustments(commandName, argumentList, response);
         }
         else if (commandName == "update-units") {
             handleUpdateUnits(commandName, argumentList, response);
@@ -403,9 +406,32 @@ CommandHandler::handleQueryCalibrationAdjustments(const std::string & commandNam
     if (station.retrieveCalibrationAdjustments(packet))
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << packet.formatJSON();
     else
-        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" }";
+        oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"Console command error\" }";
 
     response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleUpdateCalibrationAdjustments(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    if (argumentList.size() == 0) {
+        response.append(FAILURE_TOKEN + "," + DATA_TOKEN + " : { \"error\" : \"Missing argument\" }");
+        return;
+    }
+
+    CalibrationAdjustmentsPacket packet;
+    if (packet.parseJSON(argumentList[0].second)) {
+        if (station.updateCalibrationAdjustments(packet)) {
+            response.append(SUCCESS_TOKEN);
+        }
+        else {
+            response.append(FAILURE_TOKEN + "," + DATA_TOKEN + " : { \"error\" : \"Console command error\" }");
+        }
+    }
+    else {
+        response.append(FAILURE_TOKEN + "," + DATA_TOKEN + " : { \"error\" : \"Invalid calibration adjustment JSON\" }");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -437,25 +463,25 @@ CommandHandler::handleQueryBarometerCalibrationParameters(const std::string & co
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleUpdateBarometerOffsetAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+CommandHandler::handleUpdateBarometerReadingAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     ostringstream oss;
 
-    Pressure baroOffsetInHg = 99.0;
+    Pressure baroReadingInHg = 99.0;
     int elevationFeet = -9999;
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "elevation") {
             elevationFeet = atoi(arg.second.c_str());
         }
-        else if (arg.first == "baroOffset") {
-            baroOffsetInHg = atof(arg.second.c_str());
+        else if (arg.first == "baroReading") {
+            baroReadingInHg = atof(arg.second.c_str());
         }
     }
 
-    if (baroOffsetInHg == 99.0 || elevationFeet == -9999) {
+    if (baroReadingInHg == 99.0 || elevationFeet == -9999) {
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"missing argument\" }";
     }
-    else if (station.updateBarometerOffsetAndElevation(baroOffsetInHg, elevationFeet)) {
+    else if (station.updateBarometerReadingAndElevation(baroReadingInHg, elevationFeet)) {
         oss << SUCCESS_TOKEN;
     }
     else {

@@ -91,22 +91,25 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         // Initialize objects that require it before entering the main loop
         //
         logger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
-        if (!currentWeatherPublisher.initialize())
-            return;
-
         //
         // The driver must be initialized before any communication is performed with the console
         //
         if (!driver.initialize())
             return;
 
+        if (!currentWeatherPublisher.initialize())
+            return;
+
         if (!network.initializeNetwork())
             return;
 
-        if (!commandSocket.initialize())
+        if (!alarmManager.initialize())
             return;
 
-        if (!alarmManager.initialize())
+        //
+        // Initialize the command socket last so that all other's are initialed before any commands are received
+        //
+        if (!commandSocket.initialize())
             return;
 
         logger.log(VantageLogger::VANTAGE_INFO) << "Entering driver's main loop" << endl;

@@ -109,6 +109,10 @@ bool
 VantageDriver::retrieveConfiguration() {
 
 
+    //
+    // Get the setup bits first so that the size of the rain bucket is saved before any LOOP packets
+    // or archive packets are received.
+    //
     SetupBits setupBits;
     if (!configuration.retrieveSetupBits(setupBits)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve setup bits" << endl;

@@ -20,8 +20,11 @@
 
 #include "Weather.h"
 #include "VantageProtocolConstants.h"
+#include "json.hpp"
+
 
 namespace vws {
+class VantageLogger;
 
 class CalibrationAdjustmentsPacket {
 public:
@@ -87,15 +90,19 @@ private:
      */
     static constexpr Temperature TEMPERATURE_ADJUSTMENT_SCALE = 10.0;
 
-    Temperature insideTemperatureAdjustment;
-    Temperature outsideTemperatureAdjustment;
-    Temperature extraTemperatureAdjustments[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
-    Temperature soilTemperatureAdjustments[ProtocolConstants::MAX_SOIL_TEMPERATURES];
-    Temperature leafTemperatureAdjustments[ProtocolConstants::MAX_LEAF_TEMPERATURES];
-    int16       insideHumidityAdjustment;
-    int16       outsideHumidityAdjustment;
-    int16       extraHumidityAdjustments[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
-    int16       windDirectionAdjustment;
+    template<typename T> bool findJsonValue(nlohmann::json root, const std::string & name, T & value);
+    template<typename T> bool findJsonArray(nlohmann::json root, const std::string & name, T & array, int size);
+
+    Temperature     insideTemperatureAdjustment;
+    Temperature     outsideTemperatureAdjustment;
+    Temperature     extraTemperatureAdjustments[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
+    Temperature     soilTemperatureAdjustments[ProtocolConstants::MAX_SOIL_TEMPERATURES];
+    Temperature     leafTemperatureAdjustments[ProtocolConstants::MAX_LEAF_TEMPERATURES];
+    int16           insideHumidityAdjustment;
+    int16           outsideHumidityAdjustment;
+    int16           extraHumidityAdjustments[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
+    int16           windDirectionAdjustment;
+    VantageLogger & logger;
 };
 
 } /* namespace vws */

@@ -126,7 +126,7 @@ VantageConfiguration::updatePosition(const PositionData & position) {
     BitConverter::getBytes(value16, buffer, 2, 2);
 
     if (station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
-        if (station.updateBarometerOffsetAndElevation(baroOffset, position.elevation)) {
+        if (station.updateBarometerReadingAndElevation(baroOffset, position.elevation)) {
             success = true;
         }
     }
@@ -311,7 +311,6 @@ VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
     if (station.eepromBinaryRead(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, 1, &buffer)) {
         decodeSetupBits(&buffer, 0, setupBits);
         success = true;
-        saveRainBucketSize(setupBits.rainBucketSizeType);
     }
 
     return success;
@@ -328,6 +327,7 @@ VantageConfiguration::decodeSetupBits(const byte * buffer, int offset, SetupBits
         setupBits.isNorthLatitude = (buffer[offset] & 0x40) != 0;
         setupBits.isEastLongitude = (buffer[offset] & 0x80) != 0;
         setupBits.rainBucketSizeType = static_cast<ProtocolConstants::RainBucketSizeType>((buffer[offset] >> 4) & 0x3);
+        saveRainBucketSize(setupBits.rainBucketSizeType);
 
 }
 

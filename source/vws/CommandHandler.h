@@ -144,12 +144,14 @@ private:
     // EEBRD
     void handleQueryCalibrationAdjustments(const std::string & commandName, std::string & response);
 
+    void handleUpdateCalibrationAdjustments(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     //////////////////////////
     // Calibration Commands //
     //////////////////////////
 
     // BAR=
-    void handleUpdateBarometerOffsetAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateBarometerReadingAndElevation(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     // BARDATA
     void handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response);

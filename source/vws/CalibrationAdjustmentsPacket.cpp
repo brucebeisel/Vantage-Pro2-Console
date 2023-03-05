@@ -18,20 +18,23 @@
 
 #include <sstream>
 #include "BitConverter.h"
+#include "VantageLogger.h"
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 namespace vws {
 using namespace ProtocolConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CalibrationAdjustmentsPacket::CalibrationAdjustmentsPacket() :
-                                                                    insideTemperatureAdjustment(0.0),
-                                                                    outsideTemperatureAdjustment(0.0),
-                                                                    insideHumidityAdjustment(0),
-                                                                    outsideHumidityAdjustment(0),
-                                                                    windDirectionAdjustment(0) {
+CalibrationAdjustmentsPacket::CalibrationAdjustmentsPacket() : insideTemperatureAdjustment(0.0),
+                                                               outsideTemperatureAdjustment(0.0),
+                                                               insideHumidityAdjustment(0),
+                                                               outsideHumidityAdjustment(0),
+                                                               windDirectionAdjustment(0),
+                                                               logger(VantageLogger::getLogger("CalibrationAdjustmentsPacket")) {
 
 }
 
@@ -126,22 +129,16 @@ CalibrationAdjustmentsPacket::formatJSON() const {
 
     bool first = true;
     for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
-        if (!first)
-            oss << ", ";
-
+        if (!first) oss << ", "; else first = false;
         oss << extraTemperatureAdjustments[i];
-        first = false;
     }
     oss << " ], "
         << "\"soilTemperatureAdjustments\" : [ ";
 
     first = true;
     for (int i = 0; i < MAX_SOIL_TEMPERATURES; i++) {
-        if (!first)
-            oss << ", ";
-
+        if (!first) oss << ", "; else first = false;
         oss << soilTemperatureAdjustments[i];
-        first = false;
     }
 
     oss << " ], "
@@ -149,11 +146,8 @@ CalibrationAdjustmentsPacket::formatJSON() const {
 
     first = true;
     for (int i = 0; i < MAX_LEAF_TEMPERATURES; i++) {
-        if (!first)
-            oss << ", ";
-
+        if (!first) oss << ", "; else first = false;
         oss << leafTemperatureAdjustments[i];
-        first = false;
     }
     oss << " ], "
         << "\"insideHumidityAdjustment\" : " << insideHumidityAdjustment << ", "
@@ -162,11 +156,8 @@ CalibrationAdjustmentsPacket::formatJSON() const {
 
     first = true;
     for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++) {
-        if (!first)
-            oss << ", ";
-
+        if (!first) oss << ", "; else first = false;
         oss << extraHumidityAdjustments[i];
-        first = false;
     }
 
     oss << " ], ";
@@ -180,10 +171,80 @@ CalibrationAdjustmentsPacket::formatJSON() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+template<typename T>
+bool
+CalibrationAdjustmentsPacket::findJsonValue(json root, const string & name, T & value) {
+    bool success = false;
+    auto valuePtr = root.find(name);
+    if (valuePtr != root.end()) {
+        value = *valuePtr;
+        success = true;
+    }
+    else
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
+
+    return success;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+template<typename T>
+bool
+CalibrationAdjustmentsPacket::findJsonArray(json root, const string & name, T & array, int size) {
+    bool success = false;
+    auto jlist = root.find(name);
+    if (jlist != root.end()) {
+        if ((*jlist).size() == size) {
+            std::copy((*jlist).begin(), (*jlist).end(), array);
+            success = true;
+        }
+        else {
+            logger.log(VantageLogger::VANTAGE_WARNING) << "JSON array has the wrong size. Expecting " << size << " received " << (*jlist).size() << endl;
+        }
+    }
+    else
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
+
+    return success;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
 CalibrationAdjustmentsPacket::parseJSON(const std::string & s) {
-    return true;
 
+    json argument = json::parse(s.begin(), s.end());
+
+    json adjustments = argument.at("adjustments");
+
+    if (!findJsonValue(adjustments, "insideTemperatureAdjustment", this->insideTemperatureAdjustment))
+        return false;
+
+    if (!findJsonValue(adjustments, "outsideTemperatureAdjustment", this->outsideTemperatureAdjustment))
+        return false;
+
+    if (!findJsonValue(adjustments, "insideHumidityAdjustment", this->insideHumidityAdjustment))
+        return false;
+
+    if (!findJsonValue(adjustments, "outsideHumidityAdjustment", this->outsideHumidityAdjustment))
+        return false;
+
+    if (!findJsonArray(adjustments, "extraTemperatureAdjustments", this->extraTemperatureAdjustments, MAX_EXTRA_TEMPERATURES))
+        return false;
+
+    if (!findJsonArray(adjustments, "soilTemperatureAdjustments", this->soilTemperatureAdjustments, MAX_SOIL_TEMPERATURES))
+        return false;
+
+    if (!findJsonArray(adjustments, "leafTemperatureAdjustments", this->leafTemperatureAdjustments, MAX_LEAF_TEMPERATURES))
+        return false;
+
+    if (!findJsonArray(adjustments, "extraHumidityAdjustments", this->extraHumidityAdjustments, MAX_EXTRA_HUMIDITIES))
+        return false;
+
+    if (!findJsonValue(adjustments, "windDirectionAdjustment", this->windDirectionAdjustment))
+        return false;
+
+    return true;
 }
 
 } /* namespace vws */
