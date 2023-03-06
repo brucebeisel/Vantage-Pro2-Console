@@ -114,7 +114,7 @@ VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
         firstLoopPacketReceived = true;
         detectSensors(packet);
         console.consoleType = station.getConsoleType();
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "============== NETWORK ================" << endl << formatJSON() << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "============== NETWORK ================" << endl << formatConfigurationJSON() << endl;
     }
 
     return true;
@@ -494,7 +494,7 @@ VantageStationNetwork::writeStatusFile(struct tm & tm) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-VantageStationNetwork::formatJSON() const {
+VantageStationNetwork::formatConfigurationJSON() const {
     ostringstream oss;
 
     oss << "{ \"weatherStationNetwork\" : { ";
@@ -598,6 +598,32 @@ VantageStationNetwork::formatJSON() const {
 
     oss << " } }";
 
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+VantageStationNetwork::formatStatusJSON(DateTime startDate, DateTime endDate) const {
+    ostringstream oss;
+
+    oss << "{ \"networkStatus\" [ ";
+    ifstream ifs(networkStatusFile.c_str());
+
+    if (ifs.is_open()) {
+        string line;
+        bool first = true;
+        while (std::getline(ifs, line)) {
+            // TODO compare date in the line with the startDate and endDate arguments
+            if (!first) oss << ", "; else first = false;
+            oss << line;
+        }
+        ifs.close();
+    }
+    else
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not open Network Status file for writing: " << networkStatusFile << endl;
+
+    oss << " ] }";
     return oss.str();
 }
 

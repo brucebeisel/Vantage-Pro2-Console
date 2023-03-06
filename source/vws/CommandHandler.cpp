@@ -183,8 +183,11 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-highlows") {
             handleQueryHighLows(commandName, response);
         }
-        else if (commandName == "query-network") {
-            handleQueryNetwork(commandName, response);
+        else if (commandName == "query-network-config") {
+            handleQueryNetworkConfiguration(commandName, response);
+        }
+        else if (commandName == "query-network-status") {
+            handleQueryNetworkStatus(commandName, argumentList, response);
         }
         else if (commandName == "query-receiver-list") {
             handleQueryReceiverList(commandName, response);
@@ -870,10 +873,10 @@ CommandHandler::handleGetTimezones(const std::string & commandName, std::string 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandHandler::handleQueryNetwork(const std::string & commandName, std::string & response) {
+CommandHandler::handleQueryNetworkConfiguration(const std::string & commandName, std::string & response) {
     ostringstream oss;
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
-    oss << network.formatJSON();
+    oss << network.formatConfigurationJSON();
 
     response.append(oss.str());
 }
@@ -907,6 +910,39 @@ CommandHandler::handleUpdateAlarmThresholds(const std::string & commandName, con
 void
 CommandHandler::handleInitialization(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     response.append(SUCCESS_TOKEN);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryNetworkStatus(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    DateTime startTime = 0;
+    DateTime endTime = 0;
+
+    /*
+    struct tm tm = {0};
+
+    for (CommandArgument arg : argumentList) {
+        if (arg.first == "start-time") {
+            std::stringstream ss(arg.second);
+            ss >> std::get_time(&tm, "%Y-%m-%dT%T");
+            startTime = mktime(&tm);
+        }
+        else if (arg.first == "end-time") {
+            std::stringstream ss(arg.second);
+            ss >> std::get_time(&tm, "%Y-%m-%dT%T");
+            endTime = mktime(&tm);
+        }
+    }
+
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the archive with times: " << startTime << " - " << endTime << endl;
+    */
+
+    ostringstream oss;
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+    oss << network.formatStatusJSON(0, 0);
+
+    response = oss.str();
 }
 
 } // End namespace

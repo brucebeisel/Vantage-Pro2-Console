@@ -162,11 +162,18 @@ public:
     bool initializeNetwork();
 
     /**
-     * Format the JSON message containing the network data.
+     * Format the JSON message containing the network configuration data.
      *
-     * @param string The JSON message
+     * @return The JSON message
      */
-    std::string formatJSON() const;
+    std::string formatConfigurationJSON() const;
+
+    /**
+     * Format the JSON message containing the network status data in the given date range.
+     *
+     * @return The JSON message
+     */
+    std::string formatStatusJSON(DateTime startDate, DateTime endDate) const;
 
     /**
      * Process a LOOP packet as part of the LoopPacketListener interface.

@@ -26,6 +26,8 @@
 
 namespace vws {
 class VantageLogger;
+class LoopPacket;
+class Loop2Packet;
 
 /**
  * This file will be use to evaluate the different types of data that the console contains so that
@@ -123,7 +125,7 @@ struct ConsoleConfigurationData {
  * Most of these settings are changed using the EEPROM commands, but some have their own dedicated
  * commands to set the values.
  */
-class VantageConfiguration {
+class VantageConfiguration : public VantageWeatherStation::LoopPacketListener {
 public:
     /**
      * Constructor.
@@ -137,18 +139,22 @@ public:
      */
     virtual ~VantageConfiguration();
 
+    virtual bool processLoopPacket(const LoopPacket & loopPacket);
+    virtual bool processLoop2Packet(const Loop2Packet & loopPacket);
+
     /**
      * Read the configuration settings from the EEPROM.
      */
-    bool retrieveConfigurationParameters();
+    //bool retrieveConfigurationParameters();
 
     /**
      * Update the position of the console.
      *
-     * @param position  The position of the console (not the ISS)
+     * @param position   The position of the console (not the ISS)
+     * @param initialize If true, the NEWSETUP command will be sent to the console
      * @return True if the position was updated
      */
-    bool updatePosition(const PositionData & position);
+    bool updatePosition(const PositionData & position, bool initialize = true);
 
     /**
      * Retrieve the position of the console.
@@ -182,9 +188,10 @@ public:
      * only change the displayed values, not the values reported in the serial protocol.
      *
      * @param unitsSettings The settings for all of the unit of display
+     * @param initialize    If true, the NEWSETUP command will be sent to the console
      * @return True if the units setting were written successfully
      */
-    bool updateUnitsSettings(const UnitsSettings & unitsSettings);
+    bool updateUnitsSettings(const UnitsSettings & unitsSettings, bool intialize = true);
 
     /**
      * Retrieve the units settings.
@@ -197,10 +204,11 @@ public:
     /**
      * Update the general setup bits.
      *
-     * @param setupBits The bits that will be written to the console
+     * @param setupBits  The bits that will be written to the console
+     * @param initialize If true, the NEWSETUP command will be sent to the console
      * @return True if the bits were successfully updated
      */
-    bool updateSetupBits(const SetupBits & setupBits);
+    bool updateSetupBits(const SetupBits & setupBits, bool initialize = true);
 
     /**
      * Retrieve the general setup bits.
@@ -233,6 +241,7 @@ private:
 
     VantageWeatherStation &  station;
     VantageLogger &          logger;
+    Measurement<Pressure>    lastAtmosphericPressure;
     int                      secondaryWindCupSize;
     ProtocolConstants::Month rainSeasonStartMonth;
     StationId                retransmitId;

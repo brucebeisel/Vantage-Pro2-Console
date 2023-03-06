@@ -26,6 +26,7 @@
 #include "VantageEnums.h"
 #include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
+#include "Loop2Packet.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -97,6 +98,7 @@ static constexpr int NUM_TIME_ZONES = sizeof(TIME_ZONES) / sizeof(TIME_ZONES[0])
 VantageConfiguration::VantageConfiguration(VantageWeatherStation & station) : station(station),
                                                                               rainSeasonStartMonth(ProtocolConstants::Month::JANUARY),
                                                                               secondaryWindCupSize(0),
+                                                                              lastAtmosphericPressure(0.0),
                                                                               retransmitId(0),
                                                                               logFinalTemperature(false),
                                                                               logger(VantageLogger::getLogger("VantageConfiguration")) {
@@ -111,27 +113,61 @@ VantageConfiguration::~VantageConfiguration() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::updatePosition(const PositionData & position) {
+VantageConfiguration::processLoopPacket(const LoopPacket & packet) {
+    // This class does not have interest in any fields in the LOOP packet
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageConfiguration::processLoop2Packet(const Loop2Packet & packet) {
+
+    lastAtmosphericPressure = packet.getAtmPressure();
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageConfiguration::updatePosition(const PositionData & position, bool initialize) {
     bool success = false;
+
     char buffer[4];
-
-    // TODO Ensure that the BAR CAL value is the proper values as input to BAR=
-    station.eepromBinaryRead(VantageEepromConstants::EE_BAR_CAL_ADDRESS, 2, buffer);
-    double baroOffset = static_cast<double>(BitConverter::toInt16(buffer, 0)) / ProtocolConstants::BAROMETER_SCALE;
-
-    logger.log(VantageLogger::VANTAGE_INFO) << "Using " << baroOffset << " as barometer offset when updating position" << endl;
-
     int16 value16 = std::lround(position.latitude * LAT_LON_SCALE);
     BitConverter::getBytes(value16, buffer, 0, 2);
 
     value16 = std::lround(position.longitude * LAT_LON_SCALE);
     BitConverter::getBytes(value16, buffer, 2, 2);
 
-    if (station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
-        //if (station.updateBarometerReadingAndElevation(baroOffset, position.elevation)) {
-        //    success = true;
-        //}
+    if (!station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to update latitude/longitude in EEPROM" << endl;
+        return false;
     }
+
+    if (station.eepromBinaryRead(VantageEepromConstants::EE_BAR_CAL_ADDRESS, 2, buffer)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read BAR_CAL EEPROM value" << endl;
+        return false;
+    }
+
+    //
+    // Calculate the trusted barometric pressure from the latest raw pressure value and the calibration
+    // offset currently stored in the EEPROM
+    //
+    Pressure trustedBarometerReading = static_cast<Pressure>(BitConverter::toInt16(buffer, 0)) / BAROMETER_SCALE;
+    if (lastAtmosphericPressure.isValid())
+        trustedBarometerReading += lastAtmosphericPressure.getValue();
+    else
+        trustedBarometerReading = 0.0;
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Using " << trustedBarometerReading << " as trusted barometer value when updating position" << endl;
+
+    if (station.updateBarometerReadingAndElevation(trustedBarometerReading, position.elevation)) {
+        success = true;
+    }
+
+    if (initialize)
+        station.initializeSetup();
 
     return success;
 }
@@ -230,7 +266,7 @@ VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSe
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::updateUnitsSettings(const UnitsSettings & unitsSettings) {
+VantageConfiguration::updateUnitsSettings(const UnitsSettings & unitsSettings, bool initialize) {
     bool success = false;
     byte buffer[2];
     buffer[0] = static_cast<int>(unitsSettings.baroUnits) & 0x3;
@@ -241,14 +277,17 @@ VantageConfiguration::updateUnitsSettings(const UnitsSettings & unitsSettings) {
 
     buffer[1] = ~buffer[0];
 
-    if (station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, buffer, sizeof(buffer)))
-        //
-        // Though the protocol document does not specifically say to initialize the console when
-        // the units are changed, it did not work without it
-        //
-        return station.initializeSetup();
-    else
+    if (!station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, buffer, sizeof(buffer)))
         return false;
+
+    //
+    // Though the protocol document does not specifically say to initialize the console when
+    // the units are changed, it did not work without it
+    //
+    if (initialize)
+        return station.initializeSetup();
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -279,7 +318,7 @@ VantageConfiguration::decodeUnitsSettings(const byte * buffer, int offset, Units
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageConfiguration::updateSetupBits(const SetupBits & setupBits) {
+VantageConfiguration::updateSetupBits(const SetupBits & setupBits, bool initialize) {
     bool success = false;
     byte buffer;
 
@@ -290,17 +329,20 @@ VantageConfiguration::updateSetupBits(const SetupBits & setupBits) {
     buffer |= setupBits.isNorthLatitude ? 0x40 : 0;
     buffer |= setupBits.isEastLongitude ? 0x80 : 0;
     buffer |= (static_cast<int>(setupBits.rainBucketSizeType) & 0x3) << 4;
-    if (station.eepromBinaryWrite(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, &buffer, 1)) {
-        saveRainBucketSize(setupBits.rainBucketSizeType);
 
-        //
-        // Per the serial protocol documentation, when the setup bits byte is changed, the
-        // console must be reinitialized.
-        //
-        success = station.initializeSetup();
-    }
+    if (!station.eepromBinaryWrite(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, &buffer, 1))
+        return false;
 
-    return success;
+    saveRainBucketSize(setupBits.rainBucketSizeType);
+
+    //
+    // Per the serial protocol documentation, when the setup bits byte is changed, the
+    // console must be reinitialized.
+    //
+    if (initialize)
+        return station.initializeSetup();
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -502,18 +544,15 @@ VantageConfiguration::updateAllConfigurationData(const std::string & jsonString)
     findJsonValue(misc, "logFinalTemperature", logFinalTemperature);
 
     bool rv = true;
-    bool results = updatePosition(positionData);
+    bool results = updatePosition(positionData, false);
     rv = rv && results;
-    results = updateSetupBits(setupBits);
+    results = updateSetupBits(setupBits, false);
     rv = rv && results;
     results = updateTimeSettings(timeSettings);
     rv = rv && results;
-    results = updateUnitsSettings(unitsSettings);
+    results = updateUnitsSettings(unitsSettings, false);
     rv = rv && results;
 
-    // rain season start
-    // retransmit
-    // log final temperature
     byte value;
     value = static_cast<byte>(rainSeasonStartMonth);
     results = station.eepromBinaryWrite(VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS, &value, 1);
@@ -525,6 +564,9 @@ VantageConfiguration::updateAllConfigurationData(const std::string & jsonString)
 
     value = logFinalTemperature ? 1 : 0;
     results = station.eepromBinaryWrite(VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS, &value, 1);
+    rv = rv && results;
+
+    results = station.initializeSetup();
     rv = rv && results;
 
     return rv;
