@@ -47,8 +47,6 @@ public:
         virtual bool processLoop2Packet(const Loop2Packet & packet) = 0;
     };
 
-    static const int MAX_STATION_RECEPTION = 100;
-
     struct ConsoleDiagnosticReport {
         int packetCount;
         int missedPacketCount;
@@ -114,11 +112,6 @@ public:
      */
     bool wakeupStation();
 
-    /**
-     * Read the configuration data from the station that is needed for other commands, such as the archive period or rain collector.
-     */
-    bool retrieveConfigurationData();
-
     //
     // The following methods correspond to the commands in section VIII of the Vantage Serial Protocol Document, version 2.6.1
     //
@@ -161,30 +154,30 @@ public:
     /**
      * Retrieve the date of the console firmware.
      *
-     * @param firmwareDate An optional string to return the firmware date. NULL pointer is allowed.
+     * @param firmwareDate The string into which the firmware date will be copied
      *
      * @return True if the date was retrieved successfully
      */
-    bool retrieveFirmwareDate(std::string * firmwareDate = NULL);
+    bool retrieveFirmwareDate(std::string & firmwareDate);
 
     /**
      * Retrieve the list of receivers the console can hear. Note that this is not the set of stations that the console is
      * reading from. There can be other sensor stations in the area that do not belong to this Vantage station.
      *
-     * @param sensorStations An optional vector into which the sensor station list will be written. NULL pointer is allowed.
+     * @param sensorStations The vector into which the list of receiver that can be heard is copied.
      *
      * @return True if the list of sensor stations was retrieved
      */
-    bool retrieveReceiverList(std::vector<StationId> * sensorStations);
+    bool retrieveReceiverList(std::vector<StationId> & sensorStations);
 
     /**
      * Retrieve the version of the console firmware.
      *
-     * @param firmwareVersion An optional string to return the firmware version. nullptr is allowed.
+     * @param firmwareDate The string into which the firmware version will be copied
      *
      * @return True if the version was retrieved successfully
      */
-    bool retrieveFirmwareVersion(std::string * firmwareVersion);
+    bool retrieveFirmwareVersion(std::string & firmwareVersion);
 
     /////////////////////////////////////////////////////////////////////////////////
     // End Testing Commands
@@ -493,14 +486,6 @@ public:
     // End of Configuration Commands
     /////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Calculate the percentage of packets that have been received over the past "archive period" minutes.
-     * Note that this percentage is only calculated for the station that contains the wind anemometer.
-     *
-     * @param archivePacketWindSamples The number of samples as reported by the Archive packet
-     */
-    int calculateStationReceptionPercentage(int archivePacketWindSamples) const;
-
     ConsoleType getConsoleType() const;
 
 private:
@@ -634,27 +619,9 @@ private:
     SerialPort &               serialPort;               // The serial port object that communicates with the console
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
     LoopPacketListenerList     loopPacketListenerList;   // The list of Loop Packet listeners
-
     ConsoleType                consoleType;
-
-
-    //
-    // TBD All of the member below are not required to communicate with the console
-    //     Question: Should all of this information be moved to a class that manages the weather station?
-    //               Noting that a weather station is comprised of all the the sensor stations, repeaters and sensors.
-    //               If another class is create, this class should probably be renamed to VantageConsole or similar.
-    //
-
-    //
-    // TBD Could add a ConsoleStatus class that hold various things, come of which change, others are static
-    //
-    float                      consoleBatteryVoltage;    // The console battery voltage received in the LOOP packet
-    std::string                firmwareDate;             // TBD - Is this really needed?
-    std::string                firmwareVersion;          // TBD - Is this really needed?
-    std::vector<StationId>     stationIds;               // The ID of the stations that the console can hear
-    int                        windSensorStationId;      // The ID of the sensor station containing the anemometer
-    int                        archivePeriod;            // The archive period used to calculate reception percentage
     VantageLogger &            logger;
+
 };
 }
 

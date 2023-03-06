@@ -216,6 +216,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "update-cal-adjustments") {
             handleUpdateCalibrationAdjustments(commandName, argumentList, response);
         }
+        else if (commandName == "update-configuration-data") {
+            handleUpdateConfigurationData(commandName, argumentList, response);
+        }
         else if (commandName == "update-units") {
             handleUpdateUnits(commandName, argumentList, response);
         }
@@ -272,7 +275,7 @@ CommandHandler::handleQueryFirmware(const std::string & commandName, std::string
 
     ostringstream oss;
 
-    if (station.retrieveFirmwareDate(&firmwareDate) && station.retrieveFirmwareVersion(&firmwareVersion))
+    if (station.retrieveFirmwareDate(firmwareDate) && station.retrieveFirmwareVersion(firmwareVersion))
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"firmwareVersion\" : \"" << firmwareVersion << "\", \"firmwareDate\" : \"" << firmwareDate << "\"}";
     else
         oss << FAILURE_TOKEN << "," << DATA_TOKEN << " : { \"error\" : \"console command error\" } ";;
@@ -287,7 +290,7 @@ CommandHandler::handleQueryReceiverList(const std::string & commandName, std::st
     std::vector<StationId> sensorStations;
 
     ostringstream oss;
-    if (station.retrieveReceiverList(&sensorStations)) {
+    if (station.retrieveReceiverList(sensorStations)) {
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"receiverList\" : [";
         bool first = true;
         for (int id : sensorStations) {
@@ -769,6 +772,13 @@ CommandHandler::handleQueryConfigurationData(const std::string & commandName, st
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << data;
 
     response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleUpdateConfigurationData(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    response.append(SUCCESS_TOKEN);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -71,7 +71,7 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         VantageWeatherStation station(serialPort);
         ArchiveManager archiveManager(archiveFile, station);
         VantageConfiguration configuration(station);
-        VantageStationNetwork network(station, "");
+        VantageStationNetwork network(station, archiveManager, "");
         AlarmManager alarmManager(station);
         CommandHandler commandHandler(station, configuration, archiveManager, network, alarmManager, currentWeatherManager);
         EventManager eventManager(commandHandler);

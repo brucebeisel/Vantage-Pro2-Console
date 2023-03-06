@@ -215,7 +215,7 @@ Archive query
     update-network - Update the network data with user inputs
     ++ query-alarm-thresholds - Query the current alarm thresholds
     + update-alarm-threshold - Update the alarm thresholds
-    update-configuration-data - Update the configuration data that are needed to start using the weather station.
+    + update-configuration-data - Update the configuration data that are needed to start using the weather station.
     ++ query-calibration-adjustments - Query the calibration adjustment section of the EEPROM
     ++ update-calibration-adjustments - Update the calibration adjustment section of the EEPROM
     

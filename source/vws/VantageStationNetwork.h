@@ -26,6 +26,7 @@
 
 namespace vws {
 class VantageLogger;
+class ArchiveManager;
 
 
 /**
@@ -142,7 +143,7 @@ public:
      * @param station     The object used to communicate with the console
      * @param networkFile The file to read/write the network configuration data
      */
-    VantageStationNetwork(VantageWeatherStation & station, const std::string & networkFile);
+    VantageStationNetwork(VantageWeatherStation & station, ArchiveManager & archiveManager, const std::string & networkFile);
 
     /**
      * Destructor.
@@ -182,6 +183,7 @@ public:
 private:
     static constexpr int UNKNOWN_STATION_ID = 0;
     static constexpr int MAX_REPEATERS_PER_CHAIN = 4;
+    static const int MAX_STATION_RECEPTION = 100;
 
 
     bool retrieveStationInfo();
@@ -191,6 +193,7 @@ private:
     void createRepeaterChains();
     void decodeStationData();
     void detectSensors(const LoopPacket & packet);
+    void calculateStationReceptionPercentage();
 
     typedef std::map<RepeaterId,RepeaterChain> RepeaterChainMap;
     typedef std::map<RepeaterId,Repeater> RepeaterMap;
@@ -198,6 +201,7 @@ private:
 
     VantageLogger &         logger;
     VantageWeatherStation & station;
+    ArchiveManager &        archiveManager;
     std::string             networkFile;                     // The file in which the network configuration is stored. This includes user inputs.
     byte                    monitoredStationMask;            // The mask of station IDs that the console is monitoring
 
@@ -209,6 +213,7 @@ private:
 
     StationId               windStationId;                   // The station ID of the sensor station that has the wind sensor
     int                     windStationLinkQuality;          // The current link quality of the sensor station that has the wind sensor
+    int                     linkQualityCalculationMday;      // The day of the month for which the last link quality was calculated
     bool                    firstLoopPacketReceived;         // Whether the first LOOP packet has been received
 };
 

@@ -203,6 +203,8 @@ private:
     //
     void handleQueryConfigurationData(const std::string & commandName, std::string & response);
 
+    void handleUpdateConfigurationData(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     void handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleQueryLoopArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);

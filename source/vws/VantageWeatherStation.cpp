@@ -54,9 +54,6 @@ static constexpr int NUM_PROTECTED_EEPROM_BYTES = sizeof(protectedEepromBytes) /
 ////////////////////////////////////////////////////////////////////////////////
 VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
                                                                         consoleType(VANTAGE_PRO_2),
-                                                                        consoleBatteryVoltage(0.0),
-                                                                        archivePeriod(0),
-                                                                        windSensorStationId(0),
                                                                         logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
 
@@ -124,23 +121,6 @@ VantageWeatherStation::wakeupStation() {
     }
 
     return awake;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-VantageWeatherStation::retrieveConfigurationData() {
-    if (!wakeupStation())
-        return false;
-
-    if (!eepromBinaryRead(VantageEepromConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
-        return false;
-
-    archivePeriod = BitConverter::toUint8(buffer, 0);
-
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Configuration Data: " <<  " Archive Period: " << archivePeriod << endl;
-
-    return true;
 }
 
 //
@@ -230,21 +210,15 @@ VantageWeatherStation::performReceiveTest() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::retrieveFirmwareVersion(std::string * fwVersion) {
+VantageWeatherStation::retrieveFirmwareVersion(std::string & firmwareVersion) {
     logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieving firmware version" << endl;
-    if (!sendStringValueCommand(FIRMWARE_VERSION_CMD, firmwareVersion))
-        return false;
-
-    if (fwVersion != nullptr)
-        *fwVersion = firmwareVersion;
-
-    return true;
+    return sendStringValueCommand(FIRMWARE_VERSION_CMD, firmwareVersion);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::retrieveReceiverList(std::vector<StationId> * sensorStations) {
+VantageWeatherStation::retrieveReceiverList(std::vector<StationId> & sensorStations) {
 
     if (!sendOKedCommand(RECEIVER_LIST_CMD))
        return false;
@@ -253,18 +227,11 @@ VantageWeatherStation::retrieveReceiverList(std::vector<StationId> * sensorStati
     if (!serialPort.readBytes(&stations, 1))
         return false;
 
-    if (sensorStations != nullptr)
-        sensorStations->clear();
-
-    stationIds.clear();
+    sensorStations.clear();
 
     for (int i = 0; i < ProtocolConstants::MAX_STATION_ID; i++) {
-        if ((stations & (1 << i)) != 0) {
-            if (sensorStations != nullptr)
-                sensorStations->push_back(i + 1);
-
-            stationIds.push_back(i + 1);
-        }
+        if ((stations & (1 << i)) != 0)
+            sensorStations.push_back(i + 1);
     }
 
     return true;
@@ -273,16 +240,10 @@ VantageWeatherStation::retrieveReceiverList(std::vector<StationId> * sensorStati
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::retrieveFirmwareDate(std::string * fwDate) {
+VantageWeatherStation::retrieveFirmwareDate(std::string & firmwareDate) {
     logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieving firmware date" << endl;
 
-    if (!sendStringValueCommand(FIRMWARE_DATE_CMD, firmwareDate))
-        return false;
-
-    if (fwDate != nullptr)
-        *fwDate = firmwareDate;
-
-    return true;
+    return sendStringValueCommand(FIRMWARE_DATE_CMD, firmwareDate);
 }
 
 //
@@ -301,9 +262,6 @@ VantageWeatherStation::currentValuesLoop(int records) {
     Loop2Packet loop2Packet;
     bool terminateLoop = false;
     bool resetNeeded = false;
-
-    if (stationIds.size() == 0)
-        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Reading current values without any sensor stations connected" << endl;
 
     ostringstream command;
     command << LPS_CMD << " " << (records * 2);
@@ -1023,23 +981,6 @@ VantageWeatherStation::controlConsoleLamp(bool on) {
 //
 // EEPROM retrieval commands
 //
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-int
-VantageWeatherStation::calculateStationReceptionPercentage(int archivePacketWindSamples) const {
-    static const int stationId = 1;
-
-    float archivePeriodSeconds = archivePeriod * 60.0F;
-    float stationIndex = stationId - 1.0F;
-    int maxPackets = static_cast<int>(archivePeriodSeconds / ((41.0F + stationIndex) / 16.0F));
-
-    int stationReception = (archivePacketWindSamples * 100) / maxPackets;
-    if (stationReception > MAX_STATION_RECEPTION)
-        stationReception = MAX_STATION_RECEPTION;
-
-    return stationReception;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

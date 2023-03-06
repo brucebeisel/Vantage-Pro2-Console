@@ -19,6 +19,7 @@
 
 #include <cmath>
 
+#include "json.hpp"
 #include "BitConverter.h"
 #include "VantageDecoder.h"
 #include "VantageEepromConstants.h"
@@ -27,6 +28,7 @@
 #include "VantageProtocolConstants.h"
 
 using namespace std;
+using json = nlohmann::json;
 
 namespace vws {
 using namespace ProtocolConstants;
@@ -126,9 +128,9 @@ VantageConfiguration::updatePosition(const PositionData & position) {
     BitConverter::getBytes(value16, buffer, 2, 2);
 
     if (station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
-        if (station.updateBarometerReadingAndElevation(baroOffset, position.elevation)) {
-            success = true;
-        }
+        //if (station.updateBarometerReadingAndElevation(baroOffset, position.elevation)) {
+        //    success = true;
+        //}
     }
 
     return success;
@@ -386,7 +388,7 @@ VantageConfiguration::retrieveAllConfigurationData() {
             << ", \"windCupLarge\" : " << setupBits.isWindCupLarge
             << ", \"rainBucketSize\" : \"" << rainBucketSizeTypeEnum.valueToString(setupBits.rainBucketSizeType) << "\""
             << " }, \"miscellaneous\" : {"
-            << " \"2ndWindCupSize\" : " << secondaryWindCupSize
+            << " \"secondaryWindCupSize\" : " << secondaryWindCupSize
             << ", \"rainSeasonStartMonth\" : \"" << monthEnum.valueToString(rainSeasonStartMonth) << "\""
             << ", \"retransmitId\" : " << retransmitId
             << ", \"logFinalTemperature\" : " << logFinalTemperature
@@ -415,4 +417,116 @@ VantageConfiguration::getTimeZoneOptions(std::vector<std::string> & timezoneList
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+template<typename T>
+bool
+findJsonValue(json root, const string & name, T & value) {
+    bool success = false;
+    auto valuePtr = root.find(name);
+    if (valuePtr != root.end()) {
+        value = *valuePtr;
+        success = true;
+    }
+    //else
+        //logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
+
+    return success;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageConfiguration::updateAllConfigurationData(const std::string & jsonString) {
+    PositionData positionData;
+    SetupBits setupBits;
+    UnitsSettings unitsSettings;
+    TimeSettings timeSettings;
+
+    json configuration = json::parse(jsonString.begin(), jsonString.end());
+
+    json position = configuration.at("position");
+
+    findJsonValue(position, "latitude", positionData.latitude);
+    findJsonValue(position, "longitude", positionData.longitude);
+    findJsonValue(position, "elevation", positionData.elevation);
+
+    json timeElement = configuration.at("time");
+
+    findJsonValue(timeElement, "gmtOffsetMinutes", timeSettings.gmtOffsetMinutes);
+    findJsonValue(timeElement, "timezoneName", timeSettings.timezoneName);
+    findJsonValue(timeElement, "manualDst", timeSettings.manualDaylightSavingsTime);
+    findJsonValue(timeElement, "manualDstOn", timeSettings.manualDaylightSavingsTimeOn);
+    findJsonValue(timeElement, "useGmtOffset", timeSettings.useGmtOffset);
+
+    json units = configuration.at("units");
+    string enumString;
+
+    findJsonValue(units, "baroUnits", enumString);
+    unitsSettings.baroUnits = barometerUnitsEnum.stringToValue(enumString);
+
+    findJsonValue(units, "elevationUnits", enumString);
+    unitsSettings.elevationUnits = elevationUnitsEnum.stringToValue(enumString);
+
+    findJsonValue(units, "rainUnits", enumString);
+    unitsSettings.rainUnits = rainUnitsEnum.stringToValue(enumString);
+
+    findJsonValue(units, "temperatureUnits", enumString);
+    unitsSettings.temperatureUnits = temperatureUnitsEnum.stringToValue(enumString);
+
+    findJsonValue(units, "windUnits", enumString);
+    unitsSettings.windUnits = windUnitsEnum.stringToValue(enumString);
+
+    json setup = configuration.at("setup");
+
+    findJsonValue(setup, "clock24hourMode", setupBits.is24HourMode);
+    setupBits.isCurrentlyAM = true;
+    findJsonValue(setup, "dayMonthDisplay", setupBits.isDayMonthDisplay);
+    setupBits.isEastLongitude = positionData.longitude >= 0.0;
+    setupBits.isNorthLatitude = positionData.latitude >= 0.0;
+    findJsonValue(setup, "windCupLarge", setupBits.isWindCupLarge);
+
+    findJsonValue(units, "rainBucketSize", enumString);
+    setupBits.rainBucketSizeType = rainBucketSizeTypeEnum.stringToValue(enumString);
+
+    json misc = configuration.at("miscellaneous");
+
+    if (setupBits.isWindCupLarge)
+        secondaryWindCupSize = 2;
+    else
+        secondaryWindCupSize = 1;
+
+    findJsonValue(misc, "rainSeasonStartMonth", enumString);
+    rainSeasonStartMonth = monthEnum.stringToValue(enumString);
+    findJsonValue(misc, "retransmitId", retransmitId);
+    findJsonValue(misc, "logFinalTemperature", logFinalTemperature);
+
+    bool rv = true;
+    bool results = updatePosition(positionData);
+    rv = rv && results;
+    results = updateSetupBits(setupBits);
+    rv = rv && results;
+    results = updateTimeSettings(timeSettings);
+    rv = rv && results;
+    results = updateUnitsSettings(unitsSettings);
+    rv = rv && results;
+
+    // rain season start
+    // retransmit
+    // log final temperature
+    byte value;
+    value = static_cast<byte>(rainSeasonStartMonth);
+    results = station.eepromBinaryWrite(VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS, &value, 1);
+    rv = rv && results;
+
+    value = secondaryWindCupSize;
+    results = station.eepromBinaryWrite(VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS, &value, 1);
+    rv = rv && results;
+
+    value = logFinalTemperature ? 1 : 0;
+    results = station.eepromBinaryWrite(VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS, &value, 1);
+    rv = rv && results;
+
+    return rv;
+}
 }

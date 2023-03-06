@@ -27,7 +27,9 @@
 #include "VantageEnums.h"
 #include "VantageLogger.h"
 #include "VantageWeatherStation.h"
+#include "ArchiveManager.h"
 #include "WeatherTypes.h"
+#include "Weather.h"
 
 using namespace std;
 
@@ -51,13 +53,15 @@ static const char *SENSOR_NAMES[] = {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageStationNetwork::VantageStationNetwork(VantageWeatherStation & station, const string & file) : station(station),
-                                                                                                     monitoredStationMask(0),
-                                                                                                     networkFile(file),
-                                                                                                     windStationLinkQuality(0),
-                                                                                                     windStationId(UNKNOWN_STATION_ID),
-                                                                                                     firstLoopPacketReceived(false),
-                                                                                                     logger(VantageLogger::getLogger("VantageStationNetwork")) {
+VantageStationNetwork::VantageStationNetwork(VantageWeatherStation & station, ArchiveManager & am, const string & file) : station(station),
+                                                                                                                          archiveManager(am),
+                                                                                                                          monitoredStationMask(0),
+                                                                                                                          networkFile(file),
+                                                                                                                          windStationLinkQuality(0),
+                                                                                                                          windStationId(UNKNOWN_STATION_ID),
+                                                                                                                          firstLoopPacketReceived(false),
+                                                                                                                          linkQualityCalculationMday(0),
+                                                                                                                          logger(VantageLogger::getLogger("VantageStationNetwork")) {
 
 }
 
@@ -118,8 +122,10 @@ VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
 bool
 VantageStationNetwork::processLoop2Packet(const Loop2Packet & packet) {
     //
-    // Nothing in the LOOP2 packet is of interest to this class
+    // Nothing in the LOOP2 packet is of interest to this class.
+    // Using it as a pseudo timer.
     //
+    calculateStationReceptionPercentage();
     return true;
 }
 
@@ -389,6 +395,65 @@ VantageStationNetwork::retrieveStationInfo() {
     }
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageStationNetwork::calculateStationReceptionPercentage() {
+
+    DateTime now = time(0);
+    struct tm tm;
+    Weather::localtime(now, tm);
+
+    //
+    // Only calculate the link quality once a day
+    //
+    if (linkQualityCalculationMday == tm.tm_mday)
+        return;
+
+    linkQualityCalculationMday = tm.tm_mday;
+
+    ArchivePeriod archivePeriod;
+    station.retrieveArchivePeriod(archivePeriod);
+
+    int archivePeriodMinutes = static_cast<int>(archivePeriod);
+
+    float archivePeriodSeconds = archivePeriodMinutes * 60.0F;
+    float stationIndex = windStationId - 1.0F;
+
+    int maxPacketsPerArchive = static_cast<int>(archivePeriodSeconds / ((41.0F + stationIndex) / 16.0F));
+
+    vector<ArchivePacket> list;
+
+    now -= 86400;
+    Weather::localtime(now, tm);
+    tm.tm_hour = 0;
+    tm.tm_min = 0;
+    tm.tm_sec = 0;
+
+    DateTime startTime = mktime(&tm);
+
+    tm.tm_hour = 23;
+    tm.tm_min = 59;
+    tm.tm_sec = 59;
+
+    DateTime endTime = mktime(&tm);
+
+    archiveManager.queryArchiveRecords(startTime, endTime, list);
+
+    int windSamplesForDay = 0;
+    for (ArchivePacket & packet : list)
+        windSamplesForDay += packet.getWindSampleCount();
+
+    int maxPacketsForDay = maxPacketsPerArchive * list.size();
+
+    windStationLinkQuality = (windSamplesForDay * 100) / maxPacketsForDay;
+    if (windStationLinkQuality > MAX_STATION_RECEPTION)
+        windStationLinkQuality = MAX_STATION_RECEPTION;
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Link quality for the wind sensor station at ID " << windStationId << " for the date " << (tm.tm_mon + 1) << "/" << tm.tm_mday << " is " << windStationLinkQuality << endl;
+    // TODO Preserve this data in a file somewhere
 }
 
 ////////////////////////////////////////////////////////////////////////////////

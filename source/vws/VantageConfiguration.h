@@ -219,6 +219,8 @@ public:
 
     std::string retrieveAllConfigurationData();
 
+    bool updateAllConfigurationData(const std::string & s);
+
 private:
     void decodePosition(byte * buffer, int offset, PositionData & positionData);
     void decodeTimeSettings(const byte * buffer, int offset, TimeSettings & timeSettings);
