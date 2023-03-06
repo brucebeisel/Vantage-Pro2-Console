@@ -56,7 +56,7 @@ sigHandler(int sig) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArchiveDir, const string & serialPortName, int baudRate) {
+consoleThreadEntry(const string & dataDirectory, const string & serialPortName, int baudRate) {
     VantageLogger & logger = VantageLogger::getLogger("Vantage Main");
     logger.log(VantageLogger::VANTAGE_INFO) << "Starting console thread" << endl;
 
@@ -66,12 +66,12 @@ consoleThreadEntry(const string & archiveFile, const std::string & loopPacketArc
         // Create all of the runtime object that never get destroyed
         //
         CurrentWeatherSocket currentWeatherPublisher;
-        CurrentWeatherManager currentWeatherManager(loopPacketArchiveDir, currentWeatherPublisher);
+        CurrentWeatherManager currentWeatherManager(dataDirectory, currentWeatherPublisher);
         SerialPort serialPort(serialPortName, baudRate);
         VantageWeatherStation station(serialPort);
-        ArchiveManager archiveManager(archiveFile, station);
+        ArchiveManager archiveManager(dataDirectory, station);
         VantageConfiguration configuration(station);
-        VantageStationNetwork network(station, archiveManager, "");
+        VantageStationNetwork network(dataDirectory, station, archiveManager);
         AlarmManager alarmManager(station);
         CommandHandler commandHandler(station, configuration, archiveManager, network, alarmManager, currentWeatherManager);
         EventManager eventManager(commandHandler);
@@ -139,22 +139,21 @@ main(int argc, char *argv[]) {
 #endif
 
     if (argc < 3 || argc > 4) {
-        cerr << "Usage: vws <weather station serial port> <archive file> <loop packet archive dir> [log file]" << endl;
+        cerr << "Usage: vws <weather station serial port> <data directory> [log file]" << endl;
         exit(1);
     }
 
     const string serialPortName(argv[1]);
-    const string archiveFile(argv[2]);
-    const string loopPacketArchiveDir(argv[3]);
+    const string dataDirectory(argv[2]);
 
-    if (argc == 5) {
-        const string logFile(argv[4]);
+    if (argc == 4) {
+        const string logFile(argv[3]);
         ofstream logStream(logFile.c_str(), ios::app | ios::ate | ios::out);
         VantageLogger::setLogStream(logStream);
     }
 
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
-    thread consoleThread(consoleThreadEntry, archiveFile, loopPacketArchiveDir, serialPortName, 19200);
+    thread consoleThread(consoleThreadEntry, dataDirectory, serialPortName, 19200);
 
     consoleThread.join();
 }

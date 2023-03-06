@@ -18,7 +18,9 @@
 #include "VantageStationNetwork.h"
 
 #include <sys/stat.h>
+#include <time.h>
 #include <iostream>
+#include <fstream>
 
 #include "BitConverter.h"
 #include "LoopPacket.h"
@@ -53,10 +55,11 @@ static const char *SENSOR_NAMES[] = {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageStationNetwork::VantageStationNetwork(VantageWeatherStation & station, ArchiveManager & am, const string & file) : station(station),
+VantageStationNetwork::VantageStationNetwork(const string & dataDirectory, VantageWeatherStation & station, ArchiveManager & am) : station(station),
                                                                                                                           archiveManager(am),
                                                                                                                           monitoredStationMask(0),
-                                                                                                                          networkFile(file),
+                                                                                                                          networkConfigFile(dataDirectory + "/" + NETWORK_CONFIG_FILE),
+                                                                                                                          networkStatusFile(dataDirectory + "/" + NETWORK_STATUS_FILE),
                                                                                                                           windStationLinkQuality(0),
                                                                                                                           windStationId(UNKNOWN_STATION_ID),
                                                                                                                           firstLoopPacketReceived(false),
@@ -78,7 +81,7 @@ VantageStationNetwork::initializeNetwork() {
     // See if the saved file exists
     //
     struct stat st;
-    if (stat(networkFile.c_str(), &st) == 0)
+    if (stat(networkConfigFile.c_str(), &st) == 0)
         return initializeNetworkFromFile();
     else
         return initializeNetworkFromConsole();
@@ -454,7 +457,36 @@ VantageStationNetwork::calculateStationReceptionPercentage() {
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Link quality calculation parameters. Archive packets: " << list.size() << " Wind Samples: " << windSamplesForDay << " Max Wind Samples for Day: " << maxWindSamplesForDay << endl;
     logger.log(VantageLogger::VANTAGE_INFO) << "Link quality for the wind sensor station at ID " << windStationId << " for the date " << (tm.tm_mon + 1) << "/" << tm.tm_mday << " is " << windStationLinkQuality << endl;
-    // TODO Preserve this data in a file somewhere
+
+    writeStatusFile(tm);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageStationNetwork::writeStatusFile(struct tm & tm) {
+    ofstream ofs(networkStatusFile.c_str(), ofstream::out | ios::app);
+
+    if (!ofs.is_open()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not open Network Status file for writing: " << networkStatusFile << endl;
+        return;
+    }
+    char timeBuffer[100];
+
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d", &tm);
+
+    ofs << "{ \"networkStatus\" : { \"date\" : \"" << timeBuffer << "\" : \"consoleVoltage\" : " << console.batteryVoltage  << ", "
+        << "\"windStationLinkQuality\" : " << windStationLinkQuality << ", \"stationsBatteryStatus\" : [";
+
+    bool first = true;
+    for (auto entry : stations) {
+        if (!first) ofs << ", "; else first = false;
+        ofs << std::boolalpha << entry.second.isBatteryGood;
+    }
+
+    ofs << " }" << endl;
+
+    ofs.close();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

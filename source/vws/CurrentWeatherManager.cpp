@@ -18,6 +18,7 @@
 #include "CurrentWeatherManager.h"
 
 #include <fstream>
+#include <filesystem>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -31,12 +32,12 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeatherManager::CurrentWeatherManager(const string & archiveDir, CurrentWeatherPublisher & cwPublisher) : archiveDirectory(archiveDir),
-                                                                                                                 currentWeatherPublisher(cwPublisher),
-                                                                                                                 firstLoop2PacketReceived(false),
-                                                                                                                 dominantWindDirections(archiveDir),
-                                                                                                                 logger(VantageLogger::getLogger("CurrentWeatherManager")) {
-
+CurrentWeatherManager::CurrentWeatherManager(const string & dataDirectory, CurrentWeatherPublisher & cwPublisher) : archiveDirectory(dataDirectory + LOOP_ARCHIVE_DIR),
+                                                                                                                    firstPass(true),
+                                                                                                                    currentWeatherPublisher(cwPublisher),
+                                                                                                                    firstLoop2PacketReceived(false),
+                                                                                                                    dominantWindDirections(dataDirectory),
+                                                                                                                    logger(VantageLogger::getLogger("CurrentWeatherManager")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +59,15 @@ CurrentWeatherManager::~CurrentWeatherManager() {
  */
 void
 CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, const byte * packetData, size_t length) {
+    if (firstPass) {
+        firstPass = false;
+        if (!std::filesystem::exists(archiveDirectory)) {
+            logger.log(VantageLogger::VANTAGE_INFO) <<  "Creating loop archive directory: " << archiveDirectory << endl;
+            if (!std::filesystem::create_directory(archiveDirectory))
+                logger.log(VantageLogger::VANTAGE_INFO) <<  "Failed to create loop archive directory: " << archiveDirectory << endl;
+        }
+    }
+
     string filename = archiveFilename(packetTime);
 
     //

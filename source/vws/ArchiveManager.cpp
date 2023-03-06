@@ -36,8 +36,8 @@ using vws::VantageLogger;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchiveManager::ArchiveManager(const std::string & archiveFilename, VantageWeatherStation & station) :
-                                                                    archiveFile(archiveFilename),
+ArchiveManager::ArchiveManager(const std::string & dataDirectory, VantageWeatherStation & station) :
+                                                                    archiveFile(dataDirectory + "/" + ARCHIVE_FILE),
                                                                     station(station),
                                                                     newestPacketTime(0),
                                                                     oldestPacketTime(0),

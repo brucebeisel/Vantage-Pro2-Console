@@ -27,6 +27,8 @@ class ArchivePacket;
 class VantageWeatherStation;
 class VantageLogger;
 
+static const std::string ARCHIVE_FILE = "weather-archive.dat";
+
 /**
  * The ArchiveManager class manages a file that contains the raw data read from the DMP and DMPAFT command of the Vantage console.
  * This archive acts as augmented storage for the console.
@@ -36,9 +38,9 @@ public:
     /**
      * Constructor.
      * 
-     * @param archiveFilename The file in which the archive will be maintained
+     * @param dataDirctory The directory into which the archive will be written
      */
-    ArchiveManager(const std::string & archiveFilename, VantageWeatherStation & station);
+    ArchiveManager(const std::string & dataDirectory, VantageWeatherStation & station);
 
     /**
      * Destructor.

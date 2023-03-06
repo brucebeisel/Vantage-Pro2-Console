@@ -17,6 +17,7 @@
 #ifndef VANTAGE_STATION_NETWORK_H
 #define VANTAGE_STATION_NETWORK_H
 
+#include <time.h>
 #include <vector>
 #include <bitset>
 
@@ -27,7 +28,6 @@
 namespace vws {
 class VantageLogger;
 class ArchiveManager;
-
 
 /**
  * A Davis Instruments Vantage weather station is made up of many integrated devices. These
@@ -135,15 +135,19 @@ public:
 
 typedef std::map<StationId,std::vector<Sensor>> stationSensors;
 
+static const std::string NETWORK_CONFIG_FILE = "vantage-network-configuration.dat";
+static const std::string NETWORK_STATUS_FILE = "vantage-network-status.dat";
+
 class VantageStationNetwork : public VantageWeatherStation::LoopPacketListener {
 public:
     /**
      * Constructor.
      *
-     * @param station     The object used to communicate with the console
-     * @param networkFile The file to read/write the network configuration data
+     * @param dataDirectory The directory into which the network status file and the network configuration file will be written.
+     * @param station       The object used to communicate with the console
+     * @param networkFile   The file to read/write the network configuration data
      */
-    VantageStationNetwork(VantageWeatherStation & station, ArchiveManager & archiveManager, const std::string & networkFile);
+    VantageStationNetwork(const std::string & dataDirectory, VantageWeatherStation & station, ArchiveManager & archiveManager);
 
     /**
      * Destructor.
@@ -194,6 +198,7 @@ private:
     void decodeStationData();
     void detectSensors(const LoopPacket & packet);
     void calculateStationReceptionPercentage();
+    void writeStatusFile(struct tm & tm);
 
     typedef std::map<RepeaterId,RepeaterChain> RepeaterChainMap;
     typedef std::map<RepeaterId,Repeater> RepeaterMap;
@@ -202,7 +207,8 @@ private:
     VantageLogger &         logger;
     VantageWeatherStation & station;
     ArchiveManager &        archiveManager;
-    std::string             networkFile;                     // The file in which the network configuration is stored. This includes user inputs.
+    std::string             networkConfigFile;               // The file in which the network configuration is stored. This includes user inputs.
+    std::string             networkStatusFile;               // The file in which the network status is stored.
     byte                    monitoredStationMask;            // The mask of station IDs that the console is monitoring
 
     RepeaterChainMap        chains;                          // The chains of repeaters and their sensor stations in the network

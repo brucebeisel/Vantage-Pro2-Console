@@ -26,14 +26,16 @@ namespace vws {
 class VantageLogger;
 class CurrentWeatherPublisher;
 
+static const std::string LOOP_ARCHIVE_DIR = "/loop/";
 class CurrentWeatherManager : public VantageWeatherStation::LoopPacketListener {
 public:
     /**
      * Constructor.
      *
-     * @param cwPublisher The publisher of current weather data
+     * @param dataDirectory The directory into which the loop archive will be written
+     * @param cwPublisher   The publisher of current weather data
      */
-    CurrentWeatherManager(const std::string & archiveDir, CurrentWeatherPublisher & cwPublisher);
+    CurrentWeatherManager(const std::string & dataDirectory, CurrentWeatherPublisher & cwPublisher);
 
     /**
      * Destructor.
@@ -85,6 +87,7 @@ private:
     CurrentWeather            currentWeather;
     bool                      firstLoop2PacketReceived;
     DominantWindDirections    dominantWindDirections;   // The past wind direction measurements used to determine the arrows on the wind display
+    bool                      firstPass;
     VantageLogger &           logger;
 };
 
