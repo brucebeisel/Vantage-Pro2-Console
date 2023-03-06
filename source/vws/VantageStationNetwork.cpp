@@ -324,6 +324,8 @@ VantageStationNetwork::initializeNetworkFromConsole() {
             station.isBatteryGood = true;
             if (stationData[i].stationType == StationType::INTEGRATED_SENSOR_STATION)
                 station.name = "ISS";
+            else
+                station.name = "Station " + (i + 1);
 
             stations[stationData[i].stationId] = station;
         }
@@ -481,10 +483,10 @@ VantageStationNetwork::writeStatusFile(struct tm & tm) {
     bool first = true;
     for (auto entry : stations) {
         if (!first) ofs << ", "; else first = false;
-        ofs << std::boolalpha << entry.second.isBatteryGood;
+        ofs << std::boolalpha << " { \"id\" : \"" << entry.second.stationData.stationId << "\", \"batteryGood\" : " << entry.second.isBatteryGood << " }";
     }
 
-    ofs << " }" << endl;
+    ofs << " ] } }" << endl;
 
     ofs.close();
 }
