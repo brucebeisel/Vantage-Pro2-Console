@@ -422,7 +422,7 @@ VantageStationNetwork::calculateStationReceptionPercentage() {
     float archivePeriodSeconds = archivePeriodMinutes * 60.0F;
     float stationIndex = windStationId - 1.0F;
 
-    int maxPacketsPerArchive = static_cast<int>(archivePeriodSeconds / ((41.0F + stationIndex) / 16.0F));
+    int maxWindSamplesPerArchivePacket = static_cast<int>(archivePeriodSeconds / ((41.0F + stationIndex) / 16.0F));
 
     vector<ArchivePacket> list;
 
@@ -446,12 +446,13 @@ VantageStationNetwork::calculateStationReceptionPercentage() {
     for (ArchivePacket & packet : list)
         windSamplesForDay += packet.getWindSampleCount();
 
-    int maxPacketsForDay = maxPacketsPerArchive * list.size();
+    int maxWindSamplesForDay = maxWindSamplesPerArchivePacket * list.size();
 
-    windStationLinkQuality = (windSamplesForDay * 100) / maxPacketsForDay;
+    windStationLinkQuality = (windSamplesForDay * 100) / maxWindSamplesForDay;
     if (windStationLinkQuality > MAX_STATION_RECEPTION)
         windStationLinkQuality = MAX_STATION_RECEPTION;
 
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Link quality calculation parameters. Archive packets: " << list.size() << " Wind Samples: " << windSamplesForDay << " Max Wind Samples for Day: " << maxWindSamplesForDay << endl;
     logger.log(VantageLogger::VANTAGE_INFO) << "Link quality for the wind sensor station at ID " << windStationId << " for the date " << (tm.tm_mon + 1) << "/" << tm.tm_mday << " is " << windStationLinkQuality << endl;
     // TODO Preserve this data in a file somewhere
 }
