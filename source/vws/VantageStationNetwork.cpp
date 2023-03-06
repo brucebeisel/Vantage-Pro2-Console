@@ -477,7 +477,7 @@ VantageStationNetwork::writeStatusFile(struct tm & tm) {
 
     strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d", &tm);
 
-    ofs << "{ \"networkStatus\" : { \"date\" : \"" << timeBuffer << "\" : \"consoleVoltage\" : " << console.batteryVoltage  << ", "
+    ofs << "{ \"date\" : \"" << timeBuffer << "\", \"consoleVoltage\" : " << console.batteryVoltage  << ", "
         << "\"windStationLinkQuality\" : " << windStationLinkQuality << ", \"stationsBatteryStatus\" : [";
 
     bool first = true;
@@ -486,7 +486,7 @@ VantageStationNetwork::writeStatusFile(struct tm & tm) {
         ofs << std::boolalpha << " { \"id\" : \"" << entry.second.stationData.stationId << "\", \"batteryGood\" : " << entry.second.isBatteryGood << " }";
     }
 
-    ofs << " ] } }" << endl;
+    ofs << " ] }" << endl;
 
     ofs.close();
 }
@@ -607,7 +607,7 @@ std::string
 VantageStationNetwork::formatStatusJSON(DateTime startDate, DateTime endDate) const {
     ostringstream oss;
 
-    oss << "{ \"networkStatus\" [ ";
+    oss << "{ \"networkStatus\" : [ ";
     ifstream ifs(networkStatusFile.c_str());
 
     if (ifs.is_open()) {

@@ -942,7 +942,7 @@ CommandHandler::handleQueryNetworkStatus(const std::string & commandName, const 
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
     oss << network.formatStatusJSON(0, 0);
 
-    response = oss.str();
+    response.append(oss.str());
 }
 
 } // End namespace
