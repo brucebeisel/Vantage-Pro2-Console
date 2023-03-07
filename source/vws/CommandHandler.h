@@ -219,6 +219,8 @@ private:
 
     void handleQueryNetworkStatus(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    void handleQueryTodayNetworkStatus(const std::string & commandName, std::string & response);
+
 
     VantageWeatherStation & station;
     VantageConfiguration &  configurator;

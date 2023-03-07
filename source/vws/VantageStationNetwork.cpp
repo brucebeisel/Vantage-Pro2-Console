@@ -17,10 +17,10 @@
 
 #include "VantageStationNetwork.h"
 
-#include <sys/stat.h>
 #include <time.h>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 #include "BitConverter.h"
 #include "LoopPacket.h"
@@ -80,8 +80,7 @@ VantageStationNetwork::initializeNetwork() {
     //
     // See if the saved file exists
     //
-    struct stat st;
-    if (stat(networkConfigFile.c_str(), &st) == 0)
+    if (std::filesystem::exists(networkConfigFile))
         return initializeNetworkFromFile();
     else
         return initializeNetworkFromConsole();
@@ -128,7 +127,7 @@ VantageStationNetwork::processLoop2Packet(const Loop2Packet & packet) {
     // Nothing in the LOOP2 packet is of interest to this class.
     // Using it as a pseudo timer.
     //
-    calculateStationReceptionPercentage();
+    calculateDailyNetworkStatus();
     return true;
 }
 
@@ -219,12 +218,12 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
     stations[sensor.onStationId].connectedSensors.push_back(sensor);
 
     //
-    // Now find the sensors on the leaf/soil sensor stations.
+    // TODO Now find the sensors on the leaf/soil sensor stations.
     // Not sure how the values map to the sensor stations.
     //
 
     //
-    // Now find the sensors on the temperature/humidity sensor stations
+    // TODO Now find the sensors on the temperature/humidity sensor stations
     //
 }
 
@@ -404,12 +403,93 @@ VantageStationNetwork::retrieveStationInfo() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
-VantageStationNetwork::calculateStationReceptionPercentage() {
+int
+VantageStationNetwork::calculateLinkQuality(int stationId, int windSamples, int archivePeriod, int archiveRecords) const {
 
+    float archivePeriodSeconds = static_cast<float>(archivePeriod) * 60.0F;
+    float stationIndex = static_cast<float>(stationId - 1);
+
+    int maxWindSamples = static_cast<int>(archivePeriodSeconds / ((41.0F + stationIndex) / 16.0F));
+
+    int linkQuality = (windSamples * 100) / (maxWindSamples * archiveRecords);
+    if (linkQuality > MAX_STATION_RECEPTION)
+        linkQuality = MAX_STATION_RECEPTION;
+
+    return linkQuality;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+int
+VantageStationNetwork::calculateLinkQualityFromArchiveRecords(const std::vector<ArchivePacket> & list) const {
+    int totalWindSamples = 0;
+    for (const ArchivePacket & packet : list)
+        totalWindSamples += packet.getWindSampleCount();
+
+    return calculateLinkQuality(windStationId, totalWindSamples, station.getArchivePeriod(), list.size());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+int
+VantageStationNetwork::calculateLinkQualityFromArchiveRecord(const ArchivePacket & packet) const {
+    vector<ArchivePacket> list;
+    list.push_back(packet);
+    return calculateLinkQualityFromArchiveRecords(list);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageStationNetwork::queryArchiveForDay(DateTime day, vector<ArchivePacket> & list) const {
+    struct tm tm;
+    Weather::localtime(day, tm);
+
+    tm.tm_hour = 0;
+    tm.tm_min = 0;
+    tm.tm_sec = 0;
+    DateTime startTime = mktime(&tm);
+
+    tm.tm_hour = 23;
+    tm.tm_min = 59;
+    tm.tm_sec = 59;
+    DateTime endTime = mktime(&tm);
+
+    archiveManager.queryArchiveRecords(startTime, endTime, list);
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+int
+VantageStationNetwork::calculateLinkQualityForDay(DateTime day) const {
+    vector<ArchivePacket> list;
+    queryArchiveForDay(day, list);
+    return calculateLinkQualityFromArchiveRecords(list);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageStationNetwork::calculateDailyNetworkStatus() {
     DateTime now = time(0);
+    struct tm tm0;
+    Weather::localtime(now, tm0);
+
+    //
+    // Subtract enough seconds to move the time into the previous day.
+    //
+    now -= 86400;
+
     struct tm tm;
     Weather::localtime(now, tm);
+
+    //
+    // Prevent this algorithm from jumping back 2 days due to DST or
+    // not jumping back any days also due to DST
+    //
+    if (tm.tm_hour != tm0.tm_hour) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "calculateDailyNetworkStatus() skipped check due to DST starting or ending" << endl;
+        return;
+    }
 
     //
     // Only calculate the link quality once a day
@@ -417,50 +497,38 @@ VantageStationNetwork::calculateStationReceptionPercentage() {
     if (linkQualityCalculationMday == tm.tm_mday)
         return;
 
+    windStationLinkQuality = calculateLinkQualityForDay(now);
     linkQualityCalculationMday = tm.tm_mday;
 
-    ArchivePeriod archivePeriod;
-    station.retrieveArchivePeriod(archivePeriod);
-
-    int archivePeriodMinutes = static_cast<int>(archivePeriod);
-
-    float archivePeriodSeconds = archivePeriodMinutes * 60.0F;
-    float stationIndex = windStationId - 1.0F;
-
-    int maxWindSamplesPerArchivePacket = static_cast<int>(archivePeriodSeconds / ((41.0F + stationIndex) / 16.0F));
-
-    vector<ArchivePacket> list;
-
-    now -= 86400;
-    Weather::localtime(now, tm);
-    tm.tm_hour = 0;
-    tm.tm_min = 0;
-    tm.tm_sec = 0;
-
-    DateTime startTime = mktime(&tm);
-
-    tm.tm_hour = 23;
-    tm.tm_min = 59;
-    tm.tm_sec = 59;
-
-    DateTime endTime = mktime(&tm);
-
-    archiveManager.queryArchiveRecords(startTime, endTime, list);
-
-    int windSamplesForDay = 0;
-    for (ArchivePacket & packet : list)
-        windSamplesForDay += packet.getWindSampleCount();
-
-    int maxWindSamplesForDay = maxWindSamplesPerArchivePacket * list.size();
-
-    windStationLinkQuality = (windSamplesForDay * 100) / maxWindSamplesForDay;
-    if (windStationLinkQuality > MAX_STATION_RECEPTION)
-        windStationLinkQuality = MAX_STATION_RECEPTION;
-
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Link quality calculation parameters. Archive packets: " << list.size() << " Wind Samples: " << windSamplesForDay << " Max Wind Samples for Day: " << maxWindSamplesForDay << endl;
-    logger.log(VantageLogger::VANTAGE_INFO) << "Link quality for the wind sensor station at ID " << windStationId << " for the date " << (tm.tm_mon + 1) << "/" << tm.tm_mday << " is " << windStationLinkQuality << endl;
-
     writeStatusFile(tm);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+VantageStationNetwork::formatNetworkStatusJSON(struct tm & tm) const {
+    ostringstream oss;
+    char timeBuffer[100];
+
+    //
+    // Note that this calculates the link quality for the previous day, but using the most recent
+    // console voltage and station battery status, which may be a few seconds newer. They could also be
+    // much newer if the vws process has not been running for a while.
+    //
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d", &tm);
+
+    oss << "{ \"date\" : \"" << timeBuffer << "\", \"consoleVoltage\" : " << console.batteryVoltage  << ", "
+        << "\"windStationLinkQuality\" : " << windStationLinkQuality << ", \"stationsBatteryStatus\" : [";
+
+    bool first = true;
+    for (auto entry : stations) {
+        if (!first) oss << ", "; else first = false;
+        oss << std::boolalpha << " { \"id\" : \"" << entry.second.stationData.stationId << "\", \"batteryGood\" : " << entry.second.isBatteryGood << " }";
+    }
+
+    oss << " ] }" << endl;
+
+    return oss.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -473,21 +541,8 @@ VantageStationNetwork::writeStatusFile(struct tm & tm) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Could not open Network Status file for writing: " << networkStatusFile << endl;
         return;
     }
-    char timeBuffer[100];
 
-    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d", &tm);
-
-    ofs << "{ \"date\" : \"" << timeBuffer << "\", \"consoleVoltage\" : " << console.batteryVoltage  << ", "
-        << "\"windStationLinkQuality\" : " << windStationLinkQuality << ", \"stationsBatteryStatus\" : [";
-
-    bool first = true;
-    for (auto entry : stations) {
-        if (!first) ofs << ", "; else first = false;
-        ofs << std::boolalpha << " { \"id\" : \"" << entry.second.stationData.stationId << "\", \"batteryGood\" : " << entry.second.isBatteryGood << " }";
-    }
-
-    ofs << " ] }" << endl;
-
+    ofs << formatNetworkStatusJSON(tm);
     ofs.close();
 }
 
@@ -582,8 +637,9 @@ VantageStationNetwork::formatConfigurationJSON() const {
     for (auto station : stations) {
         if (!firstStation) oss << ", "; else firstStation = false;
 
-        oss << " { \"station\" : \"" << station.second.name
-            << "\", \"type\" : \"" << stationTypeEnum.valueToString(station.second.stationData.stationType) << "\", "
+        oss << " { \"station\" : \"" << station.second.name << "\", "
+            << "\"stationId\" : " << station.second.stationData.stationId
+            << ", \"type\" : \"" << stationTypeEnum.valueToString(station.second.stationData.stationType) << "\", "
             << " \"sensors\" : [ ";
 
         first = true;
@@ -638,6 +694,40 @@ VantageStationNetwork::formatStatusJSON(DateTime startDate, DateTime endDate) co
         logger.log(VantageLogger::VANTAGE_ERROR) << "Could not open Network Status file for writing: " << networkStatusFile << endl;
 
     oss << " ] }";
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+VantageStationNetwork::todayNetworkStatusJSON() const {
+    ostringstream oss;
+
+    oss << "{ \"todayNetworkStatus\" : { \"consoleVoltage\" : " << console.batteryVoltage
+        << ", \"stationsBatteryStatus\" : [";
+
+    bool first = true;
+    for (auto entry : stations) {
+        if (!first) oss << ", "; else first = false;
+        oss << std::boolalpha << " { \"id\" : \"" << entry.second.stationData.stationId << "\", \"batteryGood\" : " << entry.second.isBatteryGood << " }";
+    }
+    oss << " ], ";
+    oss << "\"linkQuality\" : ";
+
+    vector<ArchivePacket> list;
+    queryArchiveForDay(time(0), list);
+    int linkQuality = calculateLinkQualityFromArchiveRecords(list);
+    oss << " { \"overall\" : " << linkQuality << ", \"individual\" : [ ";
+
+    first = true;
+    for (const ArchivePacket & packet : list) {
+        if (!first) oss << ", "; else first = false;
+        linkQuality = calculateLinkQualityFromArchiveRecord(packet);
+        oss << " { \"time\" : \""  << Weather::formatDateTime(packet.getDateTime()) << "\", "
+            << " \"linkQuality\" : " << linkQuality << " }";
+    }
+
+    oss << " ] } } }";
     return oss.str();
 }
 

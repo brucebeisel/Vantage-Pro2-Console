@@ -53,7 +53,20 @@ class ArchiveManager;
  *            D --> Console
  *  It depends how the user configured the repeaters. This class will assume the maximum number of repeaters in the
  *  chain until the actual configuration is sent from the user. It will also assume that all sensor stations
- *  are communicating with the first repeater in the chain.
+ *  are communicating with the first repeater in the chain.o
+ *
+ *  The user should be able to edit the following data:
+ *      1. The station list, which includes the type of station and what repeater is being used. The extra temperature
+ *         and humidity fields should be built based on the station types and IDs.
+ *      2. The repeater chain. A repeater chain can for example be A -> B -> C or B -> C and the data in the console
+ *         cannot tell the difference. This software assumes the former, but the user can override the repeater chain to the
+ *         latter.
+ *      3. The repeaters to which a station is communicating. In the previous example this software assumes that all
+ *         stations are communicating directly with Repeater A, but some might be communicating with Repeater B or
+ *         Repeater C.
+ *      4. The names of the sensors. Each sensor probably has a unique goal, such as monitoring the temperature in a
+ *         wine cellar. The user can name this sensor "Wine Cellar Thermometer". This name could then be used to label
+ *         a dataset in a graph.
  */
 
 using namespace VantageEepromConstants;
@@ -120,17 +133,17 @@ public:
  */
 class Station : public SensorContainer {
 public:
-    std::string name;
-    StationData stationData;
-    bool        isBatteryGood;
+    std::string name;              // User editable
+    StationData stationData;       // Read-only
+    bool        isBatteryGood;     // Updated by console
 
 };
 
 class Console : public SensorContainer {
 public:
-    ProtocolConstants::ConsoleType consoleType;
-    std::vector<StationId>         connectedStations;
-    float                          batteryVoltage;
+    ProtocolConstants::ConsoleType consoleType;       //
+    std::vector<StationId>         connectedStations; // Read-only
+    float                          batteryVoltage;    // Updated by console
 };
 
 typedef std::map<StationId,std::vector<Sensor>> stationSensors;
@@ -176,6 +189,13 @@ public:
     std::string formatStatusJSON(DateTime startDate, DateTime endDate) const;
 
     /**
+     * Format the JSON message containing the network status data for today.
+     *
+     * @return The JSON message
+     */
+    std::string todayNetworkStatusJSON() const;
+
+    /**
      * Process a LOOP packet as part of the LoopPacketListener interface.
      *
      * @param packet The LOOP packet
@@ -204,8 +224,15 @@ private:
     void createRepeaterChains();
     void decodeStationData();
     void detectSensors(const LoopPacket & packet);
-    void calculateStationReceptionPercentage();
+
+    int calculateLinkQuality(int stationId, int windSamples, int archivePeriod, int archiveRecords) const;
+    int calculateLinkQualityFromArchiveRecords(const std::vector<ArchivePacket> & list) const;
+    int calculateLinkQualityFromArchiveRecord(const ArchivePacket & packet) const;
+    int calculateLinkQualityForDay(DateTime day) const;
+    std::string formatNetworkStatusJSON(struct tm & tm) const;
     void writeStatusFile(struct tm & tm);
+    void queryArchiveForDay(DateTime day, std::vector<ArchivePacket> & list) const;
+    void calculateDailyNetworkStatus();
 
     typedef std::map<RepeaterId,RepeaterChain> RepeaterChainMap;
     typedef std::map<RepeaterId,Repeater> RepeaterMap;

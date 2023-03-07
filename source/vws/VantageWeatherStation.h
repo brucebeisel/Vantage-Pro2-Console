@@ -396,6 +396,13 @@ public:
     bool retrieveArchivePeriod(ProtocolConstants::ArchivePeriod  & period);
 
     /**
+     * Get the archive period last retrieved.
+     *
+     * @return The archive period in minutes
+     */
+    int getArchivePeriod() const;
+
+    /**
      * Start archiving the weather data.
      *
      * @return True if successful
@@ -619,7 +626,8 @@ private:
     SerialPort &               serialPort;               // The serial port object that communicates with the console
     byte                       buffer[BUFFER_SIZE];      // The buffer used for all reads
     LoopPacketListenerList     loopPacketListenerList;   // The list of Loop Packet listeners
-    ConsoleType                consoleType;
+    ConsoleType                consoleType;              // The type of Davis Vantage console this is
+    int                        archivePeriodMinutes;     // The number of minutes between archive records
     VantageLogger &            logger;
 
 };

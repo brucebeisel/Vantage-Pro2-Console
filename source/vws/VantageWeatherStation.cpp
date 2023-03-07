@@ -53,6 +53,7 @@ static constexpr int NUM_PROTECTED_EEPROM_BYTES = sizeof(protectedEepromBytes) /
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
+                                                                        archivePeriodMinutes(0),
                                                                         consoleType(VANTAGE_PRO_2),
                                                                         logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
@@ -910,7 +911,12 @@ VantageWeatherStation::updateArchivePeriod(ArchivePeriod period) {
     //
     // Note that the Vantage protocol document claims this is an ACKed command, but it is really an OKed command
     //
-    return sendOKedCommand(command.str());
+    if (sendOKedCommand(command.str())) {
+        archivePeriodMinutes = static_cast<int>(period);
+        return true;
+    }
+    else
+        return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -923,10 +929,18 @@ VantageWeatherStation::retrieveArchivePeriod(ArchivePeriod & period) {
 
     int archivePeriodValue = BitConverter::toUint8(buffer, 0);
     period = static_cast<ArchivePeriod>(archivePeriodValue);
+    archivePeriodMinutes = archivePeriodValue;
 
     logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) <<  " Archive Period: " << archivePeriodValue << endl;
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+int
+VantageWeatherStation::getArchivePeriod() const {
+    return archivePeriodMinutes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

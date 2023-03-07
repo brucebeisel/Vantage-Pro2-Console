@@ -192,6 +192,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-receiver-list") {
             handleQueryReceiverList(commandName, response);
         }
+        else if (commandName == "query-today-network-status") {
+            handleQueryTodayNetworkStatus(commandName, response);
+        }
         else if (commandName == "query-units") {
             handleQueryUnits(commandName, response);
         }
@@ -939,6 +942,17 @@ CommandHandler::handleQueryNetworkStatus(const std::string & commandName, const 
     ostringstream oss;
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
     oss << network.formatStatusJSON(startTime, endTime);
+
+    response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryTodayNetworkStatus(const std::string & commandName, std::string & response) {
+    ostringstream oss;
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+    oss << network.todayNetworkStatusJSON();
 
     response.append(oss.str());
 }

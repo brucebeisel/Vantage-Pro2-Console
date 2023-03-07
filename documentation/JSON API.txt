@@ -213,7 +213,7 @@ Archive query
     ++ query-current-weather - Query the current weather, also know as LOOP packet, archive
     query-network - Query the configuration of the devices that make up with weather station (Needs load/store from file capability)
     update-network - Update the network data with user inputs
-    query-network-status - Get the status of the network devices. This includes the battery state of the transmitters, the console voltage and the wind station link quality
+    ++ query-network-status - Get the status of the network devices. This includes the battery state of the transmitters, the console voltage and the wind station link quality
     ++ query-alarm-thresholds - Query the current alarm thresholds
     + update-alarm-threshold - Update the alarm thresholds
     + update-configuration-data - Update the configuration data that are needed to start using the weather station.
