@@ -919,28 +919,26 @@ CommandHandler::handleQueryNetworkStatus(const std::string & commandName, const 
     DateTime startTime = 0;
     DateTime endTime = 0;
 
-    /*
     struct tm tm = {0};
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "start-time") {
             std::stringstream ss(arg.second);
-            ss >> std::get_time(&tm, "%Y-%m-%dT%T");
+            ss >> std::get_time(&tm, "%Y-%m-%d");
             startTime = mktime(&tm);
         }
         else if (arg.first == "end-time") {
             std::stringstream ss(arg.second);
-            ss >> std::get_time(&tm, "%Y-%m-%dT%T");
+            ss >> std::get_time(&tm, "%Y-%m-%d");
             endTime = mktime(&tm);
         }
     }
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the archive with times: " << startTime << " - " << endTime << endl;
-    */
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the network status with times: " << startTime << " - " << endTime << endl;
 
     ostringstream oss;
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
-    oss << network.formatStatusJSON(0, 0);
+    oss << network.formatStatusJSON(startTime, endTime);
 
     response.append(oss.str());
 }

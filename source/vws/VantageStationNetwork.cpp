@@ -614,9 +614,21 @@ VantageStationNetwork::formatStatusJSON(DateTime startDate, DateTime endDate) co
         string line;
         bool first = true;
         while (std::getline(ifs, line)) {
-            // TODO compare date in the line with the startDate and endDate arguments
-            if (!first) oss << ", "; else first = false;
-            oss << line;
+            int pos = line.find(':');
+            pos = line.find('"', pos);
+            string date = line.substr(pos, 10);
+            struct tm tm = {0};
+            sscanf(date.c_str(), "%4d-%02d-%02d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
+            tm.tm_year -= 1900;
+            tm.tm_mon--;
+            DateTime recordTime = mktime(&tm);
+
+            if (recordTime >= startDate) {
+                if (!first) oss << ", "; else first = false;
+                oss << line;
+            }
+            else if (recordTime > endDate)
+                break;
         }
         ifs.close();
     }
