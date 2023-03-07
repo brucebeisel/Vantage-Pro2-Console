@@ -616,9 +616,10 @@ VantageStationNetwork::formatStatusJSON(DateTime startDate, DateTime endDate) co
         while (std::getline(ifs, line)) {
             int pos = line.find(':');
             pos = line.find('"', pos);
-            string date = line.substr(pos, 10);
+            string date = line.substr(pos + 1, 10);
             struct tm tm = {0};
-            sscanf(date.c_str(), "%4d-%02d-%02d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
+            sscanf(date.c_str(), "%d-%d-%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
+
             tm.tm_year -= 1900;
             tm.tm_mon--;
             DateTime recordTime = mktime(&tm);
