@@ -624,12 +624,13 @@ VantageStationNetwork::formatStatusJSON(DateTime startDate, DateTime endDate) co
             tm.tm_mon--;
             DateTime recordTime = mktime(&tm);
 
+            if (recordTime > endDate)
+                break;
+
             if (recordTime >= startDate) {
                 if (!first) oss << ", "; else first = false;
                 oss << line;
             }
-            else if (recordTime > endDate)
-                break;
         }
         ifs.close();
     }
