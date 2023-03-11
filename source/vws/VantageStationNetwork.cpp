@@ -709,13 +709,17 @@ VantageStationNetwork::findJsonArray(json root, const string & name, T & array) 
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageStationNetwork::updateNetworkConfiguration(const std::string & networkConfigJson) {
-    json networkConfigTop = json::parse(networkConfigJson.begin(), networkConfigJson.end());
-
-    json networkConfig = networkConfigTop.at("networkConfiguration");
+    json networkConfig = json::parse(networkConfigJson.begin(), networkConfigJson.end());
 
     vector<int> monitoredStationIds;
     if (!findJsonArray(networkConfig, "monitoredStationIds", monitoredStationIds))
         return false;
+
+    cout << "Monitored stations: ";
+    for (auto id : monitoredStationIds)
+        cout << id << ",";
+
+    cout << endl;
 
     auto stations = networkConfig.at("stations");
     for (auto station : stations) {

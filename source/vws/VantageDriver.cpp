@@ -119,6 +119,9 @@ VantageDriver::retrieveConfiguration() {
         return false;
     }
 
+    ArchivePeriod period;
+    station.retrieveArchivePeriod(period);
+
     //
     // Get one LOOP packet weather so that the sensors are detected
     //
