@@ -20,6 +20,7 @@
 #include <time.h>
 #include <vector>
 #include <bitset>
+#include "json.hpp"
 
 #include "VantageDecoder.h"
 #include "VantageProtocolConstants.h"
@@ -74,6 +75,7 @@ using namespace ProtocolConstants;
 
 class Repeater {
 public:
+    Repeater() : repeaterId(RepeaterId::NO_REPEATER), endPoint(false), impliedExistance(false) {}
     RepeaterId             repeaterId;
     bool                   endPoint;          // If true then this repeater talks to the console
     bool                   impliedExistance;  // If true there is no evidence this repeater exists,
@@ -83,6 +85,7 @@ public:
 
 class RepeaterChain {
 public:
+    RepeaterChain() : hasRepeater(false), endPoint(RepeaterId::NO_REPEATER) {}
     std::string               name;           // The name of the chain. Defaults to the end point name
     bool                      hasRepeater;    // If true then the endPoint and repeaters are filled in
     RepeaterId                endPoint;       // The last repeater in the chain, if any
@@ -121,10 +124,14 @@ public:
     StationId   onStationId;
 };
 
+/**
+ * A container class for a weather station device that has sensors connected.
+ */
 class SensorContainer {
 public:
     std::vector<Sensor>     connectedSensors;
 };
+
 /**
  * Class representing a sensor station.
  * A sensor station is a transmitter that has sensors attached.
@@ -143,6 +150,7 @@ class Console : public SensorContainer {
 public:
     ProtocolConstants::ConsoleType consoleType;       //
     std::vector<StationId>         connectedStations; // Read-only
+    StationId                      retransmitId;      // The ID on which the console is retransmitting (0 = not retransmitting)
     float                          batteryVoltage;    // Updated by console
 };
 
@@ -182,6 +190,11 @@ public:
     std::string formatConfigurationJSON() const;
 
     /**
+     * Update the network configuration from the received JSON.
+     */
+    bool updateNetworkConfiguration(const std::string & networkConfigJson);
+
+    /**
      * Format the JSON message containing the network status data in the given date range.
      *
      * @return The JSON message
@@ -212,9 +225,10 @@ public:
     virtual bool processLoop2Packet(const Loop2Packet & packet);
 
 private:
-    static constexpr int UNKNOWN_STATION_ID = 0;
-    static constexpr int MAX_REPEATERS_PER_CHAIN = 4;
-    static const int MAX_STATION_RECEPTION = 100;
+    static constexpr StationId UNKNOWN_STATION_ID = 0;
+    static constexpr int       MAX_REPEATERS_PER_CHAIN = 4;
+    static constexpr int       MAX_STATION_RECEPTION = 100;
+    static constexpr StationId NO_RETRANSMIT_STATION_ID = 0;
 
 
     bool retrieveStationInfo();
@@ -233,6 +247,9 @@ private:
     void writeStatusFile(struct tm & tm);
     void queryArchiveForDay(DateTime day, std::vector<ArchivePacket> & list) const;
     void calculateDailyNetworkStatus();
+
+    template<typename T> bool findJsonValue(nlohmann::json root, const std::string & name, T & value);
+    template<typename T> bool findJsonArray(nlohmann::json root, const std::string & name, T & array);
 
     typedef std::map<RepeaterId,RepeaterChain> RepeaterChainMap;
     typedef std::map<RepeaterId,Repeater> RepeaterMap;

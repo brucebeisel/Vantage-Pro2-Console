@@ -213,6 +213,8 @@ private:
 
     void handleQueryNetworkConfiguration(const std::string & commandName, std::string & response);
 
+    void handleUpdateNetworkConfiguration(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     void handleQueryAlarmThresholds(const std::string & commandName, std::string & response);
 
     void handleUpdateAlarmThresholds(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);

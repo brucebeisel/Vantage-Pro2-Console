@@ -225,6 +225,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "update-configuration-data") {
             handleUpdateConfigurationData(commandName, argumentList, response);
         }
+        else if (commandName == "update-network-config") {
+            handleUpdateNetworkConfiguration(commandName, argumentList, response);
+        }
         else if (commandName == "update-units") {
             handleUpdateUnits(commandName, argumentList, response);
         }
@@ -882,6 +885,23 @@ CommandHandler::handleQueryNetworkConfiguration(const std::string & commandName,
     oss << network.formatConfigurationJSON();
 
     response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleUpdateNetworkConfiguration(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    if (argumentList.size() == 0) {
+        response.append(FAILURE_TOKEN + "," + DATA_TOKEN + " : { \"error\" : \"Missing argument\" }");
+        return;
+    }
+
+    if (network.updateNetworkConfiguration(argumentList[0].second)) {
+        response.append(SUCCESS_TOKEN);
+    }
+    else {
+        response.append(FAILURE_TOKEN + "," + DATA_TOKEN + " : { \"error\" : \"Console command error\" }");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -21,6 +21,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include "json.hpp"
 
 #include "BitConverter.h"
 #include "LoopPacket.h"
@@ -34,6 +35,7 @@
 #include "Weather.h"
 
 using namespace std;
+using json = nlohmann::json;
 
 namespace vws {
 using namespace VantageEepromConstants;
@@ -368,6 +370,12 @@ VantageStationNetwork::retrieveStationInfo() {
 
     logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving sensor station information" << endl;
 
+    byte retransmitValue;
+    if (!station.eepromBinaryRead(EE_RETRANSMIT_ID_ADDRESS, 1, &retransmitValue))
+        return false;
+
+    console.retransmitId = static_cast<StationId>(retransmitValue);
+
     if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
         return false;
 
@@ -566,6 +574,11 @@ VantageStationNetwork::formatConfigurationJSON() const {
 
     oss << " \"console\" : { \"type\" : \"" << consoleTypeEnum.valueToString(console.consoleType) << "\", ";
 
+    oss << "\"retransmitEnabled\" : " << std::boolalpha << (console.retransmitId != NO_RETRANSMIT_STATION_ID) << ", ";
+
+    if (console.retransmitId != 0)
+        oss << "\"retransmitId\" : " << console.retransmitId << ", ";
+
     oss << "\"stations\" : [";
 
     first = true;
@@ -637,10 +650,10 @@ VantageStationNetwork::formatConfigurationJSON() const {
     for (auto station : stations) {
         if (!firstStation) oss << ", "; else firstStation = false;
 
-        oss << " { \"station\" : \"" << station.second.name << "\", "
-            << "\"stationId\" : " << station.second.stationData.stationId
-            << ", \"type\" : \"" << stationTypeEnum.valueToString(station.second.stationData.stationType) << "\", "
-            << " \"sensors\" : [ ";
+        oss << " { \"station\" : \"" << station.second.name << "\""
+            << ", \"stationId\" : " << station.second.stationData.stationId
+            << ", \"type\" : \"" << stationTypeEnum.valueToString(station.second.stationData.stationType) << "\""
+            << ", \"sensors\" : [ ";
 
         first = true;
         for (auto sensor : station.second.connectedSensors) {
@@ -655,6 +668,64 @@ VantageStationNetwork::formatConfigurationJSON() const {
     oss << " } }";
 
     return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+template<typename T>
+bool
+VantageStationNetwork::findJsonValue(json root, const string & name, T & value) {
+    bool success = false;
+    auto valuePtr = root.find(name);
+    if (valuePtr != root.end()) {
+        value = *valuePtr;
+        success = true;
+    }
+    else
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
+
+    return success;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+template<typename T>
+bool
+VantageStationNetwork::findJsonArray(json root, const string & name, T & array) {
+    array.clear();
+    bool success = false;
+    auto jlist = root.find(name);
+    if (jlist != root.end()) {
+        std::copy((*jlist).begin(), (*jlist).end(), back_inserter(array));
+        success = true;
+    }
+    else
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
+
+    return success;
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageStationNetwork::updateNetworkConfiguration(const std::string & networkConfigJson) {
+    json networkConfigTop = json::parse(networkConfigJson.begin(), networkConfigJson.end());
+
+    json networkConfig = networkConfigTop.at("networkConfiguration");
+
+    vector<int> monitoredStationIds;
+    if (!findJsonArray(networkConfig, "monitoredStationIds", monitoredStationIds))
+        return false;
+
+    auto stations = networkConfig.at("stations");
+    for (auto station : stations) {
+        string name = station.at("station");
+        int stationId = station.at("stationId");
+        string typeString = station.at("type");
+        cout << "Network station: " << name << " ID: " << stationId << " Type: " << typeString << endl;
+    }
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -709,7 +780,7 @@ VantageStationNetwork::todayNetworkStatusJSON() const {
     bool first = true;
     for (auto entry : stations) {
         if (!first) oss << ", "; else first = false;
-        oss << std::boolalpha << " { \"id\" : \"" << entry.second.stationData.stationId << "\", \"batteryGood\" : " << entry.second.isBatteryGood << " }";
+        oss << std::boolalpha << " { \"id\" : " << entry.second.stationData.stationId << ", \"batteryGood\" : " << entry.second.isBatteryGood << " }";
     }
     oss << " ], ";
     oss << "\"linkQuality\" : ";
