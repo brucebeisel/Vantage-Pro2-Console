@@ -173,6 +173,8 @@ SerialPort::write(const void * buffer, int nbytes) {
         return false;
     }
 
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Write buffer: " << endl << Weather::dumpBuffer(buffer, nbytes);
+
     ssize_t bytesWritten = ::write(commPort, buffer, nbytes);
 
     if (bytesWritten != nbytes) {

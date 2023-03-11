@@ -162,7 +162,7 @@ Archive query
 
 4. EEPROM Commands
     - "GETEE"     Reads the full 4K EEPROM in one data block.
-    - "EEWR <EE address-hex> <EE data-hex>"
+    ++ "EEWR <EE address-hex> <EE data-hex>"
                 Writes one byte of data to the specified address in the EEPROM.
     - "EERD <EE address-hex> <number of bytes to read-hex>"
                 Reads the specified number of bytes starting at the specified address. Results are given as hex strings, one byte per line.
