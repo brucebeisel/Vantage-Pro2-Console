@@ -21,8 +21,10 @@
 
 #include "ArchivePacket.h"
 #include "VantageProtocolConstants.h"
+#include "VantageEepromConstants.h"
 #include "VantageDecoder.h"
 #include "Weather.h"
+#include "WeatherTypes.h"
 #include "VantageWeatherStation.h"
 #include "SerialPort.h"
 #include "VantageLogger.h"
@@ -78,6 +80,15 @@ main(int argc, char *argv[]) {
         cerr << "Could not wake up console" << endl;
         exit(2);
     }
+
+    vws::byte beforeValue = 0;
+    bool results = ws.eepromBinaryRead(VantageEepromConstants::EE_STATION_LIST_ADDRESS, 1, &beforeValue);
+
+    vws::byte value = 3;
+    results = ws.eepromBinaryWrite(VantageEepromConstants::EE_STATION_LIST_ADDRESS, &value, 1);
+
+    vws::byte afterValue = 0;
+    results = ws.eepromBinaryRead(VantageEepromConstants::EE_STATION_LIST_ADDRESS, 1, &afterValue);
 
     vector<ArchivePacket> packets;
 
