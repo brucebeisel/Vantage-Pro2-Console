@@ -752,15 +752,12 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
     if (!findJsonArray(networkConfig, "monitoredStationIds", monitoredStationIds))
         return false;
 
-    cout << "Monitored stations: ";
     byte monitoredStationMask = 0;
     for (auto id : monitoredStationIds) {
         monitoredStationMask |= (1 << (id - 1));
-        cout << id << ",";
     }
-    cout << endl;
 
-    if (!station.eepromBinaryWrite(EE_USED_TRANSMITTERS_ADDRESS, &monitoredStationMask, 1))
+    if (!station.eepromWriteByte(EE_USED_TRANSMITTERS_ADDRESS, monitoredStationMask))
         return false;
 
     StationData stationData[MAX_STATIONS];
@@ -769,7 +766,6 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
         string name = station.at("station");
         int stationId = station.at("stationId");
         string typeString = station.at("type");
-        cout << "Network station: " << name << " ID: " << stationId << " Type: " << typeString << endl;
         stationData[stationId - 1].stationId = stationId;
         stationData[stationId - 1].repeaterId = RepeaterId::NO_REPEATER;
         stationData[stationId - 1].stationType = stationTypeEnum.stringToValue(typeString);
