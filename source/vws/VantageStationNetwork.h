@@ -96,6 +96,10 @@ public:
 
 class StationData {
 public:
+    static constexpr int NO_EXTRA_VALUE_INDEX = 0xF;
+    StationData();
+    void encode(byte buffer[], int offset);
+    void decode(StationId id, const byte buffer[], int offset);
     StationId   stationId;
     RepeaterId  repeaterId;
     StationType stationType;

@@ -57,6 +57,34 @@ static const char *SENSOR_NAMES[] = {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+StationData::StationData() : stationId(0),
+                             repeaterId(RepeaterId::NO_REPEATER),
+                             stationType(StationType::NO_STATION),
+                             extraHumidityIndex(StationData::NO_EXTRA_VALUE_INDEX),
+                             extraTemperatureIndex(StationData::NO_EXTRA_VALUE_INDEX) {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+StationData::encode(byte buffer[], int offset) {
+    buffer[offset] = ((static_cast<int>(repeaterId) << 4) & 0xF0) | (stationType & 0xF);
+    buffer[offset + 1] = ((extraTemperatureIndex << 4) & 0xF0) | (extraTemperatureIndex & 0xF);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+StationData::decode(StationId id, const byte buffer[], int offset) {
+    stationId = id;
+    repeaterId = static_cast<RepeaterId>(BitConverter::getUpperNibble(buffer[offset]));
+    stationType = static_cast<StationType>(BitConverter::getLowerNibble(buffer[offset]));
+    extraTemperatureIndex = BitConverter::getLowerNibble(buffer[offset + 1]);
+    extraHumidityIndex = BitConverter::getUpperNibble(buffer[offset + 1]);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 VantageStationNetwork::VantageStationNetwork(const string & dataDirectory, VantageWeatherStation & station, ArchiveManager & am) : station(station),
                                                                                                                           archiveManager(am),
                                                                                                                           monitoredStationMask(0),
@@ -384,11 +412,15 @@ VantageStationNetwork::retrieveStationInfo() {
 
     windStationId = UNKNOWN_STATION_ID;
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
+        stationData[i].decode(i + 1, buffer, i * 2);
+
+        /*
         stationData[i].stationId = i + 1;
         stationData[i].repeaterId = static_cast<RepeaterId>(BitConverter::getUpperNibble(buffer[i * 2]));
         stationData[i].stationType = static_cast<StationType>(BitConverter::getLowerNibble(buffer[i * 2]));
         stationData[i].extraTemperatureIndex = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
         stationData[i].extraHumidityIndex = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
+        */
 
         if (stationData[i].stationType == StationType::ANEMOMETER_STATION)
             windStationId = i + 1;
@@ -711,23 +743,50 @@ bool
 VantageStationNetwork::updateNetworkConfiguration(const std::string & networkConfigJson) {
     json networkConfig = json::parse(networkConfigJson.begin(), networkConfigJson.end());
 
+    //
+    // For now we are only dealing with writing to the EEPROM and not saving the network data
+    // to a file. There are two EEPROM areas, the station list and the 16 byte table for station
+    // types, repeaters and extra temperature/humidity indices.
+    //
     vector<int> monitoredStationIds;
     if (!findJsonArray(networkConfig, "monitoredStationIds", monitoredStationIds))
         return false;
 
     cout << "Monitored stations: ";
-    for (auto id : monitoredStationIds)
+    byte monitoredStationMask = 0;
+    for (auto id : monitoredStationIds) {
+        monitoredStationMask |= (1 << (id - 1));
         cout << id << ",";
-
+    }
     cout << endl;
 
+    if (!station.eepromBinaryWrite(EE_USED_TRANSMITTERS_ADDRESS, &monitoredStationMask, 1))
+        return false;
+
+    StationData stationData[MAX_STATIONS];
     auto stations = networkConfig.at("stations");
     for (auto station : stations) {
         string name = station.at("station");
         int stationId = station.at("stationId");
         string typeString = station.at("type");
         cout << "Network station: " << name << " ID: " << stationId << " Type: " << typeString << endl;
+        stationData[stationId - 1].stationId = stationId;
+        stationData[stationId - 1].repeaterId = RepeaterId::NO_REPEATER;
+        stationData[stationId - 1].stationType = stationTypeEnum.stringToValue(typeString);
+        stationData[stationId - 1].extraTemperatureIndex = 0xF;
+        stationData[stationId - 1].extraHumidityIndex = 0xF;
     }
+
+    char buffer[EE_STATION_LIST_SIZE];
+    for (int i = 0; i < MAX_STATIONS; i++)
+        stationData[i].encode(buffer, i * 2);
+
+    cout << "Station List Buffer: " << Weather::dumpBuffer(buffer, sizeof(buffer)) << endl;
+
+    /*
+    if (!station.eepromBinaryWrite(EE_STATION_LIST_ADDRESS, buffer, EE_STATION_LIST_SIZE))
+        return false;
+        */
 
     return true;
 }
