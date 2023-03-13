@@ -20,6 +20,7 @@
 #include "VantageWeatherStation.h"
 #include "VantageEepromConstants.h"
 #include "VantageDecoder.h"
+#include "BitConverter.h"
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
 
@@ -45,6 +46,7 @@ GraphDataRetriever::processLoopPacket(const LoopPacket & packet) {
     return true;
 }
 
+static bool done = false;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
@@ -54,7 +56,6 @@ GraphDataRetriever::processLoop2Packet(const Loop2Packet & packet) {
     //
     nextRainStormDataPointer = packet.getNextRainStormDataPointer();
     // TODO remove the next 6 lines as they are for test purposes only
-    bool done = false;
     if (!done) {
         vector<StormData> v;
         retrieveStormData(v);
@@ -81,13 +82,14 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
     //
     StormData storm;
     for (int i = 0; i < NUM_RAIN_STORM_RECORDS; i++) {
-        storm.stormRain = VantageDecoder::decodeStormRain(buffer, i * RAIN_STORM_DATA_SIZE);
-        storm.stormStart = VantageDecoder::decodeStormStartDate(buffer, (i * RAIN_STORM_DATA_SIZE) + 2);
-        storm.stormEnd = VantageDecoder::decodeStormStartDate(buffer, (i * RAIN_STORM_DATA_SIZE) + 4);
-        storms.push_back(storm);
+        storm.stormRain = VantageDecoder::decodeStormRain(buffer, i * 2);
+        storm.stormStart = VantageDecoder::decodeStormStartDate(buffer, (2 * NUM_RAIN_STORM_RECORDS) + (i * 2));
+        storm.stormEnd = VantageDecoder::decodeStormStartDate(buffer, (4 * NUM_RAIN_STORM_RECORDS) + (i * 2));
+        if (storm.stormStart != 0)
+            storms.push_back(storm);
     }
 
-    //sort(storms.begin(), storms.end(), [](StormData a, StormData b) {return a.stormStart < b.stormStart;});
+    sort(storms.begin(), storms.end(), [](StormData a, StormData b) {return a.stormStart < b.stormStart;});
 
     cout << "^^^^^^^^^ STORM DATA ^^^^^^^^^^^^^^^^^^^^^^" << endl;
     cout << "Next storm data pointer: " << nextRainStormDataPointer << endl;
