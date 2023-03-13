@@ -100,6 +100,8 @@ public:
     const Measurement<Temperature> & getThsw() const;
     const Measurement<Pressure> &    getAtmPressure() const;
 
+    int                              getNextRainStormDataPointer() const;
+
 private:
     byte                     packetData[LOOP2_PACKET_SIZE];
     int                      packetType;
@@ -117,6 +119,7 @@ private:
     Rainfall                 rainHour;
     Rainfall                 rain24Hour;
     Measurement<Pressure>    atmPressure;
+    int                      nextRainStormDataPointer;
     VantageLogger *          logger;
 };
 }

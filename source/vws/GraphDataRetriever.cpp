@@ -1,0 +1,102 @@
+/*
+ * Copyright (C) 2023 Bruce Beisel
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include "GraphDataRetriever.h"
+
+#include "Weather.h"
+#include "VantageWeatherStation.h"
+#include "VantageEepromConstants.h"
+#include "VantageDecoder.h"
+#include "LoopPacket.h"
+#include "Loop2Packet.h"
+
+using namespace std;
+
+namespace vws {
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+GraphDataRetriever::GraphDataRetriever(VantageWeatherStation & station) : station(station),
+                                                                          nextRainStormDataPointer(0) {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+GraphDataRetriever::~GraphDataRetriever() {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+GraphDataRetriever::processLoopPacket(const LoopPacket & packet) {
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+GraphDataRetriever::processLoop2Packet(const Loop2Packet & packet) {
+    //
+    // Pick out the graph data pointers for easier access to the graph data
+    //
+    nextRainStormDataPointer = packet.getNextRainStormDataPointer();
+    // TODO remove the next 6 lines as they are for test purposes only
+    bool done = false;
+    if (!done) {
+        vector<StormData> v;
+        retrieveStormData(v);
+        done = true;
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
+    storms.clear();
+
+    byte buffer[RAIN_STORM_DATA_SIZE];
+
+    if (!station.eepromBinaryRead(VantageEepromConstants::EE_RAIN_STORM_DATA_ADDRESS, sizeof(buffer), buffer))
+        return false;
+
+    //
+    // This is a ring buffer, so we need to start in the middle and wrap around. What the state of the "next"
+    // value is not known at this point.
+    //
+    StormData storm;
+    for (int i = 0; i < NUM_RAIN_STORM_RECORDS; i++) {
+        storm.stormRain = VantageDecoder::decodeStormRain(buffer, i * RAIN_STORM_DATA_SIZE);
+        storm.stormStart = VantageDecoder::decodeStormStartDate(buffer, (i * RAIN_STORM_DATA_SIZE) + 2);
+        storm.stormEnd = VantageDecoder::decodeStormStartDate(buffer, (i * RAIN_STORM_DATA_SIZE) + 4);
+        storms.push_back(storm);
+    }
+
+    //sort(storms.begin(), storms.end(), [](StormData a, StormData b) {return a.stormStart < b.stormStart;});
+
+    cout << "^^^^^^^^^ STORM DATA ^^^^^^^^^^^^^^^^^^^^^^" << endl;
+    cout << "Next storm data pointer: " << nextRainStormDataPointer << endl;
+
+    for (const StormData & storm : storms) {
+        cout << "Start: " << Weather::formatDate(storm.stormStart) << " End: " << Weather::formatDate(storm.stormEnd) << " Rain: " << storm.stormRain << endl;
+    }
+
+    return true;
+}
+
+} /* namespace vws */

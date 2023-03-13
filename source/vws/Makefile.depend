@@ -19,7 +19,7 @@
 ../../target/vws/CalibrationAdjustmentsPacket.o: \
  CalibrationAdjustmentsPacket.cpp CalibrationAdjustmentsPacket.h \
  Weather.h Measurement.h WeatherTypes.h VantageProtocolConstants.h \
- BitConverter.h
+ ../3rdParty/json.hpp BitConverter.h VantageLogger.h
 ../../target/vws/CommandHandler.o: CommandHandler.cpp CommandHandler.h \
  ../3rdParty/json.hpp Weather.h Measurement.h WeatherTypes.h \
  ArchiveManager.h ArchivePacket.h CalibrationAdjustmentsPacket.h \
@@ -51,6 +51,11 @@
 ../../target/vws/EventManager.o: EventManager.cpp EventManager.h \
  ResponseHandler.h CommandHandler.h VantageLogger.h
 ../../target/vws/ForecastRule.o: ForecastRule.cpp ForecastRule.h
+../../target/vws/GraphDataRetriever.o: GraphDataRetriever.cpp \
+ GraphDataRetriever.h VantageWeatherStation.h ArchivePacket.h \
+ WeatherTypes.h Measurement.h BitConverter.h VantageProtocolConstants.h \
+ Weather.h VantageEepromConstants.h VantageDecoder.h VantageLogger.h \
+ LoopPacket.h Loop2Packet.h
 ../../target/vws/HiLowPacket.o: HiLowPacket.cpp HiLowPacket.h \
  Measurement.h VantageProtocolConstants.h WeatherTypes.h BitConverter.h \
  VantageDecoder.h VantageEepromConstants.h VantageLogger.h Weather.h
@@ -69,7 +74,7 @@
  DominantWindDirections.h WindDirectionSlice.h CurrentWeatherSocket.h \
  CurrentWeatherPublisher.h EventManager.h SerialPort.h VantageDriver.h \
  VantageConfiguration.h VantageLogger.h VantageStationNetwork.h \
- VantageDecoder.h VantageEepromConstants.h
+ ../3rdParty/json.hpp VantageDecoder.h VantageEepromConstants.h
 ../../target/vws/SerialPort.o: SerialPort.cpp SerialPort.h WeatherTypes.h \
  VantageLogger.h Weather.h Measurement.h
 ../../target/vws/UnitConverter.o: UnitConverter.cpp UnitConverter.h \
@@ -79,7 +84,8 @@
 ../../target/vws/VantageConfiguration.o: VantageConfiguration.cpp \
  VantageConfiguration.h VantageProtocolConstants.h WeatherTypes.h \
  VantageWeatherStation.h ArchivePacket.h Measurement.h BitConverter.h \
- VantageDecoder.h VantageEepromConstants.h VantageLogger.h VantageEnums.h
+ ../3rdParty/json.hpp VantageDecoder.h VantageEepromConstants.h \
+ VantageLogger.h VantageEnums.h Loop2Packet.h
 ../../target/vws/VantageDecoder.o: VantageDecoder.cpp VantageDecoder.h \
  Measurement.h VantageEepromConstants.h WeatherTypes.h VantageLogger.h \
  VantageProtocolConstants.h BitConverter.h Weather.h
@@ -93,15 +99,16 @@
 ../../target/vws/VantageLogger.o: VantageLogger.cpp VantageLogger.h \
  Weather.h Measurement.h WeatherTypes.h
 ../../target/vws/VantageStationNetwork.o: VantageStationNetwork.cpp \
- VantageStationNetwork.h VantageDecoder.h Measurement.h \
- VantageEepromConstants.h WeatherTypes.h VantageLogger.h \
+ VantageStationNetwork.h ../3rdParty/json.hpp VantageDecoder.h \
+ Measurement.h VantageEepromConstants.h WeatherTypes.h VantageLogger.h \
  VantageProtocolConstants.h VantageWeatherStation.h ArchivePacket.h \
- BitConverter.h LoopPacket.h VantageEnums.h
+ BitConverter.h LoopPacket.h VantageEnums.h ArchiveManager.h Weather.h
 ../../target/vws/VantageWeatherStation.o: VantageWeatherStation.cpp \
  VantageWeatherStation.h ArchivePacket.h WeatherTypes.h Measurement.h \
  BitConverter.h VantageProtocolConstants.h VantageEepromConstants.h \
  HiLowPacket.h LoopPacket.h Loop2Packet.h CalibrationAdjustmentsPacket.h \
- Weather.h VantageCRC.h SerialPort.h VantageEnums.h VantageLogger.h
+ Weather.h ../3rdParty/json.hpp VantageCRC.h SerialPort.h VantageEnums.h \
+ VantageLogger.h
 ../../target/vws/Weather.o: Weather.cpp Weather.h Measurement.h \
  WeatherTypes.h
 ../../target/vws/WindDirectionSlice.o: WindDirectionSlice.cpp \

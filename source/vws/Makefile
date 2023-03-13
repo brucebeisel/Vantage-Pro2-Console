@@ -18,6 +18,7 @@ SRCS=\
 	DominantWindDirections.cpp \
 	EventManager.cpp \
 	ForecastRule.cpp \
+	GraphDataRetriever.cpp \
 	HiLowPacket.cpp \
 	Loop2Packet.cpp \
 	LoopPacket.cpp \

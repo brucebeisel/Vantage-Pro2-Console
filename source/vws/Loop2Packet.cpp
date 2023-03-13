@@ -158,6 +158,13 @@ Loop2Packet::getAtmPressure() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+int
+Loop2Packet::getNextRainStormDataPointer() const {
+    return nextRainStormDataPointer;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
 Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
 
@@ -206,6 +213,7 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
     thsw = VantageDecoder::decode16BitTemperature(packetData, 39, false);
 
     atmPressure = VantageDecoder::decodeBarometricPressure(packetData, 65);
+    nextRainStormDataPointer = BitConverter::toUint8(buffer, 78);
 
     return true;
 }

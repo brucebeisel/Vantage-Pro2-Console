@@ -414,14 +414,6 @@ VantageStationNetwork::retrieveStationInfo() {
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
         stationData[i].decode(i + 1, buffer, i * 2);
 
-        /*
-        stationData[i].stationId = i + 1;
-        stationData[i].repeaterId = static_cast<RepeaterId>(BitConverter::getUpperNibble(buffer[i * 2]));
-        stationData[i].stationType = static_cast<StationType>(BitConverter::getLowerNibble(buffer[i * 2]));
-        stationData[i].extraTemperatureIndex = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
-        stationData[i].extraHumidityIndex = BitConverter::getLowerNibble(buffer[(i * 2) + 1]);
-        */
-
         if (stationData[i].stationType == StationType::ANEMOMETER_STATION)
             windStationId = i + 1;
         else if (stationData[i].stationType == StationType::INTEGRATED_SENSOR_STATION && windStationId == UNKNOWN_STATION_ID)
@@ -771,6 +763,30 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
         stationData[stationId - 1].stationType = stationTypeEnum.stringToValue(typeString);
         stationData[stationId - 1].extraTemperatureIndex = 0xF;
         stationData[stationId - 1].extraHumidityIndex = 0xF;
+    }
+
+    //
+    // Calculate the extra temperature and humidity indexes.
+    // This algorithm assigns the indexes, but I am not sure that this is the best method.
+    // If station ID 5 is a temperature station, then it uses extra temperature index of 0.
+    // If a new temperature station is added using ID 3, then it will use index 0, which may
+    // cause the archive data to be inconsistent, as the temperatures from ID 5 used to be in extra temperatures[0]
+    // and after adding station ID 3, they are in temperatures[1]. The best approach would be to preserve the
+    // extra temperature index no matter if the station changes IDs or a new station is added. That could be
+    // accomplished using unique and permanent names.
+    //
+    int nextExtraTemperatureIndex = 0;
+    int nextExtraHumidityIndex = 1;
+    for (int i = 0; i < MAX_STATIONS; i++) {
+        if (stationData[i].stationType == StationType::TEMPERATURE_ONLY_STATION ||
+            stationData[i].stationType == StationType::TEMPERATURE_HUMIDITY_STATION) {
+            stationData[i].extraTemperatureIndex = nextExtraTemperatureIndex++;
+        }
+
+        if (stationData[i].stationType == StationType::HUMIDITY_ONLY_STATION ||
+            stationData[i].stationType == StationType::TEMPERATURE_HUMIDITY_STATION) {
+            stationData[i].extraHumidityIndex = nextExtraHumidityIndex++;
+        }
     }
 
     char buffer[EE_STATION_LIST_SIZE];

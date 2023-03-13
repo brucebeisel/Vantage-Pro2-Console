@@ -67,6 +67,7 @@ public:
         int fixedOffset;               // Unknown units, fixed per console
     };
 
+
     /**
      * Constructor.
      * 
@@ -144,6 +145,14 @@ public:
      * @return True if the station type was retrieved successfully
      */
     bool retrieveConsoleType(std::string * consoleType = NULL);
+
+    /**
+     * Get the console type that was retrieved from the console at initialization.
+     * Note: This method does not talk to the console.
+     *
+     * @return The console type
+     */
+    ConsoleType getConsoleType() const;
 
     /**
      * Move the console from the "Receiving from..." screen to the current condition screen and reset
@@ -488,12 +497,6 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // End Configuration Commands for data stored in the EEPROM
     /////////////////////////////////////////////////////////////////////////////////
-
-    /////////////////////////////////////////////////////////////////////////////////
-    // End of Configuration Commands
-    /////////////////////////////////////////////////////////////////////////////////
-
-    ConsoleType getConsoleType() const;
 
 private:
     static constexpr int WAKEUP_TRIES = 5;               // The number of times to try to wake up the console before performing a disconnect/reconnect cycle

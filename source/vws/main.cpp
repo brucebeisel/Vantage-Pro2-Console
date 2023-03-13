@@ -37,6 +37,7 @@
 #include "VantageConfiguration.h"
 #include "VantageLogger.h"
 #include "VantageStationNetwork.h"
+#include "GraphDataRetriever.h"
 
 using namespace std;
 using namespace vws;
@@ -73,6 +74,7 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         VantageConfiguration configuration(station);
         VantageStationNetwork network(dataDirectory, station, archiveManager);
         AlarmManager alarmManager(station);
+        GraphDataRetriever graphDataRetriever(station);
         CommandHandler commandHandler(station, configuration, archiveManager, network, alarmManager, currentWeatherManager);
         EventManager eventManager(commandHandler);
         CommandSocket commandSocket(11462, eventManager);
@@ -86,6 +88,7 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         station.addLoopPacketListener(alarmManager);
         station.addLoopPacketListener(network);
         station.addLoopPacketListener(driver);
+        station.addLoopPacketListener(graphDataRetriever);
 
         //
         // Initialize objects that require it before entering the main loop
@@ -107,7 +110,7 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
             return;
 
         //
-        // Initialize the command socket last so that all other's are initialed before any commands are received
+        // Initialize the command socket last so that all other's are initialized before any commands are received
         //
         if (!commandSocket.initialize())
             return;
