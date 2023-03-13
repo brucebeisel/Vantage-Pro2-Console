@@ -26,7 +26,7 @@
  VantageProtocolConstants.h HiLowPacket.h VantageConfiguration.h \
  VantageWeatherStation.h BitConverter.h VantageEnums.h \
  VantageEepromConstants.h VantageLogger.h VantageStationNetwork.h \
- VantageDecoder.h AlarmManager.h LoopPacket.h Alarm.h AlarmProperties.h \
+ AlarmManager.h LoopPacket.h Alarm.h AlarmProperties.h \
  CurrentWeatherManager.h CurrentWeather.h Loop2Packet.h \
  DominantWindDirections.h WindDirectionSlice.h
 ../../target/vws/CommandSocket.o: CommandSocket.cpp CommandSocket.h \
@@ -74,7 +74,7 @@
  DominantWindDirections.h WindDirectionSlice.h CurrentWeatherSocket.h \
  CurrentWeatherPublisher.h EventManager.h SerialPort.h VantageDriver.h \
  VantageConfiguration.h VantageLogger.h VantageStationNetwork.h \
- ../3rdParty/json.hpp VantageDecoder.h VantageEepromConstants.h
+ ../3rdParty/json.hpp VantageEepromConstants.h GraphDataRetriever.h
 ../../target/vws/SerialPort.o: SerialPort.cpp SerialPort.h WeatherTypes.h \
  VantageLogger.h Weather.h Measurement.h
 ../../target/vws/UnitConverter.o: UnitConverter.cpp UnitConverter.h \
@@ -99,10 +99,11 @@
 ../../target/vws/VantageLogger.o: VantageLogger.cpp VantageLogger.h \
  Weather.h Measurement.h WeatherTypes.h
 ../../target/vws/VantageStationNetwork.o: VantageStationNetwork.cpp \
- VantageStationNetwork.h ../3rdParty/json.hpp VantageDecoder.h \
- Measurement.h VantageEepromConstants.h WeatherTypes.h VantageLogger.h \
- VantageProtocolConstants.h VantageWeatherStation.h ArchivePacket.h \
- BitConverter.h LoopPacket.h VantageEnums.h ArchiveManager.h Weather.h
+ VantageStationNetwork.h ../3rdParty/json.hpp VantageProtocolConstants.h \
+ WeatherTypes.h VantageEepromConstants.h VantageWeatherStation.h \
+ ArchivePacket.h Measurement.h BitConverter.h LoopPacket.h \
+ VantageDecoder.h VantageLogger.h VantageEnums.h ArchiveManager.h \
+ Weather.h
 ../../target/vws/VantageWeatherStation.o: VantageWeatherStation.cpp \
  VantageWeatherStation.h ArchivePacket.h WeatherTypes.h Measurement.h \
  BitConverter.h VantageProtocolConstants.h VantageEepromConstants.h \

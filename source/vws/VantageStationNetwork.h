@@ -22,8 +22,8 @@
 #include <bitset>
 #include "json.hpp"
 
-#include "VantageDecoder.h"
 #include "VantageProtocolConstants.h"
+#include "VantageEepromConstants.h"
 #include "VantageWeatherStation.h"
 
 namespace vws {
