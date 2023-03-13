@@ -20,7 +20,6 @@
 #include "VantageWeatherStation.h"
 #include "VantageEepromConstants.h"
 #include "VantageDecoder.h"
-#include "BitConverter.h"
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
 
@@ -46,7 +45,6 @@ GraphDataRetriever::processLoopPacket(const LoopPacket & packet) {
     return true;
 }
 
-static bool done = false;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
@@ -55,13 +53,6 @@ GraphDataRetriever::processLoop2Packet(const Loop2Packet & packet) {
     // Pick out the graph data pointers for easier access to the graph data
     //
     nextRainStormDataPointer = packet.getNextRainStormDataPointer();
-    // TODO remove the next 6 lines as they are for test purposes only
-    if (!done) {
-        vector<StormData> v;
-        retrieveStormData(v);
-        done = true;
-    }
-
     return true;
 }
 
