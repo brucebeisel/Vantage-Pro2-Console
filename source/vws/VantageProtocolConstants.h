@@ -355,7 +355,7 @@ static constexpr int INVALID_16BIT_TIME = 65535;
 // Limits
 //
 static constexpr int NORTH_HEADING_VALUE = 360;
-static constexpr int NO_STORM_ACTIVE_DATE = -1;
+static constexpr int NO_STORM_ACTIVE_DATE = 65535;
 static constexpr int MIN_LEAF_WETNESS_VALUE = 0;
 static constexpr int MAX_LEAF_WETNESS_VALUE = 15;
 

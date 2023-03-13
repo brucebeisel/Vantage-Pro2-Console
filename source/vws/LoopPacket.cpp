@@ -152,7 +152,7 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     solarRadiation = VantageDecoder::decodeSolarRadiation(packetData, SOLAR_RADIATION_OFFSET);
 
     stormRain = VantageDecoder::decodeStormRain(packetData, STORM_RAIN_OFFSET);
-    stormStart = VantageDecoder::decodeStormStartDate(packetData, STORM_START_DATE_OFFSET);
+    stormStart = VantageDecoder::decodeStormDate(packetData, STORM_START_DATE_OFFSET);
 
     dayRain = VantageDecoder::decodeRain(packetData, DAY_RAIN_OFFSET);
     monthRain = VantageDecoder::decodeRain(packetData, MONTH_RAIN_OFFSET);

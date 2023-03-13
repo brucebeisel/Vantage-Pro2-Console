@@ -253,6 +253,10 @@ VantageDecoder::decodeWindDirection(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 Rainfall
 VantageDecoder::decodeStormRain(const byte buffer[], int offset) {
+    // TODO The LOOP packet has storm rain as 1/100th of an inch, while the LOOP2 packet
+    // has it as rain clicks. Which is correct? Unfortunately, we cannot tell due to the
+    // fact that my rain bucket reports in 1/100th of an inch, which yields that same value.
+    //
     int16 value16 = BitConverter::toInt16(buffer, offset);
     Rainfall rain = static_cast<Rainfall>(value16) / STORM_RAIN_SCALE;
 
@@ -287,16 +291,16 @@ VantageDecoder::decodeRain(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
-VantageDecoder::decodeStormStartDate(const byte buffer[], int offset) {
+VantageDecoder::decodeStormDate(const byte buffer[], int offset) {
     DateTime stormStart = 0;
-    int16 value16 = BitConverter::toInt16(buffer, offset);
+    uint16 value16 = BitConverter::toUint16(buffer, offset);
 
     if (value16 != NO_STORM_ACTIVE_DATE) {
         int year = (value16 & 0x3F) + YEAR_OFFSET;
         int day = (value16 >> 7) & 0x1F;
         int month = (value16 >> 12) & 0xF;
 
-        struct tm tm;
+        struct tm tm = {0};
         tm.tm_year = year - TIME_STRUCT_YEAR_OFFSET;
         tm.tm_mon = month - 1;
         tm.tm_mday = day;

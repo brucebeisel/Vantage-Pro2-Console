@@ -77,26 +77,18 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
         return false;
 
     //
-    // This is a ring buffer, so we need to start in the middle and wrap around. What the state of the "next"
-    // value is not known at this point.
+    // This is a ring buffer, so we will read the entire buffer, storing the valid storms, then sort.
     //
     StormData storm;
     for (int i = 0; i < NUM_RAIN_STORM_RECORDS; i++) {
         storm.stormRain = VantageDecoder::decodeStormRain(buffer, i * 2);
-        storm.stormStart = VantageDecoder::decodeStormStartDate(buffer, (2 * NUM_RAIN_STORM_RECORDS) + (i * 2));
-        storm.stormEnd = VantageDecoder::decodeStormStartDate(buffer, (4 * NUM_RAIN_STORM_RECORDS) + (i * 2));
+        storm.stormStart = VantageDecoder::decodeStormDate(buffer, (2 * NUM_RAIN_STORM_RECORDS) + (i * 2));
+        storm.stormEnd = VantageDecoder::decodeStormDate(buffer, (4 * NUM_RAIN_STORM_RECORDS) + (i * 2));
         if (storm.stormStart != 0)
             storms.push_back(storm);
     }
 
-    sort(storms.begin(), storms.end(), [](StormData a, StormData b) {return a.stormStart < b.stormStart;});
-
-    cout << "^^^^^^^^^ STORM DATA ^^^^^^^^^^^^^^^^^^^^^^" << endl;
-    cout << "Next storm data pointer: " << nextRainStormDataPointer << endl;
-
-    for (const StormData & storm : storms) {
-        cout << "Start: " << Weather::formatDate(storm.stormStart) << " End: " << Weather::formatDate(storm.stormEnd) << " Rain: " << storm.stormRain << endl;
-    }
+    std::sort(storms.begin(), storms.end(), [](StormData a, StormData b) {return a.stormStart < b.stormStart;});
 
     return true;
 }

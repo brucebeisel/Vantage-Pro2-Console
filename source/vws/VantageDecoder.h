@@ -72,7 +72,7 @@ public:
 
     static Rainfall decodeRain(const byte buffer[], int offset);
 
-    static DateTime decodeStormStartDate(const byte buffer[], int offset);
+    static DateTime decodeStormDate(const byte buffer[], int offset);
 
     static float decodeConsoleBatteryVoltage(const byte buffer[], int offset);
 
