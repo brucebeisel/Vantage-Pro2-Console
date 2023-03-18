@@ -49,7 +49,6 @@ CurrentWeather::setLoopData(const LoopPacket & loopPacket) {
 
     windSpeed = loopPacket.getWindSpeed();
     windDirection = loopPacket.getWindDirection();
-    windSpeed10MinuteAverage = loopPacket.getWindSpeed10MinuteAverage();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +58,6 @@ CurrentWeather::setLoop2Data(const Loop2Packet & loop2Packet) {
     this->loop2Packet = loop2Packet;
     windSpeed = loop2Packet.getWindSpeed();
     windDirection = loop2Packet.getWindDirection();
-    windSpeed10MinuteAverage = loop2Packet.getWindSpeed10MinuteAverage();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,13 +111,6 @@ CurrentWeather::getWindDirection() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const Measurement<Speed> &
-CurrentWeather::getWindSpeed10MinuteAverage() const {
-    return windSpeed10MinuteAverage;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 std::string
 CurrentWeather::formatJSON() const {
     DateTime cwTime;
@@ -144,7 +135,7 @@ CurrentWeather::formatJSON() const {
        << windDirection.formatJSON("windDirection", true)
        << loop2Packet.getWindGust10Minute().formatJSON("gustSpeed", true)
        << loop2Packet.getWindGustDirection10Minute().formatJSON("gustDirection", true)
-       << windSpeed10MinuteAverage.formatJSON("windSpeed10MinAvg", true)
+       << loop2Packet.getWindSpeed10MinuteAverage().formatJSON("windSpeed10MinAvg", true)
        << loop2Packet.getWindSpeed2MinuteAverage().formatJSON("windSpeed2MinAvg", true);
 
     ss << ", \"dominantWindDirections\" : [";

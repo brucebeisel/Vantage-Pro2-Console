@@ -102,11 +102,6 @@ public:
     const Measurement<Heading> & getWindDirection() const;
 
     /**
-     * Get the most recent wind speed 10 minute average, which can be from either the LOOP or LOOP2 packet.
-     */
-    const Measurement<Speed> & getWindSpeed10MinuteAverage() const;
-
-    /**
      * Format the Current Weather JSON message.
      * 
      * @return The formatted current weather message
@@ -124,7 +119,6 @@ private:
     //
     Measurement<Speed>   windSpeed;
     Measurement<Heading> windDirection;
-    Measurement<Speed>   windSpeed10MinuteAverage;
 };
 }
 
