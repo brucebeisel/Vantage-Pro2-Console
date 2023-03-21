@@ -129,6 +129,8 @@ VantageDecoder::decodeArchiveET(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Evapotranspiration>
 VantageDecoder::decodeDayET(const byte buffer[], int offset) {
+    // TODO Why is a ET value of 0.0 considered invalid? The documentation does not seem to support this.
+    // The same holds true for month and year ET.
     Measurement<Evapotranspiration> measurement;
     int16 value16 = BitConverter::toInt16(buffer, offset);
 

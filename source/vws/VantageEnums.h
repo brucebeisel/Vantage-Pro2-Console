@@ -345,7 +345,7 @@ operator<<(std::ostream & os, ProtocolConstants::BarometerTrend value) {
  ****************************************/
 static const NameValuePair<ProtocolConstants::Forecast> fcMappings[] = {
     { "Sunny", ProtocolConstants::Forecast::SUNNY },
-    { "Party cloudy", ProtocolConstants::Forecast::PARTLY_CLOUDY },
+    { "Partly cloudy", ProtocolConstants::Forecast::PARTLY_CLOUDY },
     { "Mostly cloudy", ProtocolConstants::Forecast::MOSTLY_CLOUDY },
     { "Mostly cloudy with rain within 12 hours", ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_RAIN },
     { "Mostly cloudy with snow within 12 hours", ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_SNOW },
