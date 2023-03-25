@@ -4,7 +4,8 @@ CXXFLAGS= -g -I../vws -std=c++20 -Wno-psabi
 SRCS=\
 	DominantWindTest.cpp \
 	EnumTest.cpp \
-	BitConverterTest.cpp
+	BitConverterTest.cpp \
+	WindDirectionSliceTest.cpp
 
 
 OBJDIR=../../target/test
@@ -26,7 +27,10 @@ ENUMOBJS=\
 	
 BITCONVERTEROBJS= $(VWSTESTOBJDIR)/BitConverter.o 
 	
-all: DominantWindTest EnumTest BitConverterTest
+all: DominantWindTest EnumTest BitConverterTest WindDirectionSliceTest
+
+WindDirectionSliceTest: $(OBJDIR) $(OBJDIR)/WindDirectionSliceTest.o
+	$(CC) -g -o WindDirectionSliceTest $(OBJDIR)/WindDirectionSliceTest.o $(DOMWINDOBJS)
 
 DominantWindTest: $(OBJDIR) $(OBJDIR)/DominantWindTest.o
 	$(CC) -g -o DominantWindTest $(OBJDIR)/DominantWindTest.o $(DOMWINDOBJS)

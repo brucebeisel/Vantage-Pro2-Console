@@ -72,13 +72,34 @@ WindDirectionSlice::getCenter() const {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 WindDirectionSlice::isInSlice(Heading heading) const {
-    return heading > lowHeading && heading <= highHeading;
+    //
+    // Normalize the heading to be checked
+    //
+    while (heading > 360.0)
+        heading -= 360.0;
+
+    while (heading < 0.0)
+        heading += 360.0;
+
+    //
+    // Test for the two ways a northern slice can be created.
+    // The first is 349.75 -> 11.25
+    // The second is -11.25 -> 11.25
+    //
+    if (lowHeading > highHeading) {
+        return heading > lowHeading || heading <= highHeading;
+    }
+    else if (lowHeading < 0) {
+        return heading > 360.0 + lowHeading || heading <= highHeading;
+    }
+    else
+        return heading > lowHeading && heading <= highHeading;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindDirectionSlice::addSample(DateTime time, Heading heading) {
+WindDirectionSlice::addSample(Heading heading) {
     if (isInSlice(heading))
         sampleCount++;
 }

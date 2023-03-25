@@ -306,14 +306,14 @@ static constexpr int MAX_EXTRA_TEMPERATURES = 7;
 static constexpr int MAX_EXTRA_HUMIDITIES = 7;
 static constexpr int MAX_SOIL_TEMPERATURES = 4;
 static constexpr int MAX_SOIL_MOISTURES = 4;
-static constexpr int MAX_LEAF_TEMPERATURES = 4;
 //
-// The protocol document suggests there are 4 possible leaf wetness values, but the Leaf/Soil
-// sensor station manual states that there can only be two leaf wetness sensors installed.
+// The protocol document suggests there are 4 leaf wetness values and 4 leaf temperature values, but the Leaf/Soil
+// sensor station manual states that there can only be two leaf wetness sensors and two leaf temperature probes installed.
 // In addition, the 4th or [3] leaf wetness in the LOOP packet does not contain 0xFF, but
 // has the value of 0, which implies it is a real value, not unknown.
 //
-static constexpr int MAX_LEAF_WETNESSES = 4;
+static constexpr int MAX_LEAF_TEMPERATURES = 2;
+static constexpr int MAX_LEAF_WETNESSES = 2;
 
 //
 // Scales and offsets

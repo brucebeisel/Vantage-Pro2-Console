@@ -200,7 +200,7 @@ DominantWindDirections::processWindSample(DateTime time, Heading heading, Speed 
         // Offer the heading to all of the slices
         //
         for (int i = 0; i < NUM_SLICES; i++) {
-            windSlices[i].addSample(time, heading);
+            windSlices[i].addSample(heading);
         }
     }
 }

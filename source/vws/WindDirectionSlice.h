@@ -87,12 +87,11 @@ public:
 
     /**
      * Add a sample to this slice if the heading fall within this slice.
-     * A sample is nothing more than a time that the wind was blowing within this slice.
+     * A sample is nothing more than a sample that the wind was blowing within this slice.
      * 
-     * @param time    The time of the wind sample
      * @param heading The heading measured at the specified time
      */
-    void addSample(DateTime time, Heading heading);
+    void addSample(Heading heading);
 
     /**
      * Get the number of samples currently stored by this slice.
