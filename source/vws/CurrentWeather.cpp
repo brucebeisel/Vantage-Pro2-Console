@@ -239,7 +239,7 @@ CurrentWeather::formatJSON() const {
 
     firstValue = true;
     ss << ", \"leafWetnesses\" : [ ";
-    for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
+    for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++) {
         if (loopPacket.getLeafWetness(i).isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << loopPacket.getLeafWetness(i).getValue() << " }";
