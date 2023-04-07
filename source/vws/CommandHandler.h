@@ -223,6 +223,8 @@ private:
 
     void handleQueryTodayNetworkStatus(const std::string & commandName, std::string & response);
 
+    std::string buildFailureString(const std::string & errorString);
+
 
     VantageWeatherStation & station;
     VantageConfiguration &  configurator;
