@@ -800,9 +800,11 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
     DateTime startTime = 0;
     DateTime endTime = 0;
 
-    struct tm tm = {0};
+    struct tm tm;
 
     for (CommandArgument arg : argumentList) {
+        tm = {0};
+        tm.tm_isdst = -1;
         if (arg.first == "start-time") {
             std::stringstream ss(arg.second);
             ss >> std::get_time(&tm, "%Y-%m-%dT%T");
