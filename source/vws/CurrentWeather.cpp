@@ -46,7 +46,6 @@ CurrentWeather::~CurrentWeather() {
 void
 CurrentWeather::setLoopData(const LoopPacket & loopPacket) {
     this->loopPacket = loopPacket;
-
     windSpeed = loopPacket.getWindSpeed();
     windDirection = loopPacket.getWindDirection();
 }
@@ -152,9 +151,10 @@ CurrentWeather::formatJSON() const {
        << ", \"barometerTrend\" : \"" << loopPacket.getBarometerTrendString() << "\""
        << ", \"rainRate\" : " << loopPacket.getRainRate()
        << ", \"rainToday\" : " << loopPacket.getDayRain()
-       << ", \"rain15Minute\" : " << loop2Packet.getRain15Minute()
-       << ", \"rainHour\" : " << loop2Packet.getRainHour()
-       << ", \"rain24Hour\" : " << loop2Packet.getRain24Hour()
+       << ", \"rainToday2\" : " << loop2Packet.getDayRain()
+       << ", \"rain15Minute\" : " << loop2Packet.get15MinuteRain()
+       << ", \"rainHour\" : " << loop2Packet.getHourRain()
+       << ", \"rain24Hour\" : " << loop2Packet.get24HourRain()
        << ", \"rainMonth\" : " << loopPacket.getMonthRain()
        << ", \"rainWeatherYear\" : " << loopPacket.getYearRain()
        << loopPacket.getSolarRadiation().formatJSON("solarRadiation", true);

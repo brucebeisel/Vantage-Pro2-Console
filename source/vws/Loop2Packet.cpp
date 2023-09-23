@@ -36,7 +36,9 @@ Loop2Packet::Loop2Packet() : logger(&VantageLogger::getLogger("Loop2Packet")),
                              packetType(-1),
                              rain15Minute(0.0),
                              rainHour(0.0),
-                             rain24Hour(0.0) {
+                             rainDay(0.0),
+                             rain24Hour(0.0),
+                             nextRainStormDataPointer(0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,21 +105,28 @@ Loop2Packet::getWindSpeed10MinuteAverage() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Rainfall
-Loop2Packet::getRain15Minute() const {
+Loop2Packet::get15MinuteRain() const {
     return rain15Minute;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Rainfall
-Loop2Packet::getRainHour() const {
+Loop2Packet::getHourRain() const {
     return rainHour;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Rainfall
-Loop2Packet::getRain24Hour() const {
+Loop2Packet::getDayRain() const {
+    return rainDay;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Rainfall
+Loop2Packet::get24HourRain() const {
     return rain24Hour;
 }
 
@@ -203,14 +212,15 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
     windGust10Minute = VantageDecoder::decode16BitWindSpeed(packetData, 22);
     windGustDirection10Minute = VantageDecoder::decodeWindDirection(packetData, 24);
 
-    rain15Minute = VantageDecoder::decodeRain(packetData, 52);
-    rainHour = VantageDecoder::decodeRain(packetData, 54);
-    rain24Hour = VantageDecoder::decodeRain(packetData, 58);
-
     dewPoint = VantageDecoder::decode16BitTemperature(packetData, 30, false);
     heatIndex = VantageDecoder::decode16BitTemperature(packetData, 35, false);
     windChill = VantageDecoder::decode16BitTemperature(packetData, 37, false);
     thsw = VantageDecoder::decode16BitTemperature(packetData, 39, false);
+
+    rainDay = VantageDecoder::decodeRain(packetData, 50);
+    rain15Minute = VantageDecoder::decodeRain(packetData, 52);
+    rainHour = VantageDecoder::decodeRain(packetData, 54);
+    rain24Hour = VantageDecoder::decodeRain(packetData, 58);
 
     atmPressure = VantageDecoder::decodeBarometricPressure(packetData, 65);
     nextRainStormDataPointer = BitConverter::toUint8(buffer, 78);

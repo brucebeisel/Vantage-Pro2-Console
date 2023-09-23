@@ -45,7 +45,7 @@ public:
      * @param buffer The buffer containing the raw archive packet
      * @param offset The offset into the buffer that the archive packet begins
      */
-    ArchivePacket(const byte buffer[], int offset);
+    ArchivePacket(const byte buffer[], int offset = 0);
 
     /**
      * Destructor.
@@ -58,7 +58,7 @@ public:
      * @param buffer The buffer with which to update the archive data
      * @param offset The offset within the specified buffer from which to copy the data
      */
-    void updateArchivePacketData(const byte buffer[], int offset);
+    void updateArchivePacketData(const byte buffer[], int offset = 0);
 
     /**
      * Get the raw packet data used to extract the archive data.

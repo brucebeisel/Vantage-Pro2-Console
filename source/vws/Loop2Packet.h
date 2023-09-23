@@ -30,23 +30,6 @@ class Loop2Packet {
 public:
     static const int LOOP2_PACKET_SIZE = 99;
     static const int LOOP2_PACKET_TYPE = 1;
-    //
-    // LOOP packet forecast icons
-    //
-    static const short RAIN_BIT = 0x1;
-    static const short CLOUDY_BIT = 0x2;
-    static const short PARTLY_CLOUDY_BIT = 0x4;
-    static const short SUNNY_BIT = 0x8;
-    static const short SNOW_BIT = 0x10;
-
-    static const int MOSTLY_CLEAR_FORECAST = SUNNY_BIT;
-    static const int PARTLY_CLOUDY_FORECAST = PARTLY_CLOUDY_BIT | CLOUDY_BIT;
-    static const int MOSTLY_CLOUDY_FORECAST = CLOUDY_BIT;
-    static const int MOSTLY_CLOUDY_CHANCE_OF_RAIN_FORECAST = CLOUDY_BIT | RAIN_BIT;
-    static const int MOSTLY_CLOUDY_CHANCE_OF_SNOW_FORECAST = CLOUDY_BIT | SNOW_BIT;
-    static const int PARTLY_CLOUDY_CHANCE_OF_RAIN_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT;
-    static const int PARTLY_CLOUDY_CHANCE_OF_SNOW_FORECAST = PARTLY_CLOUDY_BIT | SNOW_BIT;
-    static const int PARTLY_CLOUDY_CHANCE_OF_RAIN_OR_SNOW_FORECAST = PARTLY_CLOUDY_BIT | RAIN_BIT | SNOW_BIT;
 
     /**
      * Constructor.
@@ -91,9 +74,10 @@ public:
     const Measurement<Heading> &     getWindGustDirection10Minute() const;
     const Measurement<Speed> &       getWindSpeed2MinuteAverage() const;
     const Measurement<Speed> &       getWindSpeed10MinuteAverage() const;
-    Rainfall                         getRainHour() const;
-    Rainfall                         getRain15Minute() const;
-    Rainfall                         getRain24Hour() const;
+    Rainfall                         getHourRain() const;
+    Rainfall                         get15MinuteRain() const;
+    Rainfall                         getDayRain() const;
+    Rainfall                         get24HourRain() const;
     const Measurement<Temperature> & getDewPoint() const;
     const Measurement<Temperature> & getHeatIndex() const;
     const Measurement<Temperature> & getWindChill() const;
@@ -117,6 +101,7 @@ private:
     Measurement<Temperature> thsw;
     Rainfall                 rain15Minute;
     Rainfall                 rainHour;
+    Rainfall                 rainDay;
     Rainfall                 rain24Hour;
     Measurement<Pressure>    atmPressure;
     int                      nextRainStormDataPointer;

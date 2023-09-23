@@ -97,7 +97,7 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
         if (stream.eof())
             break;
 
-        ArchivePacket packet(buffer, 0);
+        ArchivePacket packet(buffer);
         list.push_back(packet);
         timeOfLastRecord = packet.getDateTime();
     }
@@ -130,7 +130,7 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::v
         stream.read(buffer, sizeof(buffer));
 
         if (!stream.eof()) {
-            ArchivePacket packet(buffer, 0);
+            ArchivePacket packet(buffer);
             packetTime = packet.getDateTime();
             if (packetTime <= endTime) {
                 list.push_back(packet);
@@ -173,7 +173,7 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
         do {
             streamPosition = stream.tellg();
             stream.read(buffer, sizeof(buffer));
-            ArchivePacket packet(buffer, 0);
+            ArchivePacket packet(buffer);
             stream.seekg(-(ArchivePacket::BYTES_PER_ARCHIVE_PACKET * 2), ios::cur);
             packetTime = packet.getDateTime();
         } while (searchTime <= packetTime && streamPosition > 0);
@@ -206,7 +206,7 @@ ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
         byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
         stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
         stream.read(buffer, sizeof(buffer));
-        packet.updateArchivePacketData(buffer, 0);
+        packet.updateArchivePacketData(buffer);
         return true;
     }
     else
@@ -260,7 +260,7 @@ ArchiveManager::findArchivePacketTimeRange() {
         //
         stream.seekg(0, ios::beg);
         stream.read(buffer, sizeof(buffer));
-        ArchivePacket packet(buffer, 0);
+        ArchivePacket packet(buffer);
         oldestPacketTime = packet.getDateTime();
 
         //
@@ -268,7 +268,7 @@ ArchiveManager::findArchivePacketTimeRange() {
         //
         stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
         stream.read(buffer, sizeof(buffer));
-        packet.updateArchivePacketData(buffer, 0);
+        packet.updateArchivePacketData(buffer);
         newestPacketTime = packet.getDateTime();
     }
     else {
