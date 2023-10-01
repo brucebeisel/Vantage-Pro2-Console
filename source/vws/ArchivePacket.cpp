@@ -138,81 +138,282 @@ ArchivePacket::extractArchiveDate() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getAverageOutsideTemperature() const {
+    return VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getHighOutsideTemperature() const {
+    return VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getLowOutsideTemperature() const {
+    return VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Rainfall>
+ArchivePacket::getRainfall() const {
+    return VantageDecoder::decodeRain(buffer, RAINFALL_OFFSET);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Rainfall>
+ArchivePacket::getHighRainfallRate() const {
+    return VantageDecoder::decodeRain(buffer, HIGH_RAIN_RATE_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Pressure>
+ArchivePacket::getBarometricPressure() const {
+    return VantageDecoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<SolarRadiation>
+ArchivePacket::getAverageSolarRadiation() const {
+    return VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getInsideTemperature() const {
+    return VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getInsideHumidity() const {
+    return VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getOutsideHumidity() const {
+    return VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Speed>
+ArchivePacket::getAverageWindSpeed() const {
+    return VantageDecoder::decodeWindSpeed(buffer, AVG_WIND_SPEED_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Heading>
+ArchivePacket::getPrevailingWindDirection() const {
+    return VantageDecoder::decodeWindDirectionSlice(buffer, PREVAILING_WIND_DIRECTION_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Speed>
+ArchivePacket::getHighWindSpeed() const {
+    return VantageDecoder::decodeWindSpeed(buffer, HIGH_WIND_SPEED_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Heading>
+ArchivePacket::getHighWindDirection() const {
+    return VantageDecoder::decodeWindDirectionSlice(buffer, DIR_OF_HIGH_WIND_SPEED_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<UvIndex>
+ArchivePacket::getAverageUvIndex() const {
+    return VantageDecoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Evapotranspiration>
+ArchivePacket::getEvapotranspiration() const {
+    return VantageDecoder::decodeArchiveET(buffer, ET_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<SolarRadiation>
+ArchivePacket::getHighSolarRadiation() const {
+    return VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<UvIndex>
+ArchivePacket::getHighUvIndex() const {
+    return VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+int
+ArchivePacket::getForecastRule() const {
+    return BitConverter::toUint8(buffer, FORECAST_RULE_OFFSET);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Humidity>
+ArchivePacket::getExtraHumidity(int index) const {
+    Measurement<Humidity> humidity;
+    if (index >= 0 && index < MAX_EXTRA_HUMIDITIES)
+        humidity = VantageDecoder::decodeHumidity(buffer, EXTRA_HUMIDITIES_BASE_OFFSET + index);
+
+    return humidity;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getExtraTemperature(int index) const {
+    Measurement<Temperature> temperature;
+    if (index >= 0 && index < MAX_EXTRA_TEMPERATURES)
+        temperature = VantageDecoder::decode8BitTemperature(buffer, EXTRA_TEMPERATURES_BASE_OFFSET + index);
+
+    return temperature;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getLeafTemperature(int index) const {
+    Measurement<Temperature> temperature;
+    if (index >= 0 && index < MAX_LEAF_TEMPERATURES)
+        temperature = VantageDecoder::decode8BitTemperature(buffer, LEAF_TEMPERATURE_BASE_OFFSET + index);
+
+    return temperature;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<LeafWetness>
+ArchivePacket::getLeafWetness(int index) const {
+    Measurement<LeafWetness> leafWetness;
+    if (index >= 0 && index < MAX_LEAF_WETNESSES)
+        leafWetness = BitConverter::toUint8(buffer, LEAF_WETNESS_BASE_OFFSET + index);
+
+    return leafWetness;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<Temperature>
+ArchivePacket::getSoilTemperature(int index) const {
+    Measurement<Temperature> temperature;
+    if (index >= 0 && index < MAX_SOIL_TEMPERATURES)
+        temperature = VantageDecoder::decode8BitTemperature(buffer, SOIL_TEMPERATURE_BASE_OFFSET + index);
+
+    return temperature;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+Measurement<LeafWetness>
+ArchivePacket::getSoilMoisture(int index) const {
+    Measurement<SoilMoisture> soilMoisture;
+    if (index >= 0 && index < MAX_SOIL_MOISTURES)
+        soilMoisture = BitConverter::toUint8(buffer, SOIL_MOISTURES_BASE_OFFSET + index);
+
+    return soilMoisture;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 std::string
 ArchivePacket::formatJSON() const {
     ostringstream ss;
     DateTime archiveTime = extractArchiveDate();
     ss << "{ \"time\" : \"" << Weather::formatDateTime(archiveTime) << "\"";
 
-    Measurement<Temperature> temperature = VantageDecoder::decode16BitTemperature(buffer, OUTSIDE_TEMPERATURE_OFFSET);
+    Measurement<Temperature> temperature = getAverageOutsideTemperature();
     ss << temperature.formatJSON("avgOutsideTemperature", true);
 
-    temperature = VantageDecoder::decode16BitTemperature(buffer, HIGH_OUTSIDE_TEMPERATURE_OFFSET);
+    temperature = getHighOutsideTemperature();
     ss << temperature.formatJSON("highOutsideTemperature", true);
 
-    temperature = VantageDecoder::decode16BitTemperature(buffer, LOW_OUTSIDE_TEMPERATURE_OFFSET);
+    temperature = getLowOutsideTemperature();
     ss << temperature.formatJSON("lowOutsideTemperature", true);
 
-    Rainfall r = VantageDecoder::decodeRain(buffer, RAINFALL_OFFSET);
+    Rainfall r = getRainfall();
     ss << ", \"rainfall\" : " << r;
 
-    r = VantageDecoder::decodeRain(buffer, HIGH_RAIN_RATE_OFFSET);
+    r = getHighRainfallRate();
     ss << ", \"highRainfallRate\" : " << r;
 
-    Measurement<Pressure> baroPressure = VantageDecoder::decodeBarometricPressure(buffer, BAROMETER_OFFSET);
+    Measurement<Pressure> baroPressure = getBarometricPressure();
     ss << baroPressure.formatJSON("barometricPressure", true);
 
-    Measurement<SolarRadiation> solarRadiation = VantageDecoder::decodeSolarRadiation(buffer, SOLAR_RADIATION_OFFSET);
+    Measurement<SolarRadiation> solarRadiation = getAverageSolarRadiation();
     ss << solarRadiation.formatJSON("avgSolarRadiation", true);
 
-    temperature = VantageDecoder::decode16BitTemperature(buffer, INSIDE_TEMPERATURE_OFFSET);
+    temperature = getInsideTemperature();
     ss << temperature.formatJSON("insideTemperature", true);
 
-    Measurement<Humidity> humidity = VantageDecoder::decodeHumidity(buffer, INSIDE_HUMIDITY_OFFSET);
+    Measurement<Humidity> humidity = getInsideHumidity();
     ss << humidity.formatJSON("insideHumidity", true);
 
-    humidity = VantageDecoder::decodeHumidity(buffer, OUTSIDE_HUMIDITY_OFFSET);
+    humidity = getOutsideHumidity();
     ss << humidity.formatJSON("outsideHumidity", true);
 
     //
     // Both wind speed and direction must be valid to generate the JSON
     //
-    Measurement<Speed> windSpeed = VantageDecoder::decodeWindSpeed(buffer, AVG_WIND_SPEED_OFFSET);
-    Measurement<Heading> windDir = VantageDecoder::decodeWindDirectionSlice(buffer, PREVAILING_WIND_DIRECTION_OFFSET);
+    Measurement<Speed> windSpeed = getAverageWindSpeed();
+    Measurement<Heading> windDir = getPrevailingWindDirection();
 
     if (windSpeed.isValid() && windDir.isValid()) {
         ss << ", \"avgWindSpeed\" : " << windSpeed << ", "
            << "\"avgWindDirection\" : " << windDir;
     }
 
-    windSpeed = VantageDecoder::decodeWindSpeed(buffer, HIGH_WIND_SPEED_OFFSET);
-    windDir = VantageDecoder::decodeWindDirectionSlice(buffer, DIR_OF_HIGH_WIND_SPEED_OFFSET);
+    windSpeed = getHighWindSpeed();
+    windDir = getHighWindDirection();
 
     if (windSpeed.isValid() && windDir.isValid()) {
         ss << ", \"highWindSpeed\" : " << windSpeed << ", "
            << "\"highWindDirection\" : " << windDir;
     }
 
-    Measurement<UvIndex> uvIndex = VantageDecoder::decodeUvIndex(buffer, AVG_UV_INDEX_OFFSET);
+    Measurement<UvIndex> uvIndex = getAverageUvIndex();
     ss << uvIndex.formatJSON("avgUvIndex", true);
 
-    Measurement<Evapotranspiration> et = VantageDecoder::decodeArchiveET(buffer, ET_OFFSET);
+    Measurement<Evapotranspiration> et = getEvapotranspiration();
     if (et.isValid())
         ss <<  et.formatJSON("evapotranspiration", true);
 
-    solarRadiation = VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET);
+    solarRadiation = getHighSolarRadiation();
     ss << solarRadiation.formatJSON("highSolarRadiation", true);
 
-    uvIndex = VantageDecoder::decodeUvIndex(buffer, HIGH_UV_INDEX_OFFSET);
+    uvIndex = getHighUvIndex();
     ss << uvIndex.formatJSON("highUvIndex", true);
 
-    int forecastRule = BitConverter::toUint8(buffer, FORECAST_RULE_OFFSET);
+    int forecastRule = getForecastRule();
     ss << ", \"forcastRule\" : " << forecastRule;
 
     bool firstValue = true;
     ss << ", \"extraHumidities\" : [";
     for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++) {
-        humidity = VantageDecoder::decodeHumidity(buffer, EXTRA_HUMIDITIES_BASE_OFFSET + i);
+        humidity = getExtraHumidity(i);
         if (humidity.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << humidity.getValue() << " }";
@@ -223,7 +424,7 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"extraTemperatures\" : [ ";
     for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
-        temperature = VantageDecoder::decode8BitTemperature(buffer, EXTRA_TEMPERATURES_BASE_OFFSET + i);
+        temperature = getExtraTemperature(i);
         if (temperature.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << temperature.getValue() << " }";
@@ -234,7 +435,7 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"leafTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++) {
-        temperature = VantageDecoder::decode8BitTemperature(buffer, LEAF_TEMPERATURE_BASE_OFFSET + i);
+        temperature = getLeafTemperature(i);
         if (temperature.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << temperature.getValue() << " }";
@@ -245,7 +446,7 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"leafWetnesses\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++) {
-        int leafWetness = BitConverter::toUint8(buffer, LEAF_WETNESS_BASE_OFFSET + i);
+        int leafWetness = getLeafWetness(i);
         if (leafWetness != ProtocolConstants::INVALID_LEAF_WETNESS) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << leafWetness << " }";
@@ -256,7 +457,7 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"soilTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++) {
-        temperature = VantageDecoder::decode8BitTemperature(buffer, SOIL_TEMPERATURE_BASE_OFFSET + i);
+        temperature = getSoilTemperature(i);
         if (temperature.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << temperature.getValue() << " }";
@@ -267,7 +468,7 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"soilMoistures\" : [";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
-        int soilMoisture = BitConverter::toUint8(buffer, SOIL_MOISTURES_BASE_OFFSET + i);
+        int soilMoisture = getSoilMoisture(i);
         if (soilMoisture != ProtocolConstants::INVALID_SOIL_MOISTURE) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << soilMoisture << " }";

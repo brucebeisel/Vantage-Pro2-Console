@@ -52,7 +52,7 @@ GraphDataRetriever::processLoop2Packet(const Loop2Packet & packet) {
     //
     // Pick out the graph data pointers for easier access to the graph data
     //
-    nextRainStormDataPointer = packet.getNextRainStormDataPointer();
+    nextRainStormDataPointer = packet.getNextRainStormGraphPointer();
     return true;
 }
 
@@ -79,7 +79,7 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
             storms.push_back(storm);
     }
 
-    std::sort(storms.begin(), storms.end(), [](StormData a, StormData b) {return a.stormStart < b.stormStart;});
+    //std::sort(storms.begin(), storms.end(), [](StormData a, StormData b) {return a.stormStart < b.stormStart;});
 
     return true;
 }

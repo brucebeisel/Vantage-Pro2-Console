@@ -34,6 +34,18 @@ public:
     static constexpr int BYTES_PER_ARCHIVE_PACKET = 52;
     static constexpr int PACKET_NO_VALUE = 0xFF;
 
+    static const int MAX_EXTRA_TEMPERATURES = 3;
+    static const int MAX_EXTRA_HUMIDITIES = 2;
+
+    //
+    // The serial protocol document says this is 4, but the 4th value is not set to the Dash value when there
+    // are not soil temperature sensors.
+    //
+    static const int MAX_SOIL_TEMPERATURES = 3;
+    static const int MAX_SOIL_MOISTURES = 4;
+    static const int MAX_LEAF_WETNESSES = 2;
+    static const int MAX_LEAF_TEMPERATURES = 2;
+
     /**
      * Default constructor required for STL containers and arrays.
      */
@@ -98,6 +110,41 @@ public:
      */
     static bool archivePacketContainsData(const byte * buffer, int offset);
 
+    Measurement<Temperature> getAverageOutsideTemperature() const;
+    Measurement<Temperature> getLowOutsideTemperature() const;
+    Measurement<Temperature> getHighOutsideTemperature() const;
+
+
+    Measurement<Rainfall> getRainfall() const;
+    Measurement<Rainfall> getHighRainfallRate() const;
+
+    Measurement<Pressure> getBarometricPressure() const;
+
+    Measurement<SolarRadiation> getAverageSolarRadiation() const;
+    Measurement<Temperature> getInsideTemperature() const;
+    Measurement<Humidity> getInsideHumidity() const;
+    Measurement<Humidity> getOutsideHumidity() const;
+    Measurement<Speed> getAverageWindSpeed() const;
+    Measurement<Heading> getPrevailingWindDirection() const;
+
+    Measurement<Speed> getHighWindSpeed() const;
+    Measurement<Heading> getHighWindDirection() const;
+
+    Measurement<UvIndex> getAverageUvIndex() const;
+    Measurement<Evapotranspiration> getEvapotranspiration() const;
+    Measurement<SolarRadiation> getHighSolarRadiation() const;
+    Measurement<UvIndex> getHighUvIndex() const;
+
+    int getForecastRule() const;
+
+    Measurement<Humidity> getExtraHumidity(int index) const;
+    Measurement<Temperature> getExtraTemperature(int index) const;
+    Measurement<Temperature> getLeafTemperature(int index) const;
+    Measurement<LeafWetness> getLeafWetness(int index) const;
+    Measurement<Temperature> getSoilTemperature(int index) const;
+    Measurement<SoilMoisture> getSoilMoisture(int index) const;
+
+
     /**
      * Format the Archive packet as JSON.
      * 
@@ -148,15 +195,6 @@ private:
     static constexpr int EXTRA_TEMPERATURES_BASE_OFFSET = 45;
     static constexpr int SOIL_MOISTURES_BASE_OFFSET = 48;
 
-    static const int MAX_EXTRA_TEMPERATURES = 3;
-    static const int MAX_EXTRA_HUMIDITIES = 2;
-
-    // The serial protocol document says this is 4, but the 4th value is not set to the Dash value when there
-    // are not soil temperature sensors.
-    static const int MAX_SOIL_TEMPERATURES = 3;
-    static const int MAX_SOIL_MOISTURES = 4;
-    static const int MAX_LEAF_WETNESSES = 2;
-    static const int MAX_LEAF_TEMPERATURES = 2;
 
     DateTime        packetTime;
     int             windSampleCount;

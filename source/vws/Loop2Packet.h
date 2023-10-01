@@ -18,6 +18,7 @@
 #define LOOP2_PACKET_H
 
 #include "Measurement.h"
+#include "VantageProtocolConstants.h"
 #include "WeatherTypes.h"
 
 namespace vws {
@@ -82,30 +83,119 @@ public:
     const Measurement<Temperature> & getHeatIndex() const;
     const Measurement<Temperature> & getWindChill() const;
     const Measurement<Temperature> & getThsw() const;
-    const Measurement<Pressure> &    getAtmPressure() const;
+    const Measurement<Pressure> &    getBarometricSensorRawReading() const;
 
-    int                              getNextRainStormDataPointer() const;
+    int                              getNextRainStormGraphPointer() const;
 
 private:
-    byte                     packetData[LOOP2_PACKET_SIZE];
-    int                      packetType;
-    Measurement<Speed>       windSpeed;
-    Measurement<Heading>     windDirection;
-    Measurement<Speed>       windSpeed10MinuteAverage;
-    Measurement<Speed>       windSpeed2MinuteAverage;
-    Measurement<Speed>       windGust10Minute;
-    Measurement<Heading>     windGustDirection10Minute;
-    Measurement<Temperature> dewPoint;
-    Measurement<Temperature> heatIndex;
-    Measurement<Temperature> windChill;
-    Measurement<Temperature> thsw;
-    Rainfall                 rain15Minute;
-    Rainfall                 rainHour;
-    Rainfall                 rainDay;
-    Rainfall                 rain24Hour;
-    Measurement<Pressure>    atmPressure;
-    int                      nextRainStormDataPointer;
-    VantageLogger *          logger;
+    static constexpr int L_OFFSET = 0;
+    static constexpr int FIRST_O_OFFSET = 1;
+    static constexpr int SECOND_O_OFFSET = 2;
+    static constexpr int BAROMETER_TREND_OFFSET = 3;
+    static constexpr int PACKET_TYPE_OFFSET = 4;
+    static constexpr int UNUSED_WORD_5 = 5;
+    static constexpr int BAROMETER_OFFSET = 7;
+    static constexpr int INSIDE_TEMPERATURE_OFFSET = 9;
+    static constexpr int INSIDE_HUMIDITY_OFFSET = 11;
+    static constexpr int OUTSIDE_TEMPERATURE_OFFSET = 12;
+    static constexpr int WIND_SPEED_OFFSET = 14;
+    static constexpr int UNUSED_BYTE_15 = 15;
+    static constexpr int WIND_DIRECTION_OFFSET = 16;
+    static constexpr int TEN_MINUTE_AVG_WIND_SPEED_OFFSET = 18;
+    static constexpr int TWO_MINUTE_AVG_WIND_SPEED_OFFSET = 20;
+    static constexpr int TEN_MINUTE_WIND_GUST_OFFSET = 22;
+    static constexpr int TEN_MINUTE_WIND_GUST_DIRECTION_OFFSET = 24;
+    static constexpr int UNUSED_WORD_26 = 26;
+    static constexpr int UNUSED_WORD_28 = 28;
+    static constexpr int DEW_POINT_OFFSET = 30;
+    static constexpr int UNUSED_BYTE_32 = 32;
+    static constexpr int OUTSIDE_HUMIDITY_OFFSET = 33;
+    static constexpr int UNUSED_BYTE_34 = 34;
+    static constexpr int HEAT_INDEX_OFFSET = 35;
+    static constexpr int WIND_CHILL_OFFSET = 37;
+    static constexpr int THSW_OFFSET = 39;
+    static constexpr int RAIN_RATE_OFFSET = 41;
+    static constexpr int UV_INDEX_OFFSET = 43;
+    static constexpr int SOLAR_RADIATION_OFFSET = 44;
+    static constexpr int STORM_RAIN_OFFSET = 46;
+    static constexpr int STORM_START_DATE_OFFSET = 48;
+    static constexpr int DAY_RAIN_OFFSET = 50;
+    static constexpr int FIFTEEN_MINUTE_RAIN_OFFSET = 52;
+    static constexpr int HOUR_RAIN_OFFSET = 54;
+    static constexpr int DAY_ET_OFFSET = 56;
+    static constexpr int TWENTY_FOUR_HOUR_RAIN_OFFSET = 58;
+    static constexpr int BAROMETRIC_REDUCTION_METHOD_OFFSET = 60;
+    static constexpr int USER_ENTERED_BAROMETRIC_OFFSET_OFFSET = 61;
+    static constexpr int BAROMETRIC_CALIBRATION_NUMBER_OFFSET = 63;
+    static constexpr int BAROMETRIC_SENSOR_RAW_READING_OFFSET = 65;
+    static constexpr int ABSOLUTE_BAROMETRIC_PRESSURE_OFFSET = 67;
+    static constexpr int ALTIMETER_SETTING_OFFSET = 69;
+    static constexpr int NEXT_10_MINUTE_WIND_SPEED_GRAPH_POINTER_OFFSET = 73;
+    static constexpr int NEXT_15_MINUTE_WIND_SPEED_GRAPH_POINTER_OFFSET = 74;
+    static constexpr int NEXT_HOURLY_WIND_SPEED_GRAPH_POINTER_OFFSET = 75;
+    static constexpr int NEXT_DAILY_WIND_SPEED_GRAPH_POINTER_OFFSET = 76;
+    static constexpr int NEXT_MINUTE_RAIN_GRAPH_POINTER_OFFSET = 77;
+    static constexpr int NEXT_RAIN_STORM_GRAPH_POINTER_OFFSET = 78;
+    static constexpr int NEXT_MONTHLY_RAIN_GRAPH_POINTER_OFFSET = 80;
+    static constexpr int NEXT_YEARLY_RAIN_GRAPH_POINTER_OFFSET = 81;
+    static constexpr int NEXT_SEASONAL_RAIN_GRAPH_POINTER_OFFSET = 82;
+    static constexpr int UNUSED_WORD_83 = 83;
+    static constexpr int UNUSED_WORD_85 = 85;
+    static constexpr int UNUSED_WORD_87 = 87;
+    static constexpr int UNUSED_WORD_89 = 89;
+    static constexpr int UNUSED_WORD_91 = 91;
+    static constexpr int UNUSED_WORD_93 = 93;
+    static constexpr int LINE_FEED_OFFSET = 95;
+    static constexpr int CARRIAGE_RETURN_OFFSET = 96;
+    static constexpr int CRC_OFFSET = 97;
+
+    static constexpr int UNUSED_WORD_VALUE = 0x7FFF;
+    static constexpr int UNUSED_BYTE_VALUE = 0xFF;
+
+    byte                              packetData[LOOP2_PACKET_SIZE];
+    int                               packetType;
+    ProtocolConstants::BarometerTrend barometerTrend;
+    Measurement<Pressure>             barometricPressure;
+    Measurement<Temperature>          insideTemperature;
+    Measurement<Humidity>             insideHumidity;
+    Measurement<Temperature>          outsideTemperature;
+    Measurement<Speed>                windSpeed;
+    Measurement<Heading>              windDirection;
+    Measurement<Speed>                windSpeed10MinuteAverage;
+    Measurement<Speed>                windSpeed2MinuteAverage;
+    Measurement<Speed>                windGust10Minute;
+    Measurement<Heading>              windGustDirection10Minute;
+    Measurement<Temperature>          dewPoint;
+    Measurement<Humidity>             outsideHumidity;
+    Measurement<Temperature>          heatIndex;
+    Measurement<Temperature>          windChill;
+    Measurement<Temperature>          thsw;
+    Rainfall                          rainRate;
+    Measurement<UvIndex>              uvIndex;
+    Measurement<SolarRadiation>       solarRadiation;
+    Rainfall                          stormRain;
+    DateTime                          stormStart;
+    Rainfall                          rainDay;
+    Rainfall                          rain15Minute;
+    Rainfall                          rainHour;
+    Measurement<Evapotranspiration>   dayET;
+    Rainfall                          rain24Hour;
+    int                               barometricReductionMethod;
+    Measurement<Pressure>             userEnteredBarometricOffset;
+    Measurement<Pressure>             barometricCalibrationNumber;
+    Measurement<Pressure>             barometricSensorRawReading;
+    Measurement<Pressure>             absoluteBarometricPressure;
+    Measurement<Pressure>             altimeterSetting;
+    int                               next10MinuteWindSpeedGraphPointer;
+    int                               next15MinuteWindSpeedGraphPointer;
+    int                               nextHourlyWindSpeedGraphPointer;
+    int                               nextDailyWindSpeedGraphPointer;
+    int                               nextMinuteRainGraphPointer;
+    int                               nextRainStormGraphPointer;
+    int                               nextMonthlyRainGraphPointer;
+    int                               nextYearlyRainGraphPointer;
+    int                               nextSeasonalRainGraphPointer;
+    VantageLogger *                   logger;
 };
 }
 #endif

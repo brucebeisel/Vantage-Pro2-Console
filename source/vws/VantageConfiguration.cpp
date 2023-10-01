@@ -123,7 +123,7 @@ VantageConfiguration::processLoopPacket(const LoopPacket & packet) {
 bool
 VantageConfiguration::processLoop2Packet(const Loop2Packet & packet) {
 
-    lastAtmosphericPressure = packet.getAtmPressure();
+    lastAtmosphericPressure = packet.getBarometricSensorRawReading();
     return true;
 }
 

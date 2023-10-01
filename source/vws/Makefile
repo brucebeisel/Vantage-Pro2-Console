@@ -24,6 +24,7 @@ SRCS=\
 	LoopPacket.cpp \
 	main.cpp \
  	SerialPort.cpp \
+ 	SummaryRecord.cpp \
 	UnitConverter.cpp \
 	VantageCRC.cpp \
 	VantageConfiguration.cpp \
