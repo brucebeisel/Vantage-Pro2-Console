@@ -9,6 +9,7 @@
 
 #include "VantageEepromConstants.h"
 #include "VantageProtocolConstants.h"
+#include "SummaryRecord.h"
 
 namespace vws {
 
@@ -611,6 +612,36 @@ rainToRainBucketEnumValue(Rainfall rain) {
         type = ProtocolConstants::RainBucketSizeType::POINT_2_MM;
 
     return type;
+}
+
+/****************************************
+ * Summary Period Enumeration
+ ****************************************/
+static const NameValuePair<SummaryPeriod> spMappings[] = {
+    { "Day", SummaryPeriod::DAY },
+    { "Week", SummaryPeriod::WEEK },
+    { "Month", SummaryPeriod::MONTH },
+    { "Year", SummaryPeriod::YEAR }
+};
+
+class SummaryPeriodEnum : public VantageEnum<SummaryPeriod,sizeof(spMappings)/sizeof(spMappings[0])>  {
+public:
+    SummaryPeriodEnum() {};
+    virtual ~SummaryPeriodEnum() {};
+
+    virtual const NameValuePair<SummaryPeriod> * getMappings() const {
+        return spMappings;
+    }
+};
+
+static SummaryPeriodEnum summaryPeriodEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static std::ostream &
+operator<<(std::ostream & os, SummaryPeriod value) {
+    os << summaryPeriodEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
 }
 
 }

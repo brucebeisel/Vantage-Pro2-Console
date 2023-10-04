@@ -2,6 +2,7 @@
 #include "SummaryRecord.h"
 #include "ArchivePacket.h"
 #include "ArchiveManager.h"
+#include "VantageEnums.h"
 
 using namespace std;
 
@@ -25,6 +26,24 @@ SummaryRecord::SummaryRecord(SummaryPeriod period, DateTime startDate, DateTime 
                                                                                            uvIndex("UV Index"),
                                                                                            et("Evapotranspiration") {
 
+
+    for (int i = 0; i < ArchivePacket::MAX_EXTRA_TEMPERATURES; i++)
+        extraTemperatures[i].setSummaryName("Extra Temperature " + std::to_string(i));
+
+    for (int i = 0; i < ArchivePacket::MAX_EXTRA_HUMIDITIES; i++)
+        extraHumidities[i].setSummaryName("Extra Humidity " + std::to_string(i));
+
+    for (int i = 0; i < ArchivePacket::MAX_LEAF_TEMPERATURES; i++)
+        leafTemperatures[i].setSummaryName("Leaf Temperature " + std::to_string(i));
+
+    for (int i = 0; i < ArchivePacket::MAX_SOIL_TEMPERATURES; i++)
+        soilTemperatures[i].setSummaryName("Soil Temperature " + std::to_string(i));
+
+    for (int i = 0; i < ArchivePacket::MAX_LEAF_WETNESSES; i++)
+        leafWetnesses[i].setSummaryName("Leaf Wetness " + std::to_string(i));
+
+    for (int i = 0; i < ArchivePacket::MAX_SOIL_MOISTURES; i++)
+        soilMoistures[i].setSummaryName("Soil Moisture " + std::to_string(i));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +80,6 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
     uvIndex.applyMeasurement(packetTime, archivePacket.getAverageUvIndex(), archivePacket.getHighUvIndex());
     et.applyMeasurement(packetTime, archivePacket.getEvapotranspiration());
 
-    /*
     for (int i = 0; i < ArchivePacket::MAX_EXTRA_TEMPERATURES; i++)
         extraTemperatures[i].applyMeasurement(packetTime, archivePacket.getExtraTemperature(i));
 
@@ -79,7 +97,43 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
 
     for (int i = 0; i < ArchivePacket::MAX_SOIL_MOISTURES; i++)
         soilMoistures[i].applyMeasurement(packetTime, archivePacket.getSoilMoisture(i));
-        */
+}
+
+/*
+            "summary" :
+            {
+                "type" : "day", "date" : "2023-10-10",
+                "measurements" :
+                [
+                    {
+                        "name" : "Indoor temperature",
+                        "extremes" : "min/max",
+                        "values" {
+                            "average" : 72.2,
+                            "minimum" : { "value" : 70.0, "time" : "2023-10-10 00:23:12" }
+                            "maximum" : { "value" : 76.0, "time" : "2023-10-10 15:23:12" },
+                        }
+                    }
+                ]
+            }
+            */
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+SummaryRecord::formatJSON() const {
+    std::stringstream ss;
+    ss << "\"summary\" : { \"type\" : \"" << period <<  "\", "
+       << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
+       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", "
+       << "\"measurements\" : [ ";
+    ss << outsideTemperature.formatJSON() << ", "
+       << insideTemperature.formatJSON() << ", "
+       << outsideHumidity.formatJSON() << ", "
+       << insideHumidity.formatJSON();
+    ss << " ] }";
+
+
+    return ss.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -322,13 +376,13 @@ SummaryReport::loadData() {
 std::string
 SummaryReport::formatJSON() const {
     std::stringstream ss;
-    ss << "{ \"summary-report\" : {"
+    ss << "{ \"summaryReport\" : {"
        << "\"type\" : \"" << static_cast<int>(period) << "\""
-       << "\"start-date\" : \"" << Weather::formatDate(startDate) << "\", "
-       << "\"end-date\" : \"" << Weather::formatDate(endDate) << "\", "
+       << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
+       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", "
        << "\"summaries\" : [";
 
-    ss << " ], \"rainfall-by-hour\" : [";
+    ss << " ], \"rainfallHourBuckets\" : [";
     for (int i = 0; i < 24; i++) {
         if (i != 0)
             ss << ", ";

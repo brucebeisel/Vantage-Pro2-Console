@@ -27,9 +27,9 @@ namespace vws {
 
 /*
 {
-    "summary-report" :
+    "summaryReport" :
     {
-        "type" : "day", "start-date" : "2023-10-10", "end-date" : "2023-10-20",
+        "type" : "day", "startDate" : "2023-10-10", "endDate" : "2023-10-20",
         "summaries" :
         [
             "summary" :
@@ -49,7 +49,7 @@ namespace vws {
                 ]
             }
          ],
-         "rainfall-by-hour" : [ 2.1, 0.0, 1.1 ]
+         "rainfallHourBuckets" : [ 2.1, 0.0, 1.1 ]
      }
 }
  */
@@ -125,7 +125,13 @@ struct ExtremeMeasurement {
 template<typename M, SummaryExtremes SE>
 class SummaryMeasurement {
 public:
+    SummaryMeasurement() : summaryName(""), extremesUsed(SE) {}
+
     explicit SummaryMeasurement(const std::string & name) : summaryName(name), extremesUsed(SE) {}
+
+    void setSummaryName(const std::string & name) {
+        summaryName = name;
+    }
 
     void applyMeasurement(DateTime measurementTime, const Measurement<M> & measurement) {
         average.applyMeasurement(measurement);
@@ -167,13 +173,10 @@ public:
         average.applyMeasurement(avgMeasurement);
         switch(extremesUsed) {
             case SummaryExtremes::NO_EXTREME:
-                break;
             case SummaryExtremes::MAXIMUM_ONLY:
-                high.applyMeasurement(measurementTime, highMeasurement);
-                break;
             case SummaryExtremes::MINIMUM_ONLY:
-                low.applyMeasurement(measurementTime, lowMeasurement);
                 break;
+
             case SummaryExtremes::MINIMUM_AND_MAXIMUM:
                 high.applyMeasurement(measurementTime, highMeasurement);
                 low.applyMeasurement(measurementTime, lowMeasurement);
@@ -181,7 +184,9 @@ public:
         }
     }
 
-    std::string formatJSON() const;
+    std::string formatJSON() const {
+        return "";
+    }
 
     std::string           summaryName;
     SummaryExtremes       extremesUsed;
@@ -228,14 +233,12 @@ private:
     SummaryMeasurement<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;
     SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> et;
 
-    /*
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraTemperatures[ArchivePacket::MAX_EXTRA_TEMPERATURES];
     SummaryMeasurement<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraHumidities[ArchivePacket::MAX_EXTRA_HUMIDITIES];
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafTemperatures[ArchivePacket::MAX_LEAF_TEMPERATURES];
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilTemperatures[ArchivePacket::MAX_SOIL_TEMPERATURES];
     SummaryMeasurement<LeafWetness,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafWetnesses[ArchivePacket::MAX_LEAF_WETNESSES];
     SummaryMeasurement<SoilMoisture,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilMoistures[ArchivePacket::MAX_SOIL_MOISTURES];
-    */
 };
 
 class ArchiveManager;
