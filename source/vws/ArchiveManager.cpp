@@ -82,6 +82,11 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
 
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
+    if (stream.fail()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
+        return 0;
+    }
+
     positionStream(stream, afterTime, true);
     list.clear();
     
@@ -114,10 +119,15 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::v
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Querying archive records between "
                                               << Weather::formatDateTime(startTime)
                                               << " and " << Weather::formatDateTime(endTime) << std::endl;
+    list.clear();
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
+    if (stream.fail()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
+        return 0;
+    }
+
     positionStream(stream, startTime, false);
-    list.clear();
 
     //
     // Cap the number of records to the number of archive records that the console holds.
@@ -200,6 +210,11 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
 bool
 ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary | ios::ate);
+    if (stream.fail()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
+        return false;
+    }
+
     streampos fileSize = stream.tellg();
 
     if (fileSize >= ArchivePacket::BYTES_PER_ARCHIVE_PACKET) {
@@ -231,6 +246,11 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
 
     ofstream stream;
     stream.open(archiveFile.c_str(), ofstream::out | ios::app | ios::binary);
+    if (stream.fail()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
+        return;
+    }
+
     for (vector<ArchivePacket>::const_iterator it = packets.begin(); it != packets.end(); ++it) {
         if (newestPacketTime < it->getDateTime()) {
             stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
