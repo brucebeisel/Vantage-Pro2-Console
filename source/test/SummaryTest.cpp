@@ -12,6 +12,8 @@
 #include "VantageWeatherStation.h"
 #include "ArchiveManager.h"
 #include "SerialPort.h"
+#include "VantageLogger.h"
+#include "VantageDecoder.h"
 
 using namespace vws;
 using namespace std;
@@ -19,11 +21,14 @@ using namespace std;
 int
 main(int argc, char * argv[]) {
 
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
+    VantageDecoder::setRainCollectorSize(.01);
+
     cout << "Summary Test" << endl;
 
     if (argc != 5) {
         cout << "Usage: summaryTest <archive-file> <start-date> <end-date> <period>" << endl
-             << "    where: archive-file is the name of the file where the archive records reside"
+             << "    where: archive-directory is the name of the directory where the archive file resides" << endl
              << "           start-date = start of summary in yyyy-mm-dd format" << endl
              << "           end-date = end of summary in yyyy-mm-dd format" << endl
              << "           period = {day, week, month, year}" << endl;
@@ -36,19 +41,21 @@ main(int argc, char * argv[]) {
     char * endDateArg = argv[3];
     char * periodArg = argv[4];
 
-    struct tm tm = {0};
-    tm.tm_isdst = -1;
+    struct tm starttm = {0};
+    struct tm endtm = {0};
+    starttm.tm_isdst = -1;
+    endtm.tm_isdst = -1;
 
     try {
-        sscanf(startDateArg, "%d-%d-%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
-        tm.tm_mon--;
-        tm.tm_year -= 1900;
-        DateTime startDate = mktime(&tm);
+        sscanf(startDateArg, "%d-%d-%d", &starttm.tm_year, &starttm.tm_mon, &starttm.tm_mday);
+        starttm.tm_mon--;
+        starttm.tm_year -= 1900;
+        DateTime startDate = mktime(&starttm);
 
-        sscanf(endDateArg, "%d-%d-%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
-        tm.tm_mon--;
-        tm.tm_year -= 1900;
-        DateTime endDate = mktime(&tm);
+        sscanf(endDateArg, "%d-%d-%d", &endtm.tm_year, &endtm.tm_mon, &endtm.tm_mday);
+        endtm.tm_mon--;
+        endtm.tm_year -= 1900;
+        DateTime endDate = mktime(&endtm);
 
         SummaryPeriod period = summaryPeriodEnum.stringToValue(periodArg);
 
@@ -57,10 +64,13 @@ main(int argc, char * argv[]) {
         SerialPort port("port", 19200);
         VantageWeatherStation station(port);
         ArchiveManager archiveManager(archiveFile, station);
-        SummaryReport report(period, startDate, endDate, archiveManager);
-        report.loadData();
 
-        cout << report.formatJSON() << endl;
+
+        SummaryReport report(period, startDate, endDate, archiveManager);
+        if (report.loadData())
+            cout << report.formatJSON() << endl;
+        else
+            cout << "No summary data available" << endl;
 
     }
     catch (const std::exception & e) {

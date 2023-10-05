@@ -61,14 +61,12 @@ enum class SummaryExtremes {
 };
 
 template<typename M>
-struct MeasurementAverage {
-    int            sampleCount;
-    Measurement<M> sum;
-    Measurement<M> average;
-
+class MeasurementAverage {
+public:
     MeasurementAverage() : sampleCount(0) {}
 
     void applyMeasurement(const Measurement<M> & value) {
+
         if (value.isValid()) {
             sampleCount++;
             sum.setValue(sum.getValue() + value.getValue());
@@ -79,6 +77,11 @@ struct MeasurementAverage {
     std::string formatJSON() const {
         return average.formatJSON("average");
     }
+private:
+    int            sampleCount;
+    Measurement<M> sum;
+    Measurement<M> average;
+
 };
 
 enum class ExtremeType {
@@ -91,16 +94,18 @@ struct ExtremeMeasurement {
     ExtremeType    extremeType;
     Measurement<M> extremeValue;
     DateTime       extremeTime;
+    ExtremeMeasurement() : extremeType(ET), extremeTime(0) {}
+
     void applyMeasurement(DateTime time, const Measurement<M> & value) {
         if (value.isValid()) {
             if (extremeType == ExtremeType::LOW) {
-                if (value.getValue() < extremeValue.getValue()) {
+                if (!extremeValue.isValid() || value.getValue() < extremeValue.getValue()) {
                     extremeValue = value;
                     extremeTime = time;
                 }
             }
             else {
-                if (value.getValue() > extremeValue.getValue()) {
+                if (!extremeValue.isValid() || value.getValue() > extremeValue.getValue()) {
                     extremeValue = value;
                     extremeTime = time;
                 }
@@ -108,16 +113,26 @@ struct ExtremeMeasurement {
         }
     }
 
+    friend std::ostream & operator<<(std::ostream & os,  const ExtremeMeasurement & em) {
+        std::string etype = em.extremeType == ExtremeType::LOW ? "Low" : "High";
+        os << "Extreme type: " << etype
+           << " Value: " << em.extremeValue << " Time: " << Weather::formatDateTime(em.extremeTime);
+
+        return os;
+    }
+
     std::string formatJSON() const {
         std::string json = "";
-        if (extremeType == ExtremeType::LOW) {
-            json += "\"minimum\"";
-        }
-        else {
-            json += "\"maximum\"";
-        }
+        if (extremeValue.isValid()) {
+            if (extremeType == ExtremeType::LOW) {
+                json += "\"minimum\"";
+            }
+            else {
+                json += "\"maximum\"";
+            }
 
-        json += " : { " + extremeValue.formatJSON("value") + "\"time\" : " + Weather::formatDateTime(extremeTime) + " }";
+            json += " : { " + extremeValue.formatJSON("value") + ", " + "\"time\" : \"" + Weather::formatDateTime(extremeTime) + "\" }";
+        }
         return json;
     }
 };
@@ -127,7 +142,8 @@ class SummaryMeasurement {
 public:
     SummaryMeasurement() : summaryName(""), extremesUsed(SE) {}
 
-    explicit SummaryMeasurement(const std::string & name) : summaryName(name), extremesUsed(SE) {}
+    explicit SummaryMeasurement(const std::string & name) : summaryName(name), extremesUsed(SE) {
+    }
 
     void setSummaryName(const std::string & name) {
         summaryName = name;
@@ -185,7 +201,15 @@ public:
     }
 
     std::string formatJSON() const {
-        return "";
+        std::stringstream ss;
+
+        ss << "{ \"Name\" : \"" <<  summaryName << "\", "
+           << average.formatJSON() << ", "
+           << high.formatJSON() << ", "
+           << low.formatJSON()
+           << " }" << std::endl;
+
+        return ss.str();
     }
 
     std::string           summaryName;
@@ -222,23 +246,23 @@ private:
     DateTime endDate;
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideTemperature;
     Rainfall totalRainfall;
-    SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> rainfallRate;
-    SummaryMeasurement<Pressure,SummaryExtremes::MINIMUM_AND_MAXIMUM> barometer;
+    //SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> rainfallRate;
+    //SummaryMeasurement<Pressure,SummaryExtremes::MINIMUM_AND_MAXIMUM> barometer;
     SummaryMeasurement<SolarRadiation,SummaryExtremes::MAXIMUM_ONLY> solarRadiation;
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideTemperature;
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideHumidity;
+    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideTemperature;
+    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideHumidity;
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideHumidity;
-    SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> sustainedWindSpeed;
-    SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> gustWindSpeed;
-    SummaryMeasurement<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;
-    SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> et;
+    //SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> sustainedWindSpeed;
+    //SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> gustWindSpeed;
+    //SummaryMeasurement<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;
+    //SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> et;
 
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraTemperatures[ArchivePacket::MAX_EXTRA_TEMPERATURES];
-    SummaryMeasurement<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraHumidities[ArchivePacket::MAX_EXTRA_HUMIDITIES];
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafTemperatures[ArchivePacket::MAX_LEAF_TEMPERATURES];
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilTemperatures[ArchivePacket::MAX_SOIL_TEMPERATURES];
-    SummaryMeasurement<LeafWetness,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafWetnesses[ArchivePacket::MAX_LEAF_WETNESSES];
-    SummaryMeasurement<SoilMoisture,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilMoistures[ArchivePacket::MAX_SOIL_MOISTURES];
+    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraTemperatures[ArchivePacket::MAX_EXTRA_TEMPERATURES];
+    //SummaryMeasurement<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraHumidities[ArchivePacket::MAX_EXTRA_HUMIDITIES];
+    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafTemperatures[ArchivePacket::MAX_LEAF_TEMPERATURES];
+    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilTemperatures[ArchivePacket::MAX_SOIL_TEMPERATURES];
+    //SummaryMeasurement<LeafWetness,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafWetnesses[ArchivePacket::MAX_LEAF_WETNESSES];
+    //SummaryMeasurement<SoilMoisture,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilMoistures[ArchivePacket::MAX_SOIL_MOISTURES];
 };
 
 class ArchiveManager;
@@ -252,7 +276,7 @@ public:
     virtual ~SummaryReport();
 
     void setParameters(SummaryPeriod period, DateTime startDate, DateTime endDate);
-    void loadData();
+    bool loadData();
 
     std::string formatJSON() const;
 private:

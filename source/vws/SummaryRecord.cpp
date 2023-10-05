@@ -15,18 +15,19 @@ SummaryRecord::SummaryRecord(SummaryPeriod period, DateTime startDate, DateTime 
                                                                                            endDate(endDate),
                                                                                            totalRainfall(0.0),
                                                                                            outsideTemperature("Outside Temperature"),
-                                                                                           solarRadiation("Solar Radiation"),
-                                                                                           rainfallRate("High Rainfall Rate"),
-                                                                                           barometer("Barometer"),
-                                                                                           insideTemperature("Inside Temperature"),
-                                                                                           insideHumidity("Inside Humidity"),
                                                                                            outsideHumidity("Outside Humidity"),
-                                                                                           sustainedWindSpeed("Sustained Wind Speed"),
-                                                                                           gustWindSpeed("Wind Gust Speed"),
-                                                                                           uvIndex("UV Index"),
-                                                                                           et("Evapotranspiration") {
+                                                                                           solarRadiation("Solar Radiation") {
+                                                                                           //rainfallRate("High Rainfall Rate"),
+                                                                                           //barometer("Barometer"),
+                                                                                           //insideTemperature("Inside Temperature"),
+                                                                                           //insideHumidity("Inside Humidity"),
+                                                                                           //sustainedWindSpeed("Sustained Wind Speed"),
+                                                                                           //gustWindSpeed("Wind Gust Speed"),
+                                                                                           //uvIndex("UV Index"),
+                                                                                           //et("Evapotranspiration") {
 
 
+                                                                                               /*
     for (int i = 0; i < ArchivePacket::MAX_EXTRA_TEMPERATURES; i++)
         extraTemperatures[i].setSummaryName("Extra Temperature " + std::to_string(i));
 
@@ -44,6 +45,7 @@ SummaryRecord::SummaryRecord(SummaryPeriod period, DateTime startDate, DateTime 
 
     for (int i = 0; i < ArchivePacket::MAX_SOIL_MOISTURES; i++)
         soilMoistures[i].setSummaryName("Soil Moisture " + std::to_string(i));
+        */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,22 +59,33 @@ void
 SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
     DateTime packetTime = archivePacket.getDateTime();
 
+    //cout << "Checking time of " << Weather::formatDateTime(packetTime)
+    //     << " against SummaryRecord time range: " << Weather::formatDateTime(startDate) << " to " << Weather::formatDateTime(endDate) << endl;
+
+    if (packetTime < startDate || packetTime > endDate) {
+        //cout << "------Ignoring packet" << endl;
+        return;
+    }
+
+    //cout << "Outside temperature for " << Weather::formatDate(startDate) << endl;
+
     outsideTemperature.applyMeasurement(packetTime,
                                         archivePacket.getAverageOutsideTemperature(),
                                         archivePacket.getLowOutsideTemperature(),
                                         archivePacket.getHighOutsideTemperature());
 
+    outsideHumidity.applyMeasurement(packetTime, archivePacket.getOutsideHumidity());
+    solarRadiation.applyMeasurement(packetTime, archivePacket.getAverageSolarRadiation(), archivePacket.getHighSolarRadiation());
+
+    /*
     insideTemperature.applyMeasurement(packetTime, archivePacket.getInsideTemperature());
 
-    solarRadiation.applyMeasurement(packetTime, archivePacket.getAverageSolarRadiation(), archivePacket.getHighSolarRadiation());
 
     totalRainfall += archivePacket.getRainfall();
     rainfallRate.applyMeasurement(packetTime, archivePacket.getHighRainfallRate());
 
     barometer.applyMeasurement(packetTime, archivePacket.getBarometricPressure());
-    insideTemperature.applyMeasurement(packetTime, archivePacket.getInsideTemperature());
     insideHumidity.applyMeasurement(packetTime, archivePacket.getInsideHumidity());
-    outsideHumidity.applyMeasurement(packetTime, archivePacket.getOutsideHumidity());
 
     sustainedWindSpeed.applyMeasurement(packetTime, archivePacket.getAverageWindSpeed());
     gustWindSpeed.applyMeasurement(packetTime, archivePacket.getHighWindSpeed());
@@ -97,6 +110,7 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
 
     for (int i = 0; i < ArchivePacket::MAX_SOIL_MOISTURES; i++)
         soilMoistures[i].applyMeasurement(packetTime, archivePacket.getSoilMoisture(i));
+        */
 }
 
 /*
@@ -122,14 +136,15 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
 std::string
 SummaryRecord::formatJSON() const {
     std::stringstream ss;
-    ss << "\"summary\" : { \"type\" : \"" << period <<  "\", "
+    ss << "\"summary\" : { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
-       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", "
-       << "\"measurements\" : [ ";
-    ss << outsideTemperature.formatJSON() << ", "
-       << insideTemperature.formatJSON() << ", "
-       << outsideHumidity.formatJSON() << ", "
-       << insideHumidity.formatJSON();
+       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", " << endl
+       << "\"measurements\" : [ " << endl;
+    ss << outsideTemperature.formatJSON() << ", " << endl
+       << outsideHumidity.formatJSON() << ", " << endl
+       << solarRadiation.formatJSON() << ", " << endl;
+       //<< insideTemperature.formatJSON() << ", "
+       //<< insideHumidity.formatJSON();
     ss << " ] }";
 
 
@@ -204,7 +219,7 @@ SummaryReport::normalizeEndTime(DateTime startTime, DateTime endTime, SummaryPer
 
     switch (period) {
         case SummaryPeriod::DAY:
-            normalizedTime = calculateLastSecondOfDay(startTime);
+            normalizedTime = calculateLastSecondOfDay(endTime);
             break;
 
         case SummaryPeriod::WEEK:
@@ -228,6 +243,7 @@ SummaryReport::normalizeEndTime(DateTime startTime, DateTime endTime, SummaryPer
             startTime = calculateLastSecondOfDay(mktime(&tm));
             break;
     }
+    cout << "Normalize end time from " << Weather::formatDateTime(endTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
 
     return normalizedTime;
 
@@ -279,6 +295,7 @@ SummaryReport::calculateEndTime(DateTime startTime, SummaryPeriod period) {
         case SummaryPeriod::MONTH:
             localtime_r(&startTime, &tm);
             tm.tm_mon += 1;
+            tm.tm_mday = 0;
             tm.tm_isdst = -1;
             endTime = calculateLastSecondOfDay(mktime(&tm));
             break;
@@ -286,6 +303,8 @@ SummaryReport::calculateEndTime(DateTime startTime, SummaryPeriod period) {
         case SummaryPeriod::YEAR:
             localtime_r(&startTime, &tm);
             tm.tm_year += 1;
+            tm.tm_mon = 0;
+            tm.tm_mday = 0;
             tm.tm_isdst = -1;
             endTime = calculateLastSecondOfDay(mktime(&tm));
             break;
@@ -337,22 +356,27 @@ SummaryReport::incrementStartTime(DateTime time, SummaryPeriod period) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
+bool
 SummaryReport::loadData() {
     startDate = normalizeStartTime(startDate, period);
     endDate = normalizeEndTime(startDate, endDate, period);
 
+    cout << "Getting archive between " << Weather::formatDate(startDate) << " and " << Weather::formatDate(endDate) << endl;
+
     vector<ArchivePacket> packets;
     DateTime lastRecordDate = archiveManager.queryArchiveRecords(startDate, endDate, packets);
+    if (lastRecordDate == 0) {
+        cout << "Failed to read archive" << endl;
+        return false;
+    }
+
+    cout << "Received " << packets.size() << " packets from the archive" << endl;
     summaryRecords.clear();
 
     DateTime summaryStart = startDate;
     DateTime summaryEnd = calculateEndTime(summaryStart, period);
 
     while (summaryEnd <= endDate) {
-        //
-        // Add more than 25 hours, then reset it back to 23:59:59
-        //
         SummaryRecord record(period, summaryStart, summaryEnd);
         summaryRecords.push_back(record);
 
@@ -360,27 +384,43 @@ SummaryReport::loadData() {
         summaryEnd = calculateEndTime(summaryStart, period);
     }
 
+    cout << "Created " << summaryRecords.size() << " summary records" << endl;
+
     //
     // Now that we have create all of the summary records, go through and apply the ArchivePackets
     //
-    for (auto packet : packets) {
-        for (auto summaryRecord : summaryRecords) {
+    for (auto & packet : packets) {
+        for (auto & summaryRecord : summaryRecords) {
             summaryRecord.applyArchivePacket(packet);
         }
+        DateTime packetTime = packet.getDateTime();
+        struct tm tm;
+        localtime_r(&packetTime, &tm);
+        hourRainfallBuckets[tm.tm_hour] += packet.getRainfall();
+
     }
+
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// TODO Add period enum to VantageEnums.h
 std::string
 SummaryReport::formatJSON() const {
     std::stringstream ss;
     ss << "{ \"summaryReport\" : {"
-       << "\"type\" : \"" << static_cast<int>(period) << "\""
+       << "\"type\" : \"" << summaryPeriodEnum.valueToString(period) << "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
        << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", "
        << "\"summaries\" : [";
+
+
+    bool first = true;
+    for (auto summaryRecord : summaryRecords) {
+        if (!first) ss << ", "; else first = false;
+        ss << summaryRecord.formatJSON();
+    }
 
     ss << " ], \"rainfallHourBuckets\" : [";
     for (int i = 0; i < 24; i++) {
