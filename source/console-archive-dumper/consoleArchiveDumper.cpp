@@ -66,7 +66,7 @@ main(int argc, char *argv[]) {
 
     VantageDecoder::setRainCollectorSize(.01);
 
-    //VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
 
     SerialPort serialPort(device, 19200);
     VantageWeatherStation ws(serialPort);
@@ -82,14 +82,21 @@ main(int argc, char *argv[]) {
     }
 
     vws::byte beforeValue = 0;
-    bool results = ws.eepromBinaryRead(VantageEepromConstants::EE_STATION_LIST_ADDRESS, 1, &beforeValue);
+    bool results = ws.eepromBinaryRead(VantageEepromConstants::EE_USED_TRANSMITTERS_ADDRESS, 1, &beforeValue);
+    cout << "Result 1: " << std::boolalpha << results << endl;
 
-    vws::byte value = 3;
-    results = ws.eepromBinaryWrite(VantageEepromConstants::EE_STATION_LIST_ADDRESS, &value, 1);
+    vws::byte value = 1;
+    results = ws.eepromWriteByte(VantageEepromConstants::EE_STATION_LIST_ADDRESS, value);
+    //results = ws.eepromBinaryWrite(VantageEepromConstants::EE_USED_TRANSMITTERS_ADDRESS, &value, 1);
+    cout << "Result 2: " << std::boolalpha << results << endl;
 
     vws::byte afterValue = 0;
-    results = ws.eepromBinaryRead(VantageEepromConstants::EE_STATION_LIST_ADDRESS, 1, &afterValue);
+    results = ws.eepromBinaryRead(VantageEepromConstants::EE_USED_TRANSMITTERS_ADDRESS, 1, &afterValue);
+    cout << "Result 3: " << std::boolalpha << results << endl;
 
+    cout << "Before: " << (int)beforeValue << " After: " << (int)afterValue << endl;
+
+    exit(1);
     vector<ArchivePacket> packets;
 
     ws.dump(packets);

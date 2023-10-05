@@ -18,6 +18,7 @@
 #include "ArchiveManager.h"
 
 #include <time.h>
+#include <math.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -163,13 +164,17 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, vector
 ////////////////////////////////////////////////////////////////////////////////
 bool
 ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool afterTime) {
+    //
+    // Use high resolution clock to track performance of positioning the stream
+    //
     chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     streampos streamPosition;
-    int readsPerformed = 0;
-    long fileSize = stream.tellg();
+    int forwardReadsPerformed = 0;
+    int backwardReadsPerformed = 0;
 
     stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
+    long fileSize = stream.tellg();
 
     //
     // If we are only looking for records after the specified time, then increment the
@@ -192,30 +197,35 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
         // very close to the search time.
         //
         DateTime archiveRange = newestPacketTime - oldestPacketTime;
-        DateTime searchDelta = newestPacketTime - searchTime;
+        DateTime searchDelta = searchTime - oldestPacketTime;
         double searchRatio = static_cast<double>(searchDelta) / static_cast<double>(archiveRange);
 
-        long searchLocation = static_cast<long>(static_cast<double>(fileSize) * searchRatio);
+        long searchLocation = static_cast<long>(::round(static_cast<double>(fileSize) * searchRatio));
         searchLocation -= searchLocation % ArchivePacket::BYTES_PER_ARCHIVE_PACKET;
         stream.seekg(searchLocation, ios::beg);
 
-        DateTime packetTime;
 
         //
         // Skip forward past the search time. This will only skip forward one record if the ratio calculation
         // positioned the stream later than the search time.
         //
+        DateTime packetTime;
         do {
             stream.read(buffer, sizeof(buffer));
-            readsPerformed++;
+            forwardReadsPerformed++;
             ArchivePacket packet(buffer);
             packetTime = packet.getDateTime();
         } while (packetTime < searchTime && !stream.eof());
 
+        //
+        // Now back up in the archive until we find the packet just after the packet for which we are looking.
+        // Since the algorithm backs up two packets after each read, that will put the stream right on the
+        // packet being searched.
+        // 
         do {
             streamPosition = stream.tellg();
             stream.read(buffer, sizeof(buffer));
-            readsPerformed++;
+            backwardReadsPerformed++;
             ArchivePacket packet(buffer);
             packetTime = packet.getDateTime();
             stream.seekg(-(ArchivePacket::BYTES_PER_ARCHIVE_PACKET * 2), ios::cur);
@@ -236,10 +246,13 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
     chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
     chrono::duration<double> timeSpan = duration_cast<chrono::duration<double>>(t2 - t1);
 
-    cout << "Positioning stream to find archive record of time " << Weather::formatDateTime(searchTime)
-         << " in archive with range of " << Weather::formatDateTime(oldestPacketTime)
-         << " to " << Weather::formatDateTime(newestPacketTime) << " took " << timeSpan.count() << " seconds"
-         << " and required " << readsPerformed << " reads" << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG2) <<  "Positioning stream to find archive record of time "
+                                              << Weather::formatDateTime(searchTime)
+                                              << " in archive with range of " << Weather::formatDateTime(oldestPacketTime)
+                                              << " to " << Weather::formatDateTime(newestPacketTime)
+                                              << " took " << timeSpan.count() << " seconds"
+                                              << " and required " << forwardReadsPerformed << " forward reads and "
+                                              << backwardReadsPerformed << " backward reads" << endl;
 
     return true;
 }
