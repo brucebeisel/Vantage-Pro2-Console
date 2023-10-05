@@ -81,6 +81,14 @@ public:
      */
     bool getNewestRecord(ArchivePacket & packet) const;
 
+    /**
+     * Get the time range of data in the archive.
+     *
+     * @param[out] oldest Reference to a DateTime that will be filled in with the oldest packet time
+     * @param[out] newest Reference to a DateTime that will be filled in with the newest packet time
+     */
+    void getArchiveRange(DateTime & oldest, DateTime & newest) const;
+
 private:
     static constexpr int SYNC_RETRIES = 5;
 

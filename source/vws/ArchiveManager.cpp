@@ -21,6 +21,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <chrono>
+#include <ratio>
 
 #include "ArchivePacket.h"
 #include "VantageProtocolConstants.h"
@@ -36,7 +38,7 @@ using vws::VantageLogger;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchiveManager::ArchiveManager(const std::string & dataDirectory, VantageWeatherStation & station) :
+ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStation & station) :
                                                                     archiveFile(dataDirectory + "/" + ARCHIVE_FILE),
                                                                     station(station),
                                                                     newestPacketTime(0),
@@ -75,7 +77,7 @@ ArchiveManager::synchronizeArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
-ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket>& list) {
+ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, vector<ArchivePacket>& list) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
     //logger.log(VantageLogger::VANTAGE_INFO) << "DMPAFT is temporarily disabled" << endl;
     //return time(0);
@@ -115,10 +117,10 @@ ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePa
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
-ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::vector<ArchivePacket> & list) {
+ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, vector<ArchivePacket> & list) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Querying archive records between "
                                               << Weather::formatDateTime(startTime)
-                                              << " and " << Weather::formatDateTime(endTime) << std::endl;
+                                              << " and " << Weather::formatDateTime(endTime) << endl;
     list.clear();
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
@@ -161,8 +163,11 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, std::v
 ////////////////////////////////////////////////////////////////////////////////
 bool
 ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool afterTime) {
+    chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     streampos streamPosition;
+    int readsPerformed = 0;
+    long fileSize = stream.tellg();
 
     stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
 
@@ -178,14 +183,42 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
     // Otherwise the start time is before the beginning of the file, so just start at the beginning.
     // This a linear search from the end of the archive. A binary search would be more efficient.
     //
-    if (searchTime >= oldestPacketTime) {
+    if (searchTime <= oldestPacketTime) {
+        stream.seekg(0, ios::beg);
+    }
+    else if (searchTime > oldestPacketTime && searchTime < newestPacketTime) {
+        //
+        // Use the ratio of time based on the time range of the archive. This will hopefully position the stream
+        // very close to the search time.
+        //
+        DateTime archiveRange = newestPacketTime - oldestPacketTime;
+        DateTime searchDelta = newestPacketTime - searchTime;
+        double searchRatio = static_cast<double>(searchDelta) / static_cast<double>(archiveRange);
+
+        long searchLocation = static_cast<long>(static_cast<double>(fileSize) * searchRatio);
+        searchLocation -= searchLocation % ArchivePacket::BYTES_PER_ARCHIVE_PACKET;
+        stream.seekg(searchLocation, ios::beg);
+
         DateTime packetTime;
+
+        //
+        // Skip forward past the search time. This will only skip forward one record if the ratio calculation
+        // positioned the stream later than the search time.
+        //
+        do {
+            stream.read(buffer, sizeof(buffer));
+            readsPerformed++;
+            ArchivePacket packet(buffer);
+            packetTime = packet.getDateTime();
+        } while (packetTime < searchTime && !stream.eof());
+
         do {
             streamPosition = stream.tellg();
             stream.read(buffer, sizeof(buffer));
+            readsPerformed++;
             ArchivePacket packet(buffer);
-            stream.seekg(-(ArchivePacket::BYTES_PER_ARCHIVE_PACKET * 2), ios::cur);
             packetTime = packet.getDateTime();
+            stream.seekg(-(ArchivePacket::BYTES_PER_ARCHIVE_PACKET * 2), ios::cur);
         } while (searchTime <= packetTime && streamPosition > 0);
 
         //
@@ -199,8 +232,14 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
         else
             stream.seekg(ArchivePacket::BYTES_PER_ARCHIVE_PACKET * 2, ios::cur);
     }
-    else
-        stream.seekg(0, ios::beg);
+
+    chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+    chrono::duration<double> timeSpan = duration_cast<chrono::duration<double>>(t2 - t1);
+
+    cout << "Positioning stream to find archive record of time " << Weather::formatDateTime(searchTime)
+         << " in archive with range of " << Weather::formatDateTime(oldestPacketTime)
+         << " to " << Weather::formatDateTime(newestPacketTime) << " took " << timeSpan.count() << " seconds"
+         << " and required " << readsPerformed << " reads" << endl;
 
     return true;
 }
@@ -226,6 +265,13 @@ ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
     }
     else
         return false;
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+ArchiveManager::getArchiveRange(DateTime & oldest, DateTime & newest) const {
+    oldest = oldestPacketTime;
+    newest = newestPacketTime;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -36,6 +36,7 @@
 #include "VantageStationNetwork.h"
 #include "AlarmManager.h"
 #include "CurrentWeatherManager.h"
+#include "SummaryRecord.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -158,6 +159,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
         else if (commandName == "query-archive") {
             handleQueryArchive(commandName, argumentList, response);
+        }
+        else if (commandName == "query-archive-summary") {
+            handleQueryArchiveSummary(commandName, argumentList, response);
         }
         else if (commandName == "query-archive-period") {
             handleQueryArchivePeriod(commandName, response);
@@ -832,6 +836,48 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
 
     oss << "]";
     response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    DateTime startTime = 0;
+    DateTime endTime = 0;
+    SummaryPeriod summaryPeriod;
+    struct tm tm;
+
+    try {
+        for (CommandArgument arg : argumentList) {
+            tm = {0};
+            tm.tm_isdst = -1;
+            if (arg.first == "start-time") {
+                std::stringstream ss(arg.second);
+                ss >> std::get_time(&tm, "%Y-%m-%dT%T");
+                startTime = mktime(&tm);
+            }
+            else if (arg.first == "end-time") {
+                std::stringstream ss(arg.second);
+                ss >> std::get_time(&tm, "%Y-%m-%dT%T");
+                endTime = mktime(&tm);
+            }
+            else if (arg.first == "summary-period") {
+                summaryPeriod = summaryPeriodEnum.stringToValue(arg.second);
+            }
+        }
+
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query summaries from the archive with times: " << startTime << " - " << endTime << endl;
+        SummaryReport report(summaryPeriod, startTime, endTime, archiveManager);
+        report.loadData();
+
+        ostringstream oss;
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+        oss << report.formatJSON();
+        response.append(oss.str());
+    }
+    catch (const std::exception & e) {
+        response.append(buildFailureString("Invalid summary period"));
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

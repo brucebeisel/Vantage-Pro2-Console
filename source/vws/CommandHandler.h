@@ -207,6 +207,8 @@ private:
 
     void handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    void handleQueryArchiveSummary(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     void handleQueryLoopArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleGetTimezones(const std::string & commandName, std::string & response);
