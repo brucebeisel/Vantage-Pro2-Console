@@ -7,9 +7,9 @@
 #include <utility>
 #include <stdexcept>
 
+#include "SummaryReport.h"
 #include "VantageEepromConstants.h"
 #include "VantageProtocolConstants.h"
-#include "SummaryRecord.h"
 
 namespace vws {
 

@@ -5,8 +5,8 @@
  *      Author: bruce
  */
 
+#include <SummaryReport.h>
 #include <iostream>
-#include "SummaryRecord.h"
 #include "Weather.h"
 #include "VantageEnums.h"
 #include "VantageWeatherStation.h"

@@ -36,7 +36,7 @@
 #include "VantageStationNetwork.h"
 #include "AlarmManager.h"
 #include "CurrentWeatherManager.h"
-#include "SummaryRecord.h"
+#include "SummaryReport.h"
 
 using namespace std;
 using json = nlohmann::json;

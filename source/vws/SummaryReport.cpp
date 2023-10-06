@@ -1,7 +1,7 @@
 #include <sstream>
-#include "SummaryRecord.h"
 #include "ArchivePacket.h"
 #include "ArchiveManager.h"
+#include "SummaryReport.h"
 #include "VantageEnums.h"
 
 using namespace std;

@@ -6,11 +6,12 @@
  */
 
 #include <iostream>
-#include "SummaryRecord.h"
 #include "Weather.h"
 #include "VantageEnums.h"
 #include "VantageWeatherStation.h"
 #include "ArchiveManager.h"
+
+#include "../vws/SummaryReport.h"
 #include "SerialPort.h"
 #include "VantageLogger.h"
 #include "VantageDecoder.h"
