@@ -13,18 +13,19 @@ namespace vws {
 SummaryRecord::SummaryRecord(SummaryPeriod period, DateTime startDate, DateTime endDate) : period(period),
                                                                                            startDate(startDate),
                                                                                            endDate(endDate),
+                                                                                           packetCount(0),
                                                                                            totalRainfall(0.0),
-                                                                                           outsideTemperature("Outside Temperature"),
-                                                                                           outsideHumidity("Outside Humidity"),
-                                                                                           solarRadiation("Solar Radiation") {
-                                                                                           //rainfallRate("High Rainfall Rate"),
-                                                                                           //barometer("Barometer"),
-                                                                                           //insideTemperature("Inside Temperature"),
-                                                                                           //insideHumidity("Inside Humidity"),
-                                                                                           //sustainedWindSpeed("Sustained Wind Speed"),
-                                                                                           //gustWindSpeed("Wind Gust Speed"),
-                                                                                           //uvIndex("UV Index"),
-                                                                                           //et("Evapotranspiration") {
+                                                                                           outsideTemperature("outsideTemperature"),
+                                                                                           outsideHumidity("outsideHumidity"),
+                                                                                           solarRadiation("solarRadiation"),
+                                                                                           rainfallRate("highRainfallRate"),
+                                                                                           barometer("barometer"),
+                                                                                           insideTemperature("insideTemperature"),
+                                                                                           insideHumidity("insideHumidity"),
+                                                                                           sustainedWindSpeed("sustainedWindSpeed"),
+                                                                                           gustWindSpeed("windGustSpeed"),
+                                                                                           uvIndex("uvIndex"),
+                                                                                           et("evapotranspiration") {
 
 
                                                                                                /*
@@ -67,6 +68,8 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
         return;
     }
 
+    packetCount++;
+
     //cout << "Outside temperature for " << Weather::formatDate(startDate) << endl;
 
     outsideTemperature.applyMeasurement(packetTime,
@@ -76,23 +79,17 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
 
     outsideHumidity.applyMeasurement(packetTime, archivePacket.getOutsideHumidity());
     solarRadiation.applyMeasurement(packetTime, archivePacket.getAverageSolarRadiation(), archivePacket.getHighSolarRadiation());
-
-    /*
     insideTemperature.applyMeasurement(packetTime, archivePacket.getInsideTemperature());
-
-
-    totalRainfall += archivePacket.getRainfall();
     rainfallRate.applyMeasurement(packetTime, archivePacket.getHighRainfallRate());
-
     barometer.applyMeasurement(packetTime, archivePacket.getBarometricPressure());
     insideHumidity.applyMeasurement(packetTime, archivePacket.getInsideHumidity());
-
     sustainedWindSpeed.applyMeasurement(packetTime, archivePacket.getAverageWindSpeed());
     gustWindSpeed.applyMeasurement(packetTime, archivePacket.getHighWindSpeed());
-
     uvIndex.applyMeasurement(packetTime, archivePacket.getAverageUvIndex(), archivePacket.getHighUvIndex());
     et.applyMeasurement(packetTime, archivePacket.getEvapotranspiration());
+    totalRainfall += archivePacket.getRainfall();
 
+    /*
     for (int i = 0; i < ArchivePacket::MAX_EXTRA_TEMPERATURES; i++)
         extraTemperatures[i].applyMeasurement(packetTime, archivePacket.getExtraTemperature(i));
 
@@ -113,40 +110,32 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
         */
 }
 
-/*
-            "summary" :
-            {
-                "type" : "day", "date" : "2023-10-10",
-                "measurements" :
-                [
-                    {
-                        "name" : "Indoor temperature",
-                        "extremes" : "min/max",
-                        "values" {
-                            "average" : 72.2,
-                            "minimum" : { "value" : 70.0, "time" : "2023-10-10 00:23:12" }
-                            "maximum" : { "value" : 76.0, "time" : "2023-10-10 15:23:12" },
-                        }
-                    }
-                ]
-            }
-            */
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
 SummaryRecord::formatJSON() const {
     std::stringstream ss;
-    ss << "\"summary\" : { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
+    ss << " { \"summary\" : { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
        << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", " << endl
        << "\"measurements\" : [ " << endl;
-    ss << outsideTemperature.formatJSON() << ", " << endl
-       << outsideHumidity.formatJSON() << ", " << endl
-       << solarRadiation.formatJSON() << ", " << endl;
-       //<< insideTemperature.formatJSON() << ", "
-       //<< insideHumidity.formatJSON();
-    ss << " ] }";
-
+    if (packetCount != 0) {
+        ss << outsideTemperature.formatJSON() << ", " << endl
+           << outsideHumidity.formatJSON() << ", " << endl
+           << solarRadiation.formatJSON() << ", " << endl
+           << insideTemperature.formatJSON() << ", " << endl
+           << insideHumidity.formatJSON() << ", " << endl
+           << barometer.formatJSON() << ", " << endl
+           << rainfallRate.formatJSON() << ", " << endl
+           << uvIndex.formatJSON() << ", " << endl
+           << et.formatJSON() << ", " << endl
+           << sustainedWindSpeed.formatJSON() << "," << endl
+           << gustWindSpeed.formatJSON() << endl;
+        ss << " ], "
+           << "\"rainfall\" : " << totalRainfall << " } }";
+    }
+    else
+        ss << "] } }";
 
     return ss.str();
 }

@@ -203,11 +203,16 @@ public:
     std::string formatJSON() const {
         std::stringstream ss;
 
-        ss << "{ \"Name\" : \"" <<  summaryName << "\", "
-           << average.formatJSON() << ", "
-           << high.formatJSON() << ", "
-           << low.formatJSON()
-           << " }" << std::endl;
+        ss << "{  \"" <<  summaryName << "\" : {  "
+           << average.formatJSON();
+
+        if (extremesUsed == SummaryExtremes::MINIMUM_ONLY || extremesUsed == SummaryExtremes::MINIMUM_AND_MAXIMUM)
+           ss << ", " << low.formatJSON();
+
+        if (extremesUsed == SummaryExtremes::MAXIMUM_ONLY || extremesUsed == SummaryExtremes::MINIMUM_AND_MAXIMUM)
+           ss << ", " << high.formatJSON();
+
+        ss << " } }" << std::endl;
 
         return ss.str();
     }
@@ -241,21 +246,22 @@ private:
     //static constexpr int DIR_OF_HIGH_WIND_SPEED_OFFSET = 26;
     //static constexpr int PREVAILING_WIND_DIRECTION_OFFSET = 27;
 
+    int packetCount;
     SummaryPeriod period;
     DateTime startDate;
     DateTime endDate;
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideTemperature;
     Rainfall totalRainfall;
-    //SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> rainfallRate;
-    //SummaryMeasurement<Pressure,SummaryExtremes::MINIMUM_AND_MAXIMUM> barometer;
+    SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> rainfallRate;
+    SummaryMeasurement<Pressure,SummaryExtremes::MINIMUM_AND_MAXIMUM> barometer;
     SummaryMeasurement<SolarRadiation,SummaryExtremes::MAXIMUM_ONLY> solarRadiation;
-    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideTemperature;
-    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideHumidity;
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideTemperature;
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideHumidity;
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideHumidity;
-    //SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> sustainedWindSpeed;
-    //SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> gustWindSpeed;
-    //SummaryMeasurement<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;
-    //SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> et;
+    SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> sustainedWindSpeed;
+    SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> gustWindSpeed;
+    SummaryMeasurement<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;
+    SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> et;
 
     //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraTemperatures[ArchivePacket::MAX_EXTRA_TEMPERATURES];
     //SummaryMeasurement<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraHumidities[ArchivePacket::MAX_EXTRA_HUMIDITIES];
