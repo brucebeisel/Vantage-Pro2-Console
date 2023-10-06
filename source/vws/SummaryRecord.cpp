@@ -28,25 +28,23 @@ SummaryRecord::SummaryRecord(SummaryPeriod period, DateTime startDate, DateTime 
                                                                                            et("evapotranspiration") {
 
 
-                                                                                               /*
     for (int i = 0; i < ArchivePacket::MAX_EXTRA_TEMPERATURES; i++)
-        extraTemperatures[i].setSummaryName("Extra Temperature " + std::to_string(i));
+        extraTemperatures[i].setSummaryName("extraTemperature" + std::to_string(i));
 
     for (int i = 0; i < ArchivePacket::MAX_EXTRA_HUMIDITIES; i++)
-        extraHumidities[i].setSummaryName("Extra Humidity " + std::to_string(i));
+        extraHumidities[i].setSummaryName("extraHumidity" + std::to_string(i));
 
     for (int i = 0; i < ArchivePacket::MAX_LEAF_TEMPERATURES; i++)
-        leafTemperatures[i].setSummaryName("Leaf Temperature " + std::to_string(i));
+        leafTemperatures[i].setSummaryName("leafTemperature" + std::to_string(i));
 
     for (int i = 0; i < ArchivePacket::MAX_SOIL_TEMPERATURES; i++)
-        soilTemperatures[i].setSummaryName("Soil Temperature " + std::to_string(i));
+        soilTemperatures[i].setSummaryName("soilTemperature" + std::to_string(i));
 
     for (int i = 0; i < ArchivePacket::MAX_LEAF_WETNESSES; i++)
-        leafWetnesses[i].setSummaryName("Leaf Wetness " + std::to_string(i));
+        leafWetnesses[i].setSummaryName("leafWetness" + std::to_string(i));
 
     for (int i = 0; i < ArchivePacket::MAX_SOIL_MOISTURES; i++)
-        soilMoistures[i].setSummaryName("Soil Moisture " + std::to_string(i));
-        */
+        soilMoistures[i].setSummaryName("soilMoisture" + std::to_string(i));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +87,6 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
     et.applyMeasurement(packetTime, archivePacket.getEvapotranspiration());
     totalRainfall += archivePacket.getRainfall();
 
-    /*
     for (int i = 0; i < ArchivePacket::MAX_EXTRA_TEMPERATURES; i++)
         extraTemperatures[i].applyMeasurement(packetTime, archivePacket.getExtraTemperature(i));
 
@@ -107,13 +104,13 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
 
     for (int i = 0; i < ArchivePacket::MAX_SOIL_MOISTURES; i++)
         soilMoistures[i].applyMeasurement(packetTime, archivePacket.getSoilMoisture(i));
-        */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
 SummaryRecord::formatJSON() const {
+    // TODO Add JSON for measurement arrays
     std::stringstream ss;
     ss << " { \"summary\" : { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
@@ -130,12 +127,10 @@ SummaryRecord::formatJSON() const {
            << uvIndex.formatJSON() << ", " << endl
            << et.formatJSON() << ", " << endl
            << sustainedWindSpeed.formatJSON() << "," << endl
-           << gustWindSpeed.formatJSON() << endl;
-        ss << " ], "
-           << "\"rainfall\" : " << totalRainfall << " } }";
+           << gustWindSpeed.formatJSON() << ", " << endl
+           << " { \"rainfall\" : " << totalRainfall << " }" << endl;
     }
-    else
-        ss << "] } }";
+    ss << "] } }";
 
     return ss.str();
 }

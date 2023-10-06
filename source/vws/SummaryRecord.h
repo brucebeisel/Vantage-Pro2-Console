@@ -25,34 +25,6 @@
 
 namespace vws {
 
-/*
-{
-    "summaryReport" :
-    {
-        "type" : "day", "startDate" : "2023-10-10", "endDate" : "2023-10-20",
-        "summaries" :
-        [
-            "summary" :
-            {
-                "type" : "day", "date" : "2023-10-10",
-                "measurements" :
-                [
-                    {
-                        "name" : "Indoor temperature",
-                        "extremes" : "min/max",
-                        "values" {
-                            "average" : 72.2,
-                            "minimum" : { "value" : 70.0, "time" : "2023-10-10 00:23:12" }
-                            "maximum" : { "value" : 76.0, "time" : "2023-10-10 15:23:12" },
-                        }
-                    }
-                ]
-            }
-         ],
-         "rainfallHourBuckets" : [ 2.1, 0.0, 1.1 ]
-     }
-}
- */
 enum class SummaryExtremes {
     NO_EXTREME,
     MAXIMUM_ONLY,
@@ -263,12 +235,12 @@ private:
     SummaryMeasurement<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;
     SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> et;
 
-    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraTemperatures[ArchivePacket::MAX_EXTRA_TEMPERATURES];
-    //SummaryMeasurement<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraHumidities[ArchivePacket::MAX_EXTRA_HUMIDITIES];
-    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafTemperatures[ArchivePacket::MAX_LEAF_TEMPERATURES];
-    //SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilTemperatures[ArchivePacket::MAX_SOIL_TEMPERATURES];
-    //SummaryMeasurement<LeafWetness,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafWetnesses[ArchivePacket::MAX_LEAF_WETNESSES];
-    //SummaryMeasurement<SoilMoisture,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilMoistures[ArchivePacket::MAX_SOIL_MOISTURES];
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraTemperatures[ArchivePacket::MAX_EXTRA_TEMPERATURES];
+    SummaryMeasurement<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraHumidities[ArchivePacket::MAX_EXTRA_HUMIDITIES];
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafTemperatures[ArchivePacket::MAX_LEAF_TEMPERATURES];
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilTemperatures[ArchivePacket::MAX_SOIL_TEMPERATURES];
+    SummaryMeasurement<LeafWetness,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafWetnesses[ArchivePacket::MAX_LEAF_WETNESSES];
+    SummaryMeasurement<SoilMoisture,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilMoistures[ArchivePacket::MAX_SOIL_MOISTURES];
 };
 
 class ArchiveManager;
