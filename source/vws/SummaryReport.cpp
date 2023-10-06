@@ -108,9 +108,29 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+template<typename M, SummaryExtremes SE>
+std::string SummaryRecord::arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const {
+    std::stringstream ss;
+
+    ss << " { \"" << name << "\" : [ " << endl;
+
+    std::string lastString;
+
+    for (int i = 0; i < numSummaries; i++) {
+        if (i != 0 && lastString.length() > 0) ss << ", " << endl;
+        lastString = sm[i].formatJSON();
+        ss << lastString;
+    }
+
+    ss << " ] }";
+
+    return ss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 std::string
 SummaryRecord::formatJSON() const {
-    // TODO Add JSON for measurement arrays
     std::stringstream ss;
     ss << " { \"summary\" : { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
@@ -128,8 +148,16 @@ SummaryRecord::formatJSON() const {
            << et.formatJSON() << ", " << endl
            << sustainedWindSpeed.formatJSON() << "," << endl
            << gustWindSpeed.formatJSON() << ", " << endl
-           << " { \"rainfall\" : " << totalRainfall << " }" << endl;
+           << " { \"rainfall\" : " << totalRainfall << " }, " << endl;
+
+        ss << arrayFormatJSON("extraTemperatures", extraTemperatures, ArchivePacket::MAX_EXTRA_TEMPERATURES) << ", " << endl
+           << arrayFormatJSON("extraHumidities", extraHumidities, ArchivePacket::MAX_EXTRA_HUMIDITIES) << ", " << endl
+           << arrayFormatJSON("leafTemperatures", leafTemperatures, ArchivePacket::MAX_LEAF_TEMPERATURES) << ", " << endl
+           << arrayFormatJSON("soilTemperatures", soilTemperatures, ArchivePacket::MAX_SOIL_TEMPERATURES) << ", " << endl
+           << arrayFormatJSON("leafWetnesses", leafWetnesses, ArchivePacket::MAX_LEAF_WETNESSES) << ", " << endl
+           << arrayFormatJSON("soilMoistures", soilMoistures, ArchivePacket::MAX_SOIL_MOISTURES) <<  endl; 
     }
+
     ss << "] } }";
 
     return ss.str();

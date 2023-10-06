@@ -310,7 +310,7 @@ Measurement<LeafWetness>
 ArchivePacket::getLeafWetness(int index) const {
     Measurement<LeafWetness> leafWetness;
     if (index >= 0 && index < MAX_LEAF_WETNESSES)
-        leafWetness = BitConverter::toUint8(buffer, LEAF_WETNESS_BASE_OFFSET + index);
+        leafWetness = VantageDecoder::decodeLeafWetness(buffer, LEAF_WETNESS_BASE_OFFSET + index);
 
     return leafWetness;
 }
@@ -328,11 +328,11 @@ ArchivePacket::getSoilTemperature(int index) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<LeafWetness>
+Measurement<SoilMoisture>
 ArchivePacket::getSoilMoisture(int index) const {
     Measurement<SoilMoisture> soilMoisture;
     if (index >= 0 && index < MAX_SOIL_MOISTURES)
-        soilMoisture = BitConverter::toUint8(buffer, SOIL_MOISTURES_BASE_OFFSET + index);
+        soilMoisture = VantageDecoder::decodeSoilMoisture(buffer, SOIL_MOISTURES_BASE_OFFSET + index);
 
     return soilMoisture;
 }

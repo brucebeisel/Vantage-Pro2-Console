@@ -42,7 +42,7 @@ SUMMARYOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/HiLowPacket.o \
 	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSTESTOBJDIR)/SerialPort.o \
-	$(VWSTESTOBJDIR)/SummaryRecord.o
+	$(VWSTESTOBJDIR)/SummaryReport.o
 	
 ARCHIVEOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \

@@ -49,7 +49,7 @@ public:
     std::string formatJSON() const {
         return average.formatJSON("average");
     }
-private:
+
     int            sampleCount;
     Measurement<M> sum;
     Measurement<M> average;
@@ -175,6 +175,9 @@ public:
     std::string formatJSON() const {
         std::stringstream ss;
 
+        if (average.sampleCount == 0)
+            return "";
+
         ss << "{  \"" <<  summaryName << "\" : {  "
            << average.formatJSON();
 
@@ -217,6 +220,8 @@ public:
 private:
     //static constexpr int DIR_OF_HIGH_WIND_SPEED_OFFSET = 26;
     //static constexpr int PREVAILING_WIND_DIRECTION_OFFSET = 27;
+    template<typename M, SummaryExtremes SE>
+    std::string arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const;
 
     int packetCount;
     SummaryPeriod period;
