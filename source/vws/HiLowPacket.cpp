@@ -357,7 +357,7 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     // Leaf wetness section
     //
-    for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
+    for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++) {
         leafWetness[i].highs.todayExtremeValue     = VantageDecoder::decodeLeafWetness(buffer, 396 + i);
         leafWetness[i].highs.todayExtremeValueTime = BitConverter::toUint16(buffer, 400 + i);
         leafWetness[i].lows.todayExtremeValue      = VantageDecoder::decodeLeafWetness(buffer, 408 + i);
