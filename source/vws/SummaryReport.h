@@ -315,8 +315,9 @@ public:
      * @param startDate      The date on which this summary report starts
      * @param endDate        The date on which this summary report ends
      * @param archiveManager The manager used to retrieve the ArchivePackets needed to build the summary report
+     * @param wrd            The WindRoseData object used to analyze wind direction and speed data
      */
-    SummaryReport(SummaryPeriod period, DateTime startDate, DateTime endDate, ArchiveManager & archiveManager);
+    SummaryReport(SummaryPeriod period, DateTime startDate, DateTime endDate, ArchiveManager & archiveManager, WindRoseData & wrd);
 
     /**
      * Destructor.
@@ -351,7 +352,7 @@ private:
     ArchiveManager &           archiveManager;
     std::vector<SummaryRecord> summaryRecords;
     Rainfall                   hourRainfallBuckets[24];   // Tracks when it has rained over the summary period
-    WindRoseData               windRoseData;
+    WindRoseData &             windRoseData;
 };
 
 } /* namespace vws */

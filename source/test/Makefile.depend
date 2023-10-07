@@ -3,9 +3,25 @@
  ../vws/WindDirectionSlice.h ../vws/VantageLogger.h ../vws/Weather.h \
  ../vws/Measurement.h
 ../../target/test/EnumTest.o: EnumTest.cpp ../vws/VantageEnums.h \
- ../vws/VantageEepromConstants.h ../vws/WeatherTypes.h \
- ../vws/VantageProtocolConstants.h
+ ../vws/SummaryEnums.h ../vws/VantageEepromConstants.h \
+ ../vws/WeatherTypes.h ../vws/VantageProtocolConstants.h
 ../../target/test/BitConverterTest.o: BitConverterTest.cpp \
  ../vws/BitConverter.h ../vws/WeatherTypes.h ../vws/WeatherTypes.h
+../../target/test/SummaryTest.o: SummaryTest.cpp ../vws/SummaryReport.h \
+ ../vws/Weather.h ../vws/Measurement.h ../vws/WeatherTypes.h \
+ ../vws/ArchivePacket.h ../vws/WindRoseData.h \
+ ../vws/VantageProtocolConstants.h ../vws/SummaryEnums.h ../vws/Weather.h \
+ ../vws/VantageEnums.h ../vws/VantageEepromConstants.h \
+ ../vws/VantageWeatherStation.h ../vws/BitConverter.h \
+ ../vws/ArchiveManager.h ../vws/SerialPort.h ../vws/VantageLogger.h \
+ ../vws/VantageDecoder.h ../vws/VantageLogger.h ../vws/WindRoseData.h
 ../../target/test/WindDirectionSliceTest.o: WindDirectionSliceTest.cpp \
  ../vws/WindDirectionSlice.h ../vws/WeatherTypes.h ../vws/WeatherTypes.h
+../../target/test/ArchiveManagerTest.o: ArchiveManagerTest.cpp \
+ ../vws/Weather.h ../vws/Measurement.h ../vws/WeatherTypes.h \
+ ../vws/VantageEnums.h ../vws/SummaryEnums.h \
+ ../vws/VantageEepromConstants.h ../vws/VantageProtocolConstants.h \
+ ../vws/VantageWeatherStation.h ../vws/ArchivePacket.h \
+ ../vws/BitConverter.h ../vws/ArchiveManager.h ../vws/SummaryReport.h \
+ ../vws/Weather.h ../vws/WindRoseData.h ../vws/SerialPort.h \
+ ../vws/VantageLogger.h ../vws/VantageDecoder.h ../vws/VantageLogger.h

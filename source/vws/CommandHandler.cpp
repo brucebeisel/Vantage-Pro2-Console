@@ -37,6 +37,7 @@
 #include "AlarmManager.h"
 #include "CurrentWeatherManager.h"
 #include "SummaryReport.h"
+#include "WindRoseData.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -867,7 +868,8 @@ CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const
         }
 
         logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query summaries from the archive with times: " << startTime << " - " << endTime << endl;
-        SummaryReport report(summaryPeriod, startTime, endTime, archiveManager);
+        WindRoseData windRoseData(ProtocolConstants::WindUnits::MPH, 2.0, 5);
+        SummaryReport report(summaryPeriod, startTime, endTime, archiveManager, windRoseData);
         report.loadData();
 
         ostringstream oss;

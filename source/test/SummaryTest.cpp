@@ -5,8 +5,8 @@
  *      Author: bruce
  */
 
-#include <SummaryReport.h>
 #include <iostream>
+#include "SummaryReport.h"
 #include "Weather.h"
 #include "VantageEnums.h"
 #include "VantageWeatherStation.h"
@@ -14,6 +14,7 @@
 #include "SerialPort.h"
 #include "VantageLogger.h"
 #include "VantageDecoder.h"
+#include "WindRoseData.h"
 
 using namespace vws;
 using namespace std;
@@ -64,9 +65,10 @@ main(int argc, char * argv[]) {
         SerialPort port("port", 19200);
         VantageWeatherStation station(port);
         ArchiveManager archiveManager(archiveFile, station);
+        WindRoseData windRoseData(ProtocolConstants::WindUnits::MPH, 2.0, 5);
 
 
-        SummaryReport report(period, startDate, endDate, archiveManager);
+        SummaryReport report(period, startDate, endDate, archiveManager, windRoseData);
         if (report.loadData())
             cout << report.formatJSON() << endl;
         else

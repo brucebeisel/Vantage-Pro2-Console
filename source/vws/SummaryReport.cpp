@@ -166,11 +166,15 @@ SummaryRecord::formatJSON() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-SummaryReport::SummaryReport(SummaryPeriod period, DateTime startDate, DateTime endDate, ArchiveManager & archiveManager) : period(period),
-                                                                                                                            startDate(startDate),
-                                                                                                                            endDate(endDate),
-                                                                                                                            archiveManager(archiveManager),
-                                                                                                                            windRoseData(ProtocolConstants::WindUnits::MPH, 5.0, 5) {
+SummaryReport::SummaryReport(SummaryPeriod period,
+                             DateTime startDate,
+                             DateTime endDate,
+                             ArchiveManager & archiveManager,
+                             WindRoseData & wrd) : period(period),
+                                                   startDate(startDate),
+                                                   endDate(endDate),
+                                                   archiveManager(archiveManager),
+                                                   windRoseData(wrd) {
     //
     // Set the start and end times to the start and end of the days
     //
@@ -446,7 +450,7 @@ SummaryReport::formatJSON() const {
         ss << hourRainfallBuckets[i];
     }
 
-    ss << " ], " << windRoseData.formatJSON();
+    ss << " ], " << endl << windRoseData.formatJSON();
     ss << " } }";
     return ss.str();
 }

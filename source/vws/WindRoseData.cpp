@@ -1,3 +1,4 @@
+#include <math.h>
 #include <sstream>
 #include "WindRoseData.h"
 #include "VantageEnums.h"
@@ -38,6 +39,8 @@ WindSlice::applyWindSample(const Measurement<HeadingIndex> & sampleHeadingIndex,
         windySampleCount++;
 
     if (sampleSpeed > 0.0 && sampleHeadingIndex.getValue() == headingIndex) {
+        if (headingIndex == 1)
+            cout << "Speed for heading index 1: " << sampleSpeed << endl;
         sliceSampleCount++;
 
         if (sampleSpeed > maxSpeed)
@@ -46,9 +49,10 @@ WindSlice::applyWindSample(const Measurement<HeadingIndex> & sampleHeadingIndex,
         speedSum += sampleSpeed;
         speedAverage = speedSum / static_cast<Speed>(sliceSampleCount);
 
-        double speedBin = sampleSpeed / speedBinIncrement;
-        int speedBinIndex = static_cast<int>(speedBin);
+        double speedBin = ::round(sampleSpeed / speedBinIncrement);
+        int speedBinIndex = static_cast<int>(speedBin) - 1;
         speedBinIndex = std::min(speedBinIndex, numSpeedBins - 1);
+        speedBinIndex = std::max(speedBinIndex, 0);
         speedBinSampleCount[speedBinIndex]++;
 
     }
@@ -57,15 +61,6 @@ WindSlice::applyWindSample(const Measurement<HeadingIndex> & sampleHeadingIndex,
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-/*
-{
-    "headingIndex" : 0,
-    "maximumSpeed" : 14,
-    "averageSpeed" : 5,
-    "percentageOfSamples", 10,
-    "speedBinPercentage" : [15.5, 19.5, 29.9, 25.1 ]
-}
-*/
 string
 WindSlice::formatJSON() const {
     stringstream ss;
@@ -84,7 +79,7 @@ WindSlice::formatJSON() const {
     bool first = true;
     for (int count : speedBinSampleCount) {
         if (!first) ss << ", "; else first = false;
-        if (windySampleCount > 0)
+        if (sliceSampleCount > 0)
             percentOfSamples =  static_cast<float>(count) / static_cast<float>(sliceSampleCount) * 100.0;
         else
             percentOfSamples = 0.0;
@@ -92,7 +87,7 @@ WindSlice::formatJSON() const {
         ss << percentOfSamples;
     }
 
-    ss << "] }" << endl;
+    ss << "] }";
 
     return ss.str();
 
@@ -120,7 +115,7 @@ WindRoseData::~WindRoseData() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 WindRoseData::applyWindSample(const Measurement<HeadingIndex> & headingIndex, Speed speed) {
-    if (!headingIndex.isValid())
+    if (!headingIndex.isValid() && speed > 0.0)
         return;
 
     totalSamples++;
@@ -133,35 +128,6 @@ WindRoseData::applyWindSample(const Measurement<HeadingIndex> & headingIndex, Sp
         slice.applyWindSample(headingIndex, speed);
 }
 
-/*
-{
-    "windRoseData :
-    {
-        "sampleCount" : 288,
-        "calmWindSampleCount" : 110,
-        "speedBins" : [ 5, 10, 15, 20 ],
-        "speedUnits" : "MPH",
-        "windSlices" :
-        [
-            {
-                "headingIndex" : 0,
-                "maximumSpeed" : 14,
-                "averageSpeed" : 5,
-                "percentageOfSamples", 10,
-                "speedBinPercentage" : [15.5, 19.5, 29.9, 25.1 ]
-            },
-            {
-                "heading" : "NNE",
-                "maximumSpeed" : 10,
-                "averageSpeed" : 3,
-                "percentageOfSamples", 12,
-                "speedBinPercentage" : [15.5, 19.5, 29.9, 25.1 ]
-            }
-        ]
-    }
-}
- */
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
@@ -173,7 +139,7 @@ WindRoseData::formatJSON() const {
        << "\"calmWindSampleCount\" : " << calmSamples << ", "
        << "\"speedBins\" : [ ";
 
-    Speed binSpeed = windSpeedIncrement;
+    Speed binSpeed = 0;
     for (int i = 0; i < windSpeedBins; i++) {
         if (i != 0) ss << ", ";
         ss << binSpeed;
@@ -181,11 +147,11 @@ WindRoseData::formatJSON() const {
     }
 
     ss << " ], \"speedUnits\" : \"" << windUnitsEnum.valueToString(units) << "\", "
-       << "\"windSlices\" : [ ";
+       << "\"windSlices\" : [ " << endl;
 
     bool first = true;
     for (auto & slice : windSlices) {
-        if (!first) ss << ", "; else first = false;
+        if (!first) ss << ", " << endl; else first = false;
         ss << slice.formatJSON();
     }
 
