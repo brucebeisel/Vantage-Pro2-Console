@@ -34,11 +34,10 @@ void
 WindSlice::applyWindSample(const Measurement<HeadingIndex> & sampleHeadingIndex, Speed sampleSpeed) {
     totalSampleCount++;
 
-
     if (sampleSpeed > 0.0)
         windySampleCount++;
 
-    if (sampleHeadingIndex.getValue() == headingIndex) {
+    if (sampleSpeed > 0.0 && sampleHeadingIndex.getValue() == headingIndex) {
         sliceSampleCount++;
 
         if (sampleSpeed > maxSpeed)
@@ -86,7 +85,7 @@ WindSlice::formatJSON() const {
     for (int count : speedBinSampleCount) {
         if (!first) ss << ", "; else first = false;
         if (windySampleCount > 0)
-            percentOfSamples =  static_cast<float>(count) / static_cast<float>(windySampleCount) * 100.0;
+            percentOfSamples =  static_cast<float>(count) / static_cast<float>(sliceSampleCount) * 100.0;
         else
             percentOfSamples = 0.0;
 
