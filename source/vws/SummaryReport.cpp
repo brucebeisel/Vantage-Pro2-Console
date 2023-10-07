@@ -418,7 +418,7 @@ SummaryReport::loadData() {
         struct tm tm;
         localtime_r(&packetTime, &tm);
         hourRainfallBuckets[tm.tm_hour] += packet.getRainfall();
-        windRoseData.applyWindSample(packet.getPrevailingWindDirectionIndex(), packet.getAverageWindSpeed());
+        windRoseData.applyWindSample(packet.getPrevailingWindHeadingIndex(), packet.getAverageWindSpeed());
     }
 
     return true;

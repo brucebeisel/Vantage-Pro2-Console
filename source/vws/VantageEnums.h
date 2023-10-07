@@ -548,6 +548,49 @@ operator<<(std::ostream & os, ProtocolConstants::ConsoleType value) {
 }
 
 /****************************************
+ * Direction Code Enumeration (For wind direction)
+ ****************************************/
+static const NameValuePair<ProtocolConstants::DirectionCode> dcMappings[] = {
+    { "N",    ProtocolConstants::DirectionCode::N },
+    { "NNE",  ProtocolConstants::DirectionCode::NNE },
+    { "NE",   ProtocolConstants::DirectionCode::NE },
+    { "ENE",  ProtocolConstants::DirectionCode::ENE },
+    { "E",    ProtocolConstants::DirectionCode::E },
+    { "ESE",  ProtocolConstants::DirectionCode::ESE },
+    { "SE",   ProtocolConstants::DirectionCode::SE },
+    { "SSE",  ProtocolConstants::DirectionCode::SSE },
+    { "S",    ProtocolConstants::DirectionCode::S },
+    { "SSW",  ProtocolConstants::DirectionCode::SSW },
+    { "SW",   ProtocolConstants::DirectionCode::SW },
+    { "WSW",  ProtocolConstants::DirectionCode::WSW },
+    { "W",    ProtocolConstants::DirectionCode::W },
+    { "WNW",  ProtocolConstants::DirectionCode::WNW },
+    { "NW",   ProtocolConstants::DirectionCode::NW },
+    { "NNW",  ProtocolConstants::DirectionCode::NNW },
+    { "---",  ProtocolConstants::DirectionCode::DASH_VALUE }
+};
+
+class DirectionCodeEnum : public VantageEnum<ProtocolConstants::DirectionCode,sizeof(dcMappings)/sizeof(dcMappings[0])>  {
+public:
+    DirectionCodeEnum() {};
+    virtual ~DirectionCodeEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::DirectionCode> * getMappings() const {
+        return dcMappings;
+    }
+};
+
+static DirectionCodeEnum directionCodeEnum;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static std::ostream &
+operator<<(std::ostream & os, ProtocolConstants::DirectionCode value) {
+    os << directionCodeEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
+    return os;
+}
+
+/****************************************
  * Rain Bucket Type Enumeration
  ****************************************/
 static const NameValuePair<ProtocolConstants::RainBucketSizeType> rbtMappings[] = {

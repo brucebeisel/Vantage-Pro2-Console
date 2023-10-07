@@ -8,7 +8,7 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindSlice::WindSlice(int headingIndex, ProtocolConstants::WindUnits units, Speed speedIncrement, int windSpeedBins) :
+WindSlice::WindSlice(HeadingIndex headingIndex, ProtocolConstants::WindUnits units, Speed speedIncrement, int windSpeedBins) :
                                                              headingIndex(headingIndex),
                                                              speedUnits(units),
                                                              speedBinIncrement(speedIncrement),
@@ -38,9 +38,9 @@ WindSlice::applyWindSample(const Measurement<HeadingIndex> & sampleHeadingIndex,
     if (sampleSpeed > 0.0)
         windySampleCount++;
 
-    if (sampleSpeed > 0.0 && sampleHeadingIndex.getValue() == headingIndex) {
+    if (sampleSpeed > 0.0 && headingIndex == sampleHeadingIndex.getValue()) {
         if (headingIndex == 1)
-            cout << "Speed for heading index 1: " << sampleSpeed << endl;
+            cout << "Speed for heading code NNE: " << sampleSpeed << endl;
         sliceSampleCount++;
 
         if (sampleSpeed > maxSpeed)

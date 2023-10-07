@@ -218,7 +218,7 @@ ArchivePacket::getAverageWindSpeed() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<HeadingIndex>
-ArchivePacket::getPrevailingWindDirectionIndex() const {
+ArchivePacket::getPrevailingWindHeadingIndex() const {
     return VantageDecoder::decodeWindDirectionIndex(buffer, PREVAILING_WIND_DIRECTION_OFFSET);
 }
 
@@ -232,7 +232,7 @@ ArchivePacket::getHighWindSpeed() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<HeadingIndex>
-ArchivePacket::getHighWindDirectionIndex() const {
+ArchivePacket::getHighWindHeadingIndex() const {
     return VantageDecoder::decodeWindDirectionIndex(buffer, DIR_OF_HIGH_WIND_SPEED_OFFSET);
 }
 
@@ -379,7 +379,7 @@ ArchivePacket::formatJSON() const {
     // Both wind speed and direction must be valid to generate the JSON
     //
     Measurement<Speed> windSpeed = getAverageWindSpeed();
-    Measurement<HeadingIndex> windDir = getPrevailingWindDirectionIndex();
+    Measurement<HeadingIndex> windDir = getPrevailingWindHeadingIndex();
 
     if (windSpeed.isValid() && windDir.isValid()) {
         ss << ", \"avgWindSpeed\" : " << windSpeed << ", "
@@ -387,7 +387,7 @@ ArchivePacket::formatJSON() const {
     }
 
     windSpeed = getHighWindSpeed();
-    windDir = getHighWindDirectionIndex();
+    windDir = getHighWindHeadingIndex();
 
     if (windSpeed.isValid() && windDir.isValid()) {
         ss << ", \"highWindSpeed\" : " << windSpeed << ", "

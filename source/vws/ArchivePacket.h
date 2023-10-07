@@ -125,10 +125,10 @@ public:
     Measurement<Humidity> getInsideHumidity() const;
     Measurement<Humidity> getOutsideHumidity() const;
     Measurement<Speed> getAverageWindSpeed() const;
-    Measurement<HeadingIndex> getPrevailingWindDirectionIndex() const;
+    Measurement<HeadingIndex> getPrevailingWindHeadingIndex() const;
 
     Measurement<Speed> getHighWindSpeed() const;
-    Measurement<HeadingIndex> getHighWindDirectionIndex() const;
+    Measurement<HeadingIndex> getHighWindHeadingIndex() const;
 
     Measurement<UvIndex> getAverageUvIndex() const;
     Measurement<Evapotranspiration> getEvapotranspiration() const;

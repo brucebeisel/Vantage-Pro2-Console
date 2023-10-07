@@ -281,6 +281,25 @@ enum ConsoleType {
     VANTAGE_VUE = 17
 };
 
+enum class DirectionCode {
+    N   = 0,
+    NNE = 1,
+    NE  = 2,
+    ENE = 3,
+    E   = 4,
+    ESE = 5,
+    SE  = 6,
+    SSE = 7,
+    S   = 8,
+    SSW = 9,
+    SW =  10,
+    WSW = 11,
+    W   = 12,
+    WNW = 13,
+    NW  = 14,
+    NNW = 15,
+    DASH_VALUE = 255
+};
 
 //
 // Maximum counts
@@ -336,7 +355,7 @@ static constexpr int INVALID_16BIT_TEMPERATURE = 32767;
 static constexpr int INVALID_16BIT_TEMPERATURE_NEGATIVE = -32768; // Sometimes the invalid temperature is negative
 static constexpr int INVALID_8BIT_TEMPERATURE = 255;
 static constexpr int INVALID_HUMIDITY = 255;
-static constexpr int INVALID_WIND_DIRECTION_SLICE = 255;
+static constexpr int INVALID_WIND_DIRECTION_INDEX = 255;
 static constexpr int INVALID_WIND_DIRECTION = 0;
 static constexpr int INVALID_WIND_SPEED = 255;
 static constexpr int INVALID_16BIT_AVG_WIND_SPEED = 32767;

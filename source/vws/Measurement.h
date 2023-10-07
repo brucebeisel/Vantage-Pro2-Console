@@ -44,7 +44,7 @@ public:
      * Invalidate a measurement, setting the internal value to 0.
      */
     void invalidate() {
-        value = 0.0;
+        value = static_cast<T>(0);
         valid = false;
     }
 

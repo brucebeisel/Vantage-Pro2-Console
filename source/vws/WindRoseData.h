@@ -10,19 +10,19 @@ namespace vws {
 
 class WindSlice {
 public:
-    WindSlice(int headingIndex, ProtocolConstants::WindUnits units, Speed speedIncrement, int windSpeedBins);
+    WindSlice(HeadingIndex headingIndex, ProtocolConstants::WindUnits units, Speed speedIncrement, int windSpeedBins);
 
     virtual ~WindSlice();
 
-    void applyWindSample(const Measurement<HeadingIndex> & headingIndex, Speed speed);
+    void applyWindSample(const Measurement<HeadingIndex> & headingCode, Speed speed);
 
     std::string formatJSON() const;
 
 private:
-    int                          headingIndex;
-    ProtocolConstants::WindUnits speedUnits;
-    Speed                        speedBinIncrement;
-    int                          numSpeedBins;
+    HeadingIndex                     headingIndex;
+    ProtocolConstants::WindUnits     speedUnits;
+    Speed                            speedBinIncrement;
+    int                              numSpeedBins;
 
     int sliceSampleCount; // Samples with the wind blowing in this directional slice
     int totalSampleCount;
@@ -49,11 +49,11 @@ public:
     std::string formatJSON() const;
 
 private:
-    std::vector<WindSlice> windSlices;
-    int       totalSamples;
-    int       calmSamples;
-    Speed     windSpeedIncrement;
-    int       windSpeedBins;
+    std::vector<WindSlice>       windSlices;
+    int                          totalSamples;
+    int                          calmSamples;
+    Speed                        windSpeedIncrement;
+    int                          windSpeedBins;
     ProtocolConstants::WindUnits units;
 
 };

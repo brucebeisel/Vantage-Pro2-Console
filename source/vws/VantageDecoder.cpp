@@ -219,10 +219,10 @@ VantageDecoder::decodeAverageWindSpeed(const byte buffer[], int offset) {
 Measurement<HeadingIndex>
 VantageDecoder::decodeWindDirectionIndex(const byte buffer[], int offset) {
     Measurement<HeadingIndex> measurement;
-    uint8 value8 = BitConverter::toUint8(buffer, offset);
+    HeadingIndex index = BitConverter::toUint8(buffer, offset);
 
-    if (value8 != INVALID_WIND_DIRECTION_SLICE)
-        measurement.setValue(value8);
+    if (index != INVALID_WIND_DIRECTION_INDEX)
+        measurement.setValue(index);
     else
         measurement.invalidate();
 
