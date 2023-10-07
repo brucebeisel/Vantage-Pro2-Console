@@ -2,6 +2,7 @@
 #include "ArchivePacket.h"
 #include "ArchiveManager.h"
 #include "SummaryReport.h"
+#include "WindRoseData.h"
 #include "VantageEnums.h"
 
 using namespace std;
@@ -165,7 +166,11 @@ SummaryRecord::formatJSON() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-SummaryReport::SummaryReport(SummaryPeriod period, DateTime startDate, DateTime endDate, ArchiveManager & archiveManager) : period(period), startDate(startDate), endDate(endDate), archiveManager(archiveManager) {
+SummaryReport::SummaryReport(SummaryPeriod period, DateTime startDate, DateTime endDate, ArchiveManager & archiveManager) : period(period),
+                                                                                                                            startDate(startDate),
+                                                                                                                            endDate(endDate),
+                                                                                                                            archiveManager(archiveManager),
+                                                                                                                            windRoseData(ProtocolConstants::WindUnits::MPH, 5.0, 5) {
     //
     // Set the start and end times to the start and end of the days
     //
@@ -409,9 +414,8 @@ SummaryReport::loadData() {
         struct tm tm;
         localtime_r(&packetTime, &tm);
         hourRainfallBuckets[tm.tm_hour] += packet.getRainfall();
-
+        windRoseData.applyWindSample(packet.getPrevailingWindDirectionIndex(), packet.getAverageWindSpeed());
     }
-
 
     return true;
 }
@@ -442,7 +446,8 @@ SummaryReport::formatJSON() const {
         ss << hourRainfallBuckets[i];
     }
 
-    ss << " ] } }";
+    ss << " ], " << windRoseData.formatJSON();
+    ss << " } }";
     return ss.str();
 }
 } /* namespace vws */

@@ -22,15 +22,10 @@
 #include "WeatherTypes.h"
 #include "Measurement.h"
 #include "ArchivePacket.h"
+#include "WindRoseData.h"
+#include "SummaryEnums.h"
 
 namespace vws {
-
-enum class SummaryExtremes {
-    NO_EXTREME,
-    MAXIMUM_ONLY,
-    MINIMUM_ONLY,
-    MINIMUM_AND_MAXIMUM
-};
 
 template<typename M>
 class MeasurementAverage {
@@ -56,21 +51,19 @@ public:
 
 };
 
-enum class ExtremeType {
-    HIGH,
-    LOW
-};
-
-template<typename M, ExtremeType ET>
+/**
+ * Template to hold an extreme value for a summary measurement.
+ */
+template<typename M, SummaryExtremeType ET>
 struct ExtremeMeasurement {
-    ExtremeType    extremeType;
+    SummaryExtremeType    extremeType;
     Measurement<M> extremeValue;
     DateTime       extremeTime;
     ExtremeMeasurement() : extremeType(ET), extremeTime(0) {}
 
     void applyMeasurement(DateTime time, const Measurement<M> & value) {
         if (value.isValid()) {
-            if (extremeType == ExtremeType::LOW) {
+            if (extremeType == SummaryExtremeType::LOW) {
                 if (!extremeValue.isValid() || value.getValue() < extremeValue.getValue()) {
                     extremeValue = value;
                     extremeTime = time;
@@ -86,7 +79,7 @@ struct ExtremeMeasurement {
     }
 
     friend std::ostream & operator<<(std::ostream & os,  const ExtremeMeasurement & em) {
-        std::string etype = em.extremeType == ExtremeType::LOW ? "Low" : "High";
+        std::string etype = em.extremeType == SummaryExtremeType::LOW ? "Low" : "High";
         os << "Extreme type: " << etype
            << " Value: " << em.extremeValue << " Time: " << Weather::formatDateTime(em.extremeTime);
 
@@ -96,7 +89,7 @@ struct ExtremeMeasurement {
     std::string formatJSON() const {
         std::string json = "";
         if (extremeValue.isValid()) {
-            if (extremeType == ExtremeType::LOW) {
+            if (extremeType == SummaryExtremeType::LOW) {
                 json += "\"minimum\"";
             }
             else {
@@ -109,18 +102,40 @@ struct ExtremeMeasurement {
     }
 };
 
+/**
+ * Template class that represents a single measurement within a summary record.
+ */
 template<typename M, SummaryExtremes SE>
 class SummaryMeasurement {
 public:
+    /**
+     * Constructor.
+     */
     SummaryMeasurement() : summaryName(""), extremesUsed(SE) {}
 
+    /**
+     * Constructor with a name.
+     *
+     * @param name The name used when generating reports
+     */
     explicit SummaryMeasurement(const std::string & name) : summaryName(name), extremesUsed(SE) {
     }
 
+    /**
+     * Set the name used in report post-constuctions.
+     *
+     * @param name The name used when generating reports
+     */
     void setSummaryName(const std::string & name) {
         summaryName = name;
     }
 
+    /**
+     * Apply a single measurement.
+     *
+     * @param measurementTime The time of this measurement
+     * @param measurement     The value to apply to average, minimum and maximum
+     */
     void applyMeasurement(DateTime measurementTime, const Measurement<M> & measurement) {
         average.applyMeasurement(measurement);
         switch(extremesUsed) {
@@ -139,8 +154,17 @@ public:
         }
     }
 
+    /**
+     * Apply a an average and an extreme measurement.
+     *
+     * @param measurementTime     The time of this measurement
+     * @param avgMeasurement      A measurement that represent the average value over the archive packets time span
+     * @param extremeMeasurement  A measurement that represent the extreme value over the archive packets time span.
+     *                            This could be a minimum or maximum or both.
+     */
     void applyMeasurement(DateTime measurementTime, const Measurement<M> & avgMeasurement, const Measurement<M> & extremeMeasurement) {
         average.applyMeasurement(avgMeasurement);
+
         switch(extremesUsed) {
             case SummaryExtremes::NO_EXTREME:
                 break;
@@ -157,8 +181,17 @@ public:
         }
     }
 
-    void applyMeasurement(DateTime measurementTime, const Measurement<M> & avgMeasurement, const Measurement<M> & lowMeasurement, const Measurement<M> & highMeasurement) {
+    /**
+     * Apply a an average, a minimum and a maximum measurement.
+     *
+     * @param measurementTime The time of this measurement
+     * @param avgMeasurement  A measurement that represent the average value over the archive packets time span
+     * @param minMeasurement  A measurement that represent the minimum extreme value over the archive packets time span.
+     * @param maxMeasurement  A measurement that represent the maximum extreme value over the archive packets time span.
+     */
+    void applyMeasurement(DateTime measurementTime, const Measurement<M> & avgMeasurement, const Measurement<M> & minMeasurement, const Measurement<M> & maxMeasurement) {
         average.applyMeasurement(avgMeasurement);
+
         switch(extremesUsed) {
             case SummaryExtremes::NO_EXTREME:
             case SummaryExtremes::MAXIMUM_ONLY:
@@ -166,12 +199,17 @@ public:
                 break;
 
             case SummaryExtremes::MINIMUM_AND_MAXIMUM:
-                high.applyMeasurement(measurementTime, highMeasurement);
-                low.applyMeasurement(measurementTime, lowMeasurement);
+                high.applyMeasurement(measurementTime, maxMeasurement);
+                low.applyMeasurement(measurementTime, minMeasurement);
                 break;
         }
     }
 
+    /**
+     * Format the summary measurement into JSON.
+     *
+     * @return The JSON string
+     */
     std::string formatJSON() const {
         std::stringstream ss;
 
@@ -192,76 +230,113 @@ public:
         return ss.str();
     }
 
-    std::string           summaryName;
-    SummaryExtremes       extremesUsed;
-    MeasurementAverage<M> average;
-    ExtremeMeasurement<M,ExtremeType::HIGH> high;
-    ExtremeMeasurement<M,ExtremeType::LOW> low;
+    std::string                                    summaryName;
+    SummaryExtremes                                extremesUsed;
+    MeasurementAverage<M>                          average;
+    ExtremeMeasurement<M,SummaryExtremeType::HIGH> high;
+    ExtremeMeasurement<M,SummaryExtremeType::LOW>  low;
 };
 
-enum class SummaryPeriod {
-    DAY,
-    WEEK,
-    MONTH,
-    YEAR
-};
-
+/**
+ * A record that represents a summary for a single period of time.
+ */
 class SummaryRecord {
 public:
+    /**
+     * Contructor.
+     *
+     * @param period    The period of time that this record represents
+     * @param startDate The starting date that this record represents
+     * @param endDate   The end date of this record. Note that if the period is Day, then start and end must be equal
+     */
     SummaryRecord(SummaryPeriod period, DateTime startDate, DateTime endDate);
+
+    /**
+     * Destructor.
+     */
     virtual ~SummaryRecord();
 
     /**
      * Apply the archive packet to this summary record if the time falls within the start/end date.
+     *
+     * @param archivePacket The packet to apply
      */
     void applyArchivePacket(const ArchivePacket & archivePacket);
+
+    /**
+     * Format the summary record into JSON.
+     *
+     * @return The JSON string
+     */
     std::string formatJSON() const;
 
 private:
-    //static constexpr int DIR_OF_HIGH_WIND_SPEED_OFFSET = 26;
-    //static constexpr int PREVAILING_WIND_DIRECTION_OFFSET = 27;
+    // TODO Apply wind direction to the summary, perhaps with a wind rose record
     template<typename M, SummaryExtremes SE>
     std::string arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const;
 
-    int packetCount;
+    int           packetCount;
     SummaryPeriod period;
-    DateTime startDate;
-    DateTime endDate;
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideTemperature;
-    Rainfall totalRainfall;
-    SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> rainfallRate;
-    SummaryMeasurement<Pressure,SummaryExtremes::MINIMUM_AND_MAXIMUM> barometer;
-    SummaryMeasurement<SolarRadiation,SummaryExtremes::MAXIMUM_ONLY> solarRadiation;
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideTemperature;
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideHumidity;
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideHumidity;
-    SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> sustainedWindSpeed;
-    SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY> gustWindSpeed;
-    SummaryMeasurement<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;
-    SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY> et;
+    DateTime      startDate;
+    DateTime      endDate;
+    Rainfall      totalRainfall;
 
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraTemperatures[ArchivePacket::MAX_EXTRA_TEMPERATURES];
-    SummaryMeasurement<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> extraHumidities[ArchivePacket::MAX_EXTRA_HUMIDITIES];
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafTemperatures[ArchivePacket::MAX_LEAF_TEMPERATURES];
-    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilTemperatures[ArchivePacket::MAX_SOIL_TEMPERATURES];
-    SummaryMeasurement<LeafWetness,SummaryExtremes::MINIMUM_AND_MAXIMUM> leafWetnesses[ArchivePacket::MAX_LEAF_WETNESSES];
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  outsideTemperature;
+    SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY>            rainfallRate;
+    SummaryMeasurement<Pressure,SummaryExtremes::MINIMUM_AND_MAXIMUM>     barometer;
+    SummaryMeasurement<SolarRadiation,SummaryExtremes::MAXIMUM_ONLY>      solarRadiation;
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  insideTemperature;
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  insideHumidity;
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  outsideHumidity;
+    SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY>               sustainedWindSpeed;
+    SummaryMeasurement<Speed,SummaryExtremes::MAXIMUM_ONLY>               gustWindSpeed;
+    SummaryMeasurement<UvIndex,SummaryExtremes::MAXIMUM_ONLY>             uvIndex;
+    SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY>            et;
+
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  extraTemperatures[ArchivePacket::MAX_EXTRA_TEMPERATURES];
+    SummaryMeasurement<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM>     extraHumidities[ArchivePacket::MAX_EXTRA_HUMIDITIES];
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  leafTemperatures[ArchivePacket::MAX_LEAF_TEMPERATURES];
+    SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  soilTemperatures[ArchivePacket::MAX_SOIL_TEMPERATURES];
+    SummaryMeasurement<LeafWetness,SummaryExtremes::MINIMUM_AND_MAXIMUM>  leafWetnesses[ArchivePacket::MAX_LEAF_WETNESSES];
     SummaryMeasurement<SoilMoisture,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilMoistures[ArchivePacket::MAX_SOIL_MOISTURES];
 };
 
 class ArchiveManager;
 
 /**
- *
+ * Holder of a summary report.
  */
 class SummaryReport {
 public:
+    /**
+     * Constructor.
+     *
+     * @param period         The time period that each summary record represents
+     * @param startDate      The date on which this summary report starts
+     * @param endDate        The date on which this summary report ends
+     * @param archiveManager The manager used to retrieve the ArchivePackets needed to build the summary report
+     */
     SummaryReport(SummaryPeriod period, DateTime startDate, DateTime endDate, ArchiveManager & archiveManager);
+
+    /**
+     * Destructor.
+     */
     virtual ~SummaryReport();
 
-    void setParameters(SummaryPeriod period, DateTime startDate, DateTime endDate);
+    /**
+     * Load the data from the archive into the summary report.
+     *
+     * @return True if the data was retrieved successfully
+     */
     bool loadData();
 
+    /**
+     * Format the report into JSON.
+     *
+     * @return The JSON string
+     */
     std::string formatJSON() const;
+
 private:
     static DateTime normalizeStartTime(DateTime time, SummaryPeriod period);
     static DateTime normalizeEndTime(DateTime startTime, DateTime endTime, SummaryPeriod period);
@@ -270,14 +345,15 @@ private:
     static DateTime calculateEndTime(DateTime startTime, SummaryPeriod period);
     static DateTime incrementStartTime(DateTime time, SummaryPeriod period);
 
-    SummaryPeriod period;
-    DateTime startDate;
-    DateTime endDate;
-    ArchiveManager & archiveManager;
+    SummaryPeriod              period;
+    DateTime                   startDate;
+    DateTime                   endDate;
+    ArchiveManager &           archiveManager;
     std::vector<SummaryRecord> summaryRecords;
-    Rainfall hourRainfallBuckets[24];            // Tracks when it has rained over the summary period
+    Rainfall                   hourRainfallBuckets[24];   // Tracks when it has rained over the summary period
+    WindRoseData               windRoseData;
 };
 
 } /* namespace vws */
 
-#endif /* SUMMARY_RECORD_H */
+#endif /* SUMMARY_REPORT_H */

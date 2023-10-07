@@ -7,7 +7,7 @@
 #include <utility>
 #include <stdexcept>
 
-#include "SummaryReport.h"
+#include "SummaryEnums.h"
 #include "VantageEepromConstants.h"
 #include "VantageProtocolConstants.h"
 

@@ -34,7 +34,8 @@ SRCS=\
 	VantageStationNetwork.cpp \
 	VantageWeatherStation.cpp \
 	Weather.cpp \
-	WindDirectionSlice.cpp
+	WindDirectionSlice.cpp \
+	WindRoseData.cpp
 
 
 OBJDIR=../../target/vws

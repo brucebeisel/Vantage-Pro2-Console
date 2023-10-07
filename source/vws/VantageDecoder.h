@@ -64,7 +64,7 @@ public:
 
     static Measurement<Speed> decodeAverageWindSpeed(const byte buffer[], int offset);
 
-    static Measurement<Heading> decodeWindDirectionSlice(const byte buffer[], int offset);
+    static Measurement<HeadingIndex> decodeWindDirectionIndex(const byte buffer[], int offset);
 
     static Measurement<Heading> decodeWindDirection(const byte buffer[], int offset);
 

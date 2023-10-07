@@ -217,9 +217,9 @@ ArchivePacket::getAverageWindSpeed() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<Heading>
-ArchivePacket::getPrevailingWindDirection() const {
-    return VantageDecoder::decodeWindDirectionSlice(buffer, PREVAILING_WIND_DIRECTION_OFFSET);
+Measurement<HeadingIndex>
+ArchivePacket::getPrevailingWindDirectionIndex() const {
+    return VantageDecoder::decodeWindDirectionIndex(buffer, PREVAILING_WIND_DIRECTION_OFFSET);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,9 +231,9 @@ ArchivePacket::getHighWindSpeed() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Measurement<Heading>
-ArchivePacket::getHighWindDirection() const {
-    return VantageDecoder::decodeWindDirectionSlice(buffer, DIR_OF_HIGH_WIND_SPEED_OFFSET);
+Measurement<HeadingIndex>
+ArchivePacket::getHighWindDirectionIndex() const {
+    return VantageDecoder::decodeWindDirectionIndex(buffer, DIR_OF_HIGH_WIND_SPEED_OFFSET);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -379,7 +379,7 @@ ArchivePacket::formatJSON() const {
     // Both wind speed and direction must be valid to generate the JSON
     //
     Measurement<Speed> windSpeed = getAverageWindSpeed();
-    Measurement<Heading> windDir = getPrevailingWindDirection();
+    Measurement<HeadingIndex> windDir = getPrevailingWindDirectionIndex();
 
     if (windSpeed.isValid() && windDir.isValid()) {
         ss << ", \"avgWindSpeed\" : " << windSpeed << ", "
@@ -387,7 +387,7 @@ ArchivePacket::formatJSON() const {
     }
 
     windSpeed = getHighWindSpeed();
-    windDir = getHighWindDirection();
+    windDir = getHighWindDirectionIndex();
 
     if (windSpeed.isValid() && windDir.isValid()) {
         ss << ", \"highWindSpeed\" : " << windSpeed << ", "
