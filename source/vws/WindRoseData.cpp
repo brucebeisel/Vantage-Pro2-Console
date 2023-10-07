@@ -31,14 +31,16 @@ WindSlice::~WindSlice() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindSlice::applyWindSample(int sampleHeadingIndex, Speed sampleSpeed) {
+WindSlice::applyWindSample(const Measurement<HeadingIndex> & sampleHeadingIndex, Speed sampleSpeed) {
     totalSampleCount++;
+
 
     if (sampleSpeed > 0.0)
         windySampleCount++;
 
-    if (sampleHeadingIndex == headingIndex) {
+    if (sampleHeadingIndex.getValue() == headingIndex) {
         sliceSampleCount++;
+
         if (sampleSpeed > maxSpeed)
             maxSpeed = sampleSpeed;
 
@@ -48,6 +50,8 @@ WindSlice::applyWindSample(int sampleHeadingIndex, Speed sampleSpeed) {
         double speedBin = sampleSpeed / speedBinIncrement;
         int speedBinIndex = static_cast<int>(speedBin);
         speedBinIndex = std::min(speedBinIndex, numSpeedBins - 1);
+        speedBinSampleCount[speedBinIndex]++;
+
     }
 
 }
@@ -67,17 +71,26 @@ string
 WindSlice::formatJSON() const {
     stringstream ss;
 
+    float percentOfSamples = 0.0;
+    if (windySampleCount > 0)
+        percentOfSamples =  static_cast<float>(sliceSampleCount) / static_cast<float>(windySampleCount);
+
     ss << "{ "
        << "\"headingIndex\" : " << headingIndex << ", "
        << "\"maximumSpeed\" : " << maxSpeed << ", "
        << "\"averageSpeed\" : " << speedAverage << ", "
-       << "\"percentageOfSamples\" : " << (sliceSampleCount / windySampleCount * 100.0) << ", "
-       << "\"speedBinPercentages\" [ ";
+       << "\"percentageOfSamples\" : " << (percentOfSamples * 100.0) << ", "
+       << "\"speedBinPercentages\" : [ ";
 
     bool first = true;
     for (int count : speedBinSampleCount) {
         if (!first) ss << ", "; else first = false;
-        ss << count;
+        if (windySampleCount > 0)
+            percentOfSamples =  static_cast<float>(count) / static_cast<float>(windySampleCount) * 100.0;
+        else
+            percentOfSamples = 0.0;
+
+        ss << percentOfSamples;
     }
 
     ss << "] }" << endl;
@@ -107,9 +120,17 @@ WindRoseData::~WindRoseData() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-WindRoseData::applyWindSample(int headingIndex, Speed speed) {
+WindRoseData::applyWindSample(const Measurement<HeadingIndex> & headingIndex, Speed speed) {
+    if (!headingIndex.isValid())
+        return;
+
+    totalSamples++;
+
+    if (speed == 0.0)
+        calmSamples++;
+
     // TODO convert speed unit from MPH to specified units
-    for (auto slice : windSlices)
+    for (auto & slice : windSlices)
         slice.applyWindSample(headingIndex, speed);
 }
 
@@ -148,7 +169,7 @@ std::string
 WindRoseData::formatJSON() const {
     stringstream ss;
 
-    ss << "{ \"windRoseData\" : { "
+    ss << "\"windRoseData\" : { "
        << "\"sampleCount\" : " << totalSamples << ", "
        << "\"calmWindSampleCount\" : " << calmSamples << ", "
        << "\"speedBins\" : [ ";
@@ -164,12 +185,12 @@ WindRoseData::formatJSON() const {
        << "\"windSlices\" : [ ";
 
     bool first = true;
-    for (auto slice : windSlices) {
+    for (auto & slice : windSlices) {
         if (!first) ss << ", "; else first = false;
         ss << slice.formatJSON();
     }
 
-    ss << " ] } }";
+    ss << " ] }";
 
     return ss.str();
 }

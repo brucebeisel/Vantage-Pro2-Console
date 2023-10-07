@@ -2,6 +2,7 @@
 #define WIND_ROSE_DATA_H
 
 #include <vector>
+#include "Measurement.h"
 #include "WeatherTypes.h"
 #include "VantageProtocolConstants.h"
 
@@ -13,7 +14,7 @@ public:
 
     virtual ~WindSlice();
 
-    void applyWindSample(int headingIndex, Speed speed);
+    void applyWindSample(const Measurement<HeadingIndex> & headingIndex, Speed speed);
 
     std::string formatJSON() const;
 
@@ -43,7 +44,7 @@ public:
 
     virtual ~WindRoseData();
 
-    void applyWindSample(int headingIndex, Speed speed);
+    void applyWindSample(const Measurement<HeadingIndex> & headingIndex, Speed speed);
 
     std::string formatJSON() const;
 

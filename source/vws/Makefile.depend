@@ -28,7 +28,8 @@
  VantageEepromConstants.h VantageLogger.h VantageStationNetwork.h \
  AlarmManager.h LoopPacket.h Alarm.h AlarmProperties.h \
  CurrentWeatherManager.h CurrentWeather.h Loop2Packet.h \
- DominantWindDirections.h WindDirectionSlice.h SummaryReport.h
+ DominantWindDirections.h WindDirectionSlice.h SummaryReport.h \
+ WindRoseData.h
 ../../target/vws/CommandSocket.o: CommandSocket.cpp CommandSocket.h \
  ResponseHandler.h ../3rdParty/json.hpp EventManager.h VantageLogger.h
 ../../target/vws/CurrentWeather.o: CurrentWeather.cpp CurrentWeather.h \
@@ -79,8 +80,8 @@
  VantageLogger.h Weather.h Measurement.h
 ../../target/vws/SummaryReport.o: SummaryReport.cpp ArchivePacket.h \
  WeatherTypes.h Measurement.h ArchiveManager.h SummaryReport.h Weather.h \
- SummaryEnums.h VantageEnums.h VantageEepromConstants.h \
- VantageProtocolConstants.h
+ WindRoseData.h VantageProtocolConstants.h SummaryEnums.h VantageEnums.h \
+ VantageEepromConstants.h
 ../../target/vws/UnitConverter.o: UnitConverter.cpp UnitConverter.h \
  WeatherTypes.h
 ../../target/vws/VantageCRC.o: VantageCRC.cpp VantageCRC.h WeatherTypes.h \
@@ -119,4 +120,5 @@
 ../../target/vws/WindDirectionSlice.o: WindDirectionSlice.cpp \
  WindDirectionSlice.h WeatherTypes.h Weather.h Measurement.h
 ../../target/vws/WindRoseData.o: WindRoseData.cpp WindRoseData.h \
- WeatherTypes.h VantageProtocolConstants.h
+ Measurement.h WeatherTypes.h VantageProtocolConstants.h VantageEnums.h \
+ SummaryEnums.h VantageEepromConstants.h
