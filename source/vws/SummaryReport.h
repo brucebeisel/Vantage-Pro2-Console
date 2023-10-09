@@ -42,7 +42,7 @@ public:
     }
 
     std::string formatJSON() const {
-        return average.formatJSON("average");
+        return "\"average\" : { " + average.formatJSON("value") + " }";
     }
 
     int            sampleCount;
@@ -216,7 +216,7 @@ public:
         if (average.sampleCount == 0)
             return "";
 
-        ss << "{  \"" <<  summaryName << "\" : {  "
+        ss << "\"" <<  summaryName << "\" : {  "
            << average.formatJSON();
 
         if (extremesUsed == SummaryExtremes::MINIMUM_ONLY || extremesUsed == SummaryExtremes::MINIMUM_AND_MAXIMUM)
@@ -225,7 +225,7 @@ public:
         if (extremesUsed == SummaryExtremes::MAXIMUM_ONLY || extremesUsed == SummaryExtremes::MINIMUM_AND_MAXIMUM)
            ss << ", " << high.formatJSON();
 
-        ss << " } }" << std::endl;
+        ss << " }" << std::endl;
 
         return ss.str();
     }

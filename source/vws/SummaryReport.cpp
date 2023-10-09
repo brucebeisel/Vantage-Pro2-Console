@@ -152,8 +152,7 @@ SummaryRecord::formatJSON() const {
     std::stringstream ss;
     ss << " { \"summary\" : { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
-       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", " << endl
-       << "\"measurements\" : [ " << endl;
+       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", " << endl;
     if (packetCount != 0) {
         ss << outsideTemperature.formatJSON() << ", " << endl
            << outsideHumidity.formatJSON() << ", " << endl
@@ -176,7 +175,7 @@ SummaryRecord::formatJSON() const {
            << arrayFormatJSON("soilMoistures", soilMoistures, ArchivePacket::MAX_SOIL_MOISTURES) <<  endl; 
     }
 
-    ss << "] } }";
+    ss << " } }";
 
     return ss.str();
 }
