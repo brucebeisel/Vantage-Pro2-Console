@@ -137,7 +137,7 @@ std::string SummaryRecord::arrayFormatJSON(const std::string & name, const Summa
     for (int i = 0; i < numSummaries; i++) {
         if (i != 0 && lastString.length() > 0) ss << ", " << endl;
         lastString = sm[i].formatJSON();
-        ss << lastString;
+        ss << " { " << lastString << " } ";
     }
 
     ss << " ]";
