@@ -210,11 +210,14 @@ public:
      *
      * @return The JSON string
      */
-    std::string formatJSON() const {
+    std::string formatJSON(bool addLeadingComma) const {
         std::stringstream ss;
 
         if (average.sampleCount == 0)
             return "";
+
+        if (addLeadingComma)
+            ss << ", ";
 
         ss << "\"" <<  summaryName << "\" : {  "
            << average.formatJSON();

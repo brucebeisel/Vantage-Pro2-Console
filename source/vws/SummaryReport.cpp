@@ -136,7 +136,7 @@ std::string SummaryRecord::arrayFormatJSON(const std::string & name, const Summa
 
     for (int i = 0; i < numSummaries; i++) {
         if (i != 0 && lastString.length() > 0) ss << ", " << endl;
-        lastString = sm[i].formatJSON();
+        lastString = sm[i].formatJSON(false);
         ss << " { " << lastString << " } ";
     }
 
@@ -154,19 +154,18 @@ SummaryRecord::formatJSON() const {
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
        << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\"" << endl;
     if (packetCount != 0) {
-        ss << ", "
-           << outsideTemperature.formatJSON() << ", " << endl
-           << outsideHumidity.formatJSON() << ", " << endl
-           << solarRadiation.formatJSON() << ", " << endl
-           << insideTemperature.formatJSON() << ", " << endl
-           << insideHumidity.formatJSON() << ", " << endl
-           << barometer.formatJSON() << ", " << endl
-           << rainfallRate.formatJSON() << ", " << endl
-           << uvIndex.formatJSON() << ", " << endl
-           << et.formatJSON() << ", " << endl
-           << sustainedWindSpeed.formatJSON() << "," << endl
-           << gustWindSpeed.formatJSON() << ", " << endl
-           << "\"rainfall\" : { \"total\" : { \"value\" : " << totalRainfall << " } }, " << endl;
+        ss << outsideTemperature.formatJSON(true) << endl
+           << outsideHumidity.formatJSON(true) << endl
+           << solarRadiation.formatJSON(true) << endl
+           << insideTemperature.formatJSON(true) << endl
+           << insideHumidity.formatJSON(true) << endl
+           << barometer.formatJSON(true) << endl
+           << rainfallRate.formatJSON(true) << endl
+           << uvIndex.formatJSON(true) << endl
+           << et.formatJSON(true) << endl
+           << sustainedWindSpeed.formatJSON(true) << endl
+           << gustWindSpeed.formatJSON(true) << endl
+           << ", \"rainfall\" : { \"total\" : { \"value\" : " << totalRainfall << " } }, " << endl;
 
         ss << arrayFormatJSON("extraTemperatures", extraTemperatures, ArchivePacket::MAX_EXTRA_TEMPERATURES) << ", " << endl
            << arrayFormatJSON("extraHumidities", extraHumidities, ArchivePacket::MAX_EXTRA_HUMIDITIES) << ", " << endl
