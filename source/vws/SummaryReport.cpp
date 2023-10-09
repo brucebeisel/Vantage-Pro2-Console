@@ -132,12 +132,16 @@ std::string SummaryRecord::arrayFormatJSON(const std::string & name, const Summa
 
     ss << "\"" << name << "\" : [ " << endl;
 
-    std::string lastString;
+    bool first = true;
 
     for (int i = 0; i < numSummaries; i++) {
-        if (i != 0 && lastString.length() > 0) ss << ", " << endl;
-        lastString = sm[i].formatJSON(false);
-        ss << " { " << lastString << " } ";
+        string s = sm[i].formatJSON(false);
+
+        if (s.length() > 0) {
+            if (!first) ss << ", " << endl; else first = false;
+
+            ss << " { " << s << " } ";
+        }
     }
 
     ss << " ]";
