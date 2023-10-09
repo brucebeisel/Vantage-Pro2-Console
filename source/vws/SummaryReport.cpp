@@ -130,7 +130,7 @@ template<typename M, SummaryExtremes SE>
 std::string SummaryRecord::arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const {
     std::stringstream ss;
 
-    ss << " { \"" << name << "\" : [ " << endl;
+    ss << "\"" << name << "\" : [ " << endl;
 
     std::string lastString;
 
@@ -140,7 +140,7 @@ std::string SummaryRecord::arrayFormatJSON(const std::string & name, const Summa
         ss << lastString;
     }
 
-    ss << " ] }";
+    ss << " ]";
 
     return ss.str();
 }
@@ -150,7 +150,7 @@ std::string SummaryRecord::arrayFormatJSON(const std::string & name, const Summa
 std::string
 SummaryRecord::formatJSON() const {
     std::stringstream ss;
-    ss << " { \"summary\" : { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
+    ss << " { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
        << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", " << endl;
     if (packetCount != 0) {
@@ -165,7 +165,7 @@ SummaryRecord::formatJSON() const {
            << et.formatJSON() << ", " << endl
            << sustainedWindSpeed.formatJSON() << "," << endl
            << gustWindSpeed.formatJSON() << ", " << endl
-           << " { \"rainfall\" : " << totalRainfall << " }, " << endl;
+           << "\"rainfall\" : { \"total\" : { \"value\" : " << totalRainfall << " } }, " << endl;
 
         ss << arrayFormatJSON("extraTemperatures", extraTemperatures, ArchivePacket::MAX_EXTRA_TEMPERATURES) << ", " << endl
            << arrayFormatJSON("extraHumidities", extraHumidities, ArchivePacket::MAX_EXTRA_HUMIDITIES) << ", " << endl
@@ -175,7 +175,7 @@ SummaryRecord::formatJSON() const {
            << arrayFormatJSON("soilMoistures", soilMoistures, ArchivePacket::MAX_SOIL_MOISTURES) <<  endl; 
     }
 
-    ss << " } }";
+    ss << " }";
 
     return ss.str();
 }
