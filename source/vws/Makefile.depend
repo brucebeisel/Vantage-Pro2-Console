@@ -78,10 +78,10 @@
  ../3rdParty/json.hpp VantageEepromConstants.h GraphDataRetriever.h
 ../../target/vws/SerialPort.o: SerialPort.cpp SerialPort.h WeatherTypes.h \
  VantageLogger.h Weather.h Measurement.h
-../../target/vws/SummaryReport.o: SummaryReport.cpp ArchivePacket.h \
- WeatherTypes.h Measurement.h ArchiveManager.h SummaryReport.h Weather.h \
- WindRoseData.h VantageProtocolConstants.h SummaryEnums.h VantageEnums.h \
- VantageEepromConstants.h
+../../target/vws/SummaryReport.o: SummaryReport.cpp SummaryReport.h \
+ Weather.h Measurement.h WeatherTypes.h ArchivePacket.h WindRoseData.h \
+ VantageProtocolConstants.h SummaryEnums.h ArchiveManager.h \
+ VantageEnums.h VantageEepromConstants.h
 ../../target/vws/UnitConverter.o: UnitConverter.cpp UnitConverter.h \
  WeatherTypes.h
 ../../target/vws/VantageCRC.o: VantageCRC.cpp VantageCRC.h WeatherTypes.h \
