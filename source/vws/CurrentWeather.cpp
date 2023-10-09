@@ -151,7 +151,7 @@ CurrentWeather::formatJSON() const {
        << ", \"barometerTrend\" : \"" << loopPacket.getBarometerTrendString() << "\""
        << ", \"rainRate\" : " << loopPacket.getRainRate()
        << ", \"rainToday\" : " << loopPacket.getDayRain()
-       << ", \"rainToday2\" : " << loop2Packet.getDayRain()
+       //<< ", \"rainToday2\" : " << loop2Packet.getDayRain()
        << ", \"rain15Minute\" : " << loop2Packet.get15MinuteRain()
        << ", \"rainHour\" : " << loop2Packet.getHourRain()
        << ", \"rain24Hour\" : " << loop2Packet.get24HourRain()
