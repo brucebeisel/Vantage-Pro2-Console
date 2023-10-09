@@ -152,9 +152,10 @@ SummaryRecord::formatJSON() const {
     std::stringstream ss;
     ss << " { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
-       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\", " << endl;
+       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\"" << endl;
     if (packetCount != 0) {
-        ss << outsideTemperature.formatJSON() << ", " << endl
+        ss << ", "
+           << outsideTemperature.formatJSON() << ", " << endl
            << outsideHumidity.formatJSON() << ", " << endl
            << solarRadiation.formatJSON() << ", " << endl
            << insideTemperature.formatJSON() << ", " << endl
