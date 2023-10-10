@@ -284,7 +284,7 @@ SummaryReport::normalizeEndTime(DateTime startTime, DateTime endTime, SummaryPer
             tm.tm_year += 1;
             tm.tm_mon = 0;
             tm.tm_mday = 0;
-            startTime = calculateLastSecondOfDay(mktime(&tm));
+            normalizedTime = calculateLastSecondOfDay(mktime(&tm));
             break;
     }
     cout << "Normalize end time from " << Weather::formatDateTime(endTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
