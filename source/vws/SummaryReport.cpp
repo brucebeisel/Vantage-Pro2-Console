@@ -206,6 +206,9 @@ SummaryReport::SummaryReport(SummaryPeriod period,
     tm.tm_min = 59;
     tm.tm_sec = 59;
     endDate = timelocal(&tm);
+
+    for (int i = 0; i < 24; i++)
+        hourRainfallBuckets[i] = 0.0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

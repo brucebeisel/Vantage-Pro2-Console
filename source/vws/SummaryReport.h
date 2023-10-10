@@ -27,13 +27,28 @@
 
 namespace vws {
 
+/**
+ * Template class to calculate the average value of a measurement.
+ */
 template<typename M>
 class MeasurementAverage {
 public:
+
+    /**
+     * Constructor.
+     */
     MeasurementAverage() : sampleCount(0) {}
 
+    /**
+     * Apply a single measurement to the average.
+     *
+     * @param value The value to be applied to the value
+     */
     void applyMeasurement(const Measurement<M> & value) {
 
+        //
+        // Ignore invalid values
+        //
         if (value.isValid()) {
             sampleCount++;
             sum.setValue(sum.getValue() + value.getValue());
@@ -41,13 +56,18 @@ public:
         }
     }
 
+    /**
+     * Format the average value into JSON.
+     *
+     * @return The JSON string
+     */
     std::string formatJSON() const {
         return "\"average\" : { " + average.formatJSON("value") + " }";
     }
 
-    int            sampleCount;
-    Measurement<M> sum;
-    Measurement<M> average;
+    int            sampleCount;  // The number of valid measurements applied
+    Measurement<M> sum;          // The sum of the valid measurements
+    Measurement<M> average;      // The average that is calculated after each valid measurement is applied
 
 };
 
@@ -56,13 +76,29 @@ public:
  */
 template<typename M, SummaryExtremeType ET>
 struct ExtremeMeasurement {
-    SummaryExtremeType    extremeType;
-    Measurement<M> extremeValue;
-    DateTime       extremeTime;
+    const SummaryExtremeType extremeType;  // The type of extreme value being tracked
+    Measurement<M>           extremeValue; // The most extreme measurement applied
+    DateTime                 extremeTime;  // The time stamp of the extreme measurement
+
+    /**
+     * Constructor.
+     */
     ExtremeMeasurement() : extremeType(ET), extremeTime(0) {}
 
+    /**
+     * Apply a single measurement to this extreme measurement
+     *
+     * @param time  The time of this measurement
+     * @param value The measurement
+     */
     void applyMeasurement(DateTime time, const Measurement<M> & value) {
+        //
+        // Ignore the measurement if it is not valid
+        //
         if (value.isValid()) {
+            //
+            // Perform checks depending if this extreme measurement is tracking a high or low value
+            //
             if (extremeType == SummaryExtremeType::LOW) {
                 if (!extremeValue.isValid() || value.getValue() < extremeValue.getValue()) {
                     extremeValue = value;
@@ -78,6 +114,13 @@ struct ExtremeMeasurement {
         }
     }
 
+    /**
+     * Ostream operator.
+     *
+     * @param os  The ostream
+     * @param em  The extreme measurement to be output on the stream
+     * @return The ostream passed in
+     */
     friend std::ostream & operator<<(std::ostream & os,  const ExtremeMeasurement & em) {
         std::string etype = em.extremeType == SummaryExtremeType::LOW ? "Low" : "High";
         os << "Extreme type: " << etype
@@ -86,8 +129,17 @@ struct ExtremeMeasurement {
         return os;
     }
 
+    /**
+     * Create a string in JSON format that represents this extreme value.
+     *
+     * @return The JSON string
+     */
     std::string formatJSON() const {
         std::string json = "";
+
+        //
+        // If there have been no valid measurement applied to this measurement, just return an empty string
+        //
         if (extremeValue.isValid()) {
             if (extremeType == SummaryExtremeType::LOW) {
                 json += "\"minimum\"";
@@ -98,6 +150,7 @@ struct ExtremeMeasurement {
 
             json += " : { " + extremeValue.formatJSON("value") + ", " + "\"time\" : \"" + Weather::formatDateTime(extremeTime) + "\" }";
         }
+
         return json;
     }
 };
@@ -234,7 +287,7 @@ public:
     }
 
     std::string                                    summaryName;
-    SummaryExtremes                                extremesUsed;
+    const SummaryExtremes                          extremesUsed;
     MeasurementAverage<M>                          average;
     ExtremeMeasurement<M,SummaryExtremeType::HIGH> high;
     ExtremeMeasurement<M,SummaryExtremeType::LOW>  low;
@@ -274,7 +327,6 @@ public:
     std::string formatJSON() const;
 
 private:
-    // TODO Apply wind direction to the summary, perhaps with a wind rose record
     template<typename M, SummaryExtremes SE>
     std::string arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const;
 
