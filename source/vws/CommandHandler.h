@@ -29,6 +29,9 @@ class VantageStationNetwork;
 class AlarmManager;
 class CurrentWeatherManager;
 
+/**
+ * Handle the commands that arrive on the command socket.
+ */
 class CommandHandler {
 public:
     typedef std::pair<std::string,std::string> CommandArgument;

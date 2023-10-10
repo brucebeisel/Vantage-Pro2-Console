@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 namespace vws {
 /**
- * Class that keeps track of the number of wind samples that have occured in a given slice of wind direction.
+ * Class that keeps track of the number of wind samples that have occurred in a given slice of wind direction.
  */
 class WindDirectionSlice {
 public:

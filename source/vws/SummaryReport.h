@@ -330,6 +330,7 @@ private:
     template<typename M, SummaryExtremes SE>
     std::string arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const;
 
+
     int           packetCount;
     SummaryPeriod period;
     DateTime      startDate;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,10 @@ class VantageLogger;
 class CurrentWeatherPublisher;
 
 static const std::string LOOP_ARCHIVE_DIR = "/loop/";
+
+/**
+ * Class to manage the current weather archive. This includes managing the rotating hour files and performing queries.
+ */
 class CurrentWeatherManager : public VantageWeatherStation::LoopPacketListener {
 public:
     /**
