@@ -23,6 +23,7 @@
 #include "VantageProtocolConstants.h"
 
 namespace vws {
+class VantageLogger;
 
 /**
  * Class to hold the data for a directional slice of wind for the wind rose data.
@@ -66,8 +67,8 @@ private:
     int                              numSpeedBins;
 
     int sliceSampleCount; // Samples with the wind blowing in this directional slice
-    int totalSampleCount; // TBD What is the difference between sliceSampleCount, totalSampleCount and windySampleCount?
-    int windySampleCount;
+    int totalSampleCount; // The total number of samples offered to this slice
+    int windySampleCount; // The total number of samples with speed > 0 offered to this slice
 
 
     std::vector<int> speedBinSampleCount; // The sample count for the wind in this slice allocated to speed bins
@@ -86,13 +87,11 @@ private:
  */
 class WindRoseData {
 public:
-    static constexpr int NUM_WIND_DIRECTION_SLICES = 16;
-
     /**
      * Constructor.
      *
      * @param units          The units of the wind speed
-     * @param speedIncrement The amount of speed each speed bin represents
+     * @param speedIncrement The amount of speed each speed bin represents in the units specified by the first argument
      * @param windSpeedBins  The number of speed bins
      */
     WindRoseData(ProtocolConstants::WindUnits units, Speed speedIncrement, int windSpeedBins);
@@ -124,6 +123,7 @@ private:
     Speed                        windSpeedIncrement; // The increment of each speed bin
     int                          windSpeedBins;      // The number of wind speed bins
     ProtocolConstants::WindUnits units;              // The units of the speed in the bins. Note: The units of the wind speed applied is in MPH
+    VantageLogger *              logger;
 };
 
 } /* namespace vws */

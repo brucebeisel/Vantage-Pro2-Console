@@ -60,6 +60,22 @@ public:
     static Speed toMetersPerSecond(Speed speed);
 
     /**
+     * Convert from MPH to KPH
+     *
+     * @param speed The wind speed in MPH
+     * @return The wind speed in KPH
+     */
+    static Speed toKilometersPerHour(Speed speed);
+
+    /**
+     * Convert from MPH to Knots
+     *
+     * @param speed The wind speed in MPH
+     * @return The wind speed in Knots
+     */
+    static Speed toKnots(Speed speed);
+
+    /**
      * Convert feet to millimeters
      *
      * @param elevation An elevation in feet

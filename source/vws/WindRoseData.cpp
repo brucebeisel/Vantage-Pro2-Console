@@ -19,6 +19,8 @@
 #include <math.h>
 #include <sstream>
 #include "VantageEnums.h"
+#include "VantageLogger.h"
+#include "UnitConverter.h"
 
 using namespace std;
 namespace vws {
@@ -113,11 +115,12 @@ WindSlice::formatJSON() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 WindRoseData::WindRoseData(ProtocolConstants::WindUnits units, Speed speedIncrement, int windSpeedBins) : windSpeedIncrement(speedIncrement),
+                                                                                                          logger(&VantageLogger::getLogger("WindRoseData")),
                                                                                                           windSpeedBins(windSpeedBins),
                                                                                                           units(ProtocolConstants::WindUnits::MPH),
                                                                                                           totalSamples(0),
                                                                                                           calmSamples(0)  {
-    for (int i = 0; i < NUM_WIND_DIRECTION_SLICES; i++) {
+    for (int i = 0; i < ProtocolConstants::NUM_WIND_DIR_SLICES; i++) {
         WindSlice slice(i, units, speedIncrement, windSpeedBins);
         windSlices.push_back(slice);
     }
@@ -132,17 +135,44 @@ WindRoseData::~WindRoseData() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 WindRoseData::applyWindSample(const Measurement<HeadingIndex> & headingIndex, Speed speed) {
-    if (!headingIndex.isValid() && speed > 0.0)
+    //
+    // This is an odd occurrence that should never happen
+    //
+    if (!headingIndex.isValid() && speed > 0.0) {
+        logger->log(VantageLogger::VANTAGE_INFO) << "Received wind sample with invalid heading, but >0 speed. It is being ignored" << endl;
         return;
+    }
 
     totalSamples++;
 
     if (speed == 0.0)
         calmSamples++;
 
-    // TODO convert speed unit from MPH to specified units
+    //
+    // Convert the speed to the units specified in the constructor. Note that it is assumed that the speed bins
+    // were specified in the same units
+    //
+    Speed convertedSpeed = 0.0;
+    switch (units) {
+        case ProtocolConstants::WindUnits::KPH:
+            convertedSpeed = UnitConverter::toKilometersPerHour(speed);
+            break;
+
+        case ProtocolConstants::WindUnits::KTS:
+            convertedSpeed = UnitConverter::toKnots(speed);
+            break;
+
+        case ProtocolConstants::WindUnits::MPS:
+            convertedSpeed = UnitConverter::toMetersPerSecond(speed);
+            break;
+
+        default:
+            convertedSpeed = speed;
+            break;
+    }
+
     for (auto & slice : windSlices)
-        slice.applyWindSample(headingIndex, speed);
+        slice.applyWindSample(headingIndex, convertedSpeed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
