@@ -141,7 +141,7 @@ VantageWeatherStation::sendTestCommand() {
     }
 
     if (TEST_RESPONSE != buffer) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "sendTestCommand() received unexpected test response: '" << buffer << "'" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "sendTestCommand() received unexpected test response: '" << buffer << "'" << endl;
         return false;
     }
 
@@ -175,11 +175,11 @@ VantageWeatherStation::retrieveConsoleType(string * consoleTypeString) {
     if (!sendAckedCommand(command))
         return false;
 
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Reading console type" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Reading console type" << endl;
 
     byte stationTypeByte;
     if (!serialPort.readBytes(&stationTypeByte, 1)) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_ERROR) << "Failed to read console type" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read console type" << endl;
         return false;
     }
 
@@ -188,7 +188,7 @@ VantageWeatherStation::retrieveConsoleType(string * consoleTypeString) {
     if (consoleTypeString != NULL)
         *consoleTypeString = consoleTypeEnum.valueToString(consoleType);
 
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieved console type of " << consoleTypeEnum.valueToString(consoleType) << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieved console type of " << consoleTypeEnum.valueToString(consoleType) << endl;
 
     return true;
 }
@@ -212,7 +212,7 @@ VantageWeatherStation::performReceiveTest() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveFirmwareVersion(std::string & firmwareVersion) {
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieving firmware version" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving firmware version" << endl;
     return sendStringValueCommand(FIRMWARE_VERSION_CMD, firmwareVersion);
 }
 
@@ -242,7 +242,7 @@ VantageWeatherStation::retrieveReceiverList(std::vector<StationId> & sensorStati
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveFirmwareDate(std::string & firmwareDate) {
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Retrieving firmware date" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving firmware date" << endl;
 
     return sendStringValueCommand(FIRMWARE_DATE_CMD, firmwareDate);
 }
@@ -271,7 +271,7 @@ VantageWeatherStation::currentValuesLoop(int records) {
         return;
 
     for (int i = 0; i < records && !terminateLoop && !resetNeeded; i++) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Reading LOOP and LOOP2 Packets ---------------------------------" << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading LOOP and LOOP2 Packets ---------------------------------" << endl;
         //
         // Loop packet comes first
         //
@@ -331,13 +331,13 @@ VantageWeatherStation::retrieveLoopPacket(LoopPacket & loopPacket) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveHiLowValues(HiLowPacket & packet) {
-    logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Retrieving Hi/Low packet" << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Retrieving Hi/Low packet" << endl;
 
     if (!sendAckedCommand(HIGH_LOW_CMD))
         return false;
 
     if (!serialPort.readBytes(buffer, HILOW_PACKET_SIZE + CRC_BYTES)) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_ERROR) << "Failed to read response to HILOWS command" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read response to HILOWS command" << endl;
         return false;
     }
 
@@ -382,7 +382,7 @@ VantageWeatherStation::putYearlyET(Evapotranspiration et) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageWeatherStation::dump(vector<ArchivePacket> & list) {
-    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Dumping archive..." << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Dumping archive..." << endl;
     list.clear();
     list.reserve(NUM_ARCHIVE_RECORDS);
 
@@ -401,7 +401,7 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
-    logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << Weather::formatDateTime(time) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << Weather::formatDateTime(time) << endl;
     list.clear();
 
     //
@@ -426,7 +426,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     BitConverter::getBytes(crc, dateTimeBytes, TIME_LENGTH, CRC_BYTES, false);
 
     if (!serialPort.write(dateTimeBytes, TIME_LENGTH + CRC_BYTES)) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Canceling DMPAFT due to port write failure" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Canceling DMPAFT due to port write failure" << endl;
         return false;
     }
 
@@ -434,7 +434,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     // Another ACK
     //
     if (!consumeAck()) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Canceling DMPAFT due to CRC failure" << endl
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Canceling DMPAFT due to CRC failure" << endl
                                         << Weather::dumpBuffer(dateTimeBytes, sizeof(dateTimeBytes));
         return false;
     }
@@ -444,12 +444,12 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
     // dumped and which record in the first page is valid for the date specified
     //
     if (!serialPort.readBytes(buffer, DUMP_AFTER_RESPONSE_LENGTH + CRC_BYTES)) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_ERROR) << "Failed to read response to DMPAFT time data command" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read response to DMPAFT time data command" << endl;
         return false;
     }
 
     if (!VantageCRC::checkCRC(buffer, DUMP_AFTER_RESPONSE_LENGTH)) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_ERROR) << "DMPAFT response to time data failed CRC check" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "DMPAFT response to time data failed CRC check" << endl;
         return false;
     }
 
@@ -457,7 +457,7 @@ VantageWeatherStation::dumpAfter(DateTime time, vector<ArchivePacket> & list) {
 
     int numPages = BitConverter::toInt16(buffer, 0);
     int firstRecord = BitConverter::toInt16(buffer, 2);
-    logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Dumping " << numPages << " archive pages. First record in page with new data = " << firstRecord << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping " << numPages << " archive pages. First record in page with new data = " << firstRecord << endl;
 
     if (numPages == 0)
         return true;
