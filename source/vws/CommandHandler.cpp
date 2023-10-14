@@ -884,7 +884,7 @@ CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const
             }
             else if (arg.first == "speed-units") {
                 windUnits = windUnitsEnum.stringToValue(arg.second);
-
+                foundWindUnits = true;
             }
         }
 
