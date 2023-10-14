@@ -102,6 +102,7 @@ private:
      */
     VantageLogger(const std::string & name);
 
+    // TODO Implement the multiple log file feature
     void openLogFile();
     void checkFileSize();
 

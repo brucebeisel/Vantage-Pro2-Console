@@ -123,7 +123,7 @@ private:
     Speed                        windSpeedIncrement; // The increment of each speed bin
     int                          windSpeedBins;      // The number of wind speed bins
     ProtocolConstants::WindUnits units;              // The units of the speed in the bins. Note: The units of the wind speed applied is in MPH
-    VantageLogger *              logger;
+    VantageLogger &              logger;
 };
 
 } /* namespace vws */

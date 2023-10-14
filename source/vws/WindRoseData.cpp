@@ -115,7 +115,7 @@ WindSlice::formatJSON() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 WindRoseData::WindRoseData(ProtocolConstants::WindUnits units, Speed speedIncrement, int windSpeedBins) : windSpeedIncrement(speedIncrement),
-                                                                                                          logger(&VantageLogger::getLogger("WindRoseData")),
+                                                                                                          logger(VantageLogger::getLogger("WindRoseData")),
                                                                                                           windSpeedBins(windSpeedBins),
                                                                                                           units(ProtocolConstants::WindUnits::MPH),
                                                                                                           totalSamples(0),
@@ -139,7 +139,7 @@ WindRoseData::applyWindSample(const Measurement<HeadingIndex> & headingIndex, Sp
     // This is an odd occurrence that should never happen
     //
     if (!headingIndex.isValid() && speed > 0.0) {
-        logger->log(VantageLogger::VANTAGE_INFO) << "Received wind sample with invalid heading, but >0 speed. It is being ignored" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Received wind sample with invalid heading, but >0 speed. It is being ignored" << endl;
         return;
     }
 
@@ -149,7 +149,7 @@ WindRoseData::applyWindSample(const Measurement<HeadingIndex> & headingIndex, Sp
         calmSamples++;
 
     //
-    // Convert the speed to the units specified in the constructor. Note that it is assumed that the speed bins
+    // Cnvert the speed to the units specified in the constructor. Note that it is assumed that the speed bins
     // were specified in the same units
     //
     Speed convertedSpeed = 0.0;

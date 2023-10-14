@@ -231,10 +231,7 @@ VantageDriver::mainLoop() {
                     ArchivePacket packet;
                     archiveManager.getNewestRecord(packet);
                     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: "
-                                                           << Weather::formatDateTime(packet.getDateTime());
-                    // TODO The following line was commented out because it was causing the vws to exit.
-                    // Need to determine why
-                    //<< " Station Reception: " << station.calculateStationReceptionPercentage(packet.getWindSampleCount()) << endl; // TBD Get the actual archive period
+                                                              << Weather::formatDateTime(packet.getDateTime());
                     previousNextRecord = nextRecord;
                 }
             }
@@ -257,7 +254,7 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
     bool continueLoopPacketProcessing = !sc && !em && !nr;
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop (LOOP): " << std::boolalpha << continueLoopPacketProcessing
-                                   << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
+                                              << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
 
     return continueLoopPacketProcessing;
 }
@@ -271,7 +268,7 @@ VantageDriver::processLoop2Packet(const Loop2Packet & packet) {
     bool continueLoopPacketProcessing = !sc && !em;
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop (LOOP2): " << std::boolalpha << continueLoopPacketProcessing
-                                   << " Signal: " << sc << " Event: " << em << endl;
+                                              << " Signal: " << sc << " Event: " << em << endl;
 
     return continueLoopPacketProcessing;
 }

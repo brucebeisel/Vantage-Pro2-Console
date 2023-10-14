@@ -37,13 +37,13 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchivePacket::ArchivePacket() : packetTime(0), windSampleCount(0), buffer(""), logger(&VantageLogger::getLogger("ArchivePacket")) {
+ArchivePacket::ArchivePacket() : packetTime(0), windSampleCount(0), buffer(""), logger(VantageLogger::getLogger("ArchivePacket")) {
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchivePacket::ArchivePacket(const byte buffer[], int offset) : logger(&VantageLogger::getLogger("ArchivePacket")) {
+ArchivePacket::ArchivePacket(const byte buffer[], int offset) : logger(VantageLogger::getLogger("ArchivePacket")) {
     updateArchivePacketData(buffer, offset);
 }
 

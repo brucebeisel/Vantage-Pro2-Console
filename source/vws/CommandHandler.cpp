@@ -639,7 +639,6 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
 void
 CommandHandler::handleQueryConsoleTime(const std::string & commandName, std::string & response) {
     ostringstream oss;
-
     DateTime consoleTime;
 
     if (station.retrieveConsoleTime(consoleTime)) {
@@ -795,6 +794,7 @@ CommandHandler::handleQueryConfigurationData(const std::string & commandName, st
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleUpdateConfigurationData(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    // TODO Either implement this command or delete the function
     response.append(SUCCESS_TOKEN);
 }
 
@@ -822,21 +822,26 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
         }
     }
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the archive with times: " << startTime << " - " << endTime << endl;
-    vector<ArchivePacket> packets;
-    archiveManager.queryArchiveRecords(startTime, endTime, packets);
-
-    ostringstream oss;
-    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : [ ";
-
-    bool first = true;
-    for (ArchivePacket packet : packets) {
-        if (!first) oss << ", "; else first = false;
-        oss << packet.formatJSON();
+    if (startTime == 0 || endTime == 0) {
+        response.append(buildFailureString("Missing argument"));
     }
+    else {
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the archive with times: " << startTime << " - " << endTime << endl;
+        vector<ArchivePacket> packets;
+        archiveManager.queryArchiveRecords(startTime, endTime, packets);
 
-    oss << "]";
-    response.append(oss.str());
+        ostringstream oss;
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : [ ";
+
+        bool first = true;
+        for (ArchivePacket packet : packets) {
+            if (!first) oss << ", "; else first = false;
+            oss << packet.formatJSON();
+        }
+
+        oss << "]";
+        response.append(oss.str());
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -846,6 +851,11 @@ CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const
     DateTime startTime = 0;
     DateTime endTime = 0;
     SummaryPeriod summaryPeriod;
+    int speedBinCount = 0;
+    Speed speedBinIncrement = 0.0;
+    bool foundSummaryPeriodArgument = false;
+    ProtocolConstants::WindUnits windUnits;
+    bool foundWindUnits = false;
     struct tm tm;
 
     try {
@@ -864,21 +874,39 @@ CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const
             }
             else if (arg.first == "summary-period") {
                 summaryPeriod = summaryPeriodEnum.stringToValue(arg.second);
+                foundSummaryPeriodArgument = true;
+            }
+            else if (arg.first == "speed-bin-count") {
+                speedBinCount = atoi(arg.second.c_str());
+            }
+            else if (arg.first == "speed-bin-increment") {
+                speedBinIncrement = atof(arg.second.c_str());
+            }
+            else if (arg.first == "speed-units") {
+                windUnits = windUnitsEnum.stringToValue(arg.second);
+
             }
         }
 
-        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query summaries from the archive with times: " << startTime << " - " << endTime << endl;
-        WindRoseData windRoseData(ProtocolConstants::WindUnits::MPH, 2.0, 5);
-        SummaryReport report(summaryPeriod, startTime, endTime, archiveManager, windRoseData);
-        report.loadData();
+        if (startTime == 0 || endTime == 0 ||
+            speedBinCount == 0 || speedBinIncrement == 0.0 ||
+            !foundWindUnits ||
+            !foundSummaryPeriodArgument)
+            response.append(buildFailureString("Missing argument"));
+        else {
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query summaries from the archive with times: " << startTime << " - " << endTime << endl;
+            WindRoseData windRoseData(windUnits, speedBinIncrement, speedBinCount);
+            SummaryReport report(summaryPeriod, startTime, endTime, archiveManager, windRoseData);
+            report.loadData();
 
-        ostringstream oss;
-        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
-        oss << report.formatJSON();
-        response.append(oss.str());
+            ostringstream oss;
+            oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+            oss << report.formatJSON();
+            response.append(oss.str());
+        }
     }
     catch (const std::exception & e) {
-        response.append(buildFailureString("Invalid summary period"));
+        response.append(buildFailureString("Invalid summary period or wind speed unit"));
     }
 }
 
