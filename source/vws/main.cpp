@@ -150,9 +150,8 @@ main(int argc, char *argv[]) {
     const string dataDirectory(argv[2]);
 
     if (argc == 4) {
-        const string logFile(argv[3]);
-        ofstream logStream(logFile.c_str(), ios::app | ios::ate | ios::out);
-        VantageLogger::setLogStream(logStream);
+        const string logFilePrefix(argv[3]);
+        VantageLogger::setLogFileParameters(logFilePrefix, 10, 5);
     }
 
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);

@@ -17,11 +17,13 @@
 
 #include "VantageLogger.h"
 
+#include <filesystem>
 #include <iomanip>
 #include <fstream>
+#include <mutex>
 #include <stdio.h>
 #include <time.h>
-#include <mutex>
+#include <math.h>
 
 #include "Weather.h"
 
@@ -32,9 +34,11 @@ VantageLogger::Level     VantageLogger::currentLevel = VantageLogger::VANTAGE_IN
 VantageLogger::LoggerMap VantageLogger::loggers;
 ostream *                VantageLogger::loggerStream = &cerr;
 ostream                  VantageLogger::nullStream(0);
-int                      VantageLogger::maxFileSize;
+int                      VantageLogger::maxFileSizeInMb;
 int                      VantageLogger::maxFiles;
 string                   VantageLogger::logFilePattern;
+string                   VantageLogger::currentLogFile("");
+bool                     VantageLogger::usingFilePattern = false;
 
 const static char *LEVEL_STRINGS[] = {"ERROR  ", "WARNING", "INFO   ", "DEBUG1 ", "DEBUG2 ", "DEBUG3 "};
 
@@ -79,16 +83,32 @@ VantageLogger::setLogLevel(Level level) {
 void
 VantageLogger::setLogStream(std::ostream &stream) {
     loggerStream = &stream;
-    maxFileSize = MAX_FILE_SIZE_INFINITE;
+    maxFileSizeInMb = MAX_FILE_SIZE_INFINITE;
+    usingFilePattern = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+std::string
+VantageLogger::buildLogFilename(int sequenceNumber) {
+    char filename[1024];
+    snprintf(filename, sizeof(filename), logFilePattern.c_str(), sequenceNumber);
+
+    std::string filenameString(filename);
+
+    return filenameString;
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
-VantageLogger::setLogFilePattern(std::string& pattern, int maxFiles, int maxFileSizeMb) {
-    VantageLogger::logFilePattern = pattern;
-    VantageLogger::maxFiles = maxFiles;
-    VantageLogger::maxFileSize = maxFileSizeMb;
+VantageLogger::setLogFileParameters(const std::string& prefix, int maximumFiles, int maxFileSizeMb) {
+    int digits = int(log10(maximumFiles) + 1);
+    logFilePattern = prefix + "_%0" + std::to_string(digits) + "d.log";
+    maxFiles = maximumFiles;
+    maxFileSizeInMb = maxFileSizeMb;
+    usingFilePattern = true;
+    currentLogFile = buildLogFilename(0);  // Current log file never changes
+    openLogFile();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,25 +122,73 @@ VantageLogger::isLogEnabled(Level level) const {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageLogger::openLogFile() {
-    char filename[1024];
+    loggerStream = new ofstream(currentLogFile, ios::app | ios::ate | ofstream::out);
+    if (loggerStream->bad()) {
+        cerr << "Failed to create stream for file logger. Switching to cerr" << endl;
+        loggerStream = &cerr;
+    }
+}
 
-    snprintf(filename, sizeof(filename), logFilePattern.c_str(), 0);
-    loggerStream = new ofstream(filename, ios::app | ios::ate | ios::out);
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageLogger::closeLogFile() {
+    loggerStream->flush();
+    if (loggerStream != &cerr && loggerStream != &cout)
+        delete loggerStream;
+
+    loggerStream = NULL;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageLogger::advanceLogFile() {
+    closeLogFile();
+
+    //
+    // First remove the last file.
+    //
+    string deleteFile = buildLogFilename(maxFiles - 1);
+
+    if (filesystem::exists(deleteFile))
+        std::remove(deleteFile.c_str());
+
+    //
+    // Now move the older files down the list
+    //
+    for (int i = maxFiles - 1; i > 0; i--) {
+        string destinationFile = buildLogFilename(i);
+        string sourceFile = buildLogFilename(i - 1);
+        if (filesystem::exists(sourceFile))
+            filesystem::rename(sourceFile.c_str(), destinationFile.c_str());
+    }
+
+    openLogFile();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageLogger::checkFileSize() {
+    if (!usingFilePattern)
+        return;
 
+    auto logFileSize = std::filesystem::file_size(currentLogFile);
+    auto logFileSizeInMb = logFileSize / 1024 / 1024;
+
+    if (logFileSizeInMb >= maxFileSizeInMb)
+        advanceLogFile();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ostream &
 VantageLogger::log(Level level) const {
+    std::lock_guard<std::mutex> guard(mutex);
     char timeString[100];
     if (isLogEnabled(level)) {
+        checkFileSize();
         time_t now = time(0);
         struct tm tm;
         Weather::localtime(now, tm);
@@ -128,7 +196,8 @@ VantageLogger::log(Level level) const {
         *loggerStream << setw(20) << loggerName << ": " << timeString << " --- " << LEVEL_STRINGS[level] << " --- ";
         return *loggerStream;
     }
-    else
+    else {
         return nullStream;
+    }
 }
 } /* End namespace */

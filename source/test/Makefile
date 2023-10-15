@@ -7,7 +7,8 @@ SRCS=\
 	BitConverterTest.cpp \
 	SummaryTest.cpp \
 	WindDirectionSliceTest.cpp \
-        ArchiveManagerTest.cpp
+	LoggerTest.cpp \
+	ArchiveManagerTest.cpp
 
 
 OBJDIR=../../target/test
@@ -43,6 +44,7 @@ SUMMARYOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSTESTOBJDIR)/SerialPort.o \
 	$(VWSTESTOBJDIR)/SummaryReport.o \
+	$(VWSTESTOBJDIR)/UnitConverter.o \
 	$(VWSTESTOBJDIR)/WindRoseData.o 
         
 	
@@ -53,6 +55,7 @@ ARCHIVEOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o \
 	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
+	$(VWSTESTOBJDIR)/UnitConverter.o \
 	$(VWSTESTOBJDIR)/VantageCRC.o \
 	$(VWSTESTOBJDIR)/LoopPacket.o \
 	$(VWSTESTOBJDIR)/Loop2Packet.o \
@@ -60,7 +63,10 @@ ARCHIVEOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSTESTOBJDIR)/SerialPort.o
 	
-all: DominantWindTest EnumTest BitConverterTest WindDirectionSliceTest SummaryTest ArchiveTest
+LOGGEROBJS= $(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o
+	
+all: DominantWindTest EnumTest BitConverterTest WindDirectionSliceTest SummaryTest ArchiveTest LoggerTest
 
 WindDirectionSliceTest: $(OBJDIR) $(OBJDIR)/WindDirectionSliceTest.o
 	$(CC) -g -o WindDirectionSliceTest $(OBJDIR)/WindDirectionSliceTest.o $(DOMWINDOBJS)
@@ -79,6 +85,9 @@ SummaryTest: $(OBJDIR) $(OBJDIR)/SummaryTest.o
 
 ArchiveTest: $(OBJDIR) $(OBJDIR)/ArchiveManagerTest.o
 	$(CC) -g -o ArchiveTest $(OBJDIR)/ArchiveManagerTest.o $(ARCHIVEOBJS)
+
+LoggerTest: $(OBJDIR) $(OBJDIR)/LoggerTest.o
+	$(CC) -g -o LoggerTest $(OBJDIR)/LoggerTest.o $(LOGGEROBJS)
 
 clean:
 	rm -f $(OBJS) $(OBJDIR)/EnumTest.o 

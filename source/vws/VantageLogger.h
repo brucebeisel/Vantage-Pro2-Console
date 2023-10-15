@@ -64,11 +64,11 @@ public:
     /**
      * Set the pattern to use for multiple log files.
      * 
-     * @param pattern The pattern to be used for the files. The pattern must contain a printf formatting string for integers.
+     * @param prefix The pattern to be used for the files. The pattern must contain a printf formatting string for integers.
      * @param maxFiles The maximum number of files that will be maintained. Files beyond this value will be deleted
      * @param maxFileSizeMb The maximum file size in megabytes. A new file will be created when the current file exceeds this size.
      */
-    static void setLogFilePattern(std::string & pattern, int maxFiles, int maxFileSizeMb);
+    static void setLogFileParameters(const std::string & prefix, int maxFiles, int maxFileSizeMb);
 
     /**
      * Destructor.
@@ -102,9 +102,33 @@ private:
      */
     VantageLogger(const std::string & name);
 
-    // TODO Implement the multiple log file feature
-    void openLogFile();
-    void checkFileSize();
+    /**
+     * Build the log file name given the provided sequence number
+     *
+     * @param sequenceNumber The log file sequence number
+     * @return The log file name
+     */
+    static std::string buildLogFilename(int sequenceNumber);
+
+    /**
+     * Create an ofstream using the current log file.
+     */
+    static void openLogFile();
+
+    /**
+     * Close the current ofstream.
+     */
+    static void closeLogFile();
+
+    /**
+     * Move to the next log file.
+     */
+    static void advanceLogFile();
+
+    /**
+     * Check the size of the current log file. If it's too large, close it and open a new one.
+     */
+    static void checkFileSize();
 
     /**
      * Collection of loggers, so that only one is create per name.
@@ -126,9 +150,11 @@ private:
      */
     static std::ostream nullStream;
 
+    static bool        usingFilePattern;
     static std::string logFilePattern;
     static int         maxFiles;
-    static int         maxFileSize;
+    static int         maxFileSizeInMb;
+    static std::string currentLogFile;
 
     std::string loggerName;
 };
