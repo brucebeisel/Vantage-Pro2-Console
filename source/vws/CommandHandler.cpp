@@ -794,7 +794,7 @@ CommandHandler::handleQueryConfigurationData(const std::string & commandName, st
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleUpdateConfigurationData(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    // TODO Either implement this command or delete the function
+    // TODO Implement this command
     response.append(SUCCESS_TOKEN);
 }
 

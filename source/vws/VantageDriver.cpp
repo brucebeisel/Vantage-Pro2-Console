@@ -151,6 +151,7 @@ VantageDriver::stop() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageDriver::reopenStation() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Reopening weather station" << endl;
     station.closeStation();
     bool success = station.openStation();
 
@@ -180,10 +181,8 @@ VantageDriver::mainLoop() {
             // never wakes up. Only restarting this driver fixes the issue. Reopening
             // the serial port will hopefully fix this issue.
             //
-            // TODO does this need to be here or can we rely on errors to trigger the
-            // wake up sequence?
             if (!station.wakeupStation()) {
-                reopenStation();
+                exitLoop = !reopenStation();
                 continue;
             }
 

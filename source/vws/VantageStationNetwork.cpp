@@ -217,21 +217,21 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
     if (packet.getInsideTemperature().isValid()) {
         sensor.name = "Inside Temperature";
         sensor.sensorType = SensorType::THERMOMETER;
-        sensor.onStationId = 0;       // TODO determine the station ID of the console
+        sensor.onStationId = CONSOLE_STATION_ID;
         console.connectedSensors.push_back(sensor);
     }
 
     if (packet.getInsideHumidity().isValid()) {
         sensor.name = "Inside Humidity";
         sensor.sensorType = SensorType::HYGROMETER;
-        sensor.onStationId = 0;       // TODO determine the station ID of the console
+        sensor.onStationId = CONSOLE_STATION_ID;
         console.connectedSensors.push_back(sensor);
     }
 
     if (packet.getBarometricPressure().isValid()) {
         sensor.name = "Barometric Pressure";
         sensor.sensorType = SensorType::BAROMETER;
-        sensor.onStationId = 0;       // TODO determine the station ID of the console
+        sensor.onStationId = CONSOLE_STATION_ID;
         console.connectedSensors.push_back(sensor);
     }
 

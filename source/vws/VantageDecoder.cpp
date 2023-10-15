@@ -129,8 +129,6 @@ VantageDecoder::decodeArchiveET(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Evapotranspiration>
 VantageDecoder::decodeDayET(const byte buffer[], int offset) {
-    // TODO Why is a ET value of 0.0 considered invalid? The documentation does not seem to support this.
-    // The same holds true for month and year ET.
     Measurement<Evapotranspiration> measurement;
     int16 value16 = BitConverter::toInt16(buffer, offset);
 
@@ -255,12 +253,21 @@ VantageDecoder::decodeWindDirection(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 Rainfall
 VantageDecoder::decodeStormRain(const byte buffer[], int offset) {
-    // TODO The LOOP packet has storm rain as 1/100th of an inch, while the LOOP2 packet
-    // has it as rain clicks. Which is correct? Unfortunately, we cannot tell due to the
-    // fact that my rain bucket reports in 1/100th of an inch, which yields that same value.
+    if (logger == nullptr)
+        logger = &VantageLogger::getLogger("VantageDecoder");
+
+    if (!rainCollectorSizeSet)
+        logger->log(VantageLogger::VANTAGE_WARNING) << "Decoding rain value before rain collector size has been set. Using .01 inches" << std::endl;
+
+    // The LOOP packet has storm rain as 1/100th of an inch, while the LOOP2 packet
+    // has it as rain clicks. This method assumes rain clicks as that is how every
+    // rain value is decoded.
+    //
+    // Which is correct? Unfortunately, we cannot tell due to the fact that my rain
+    // bucket reports in 1/100th of an inch, which yields that same value.
     //
     int16 value16 = BitConverter::toInt16(buffer, offset);
-    Rainfall rain = static_cast<Rainfall>(value16) / STORM_RAIN_SCALE;
+    Rainfall rain = static_cast<Rainfall>(value16) * rainCollectorSizeInches;
 
     return rain;
 }

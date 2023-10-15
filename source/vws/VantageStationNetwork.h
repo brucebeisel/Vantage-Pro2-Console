@@ -229,6 +229,11 @@ public:
     virtual bool processLoop2Packet(const Loop2Packet & packet);
 
 private:
+    //
+    // The console ID is set to 16 to avoid clashes with Station ID range of 0 (invalid) to 8 and the
+    // Repeater ID of 8 through 15.
+    //
+    static constexpr StationId CONSOLE_STATION_ID = 16;
     static constexpr StationId UNKNOWN_STATION_ID = 0;
     static constexpr int       MAX_REPEATERS_PER_CHAIN = 4;
     static constexpr int       MAX_STATION_RECEPTION = 100;

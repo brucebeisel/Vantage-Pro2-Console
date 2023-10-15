@@ -66,7 +66,6 @@ EventManager::processNextEvent() {
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event" << endl;
         commandHandler.handleCommand(event.command, response);
         event.responseHandler->handleCommandResponse(event, response);
-        // TODO what to do with the response?
     }
 }
 ////////////////////////////////////////////////////////////////////////////////

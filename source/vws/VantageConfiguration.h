@@ -85,7 +85,7 @@ struct TimeSettings {
 
 struct SetupBits {
     bool is24HourMode;
-    bool isCurrentlyAM;           // TODO determine what this field means as it always is true
+    bool isCurrentlyAM;           // This field always comes from the console with a value of 1.
     bool isDayMonthDisplay;
     bool isWindCupLarge;
     ProtocolConstants::RainBucketSizeType rainBucketSizeType;

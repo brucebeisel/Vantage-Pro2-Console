@@ -618,7 +618,10 @@ VantageWeatherStation::updateBarometerReadingAndElevation(Pressure baroReadingIn
     command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroReadingInHg * BAROMETER_SCALE) << " " << elevationFeet;
 
     //
-    // TODO This is the one "OK" response command that can also receive a NACK response.
+    // This is the one "OK" response command that can also receive a NACK response.
+    // If a NACK response is received sendOKedCommand() will return false because it did not
+    // the proper OK response. Not sure what would be done differently if the NACK was handled
+    // specifically.
     //
     return sendOKedCommand(command.str());
 }
