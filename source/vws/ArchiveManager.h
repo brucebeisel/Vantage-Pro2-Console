@@ -89,6 +89,14 @@ public:
      */
     void getArchiveRange(DateTime & oldest, DateTime & newest) const;
 
+    /**
+     * Clear the archive file. This should only be used after the weather station has been moved to a new location or
+     * when installing a new weather station.
+     *
+     * @return True if successful
+     */
+    bool clearArchiveFile();
+
 private:
     static constexpr int SYNC_RETRIES = 5;
 

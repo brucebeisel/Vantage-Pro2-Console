@@ -289,6 +289,14 @@ ArchiveManager::getArchiveRange(DateTime & oldest, DateTime & newest) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+bool
+ArchiveManager::clearArchiveFile() {
+    ofstream stream(archiveFile.c_str(), ios::out | ios::trunc);
+    return stream.good();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
 ArchiveManager::addPacketToArchive(const ArchivePacket & packet) {
     vector<ArchivePacket> list;
@@ -304,7 +312,7 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
         return;
 
     ofstream stream;
-    stream.open(archiveFile.c_str(), ofstream::out | ios::app | ios::binary);
+    stream.open(archiveFile.c_str(), ios::out | ios::app | ios::binary);
     if (stream.fail()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
         return;
