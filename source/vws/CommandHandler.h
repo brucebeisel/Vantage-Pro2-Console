@@ -208,6 +208,8 @@ private:
 
     void handleUpdateConfigurationData(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    void handleQueryArchiveStatistics(const std::string & commandName, std::string & response);
+
     void handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
     void handleQueryArchiveSummary(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);

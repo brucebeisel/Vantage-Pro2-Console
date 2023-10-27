@@ -86,8 +86,9 @@ public:
      *
      * @param[out] oldest Reference to a DateTime that will be filled in with the oldest packet time
      * @param[out] newest Reference to a DateTime that will be filled in with the newest packet time
+     * @param[out] count  The number of archive records in the archive
      */
-    void getArchiveRange(DateTime & oldest, DateTime & newest) const;
+    void getArchiveRange(DateTime & oldest, DateTime & newest, int & count) const;
 
     /**
      * Clear the archive file. This should only be used after the weather station has been moved to a new location or
@@ -129,10 +130,11 @@ private:
      */
     void findArchivePacketTimeRange();
 
-    std::string              archiveFile;       // The name of the archive file
-    DateTime                 newestPacketTime;  // The time of the newest packet in the archive file
-    DateTime                 oldestPacketTime;  // The time of the oldest packet in the archive file
-    VantageWeatherStation &  station;           // Reference to the Vantage weather station object
+    std::string              archiveFile;        // The name of the archive file
+    DateTime                 newestPacketTime;   // The time of the newest packet in the archive file
+    DateTime                 oldestPacketTime;   // The time of the oldest packet in the archive file
+    int                      archivePacketCount; // The number of packets in the archive
+    VantageWeatherStation &  station;            // Reference to the Vantage weather station object
     VantageLogger &          logger;
 };
 }

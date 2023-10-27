@@ -158,6 +158,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-alarm-thresholds") {
             handleQueryAlarmThresholds(commandName, response);
         }
+        else if (commandName == "query-archive-statistics") {
+            handleQueryArchiveStatistics(commandName, response);
+        }
         else if (commandName == "query-archive") {
             handleQueryArchive(commandName, argumentList, response);
         }
@@ -796,6 +799,26 @@ void
 CommandHandler::handleUpdateConfigurationData(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     // TODO Implement this command
     response.append(SUCCESS_TOKEN);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryArchiveStatistics(const std::string & commandName, std::string & response) {
+    DateTime oldestRecordTime;
+    DateTime newestRecordTime;
+    int      archiveRecordCount;
+
+    archiveManager.getArchiveRange(oldestRecordTime, newestRecordTime, archiveRecordCount);
+
+    ostringstream oss;
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { "
+        << "\"oldestRecordTime\" : \"" << Weather::formatDateTime(oldestRecordTime) << "\", "
+        << "\"newestRecordTime\" : \"" << Weather::formatDateTime(newestRecordTime) << "\""
+        << "\"recordCount\" : " << archiveRecordCount
+        << "} }";
+
+    response.append(oss.str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

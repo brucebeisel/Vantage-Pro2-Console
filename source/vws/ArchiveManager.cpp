@@ -44,6 +44,7 @@ ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStati
                                                                     station(station),
                                                                     newestPacketTime(0),
                                                                     oldestPacketTime(0),
+                                                                    archivePacketCount(0),
                                                                     logger(VantageLogger::getLogger("ArchiveManager")) {
     findArchivePacketTimeRange();
 }
@@ -282,9 +283,10 @@ ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-ArchiveManager::getArchiveRange(DateTime & oldest, DateTime & newest) const {
+ArchiveManager::getArchiveRange(DateTime & oldest, DateTime & newest, int & count) const {
     oldest = oldestPacketTime;
     newest = newestPacketTime;
+    count = archivePacketCount;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -329,6 +331,10 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
             logger.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time "
                                                     << Weather::formatDateTime(it->getDateTime()) << endl;
     }
+
+    streampos fileSize = stream.tellp();
+    archivePacketCount = fileSize / ArchivePacket::BYTES_PER_ARCHIVE_PACKET;
+
     stream.close();
 }
 
@@ -339,6 +345,8 @@ ArchiveManager::findArchivePacketTimeRange() {
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary | ios::ate);
 
     streampos fileSize = stream.tellg();
+    archivePacketCount = fileSize / ArchivePacket::BYTES_PER_ARCHIVE_PACKET;
+
     if (fileSize >= ArchivePacket::BYTES_PER_ARCHIVE_PACKET) {
         byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
 
