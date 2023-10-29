@@ -98,6 +98,22 @@ public:
      */
     bool clearArchiveFile();
 
+    /**
+     * Set the state of archiving.
+     * Note that this state can be explicitly set of implicitly determined based on the
+     * archive interval and the time of the newest record in the archive.
+     *
+     * @param active True if archiving is active
+     */
+    void setArchivingState(bool active);
+
+    /**
+     * Get the state of archiving.
+     *
+     * @return True if archiving is active
+     */
+    bool getArchivingState() const;
+
 private:
     static constexpr int SYNC_RETRIES = 5;
 
@@ -130,11 +146,18 @@ private:
      */
     void findArchivePacketTimeRange();
 
-    std::string              archiveFile;        // The name of the archive file
-    DateTime                 newestPacketTime;   // The time of the newest packet in the archive file
-    DateTime                 oldestPacketTime;   // The time of the oldest packet in the archive file
-    int                      archivePacketCount; // The number of packets in the archive
-    VantageWeatherStation &  station;            // Reference to the Vantage weather station object
+    /**
+     * Determine if archiving is active.
+     * The newest packet time must be set for this method to determine if archiving is active or not.
+     */
+    void determineIfArchivingIsActive();
+
+    std::string              archiveFile;          // The name of the archive file
+    DateTime                 newestPacketTime;     // The time of the newest packet in the archive file
+    DateTime                 oldestPacketTime;     // The time of the oldest packet in the archive file
+    int                      archivePacketCount;   // The number of packets in the archive
+    bool                     archivingActive;      // Whether archiving is active
+    VantageWeatherStation &  station;              // Reference to the Vantage weather station object
     VantageLogger &          logger;
 };
 }

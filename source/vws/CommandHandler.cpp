@@ -815,7 +815,8 @@ CommandHandler::handleQueryArchiveStatistics(const std::string & commandName, st
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { "
         << "\"oldestRecordTime\" : \"" << Weather::formatDateTime(oldestRecordTime) << "\", "
         << "\"newestRecordTime\" : \"" << Weather::formatDateTime(newestRecordTime) << "\""
-        << "\"recordCount\" : " << archiveRecordCount
+        << "\"recordCount\" : " << archiveRecordCount << ", "
+        << "\"archivingActive\" : " << boolalpha << archiveManager.getArchivingState() << noboolalpha
         << "} }";
 
     response.append(oss.str());

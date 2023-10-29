@@ -45,6 +45,7 @@ ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStati
                                                                     newestPacketTime(0),
                                                                     oldestPacketTime(0),
                                                                     archivePacketCount(0),
+                                                                    archivingActive(true),
                                                                     logger(VantageLogger::getLogger("ArchiveManager")) {
     findArchivePacketTimeRange();
 }
@@ -300,6 +301,20 @@ ArchiveManager::clearArchiveFile() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
+ArchiveManager::setArchivingState(bool active) {
+    archivingActive = active;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchiveManager::getArchivingState() const {
+    return archivingActive;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
 ArchiveManager::addPacketToArchive(const ArchivePacket & packet) {
     vector<ArchivePacket> list;
     list.push_back(packet);
@@ -336,6 +351,8 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
     archivePacketCount = fileSize / ArchivePacket::BYTES_PER_ARCHIVE_PACKET;
 
     stream.close();
+
+    determineIfArchivingIsActive();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -365,6 +382,7 @@ ArchiveManager::findArchivePacketTimeRange() {
         stream.read(buffer, sizeof(buffer));
         packet.updateArchivePacketData(buffer);
         newestPacketTime = packet.getDateTime();
+        determineIfArchivingIsActive();
     }
     else {
         oldestPacketTime = 0;
@@ -374,4 +392,14 @@ ArchiveManager::findArchivePacketTimeRange() {
     stream.close();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+ArchiveManager::determineIfArchivingIsActive() {
+
+    if (newestPacketTime == 0 || station.getArchivePeriod() == 0)
+        return;
+
+    archivingActive = newestPacketTime > time(0) - (station.getArchivePeriod() * 60);
+}
 }
