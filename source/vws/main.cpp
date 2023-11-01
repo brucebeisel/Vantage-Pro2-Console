@@ -142,7 +142,7 @@ main(int argc, char *argv[]) {
 #endif
 
     if (argc < 3 || argc > 4) {
-        cerr << "Usage: vws <weather station serial port> <data directory> [log file]" << endl;
+        cerr << "Usage: vws <weather station serial port> <data directory> [log file prefix]" << endl;
         exit(1);
     }
 

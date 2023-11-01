@@ -121,4 +121,4 @@
  WindDirectionSlice.h WeatherTypes.h Weather.h Measurement.h
 ../../target/vws/WindRoseData.o: WindRoseData.cpp WindRoseData.h \
  Measurement.h WeatherTypes.h VantageProtocolConstants.h VantageEnums.h \
- SummaryEnums.h VantageEepromConstants.h
+ SummaryEnums.h VantageEepromConstants.h VantageLogger.h UnitConverter.h
