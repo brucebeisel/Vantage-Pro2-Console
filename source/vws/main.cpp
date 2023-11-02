@@ -151,7 +151,7 @@ main(int argc, char *argv[]) {
 
     if (argc == 4) {
         const string logFilePrefix(argv[3]);
-        VantageLogger::setLogFileParameters(logFilePrefix, 10, 5);
+        VantageLogger::setLogFileParameters(logFilePrefix, 20, 25); // 20 25 MB files
     }
 
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
