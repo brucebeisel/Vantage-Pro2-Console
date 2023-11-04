@@ -122,8 +122,12 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "clear-alarm-thresholds") {
             handleNoArgCommand(&VantageWeatherStation::clearAlarmThresholds, commandName, response);
         }
-        else if (commandName == "clear-archive") {
+        else if (commandName == "clear-console-archive") {
             handleNoArgCommand(&VantageWeatherStation::clearArchive, commandName, response);
+        }
+        else if (commandName == "clear-extended-archive") {
+            archiveManager.clearArchiveFile();
+            response.append(SUCCESS_TOKEN);
         }
         else if (commandName == "clear-calibration-offsets") {
             handleNoArgCommand(&VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets, commandName, response);
@@ -243,7 +247,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             handleUpdateUnits(commandName, argumentList, response);
         }
         else {
-            response.append(buildFailureString("Unrecognized command"));
+            response.append(buildFailureString("Unrecognized command (console)"));
         }
     }
     catch (const std::exception & e) {
