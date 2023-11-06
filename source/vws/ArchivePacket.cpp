@@ -447,7 +447,7 @@ ArchivePacket::formatJSON() const {
     ss << ", \"leafWetnesses\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++) {
         Measurement<LeafWetness> leafWetness = getLeafWetness(i);
-        if (leafWetness.getValue() != ProtocolConstants::INVALID_LEAF_WETNESS) {
+        if (leafWetness.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << leafWetness.getValue() << " }";
         }
@@ -469,7 +469,7 @@ ArchivePacket::formatJSON() const {
     ss << ", \"soilMoistures\" : [";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         Measurement<SoilMoisture> soilMoisture = getSoilMoisture(i);
-        if (soilMoisture.getValue() != ProtocolConstants::INVALID_SOIL_MOISTURE) {
+        if (soilMoisture.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
             ss << "{ \"index\" : " << i << ", \"value\" : " << soilMoisture.getValue() << " }";
         }
