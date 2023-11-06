@@ -379,20 +379,16 @@ ArchivePacket::formatJSON() const {
     // Both wind speed and direction must be valid to generate the JSON
     //
     Measurement<Speed> windSpeed = getAverageWindSpeed();
-    Measurement<HeadingIndex> windDir = getPrevailingWindHeadingIndex();
+    ss << windSpeed.formatJSON("avgWindSpeed", true);
 
-    if (windSpeed.isValid() && windDir.isValid()) {
-        ss << ", \"avgWindSpeed\" : " << windSpeed << ", "
-           << "\"avgWindDirection\" : " << windDir;
-    }
+    Measurement<HeadingIndex> windDir = getPrevailingWindHeadingIndex();
+    ss << windDir.formatJSON("avgWindDirection", true);
 
     windSpeed = getHighWindSpeed();
-    windDir = getHighWindHeadingIndex();
+    ss << windSpeed.formatJSON("highWindSpeed", true);
 
-    if (windSpeed.isValid() && windDir.isValid()) {
-        ss << ", \"highWindSpeed\" : " << windSpeed << ", "
-           << "\"highWindDirection\" : " << windDir;
-    }
+    windDir = getHighWindHeadingIndex();
+    ss << windDir.formatJSON("highWindDirection", true);
 
     Measurement<UvIndex> uvIndex = getAverageUvIndex();
     ss << uvIndex.formatJSON("avgUvIndex", true);
