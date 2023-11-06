@@ -446,10 +446,10 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"leafWetnesses\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++) {
-        int leafWetness = getLeafWetness(i);
-        if (leafWetness != ProtocolConstants::INVALID_LEAF_WETNESS) {
+        Measurement<LeafWetness> leafWetness = getLeafWetness(i);
+        if (leafWetness.getValue() != ProtocolConstants::INVALID_LEAF_WETNESS) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << leafWetness << " }";
+            ss << "{ \"index\" : " << i << ", \"value\" : " << leafWetness.getValue() << " }";
         }
     }
     ss << " ]";
@@ -468,10 +468,10 @@ ArchivePacket::formatJSON() const {
     firstValue = true;
     ss << ", \"soilMoistures\" : [";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
-        int soilMoisture = getSoilMoisture(i);
-        if (soilMoisture != ProtocolConstants::INVALID_SOIL_MOISTURE) {
+        Measurement<SoilMoisture> soilMoisture = getSoilMoisture(i);
+        if (soilMoisture.getValue() != ProtocolConstants::INVALID_SOIL_MOISTURE) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << soilMoisture << " }";
+            ss << "{ \"index\" : " << i << ", \"value\" : " << soilMoisture.getValue() << " }";
         }
     }
     ss << " ] ";
