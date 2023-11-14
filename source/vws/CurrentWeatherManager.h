@@ -47,6 +47,12 @@ public:
     virtual ~CurrentWeatherManager();
 
     /**
+     * Initialize the archive which includes creating the archive directory and deleting
+     * any obsolete archive files.
+     */
+    void initialize();
+
+    /**
      * Process a LOOP packet in a callback.
      *
      * @param packet The LOOP packet
@@ -75,23 +81,59 @@ public:
      */
     void queryCurrentWeatherArchive(int hours, std::vector<CurrentWeather> & list);
 
-    void getCurrentWeatherDatasetNames(std::vector<std::string> datasetNames);
-
 private:
     /**
-     * Save the LOOP/LOOP2 packet pair to the archive file
+     * Save the LOOP/LOOP2 packet to the archive file.
+     *
+     * @param packetTime The time that this packet was received
+     * @param packetType Whether this is a LOOP or a LOOP2 packet
+     * @param packetData The buffer containing the packet data
+     * @param length     The length of the packet data
      */
     void writeLoopArchive(DateTime packetTime, int packetType, const byte * packetData, size_t length);
+
+    /**
+     * Read the archive file that is open in the stream.
+     *
+     * @param ifs        The stream to read
+     * @param list       The list of current weather records read from the file
+     */
     void readArchiveFile(std::ifstream & ifs, std::vector<CurrentWeather> & list);
-    std::string archiveFilename(DateTime time);
+
+    /**
+     * Build the name of the archive file based on a time.
+     *
+     * @param time The time from which to build the archive filename
+     *
+     * @return The name of the archive file
+     */
+    std::string archiveFilenameByTime(DateTime time);
+
+    /**
+     * Build the name of the archive file based on an hour value.
+     *
+     * @param hour The hour from which to build the archive filename
+     *
+     * @return The name of the archive file
+     */
     std::string archiveFilenameByHour(int hour);
+
+    /**
+     * Create archive directory.
+     */
+    void createArchiveDirectory();
+
+    /**
+     * Cleanup the archive, removing any files that are too old.
+     */
+    void cleanupArchive();
 
     std::string               archiveDirectory;
     CurrentWeatherPublisher & currentWeatherPublisher;
     CurrentWeather            currentWeather;
     bool                      firstLoop2PacketReceived;
     DominantWindDirections    dominantWindDirections;   // The past wind direction measurements used to determine the arrows on the wind display
-    bool                      firstPass;
+    bool                      initialized;
     VantageLogger &           logger;
 };
 

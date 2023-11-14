@@ -33,7 +33,7 @@ namespace vws {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 CurrentWeatherManager::CurrentWeatherManager(const string & dataDirectory, CurrentWeatherPublisher & cwPublisher) : archiveDirectory(dataDirectory + LOOP_ARCHIVE_DIR),
-                                                                                                                    firstPass(true),
+                                                                                                                    initialized(false),
                                                                                                                     currentWeatherPublisher(cwPublisher),
                                                                                                                     firstLoop2PacketReceived(false),
                                                                                                                     dominantWindDirections(dataDirectory),
@@ -45,6 +45,17 @@ CurrentWeatherManager::CurrentWeatherManager(const string & dataDirectory, Curre
 CurrentWeatherManager::~CurrentWeatherManager() {
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CurrentWeatherManager::initialize() {
+    if (initialized)
+        return;
+
+    createArchiveDirectory();
+    cleanupArchive();
+    initialized = true;
+}
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 /**
@@ -59,16 +70,7 @@ CurrentWeatherManager::~CurrentWeatherManager() {
  */
 void
 CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, const byte * packetData, size_t length) {
-    if (firstPass) {
-        firstPass = false;
-        if (!std::filesystem::exists(archiveDirectory)) {
-            logger.log(VantageLogger::VANTAGE_INFO) <<  "Creating loop archive directory: " << archiveDirectory << endl;
-            if (!std::filesystem::create_directory(archiveDirectory))
-                logger.log(VantageLogger::VANTAGE_INFO) <<  "Failed to create loop archive directory: " << archiveDirectory << endl;
-        }
-    }
-
-    string filename = archiveFilename(packetTime);
+    string filename = archiveFilenameByTime(packetTime);
 
     //
     // If the hour file exists and it is more than an hour since it has changed, truncate it.
@@ -148,7 +150,7 @@ CurrentWeatherManager::processLoop2Packet(const Loop2Packet & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-CurrentWeatherManager::archiveFilename(DateTime time) {
+CurrentWeatherManager::archiveFilenameByTime(DateTime time) {
     struct tm tm;
     Weather::localtime(time, tm);
     return archiveFilenameByHour(tm.tm_hour);
@@ -167,7 +169,7 @@ CurrentWeatherManager::archiveFilenameByHour(int hour) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CurrentWeatherManager::readArchiveFile(std::ifstream & ifs, vector<CurrentWeather> & list) {
-    int packetTime;
+    DateTime packetTime;
     int packetType;
     byte buffer[LoopPacket::LOOP_PACKET_SIZE];
     CurrentWeather cw;
@@ -221,6 +223,41 @@ CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<Current
         }
         archiveTime += SECONDS_PER_HOUR;
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Current weather archive records found: " << list.size() << endl;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CurrentWeatherManager::createArchiveDirectory() {
+    if (!std::filesystem::exists(archiveDirectory)) {
+        logger.log(VantageLogger::VANTAGE_INFO) <<  "Creating loop archive directory: " << archiveDirectory << endl;
+        if (!std::filesystem::create_directory(archiveDirectory))
+            logger.log(VantageLogger::VANTAGE_INFO) <<  "Failed to create loop archive directory: " << archiveDirectory << endl;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CurrentWeatherManager::cleanupArchive() {
+    //
+    // If an archive file is older than 24 hours, the file is obsolete and must be deleted
+    //
+    DateTime tooOldFileTime = time(0) - 86400;
+    for (int i = 0; i < 24; i++) {
+        string archiveFilename = archiveFilenameByHour(i);
+        struct stat statbuf;
+        if (stat(archiveFilename.c_str(), &statbuf) == 0) {
+            DateTime fileTime = statbuf.st_mtim.tv_sec;
+            logger.log(VantageLogger::VANTAGE_INFO) << "Checking Current Weather Archive file " << archiveFilename << " for deletion with last write time of " << fileTime << endl;
+            if (fileTime < tooOldFileTime) {
+                if (!std::filesystem::remove(archiveFilename))
+                    logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to remove Current Weather Archive file " << archiveFilename << endl;
+                else
+                    logger.log(VantageLogger::VANTAGE_INFO) << "Deleted old current weather archive file " << archiveFilename << endl;
+            }
+        }
     }
 }
 
