@@ -18,7 +18,7 @@ main(int argc, char *argv[]) {
     const char * outputFilename = argv[2];
 
     ifstream is(archiveFilename, ios::in | ios::binary);
-    ofstream os(archiveFilename, ios::out | ios::binary);
+    ofstream os(outputFilename, ios::out | ios::binary);
 
     if (is.fail()) {
         cerr << "Failed to open archive file '" << archiveFilename << " for reading" << endl;
@@ -36,20 +36,22 @@ main(int argc, char *argv[]) {
     char buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     do {
         is.read(buffer, sizeof(buffer));
-        ArchivePacket packet(buffer);
-        packetsRead++;
+        if (!is.eof()) {
+            ArchivePacket packet(buffer);
+            packetsRead++;
 
-        DateTime currentPacketTime = packet.getDateTime();
-        cout << "Processing packet with time: " << Weather::formatDateTime(currentPacketTime) << endl;
+            DateTime currentPacketTime = packet.getDateTime();
+            cout << "Processing packet with time: " << Weather::formatDateTime(currentPacketTime) << endl;
 
-        if (currentPacketTime > lastPacketTime) {
-            os.write(buffer, sizeof(buffer));
-            packetsWritten++;
-            lastPacketTime = currentPacketTime;
-        }
-        else {
-            cout << "Discarding packet with time " << Weather::formatDateTime(currentPacketTime) << endl
-                 << " Packet is before packet with time: " << Weather::formatDateTime(lastPacketTime) << endl;
+            if (currentPacketTime > lastPacketTime) {
+                os.write(buffer, sizeof(buffer));
+                packetsWritten++;
+                lastPacketTime = currentPacketTime;
+            }
+            else {
+                cout << "Discarding packet with time " << Weather::formatDateTime(currentPacketTime) << endl
+                     << " Packet is before packet with time: " << Weather::formatDateTime(lastPacketTime) << endl;
+            }
         }
 
     } while (!is.eof());
