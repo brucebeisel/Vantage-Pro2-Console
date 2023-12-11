@@ -69,23 +69,51 @@ public:
      * Get various values from the LOOP2 packet.
      * Note that any return value that is a Measurement<> template can have and invalid value.
      */
-    const Measurement<Speed> &       getWindSpeed() const;
-    const Measurement<Heading> &     getWindDirection() const;
-    const Measurement<Speed> &       getWindGust10Minute() const;
-    const Measurement<Heading> &     getWindGustDirection10Minute() const;
-    const Measurement<Speed> &       getWindSpeed2MinuteAverage() const;
-    const Measurement<Speed> &       getWindSpeed10MinuteAverage() const;
-    Rainfall                         getHourRain() const;
-    Rainfall                         get15MinuteRain() const;
-    Rainfall                         getDayRain() const;
-    Rainfall                         get24HourRain() const;
-    const Measurement<Temperature> & getDewPoint() const;
-    const Measurement<Temperature> & getHeatIndex() const;
-    const Measurement<Temperature> & getWindChill() const;
-    const Measurement<Temperature> & getThsw() const;
-    const Measurement<Pressure> &    getBarometricSensorRawReading() const;
+    ProtocolConstants::BarometerTrend       getBarometerTrend() const;
+    std::string                             getBarometerTrendString() const;
+    const Measurement<Pressure> &           getBarometricPressure() const;
+    const Measurement<Temperature> &        getInsideTemperature() const;
+    const Measurement<Humidity> &           getInsideHumidity() const;
+    const Measurement<Temperature> &        getOutsideTemperature() const;
+    const Measurement<Speed> &              getWindSpeed() const;
+    const Measurement<Heading> &            getWindDirection() const;
+    const Measurement<Speed> &              getWindSpeed10MinuteAverage() const;
+    const Measurement<Speed> &              getWindSpeed2MinuteAverage() const;
+    const Measurement<Speed> &              getWindGust10Minute() const;
+    const Measurement<Heading> &            getWindGustDirection10Minute() const;
+    const Measurement<Temperature> &        getDewPoint() const;
+    const Measurement<Humidity> &           getOutsideHumidity() const;
+    const Measurement<Temperature> &        getHeatIndex() const;
+    const Measurement<Temperature> &        getWindChill() const;
+    const Measurement<Temperature> &        getThsw() const;
+    Rainfall                                getRainRate() const;
+    const Measurement<UvIndex> &            getUvIndex() const;
+    const Measurement<SolarRadiation> &     getSolarRadiation() const;
+    Rainfall                                getStormRain() const;
+    DateTime                                getStormStart() const;
+    Rainfall                                getDayRain() const;
+    Rainfall                                get15MinuteRain() const;
+    Rainfall                                getHourRain() const;
+    const Measurement<Evapotranspiration> & getDayET() const;
+    Rainfall                                get24HourRain() const;
+    int                                     getBarometricReductionMethod() const;
+    const Measurement<Pressure> &           getUserEnteredBarometricOffset() const;
+    const Measurement<Pressure> &           getBarometricCalibrationNumber() const;
+    const Measurement<Pressure> &           getBarometricSensorRawReading() const;
+    const Measurement<Pressure> &           getAbsoluteBarometricPressure() const;
+    const Measurement<Pressure> &           getAltimeterBarometerOffset() const;
+    int                                     getNext10MinuteWindSpeedGraphPointer() const;
+    int                                     getNext15MinuteWindSpeedGraphPointer() const;
+    int                                     getNextHourlyWindSpeedGraphPointer() const;
+    int                                     getNextDailyWindSpeedGraphPointer() const;
+    int                                     getNextMinuteRainGraphPointer() const;
+    int                                     getNextRainStormGraphPointer() const;
+    int                                     getIndexToTheMinuteWithinAnHour() const;
+    int                                     getNextMonthlyRainGraphPointer() const;
+    int                                     getNextYearlyRainGraphPointer() const;
+    int                                     getNextSeasonalRainGraphPointer() const;
 
-    int                              getNextRainStormGraphPointer() const;
+    friend std::ostream & operator<<(std::ostream & os, const Loop2Packet & packet);
 
 private:
     static constexpr int L_OFFSET = 0;
@@ -192,6 +220,7 @@ private:
     int                               nextDailyWindSpeedGraphPointer;
     int                               nextMinuteRainGraphPointer;
     int                               nextRainStormGraphPointer;
+    int                               indexToTheMinuteWithinAnHour;
     int                               nextMonthlyRainGraphPointer;
     int                               nextYearlyRainGraphPointer;
     int                               nextSeasonalRainGraphPointer;

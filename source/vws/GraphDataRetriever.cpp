@@ -16,6 +16,7 @@
  */
 #include "GraphDataRetriever.h"
 
+#include <algorithm>
 #include "Weather.h"
 #include "VantageWeatherStation.h"
 #include "VantageEepromConstants.h"
@@ -79,7 +80,7 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
             storms.push_back(storm);
     }
 
-    //std::sort(storms.begin(), storms.end(), [](StormData a, StormData b) {return a.stormStart < b.stormStart;});
+    std::sort(storms.begin(), storms.end(), [](const StormData & a, const StormData & b) {return a.stormStart < b.stormStart;});
 
     return true;
 }

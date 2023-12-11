@@ -338,7 +338,6 @@ LoopPacket::getDayET() const {
     return dayET;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 const Measurement<SolarRadiation> &
@@ -468,7 +467,86 @@ LoopPacket::getSunsetTime() const {
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream &
 operator<<(std::ostream & os, const LoopPacket & packet) {
-    os << "Inside Temperature" << packet.getInsideTemperature() << endl;
+    os << "LOOP" << endl
+       << "Packet Byte 0:   " << static_cast<char>(packet.packetData[0]) << endl
+       << "Packet Byte 1:   " << static_cast<char>(packet.packetData[1]) << endl
+       << "Packet Byte 2:   " << static_cast<char>(packet.packetData[2]) << endl
+       << "Barometer Trend: " << packet.getBarometerTrend() << endl
+       << "Packet Type:     " << packet.getPacketType() << endl
+       << "Next Record:     " << packet.getNextRecord() << endl
+       << "Barometer:       " << packet.getBarometricPressure() << endl
+       << "Inside Temperature: " << packet.getInsideTemperature() << endl
+       << "Inside Humidity: " << packet.getInsideHumidity() << endl
+       << "Outside Temperature: " << packet.getOutsideTemperature() << endl
+       << "Wind Speed: " << packet.getWindSpeed() << endl
+       << "10 Minute Avg Wind Speed: " << packet.getWindSpeed10MinuteAverage() << endl
+       << "Wind Direction: " << packet.getWindDirection() << endl
+       << "Extra Temperatures: " << endl
+       << "    0: " << packet.getExtraTemperature(0) << endl
+       << "    1: " << packet.getExtraTemperature(1) << endl
+       << "    2: " << packet.getExtraTemperature(2) << endl
+       << "    3: " << packet.getExtraTemperature(3) << endl
+       << "    4: " << packet.getExtraTemperature(4) << endl
+       << "    5: " << packet.getExtraTemperature(5) << endl
+       << "    6: " << packet.getExtraTemperature(6) << endl
+       << "Soil Temperatures:" << endl
+       << "    1: " << packet.getSoilTemperature(0) << endl
+       << "    2: " << packet.getSoilTemperature(1) << endl
+       << "    3: " << packet.getSoilTemperature(2) << endl
+       << "    4: " << packet.getSoilTemperature(3) << endl
+       << "Leaf Temperatures:" << endl
+       << "    1: " << packet.getLeafTemperature(0) << endl
+       << "    2: " << packet.getLeafTemperature(1) << endl
+       << "    3: " << packet.getLeafTemperature(2) << endl
+       << "    4: " << packet.getLeafTemperature(3) << endl
+       << "Outside Humidity: " << packet.getOutsideHumidity() << endl
+       << "Extra Humidities: " << endl
+       << "    0: " << packet.getExtraHumidity(0) << endl
+       << "    1: " << packet.getExtraHumidity(1) << endl
+       << "    2: " << packet.getExtraHumidity(2) << endl
+       << "    3: " << packet.getExtraHumidity(3) << endl
+       << "    4: " << packet.getExtraHumidity(4) << endl
+       << "    5: " << packet.getExtraHumidity(5) << endl
+       << "    6: " << packet.getExtraHumidity(6) << endl
+       << "Rain Rate: " << packet.getRainRate() << endl
+       << "UV Index: " << packet.getUvIndex() << endl
+       << "Solar Radiation: " << packet.getSolarRadiation() << endl
+       << "Storm Rain: " << packet.getStormRain() << endl
+       << "Storm Start Date: " << packet.getStormStart() << endl
+       << "Day Rain: " << packet.getDayRain() << endl
+       << "Month Rain: " << packet.getMonthRain() << endl
+       << "Year Rain: " << packet.getYearRain() << endl
+       << "Day ET: " << packet.getDayET() << endl
+       << "Month ET: " << packet.getMonthET() << endl
+       << "Year ET: " << packet.getYearET() << endl
+       << "Soil Moistures:" << endl
+       << "    0: " << packet.getSoilMoisture(0) << endl
+       << "    1: " << packet.getSoilMoisture(1) << endl
+       << "    2: " << packet.getSoilMoisture(2) << endl
+       << "    3: " << packet.getSoilMoisture(3) << endl
+       << "Leaf Wetnesses:" << endl
+       << "    0: " << packet.getLeafWetness(0) << endl
+       << "    1: " << packet.getLeafWetness(1) << endl
+       << "    2: " << packet.getLeafWetness(2) << endl
+       << "    3: " << packet.getLeafWetness(3) << endl
+       << "Alarms: TBD" << endl
+       << "Transmitter Battery Status: " << endl << boolalpha
+       << "    0: " <<  packet.isTransmitterBatteryGood(0) << endl
+       << "    1: " <<  packet.isTransmitterBatteryGood(1) << endl
+       << "    2: " <<  packet.isTransmitterBatteryGood(2) << endl
+       << "    3: " <<  packet.isTransmitterBatteryGood(3) << endl
+       << "    4: " <<  packet.isTransmitterBatteryGood(4) << endl
+       << "    5: " <<  packet.isTransmitterBatteryGood(5) << endl
+       << "    6: " <<  packet.isTransmitterBatteryGood(6) << endl
+       << "    7: " <<  packet.isTransmitterBatteryGood(7) << endl
+       << "Console Battery Voltage: " << packet.getConsoleBatteryVoltage() << endl
+       << "Forecast Icons: " << packet.getForecastIcon() << endl
+       << "Forecast Rule Number: " << packet.getForecastRuleIndex() << endl
+       << "Sunrise Time: " << packet.getSunriseTime() << endl
+       << "Sunset Time: " << packet.getSunsetTime() << endl
+       << "Terminator 1" << hex << "0x" << static_cast<int>(packet.packetData[95]) << endl
+       << "Terminator 2" << hex << "0x" << static_cast<int>(packet.packetData[96]) << endl << dec;
+
     return os;
 
 }

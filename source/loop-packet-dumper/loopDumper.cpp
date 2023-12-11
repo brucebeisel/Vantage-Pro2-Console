@@ -29,12 +29,13 @@
 using namespace std;
 using namespace vws;
 
-static const char USAGE_MESSAGE[] = "Usage: loop-dumper [-v] [-b] <filename>";
+static const char USAGE_MESSAGE[] = "Usage: loop-dumper [-v] [-b] [-l] <filename>";
 
 int
 main(int argc, char *argv[]) {
     bool verbose = false;
     bool dumpBinary = false;
+    bool printLoopPackets = false;
     char *file = NULL;
 
     for (int i = 1; i < argc; i++) {
@@ -43,6 +44,8 @@ main(int argc, char *argv[]) {
                 verbose = true;
             else if (strcmp(argv[i], "-b") == 0)
                 dumpBinary = true;
+            else if (strcmp(argv[i], "-l") == 0)
+                printLoopPackets = true;
             else  {
                 cerr << USAGE_MESSAGE << endl;
                 exit(1);
@@ -94,6 +97,9 @@ main(int argc, char *argv[]) {
             buffer = loopBuffer;
             bufferLength = sizeof(loopBuffer);
             cw.setLoopData(loopPacket);
+
+            if (printLoopPackets)
+                cout << loopPacket;
         }
         else if (packetType == Loop2Packet::LOOP2_PACKET_TYPE) {
             loopString = "LOOP2 ";
@@ -106,6 +112,9 @@ main(int argc, char *argv[]) {
             buffer = loop2Buffer;
             bufferLength = sizeof(loop2Buffer);
             cw.setLoop2Data(loop2Packet);
+
+            if (printLoopPackets)
+                cout << loop2Packet;
         }
 
         if (verbose) {
