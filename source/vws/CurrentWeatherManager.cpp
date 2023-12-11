@@ -173,6 +173,7 @@ CurrentWeatherManager::readArchiveFile(std::ifstream & ifs, vector<CurrentWeathe
     int packetType;
     byte buffer[LoopPacket::LOOP_PACKET_SIZE];
     CurrentWeather cw;
+    bool firstPacket = true;
 
     while (ifs.good()) {
         ifs.read(reinterpret_cast<byte *>(&packetTime), sizeof(packetTime)).
@@ -193,8 +194,16 @@ CurrentWeatherManager::readArchiveFile(std::ifstream & ifs, vector<CurrentWeathe
             loop2Packet.decodeLoop2Packet(buffer);
             cw.setLoop2Data(loop2Packet);
             cw.setPacketTime(packetTime);
-            list.push_back(cw);
+            //
+            // Ignore the LOOP2 packet if it is the first in the file.
+            // This results in one LOOP/LOOP2 packet pair being discarded if the LOOP and LOOP2 pair in a single
+            // cycle is split across two Loop Archive files.
+            //
+            if (!firstPacket)
+                list.push_back(cw);
         }
+
+        firstPacket = false;
     }
 }
 
