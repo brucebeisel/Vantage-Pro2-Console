@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ Loop2Packet::Loop2Packet() : logger(&VantageLogger::getLogger("Loop2Packet")),
                              nextRainStormGraphPointer(0),
                              nextMonthlyRainGraphPointer(0),
                              nextYearlyRainGraphPointer(0),
+                             indexToTheMinuteWithinAnHour(0),
                              nextSeasonalRainGraphPointer(0) {
 }
 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,6 +131,13 @@ public:
         return ss.str();
     }
 
+    /**
+     * Ostream operator.
+     *
+     * @param os          The ostream on which to output the measurement's value
+     * @param measurement The measurement to be output
+     * @return The same ostream passed as the first argument
+     */
     friend std::ostream & operator<<(std::ostream & os, const Measurement<T> & measurement) {
         if (measurement.valid)
             os << measurement.value;
