@@ -173,7 +173,7 @@ CurrentWeatherManager::readArchiveFile(std::ifstream & ifs, vector<CurrentWeathe
     int packetType;
     byte buffer[LoopPacket::LOOP_PACKET_SIZE];
     CurrentWeather cw;
-    bool firstPacket = true;
+    bool loopPacketProcessed = false;
 
     while (ifs.good()) {
         ifs.read(reinterpret_cast<byte *>(&packetTime), sizeof(packetTime)).
@@ -185,25 +185,29 @@ CurrentWeatherManager::readArchiveFile(std::ifstream & ifs, vector<CurrentWeathe
 
         if (packetType == LoopPacket::LOOP_PACKET_TYPE) {
             LoopPacket loopPacket;
-            loopPacket.decodeLoopPacket(buffer);
-            cw.setLoopData(loopPacket);
-            cw.setPacketTime(packetTime);
+            if (loopPacket.decodeLoopPacket(buffer)) {
+                cw.setLoopData(loopPacket);
+                cw.setPacketTime(packetTime);
+                loopPacketProcessed = true;
+            }
         }
         else if (packetType == Loop2Packet::LOOP2_PACKET_TYPE) {
             Loop2Packet loop2Packet;
-            loop2Packet.decodeLoop2Packet(buffer);
-            cw.setLoop2Data(loop2Packet);
-            cw.setPacketTime(packetTime);
-            //
-            // Ignore the LOOP2 packet if it is the first in the file.
-            // This results in one LOOP/LOOP2 packet pair being discarded if the LOOP and LOOP2 pair in a single
-            // cycle is split across two Loop Archive files.
-            //
-            if (!firstPacket)
-                list.push_back(cw);
+            if (loop2Packet.decodeLoop2Packet(buffer)) {
+                cw.setLoop2Data(loop2Packet);
+                cw.setPacketTime(packetTime);
+                //
+                // Ignore the LOOP2 packet if it is the first in the file or there was an error processing the LOOP packet.
+                // If the first packet in the the file is a LOOP2 packet, then one LOOP/LOOP2 packet pair will be discarded
+                // as the last packet in the previous file should have been a LOOP packet. Given the circular buffer technique
+                // used for the Current Weather Archive, loosing a single packet is not significant loss.
+                //
+                if (loopPacketProcessed) {
+                    list.push_back(cw);
+                    loopPacketProcessed = false;
+                }
+            }
         }
-
-        firstPacket = false;
     }
 }
 

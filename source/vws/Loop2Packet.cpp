@@ -486,7 +486,7 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream &
 operator<<(std::ostream & os, const Loop2Packet & packet) {
-    os << "LOOP2" << endl
+    os << "++++++++++ LOOP2 ++++++++++" << endl
        << "Packet Byte 0:   " << static_cast<char>(packet.packetData[0]) << endl
        << "Packet Byte 1:   " << static_cast<char>(packet.packetData[1]) << endl
        << "Packet Byte 2:   " << static_cast<char>(packet.packetData[2]) << endl
@@ -519,8 +519,22 @@ operator<<(std::ostream & os, const Loop2Packet & packet) {
        << "Day ET: " << packet.getDayET() << endl
        << "24 Hour Rain: " << packet.get24HourRain() << endl
        << "Barometric Reduction Method: " << packet.getBarometricReductionMethod() << endl
-       << "Terminator 1" << hex << "0x" << static_cast<int>(packet.packetData[95]) << endl
-       << "Terminator 2" << hex << "0x" << static_cast<int>(packet.packetData[96]) << endl << dec;
+       << "User Entered Barometric Offset: " << packet.getUserEnteredBarometricOffset() << endl
+       << "Barometric Calibration Number: " << packet.getBarometricCalibrationNumber() << endl
+       << "Barometric Sensor Raw Reading: " << packet.getBarometricSensorRawReading() << endl
+       << "Absolute Barometric Pressure: " << packet.getAbsoluteBarometricPressure() << endl
+       << "Altimeter Barometric Offset: " << packet.getAltimeterBarometerOffset() << endl
+       << "Next 10 Minute Wind Speed Graph Pointer: " << packet.getNext10MinuteWindSpeedGraphPointer() << endl
+       << "Next 15 Minute Wind Speed Graph Pointer: " << packet.getNext15MinuteWindSpeedGraphPointer() << endl
+       << "Next Hourly Wind Speed Graph Pointer: " << packet.getNextHourlyWindSpeedGraphPointer() << endl
+       << "Next Daily Wind Speed Graph Pointer: " << packet.getNextDailyWindSpeedGraphPointer() << endl
+       << "Next Minute Rain Graph Pointer: " << packet.getNextMinuteRainGraphPointer() << endl
+       << "Next Rain Storm Graph Pointer: " << packet.getNextRainStormGraphPointer() << endl
+       << "Next Monthly Rain Graph Pointer: " << packet.getNextMonthlyRainGraphPointer() << endl
+       << "Next Yearly Rain Graph Pointer: " << packet.getNextYearlyRainGraphPointer() << endl
+       << "Next Seasonal Rain Graph Pointer: " << packet.getNextSeasonalRainGraphPointer() << endl
+       << "Terminator 1" << "0x" << hex << static_cast<int>(packet.packetData[95]) << dec << endl
+       << "Terminator 2" << "0x" << hex << static_cast<int>(packet.packetData[96]) << dec << endl;
 
     return os;
 

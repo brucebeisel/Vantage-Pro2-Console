@@ -467,7 +467,7 @@ LoopPacket::getSunsetTime() const {
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream &
 operator<<(std::ostream & os, const LoopPacket & packet) {
-    os << "LOOP" << endl
+    os << "---------- LOOP ----------" << endl
        << "Packet Byte 0:   " << static_cast<char>(packet.packetData[0]) << endl
        << "Packet Byte 1:   " << static_cast<char>(packet.packetData[1]) << endl
        << "Packet Byte 2:   " << static_cast<char>(packet.packetData[2]) << endl
