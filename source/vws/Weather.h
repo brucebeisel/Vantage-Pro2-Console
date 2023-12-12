@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,14 @@ public:
      * @return The converted time
      */
     static DateTime extractDate(int time);
+
+    /**
+     * Parse a date in the format of YYYY-mm-dd and return the DateTime value.
+     *
+     * @param dateString The string containing the date to be parsed
+     * @return The value of the date at midnight
+     */
+    static DateTime parseDate(const std::string & dateString);
 };
 }
 

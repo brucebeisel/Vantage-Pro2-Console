@@ -37,6 +37,7 @@
 #include "VantageLogger.h"
 #include "VantageStationNetwork.h"
 #include "GraphDataRetriever.h"
+#include "StormArchiveManager.h"
 
 using namespace std;
 using namespace vws;
@@ -74,10 +75,11 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         VantageStationNetwork network(dataDirectory, station, archiveManager);
         AlarmManager alarmManager(station);
         GraphDataRetriever graphDataRetriever(station);
+        StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
         CommandHandler commandHandler(station, configuration, archiveManager, network, alarmManager, currentWeatherManager);
         EventManager eventManager(commandHandler);
         CommandSocket commandSocket(11462, eventManager);
-        VantageDriver driver(station, configuration, archiveManager, eventManager);
+        VantageDriver driver(station, configuration, archiveManager, eventManager, stormArchiveManager);
 
         //
         // Perform configuration

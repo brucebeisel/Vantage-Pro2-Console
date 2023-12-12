@@ -23,12 +23,6 @@
 namespace vws {
 class VantageWeatherStation;
 
-struct StormData {
-    DateTime stormStart;
-    DateTime stormEnd;
-    Rainfall stormRain;
-};
-
 class GraphDataRetriever: public VantageWeatherStation::LoopPacketListener {
 public:
     GraphDataRetriever(VantageWeatherStation & station);

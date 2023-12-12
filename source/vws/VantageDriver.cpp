@@ -27,6 +27,7 @@
 #include "Alarm.h"
 #include "ArchiveManager.h"
 #include "EventManager.h"
+#include "StormArchiveManager.h"
 #include "CurrentWeather.h"
 #include "HiLowPacket.h"
 #include "VantageDecoder.h"
@@ -42,15 +43,17 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager,  EventManager & evtMgr) :
+VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager,  EventManager & evtMgr, StormArchiveManager & stormArchiveManager) :
                                                                 station(station),
                                                                 configuration(configuration),
                                                                 archiveManager(archiveManager),
                                                                 eventManager(evtMgr),
+                                                                stormArchiveManager(stormArchiveManager),
                                                                 exitLoop(false),
                                                                 nextRecord(-1),
                                                                 previousNextRecord(-1),
                                                                 lastArchivePacketTime(0),
+                                                                lastStormArchiveUpdateTime(0),
                                                                 logger(VantageLogger::getLogger("VantageDriver")) {
     //
     // Indicate the the console time needs to be set in the near future. 
@@ -197,6 +200,12 @@ VantageDriver::mainLoop() {
                     logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to set station time " << endl;
 
             }
+
+            //
+            // Update the storm archive if enough time has passed
+            //
+            if (lastStormArchiveUpdateTime + STORM_ARCHIVE_UPDATE_INTERVAL < now)
+                stormArchiveManager.updateArchive();
 
             //
             // Get the current weather values for about a minute or until an event occurs that requires the end of the loop

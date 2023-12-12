@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ class VantageLogger;
 class CurrentWeather;
 class CurrentWeatherSocket;
 class VantageConfiguration;
+class StormArchiveManager;
 
 /**
  * Class that coordinates the communications with the Vantage console.
@@ -41,12 +42,13 @@ public:
     /**
      * Constructor.
      * 
-     * @param station        The object that handles the command protocols with the Vantage console
-     * @param configuration  The object that handles configuration changes and retrievals with the console
-     * @param archiveManager The archive manager that will maintain the file containing the raw archive packets
-     * @param eventManager   The event manager that will provide commands coming in from clients
+     * @param station             The object that handles the command protocols with the Vantage console
+     * @param configuration       The object that handles configuration changes and retrievals with the console
+     * @param archiveManager      The archive manager that will maintain the file containing the raw archive packets
+     * @param eventManager        The event manager that will provide commands coming in from clients
+     * @param stormArchiveManager The manager of the storm archive
      */
-    VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager, EventManager & eventManager);
+    VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager, EventManager & eventManager, StormArchiveManager & stormArchiveManager);
 
     /**
      * Destructor.
@@ -112,15 +114,22 @@ private:
      */
     static const int TIME_SET_INTERVAL = 3600;
 
+    /**
+     * How often to update the storm archive.
+     */
+    static const int STORM_ARCHIVE_UPDATE_INTERVAL = 3600 * 2;
+
     VantageWeatherStation &   station;
     VantageConfiguration &    configuration;
     ArchiveManager &          archiveManager;
     EventManager &            eventManager;
+    StormArchiveManager &     stormArchiveManager;
     bool                      exitLoop;
     int                       nextRecord;
     int                       previousNextRecord;
     DateTime                  lastArchivePacketTime;
     DateTime                  consoleTimeSetTime;
+    DateTime                  lastStormArchiveUpdateTime;
     VantageLogger &           logger;
 };
 

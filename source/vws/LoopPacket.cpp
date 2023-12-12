@@ -498,8 +498,6 @@ operator<<(std::ostream & os, const LoopPacket & packet) {
        << "Leaf Temperatures:" << endl
        << "    1: " << packet.getLeafTemperature(0) << endl
        << "    2: " << packet.getLeafTemperature(1) << endl
-       << "    3: " << packet.getLeafTemperature(2) << endl
-       << "    4: " << packet.getLeafTemperature(3) << endl
        << "Outside Humidity: " << packet.getOutsideHumidity() << endl
        << "Extra Humidities: " << endl
        << "    0: " << packet.getExtraHumidity(0) << endl

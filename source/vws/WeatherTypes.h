@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,13 @@ using int16 = short;
 using uint16 = unsigned short;
 using int32 = int;
 using uint32 = unsigned int;
+
+struct StormData {
+    DateTime stormStart;
+    DateTime stormEnd;
+    Rainfall stormRain;
+};
+
 }
 
 #endif
