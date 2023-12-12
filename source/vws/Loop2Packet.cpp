@@ -18,6 +18,7 @@
 #include "Loop2Packet.h"
 
 #include <iostream>
+#include <iomanip>
 #include <cstring>
 
 #include "BitConverter.h"
@@ -534,8 +535,8 @@ operator<<(std::ostream & os, const Loop2Packet & packet) {
        << "Next Monthly Rain Graph Pointer: " << packet.getNextMonthlyRainGraphPointer() << endl
        << "Next Yearly Rain Graph Pointer: " << packet.getNextYearlyRainGraphPointer() << endl
        << "Next Seasonal Rain Graph Pointer: " << packet.getNextSeasonalRainGraphPointer() << endl
-       << "Terminator 1" << "0x" << hex << static_cast<int>(packet.packetData[95]) << dec << endl
-       << "Terminator 2" << "0x" << hex << static_cast<int>(packet.packetData[96]) << dec << endl;
+       << "Terminator 1: 0x" << hex << setw(2) << setfill('0') << static_cast<int>(packet.packetData[95]) << dec << endl
+       << "Terminator 2: 0x" << hex << setw(2) << setfill('0') << static_cast<int>(packet.packetData[96]) << dec << endl;
 
     return os;
 

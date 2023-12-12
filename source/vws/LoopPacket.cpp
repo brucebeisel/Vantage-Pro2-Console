@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include <time.h>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 
 #include "BitConverter.h"
 #include "VantageCRC.h"
@@ -544,8 +545,8 @@ operator<<(std::ostream & os, const LoopPacket & packet) {
        << "Forecast Rule Number: " << packet.getForecastRuleIndex() << endl
        << "Sunrise Time: " << packet.getSunriseTime() << endl
        << "Sunset Time: " << packet.getSunsetTime() << endl
-       << "Terminator 1" << hex << "0x" << static_cast<int>(packet.packetData[95]) << endl
-       << "Terminator 2" << hex << "0x" << static_cast<int>(packet.packetData[96]) << endl << dec;
+       << "Terminator 1: 0x" << hex << setw(2) << setfill('0') << static_cast<int>(packet.packetData[95]) << dec << endl
+       << "Terminator 2: 0x" << hex << setw(2) << setfill('0') << static_cast<int>(packet.packetData[96]) << dec << endl;
 
     return os;
 

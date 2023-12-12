@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Bruce Beisel
+ * Copyright (C) 2024 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,4 +53,4 @@ private:
 
 } /* namespace vws */
 
-#endif /* SOURCE_VWS_GRAPHDATARETRIEVER_H_ */
+#endif /* GRAPH_DATA_RETRIEVER_H */
