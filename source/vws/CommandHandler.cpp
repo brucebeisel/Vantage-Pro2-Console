@@ -36,6 +36,7 @@
 #include "VantageStationNetwork.h"
 #include "AlarmManager.h"
 #include "CurrentWeatherManager.h"
+#include "StormArchiveManager.h"
 #include "SummaryReport.h"
 #include "WindRoseData.h"
 
@@ -71,12 +72,14 @@ CommandHandler::CommandHandler(VantageWeatherStation & station,
                                ArchiveManager & archiveManager,
                                VantageStationNetwork & stationNetwork,
                                AlarmManager & alarmManager,
+                               StormArchiveManager & stormArchiveManager,
                                CurrentWeatherManager & cwManager) : station(station),
                                                                     logger(VantageLogger::getLogger("CommandHandler")),
                                                                     configurator(configurator),
                                                                     network(stationNetwork),
                                                                     alarmManager(alarmManager),
                                                                     currentWeatherManager(cwManager),
+                                                                    stormArchiveManager(stormArchiveManager),
                                                                     archiveManager(archiveManager) {
 }
 
@@ -170,6 +173,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         }
         else if (commandName == "query-archive-summary") {
             handleQueryArchiveSummary(commandName, argumentList, response);
+        }
+        else if (commandName == "query-storm-archive") {
+            handleQueryStormArchive(commandName, argumentList, response);
         }
         else if (commandName == "query-archive-period") {
             handleQueryArchivePeriod(commandName, response);
@@ -678,6 +684,39 @@ CommandHandler::handleQueryArchivePeriod(const std::string & commandName, std::s
         oss << CONSOLE_COMMAND_FAILURE_STRING;
 
     response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::handleQueryStormArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    DateTime startDate = 0;
+    DateTime endDate = 0;
+    struct tm tm;
+
+    for (CommandArgument arg : argumentList) {
+        tm = {0};
+        tm.tm_isdst = -1;
+        if (arg.first == "start-time") {
+            std::stringstream ss(arg.second);
+            ss >> std::get_time(&tm, "%Y-%m-%d");
+            startDate = mktime(&tm);
+        }
+        else if (arg.first == "end-time") {
+            std::stringstream ss(arg.second);
+            ss >> std::get_time(&tm, "%Y-%m-%d");
+            endDate = mktime(&tm);
+        }
+    }
+
+    if (startDate == 0 || endDate == 0) {
+        response.append(buildFailureString("Missing argument"));
+    }
+    else {
+        vector<StormData> storms;
+        stormArchiveManager.queryStorms(startDate, endDate, storms);
+        response.append(stormArchiveManager.formatStormJSON(storms));
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

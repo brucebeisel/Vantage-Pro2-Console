@@ -77,8 +77,49 @@ StormArchiveManager::updateArchive() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+DateTime
+StormArchiveManager::queryStorms(DateTime start, DateTime end, std::vector<StormData> & list) const {
+    DateTime lastRecordTime = 0;
+
+    fstream stream;
+    stream.open(stormArchiveFilename.c_str(), ios::in);
+
+    while (stream.good()) {
+        StormData stormData;
+        readRecord(stream, stormData);
+        if (stormData.stormStart >= start && stormData.stormStart <= end) {
+            list.push_back(stormData);
+            lastRecordTime = stormData.stormStart;
+        }
+    }
+
+    return lastRecordTime;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+StormArchiveManager::formatStormJSON(const std::vector<StormData> & storms) const {
+    ostringstream oss;
+    oss << "{ \"storms\" : [";
+    bool first = true;
+    for (StormData storm : storms) {
+        if (!first) oss << ", "; first = false;
+
+        oss << "{ "
+            << "\"start\" : \"" << Weather::formatDate(storm.stormStart) << "\", "
+            << "\"end\" : \"" << Weather::formatDate(storm.stormEnd) << "\", "
+            << "\"rainfall\" : " << Weather::formatDate(storm.stormRain)
+            << "}";
+    }
+    oss << "] }" << endl;
+
+    return oss.str();
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
-StormArchiveManager::readRecord(fstream & fs, StormData & data) {
+StormArchiveManager::readRecord(fstream & fs, StormData & data) const {
     char buffer[STORM_RECORD_LENGTH + 1];
     fs.read(buffer, STORM_RECORD_LENGTH);
     buffer[STORM_RECORD_LENGTH] = '\0';

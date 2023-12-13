@@ -19,6 +19,8 @@
 
 #include <string>
 #include <fstream>
+#include <vector>
+#include "Weather.h"
 
 namespace vws {
 
@@ -34,8 +36,12 @@ public:
 
     void updateArchive();
 
+    DateTime queryStorms(DateTime start, DateTime end, std::vector<StormData> & list) const;
+
+    std::string formatStormJSON(const std::vector<StormData> & storms) const;
+
 private:
-    bool readRecord(std::fstream & fs, StormData & data);
+    bool readRecord(std::fstream & fs, StormData & data) const;
     void writeRecord(std::fstream & fs, StormData & data);
 
     //

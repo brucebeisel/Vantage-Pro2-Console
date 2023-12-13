@@ -28,6 +28,7 @@ class VantageLogger;
 class VantageStationNetwork;
 class AlarmManager;
 class CurrentWeatherManager;
+class StormArchiveManager;
 
 /**
  * Handle the commands that arrive on the command socket.
@@ -45,6 +46,7 @@ public:
      * @param archiveManager        The object that is used to retrieve historical data from the archive
      * @param network               The object that is used to read and write the weather station network data
      * @param alarmManager          The object that manages the alarm thresholds and alarm triggered states
+     * @param stormArchiveManager   The object that manages the archive containing the storm data
      * @param currentWeatherManager The object that is used to retrieve historical current weather data
      */
     CommandHandler(VantageWeatherStation & station,
@@ -52,6 +54,7 @@ public:
                    ArchiveManager & archiveManager,
                    VantageStationNetwork & network,
                    AlarmManager & alarmManager,
+                   StormArchiveManager & stormArchiveManager,
                    CurrentWeatherManager & currentWeatherManager);
 
     /**
@@ -216,6 +219,8 @@ private:
 
     void handleQueryLoopArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
 
+    void handleQueryStormArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response);
+
     void handleGetTimezones(const std::string & commandName, std::string & response);
 
     void handleQueryNetworkConfiguration(const std::string & commandName, std::string & response);
@@ -239,6 +244,7 @@ private:
     VantageStationNetwork & network;
     AlarmManager &          alarmManager;
     CurrentWeatherManager & currentWeatherManager;
+    StormArchiveManager &   stormArchiveManager;
     VantageLogger &         logger;
 };
 

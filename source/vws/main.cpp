@@ -76,7 +76,7 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         AlarmManager alarmManager(station);
         GraphDataRetriever graphDataRetriever(station);
         StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
-        CommandHandler commandHandler(station, configuration, archiveManager, network, alarmManager, currentWeatherManager);
+        CommandHandler commandHandler(station, configuration, archiveManager, network, alarmManager, stormArchiveManager, currentWeatherManager);
         EventManager eventManager(commandHandler);
         CommandSocket commandSocket(11462, eventManager);
         VantageDriver driver(station, configuration, archiveManager, eventManager, stormArchiveManager);
