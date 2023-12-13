@@ -59,12 +59,17 @@ StormArchiveManager::updateArchive() {
         return;
     }
 
-    stream.seekg(-STORM_RECORD_LENGTH, ios::end);
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Read " << stormData.size() << " storm records from EEPROM" << endl;
 
     StormData lastRecord;
     DateTime lastRecordTime = 0;
-    if (readRecord(stream, lastRecord)) {
-        lastRecordTime = lastRecord.stormEnd;
+    stream.seekg(0, ios::end);
+    if (stream.tellg() > STORM_RECORD_LENGTH) {
+        stream.seekg(-STORM_RECORD_LENGTH, ios::end);
+
+        if (readRecord(stream, lastRecord)) {
+            lastRecordTime = lastRecord.stormEnd;
+        }
     }
 
     for (StormData record : stormData) {
@@ -124,8 +129,9 @@ StormArchiveManager::readRecord(fstream & fs, StormData & data) const {
     fs.read(buffer, STORM_RECORD_LENGTH);
     buffer[STORM_RECORD_LENGTH] = '\0';
 
-    if (fs.eof())
+    if (fs.eof()) {
         return false;
+    }
 
     char startDateString[20];
     char endDateString[20];

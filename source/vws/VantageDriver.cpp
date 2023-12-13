@@ -204,8 +204,10 @@ VantageDriver::mainLoop() {
             //
             // Update the storm archive if enough time has passed
             //
-            if (lastStormArchiveUpdateTime + STORM_ARCHIVE_UPDATE_INTERVAL < now)
+            if (lastStormArchiveUpdateTime + STORM_ARCHIVE_UPDATE_INTERVAL < now) {
                 stormArchiveManager.updateArchive();
+                lastStormArchiveUpdateTime = now;
+            }
 
             //
             // Get the current weather values for about a minute or until an event occurs that requires the end of the loop
