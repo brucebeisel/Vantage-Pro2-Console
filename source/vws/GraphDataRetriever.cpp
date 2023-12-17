@@ -70,6 +70,8 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
 
     //
     // This is a ring buffer, so we will read the entire buffer, storing the valid storms, then sort.
+    // Note that the current insert location in the ring buffer is marked by a start and end date of 0xFFFF
+    // and a rainfall amount of 0.0 inches.
     //
     StormData storm;
     for (int i = 0; i < NUM_RAIN_STORM_RECORDS; i++) {

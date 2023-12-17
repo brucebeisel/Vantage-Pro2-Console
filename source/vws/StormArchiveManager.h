@@ -45,7 +45,7 @@ private:
     void writeRecord(std::fstream & fs, StormData & data);
 
     //
-    // Format of record: YYYY-MM-DD<sp>YYYY-MM-DD<sp>00.00<cr>
+    // Format of record: YYYY-MM-DD<SP>YYYY-MM-DD<SP>00.00<LF>
     //
     static constexpr int              STORM_RECORD_LENGTH = 28;
     static constexpr std::string_view STORM_ARCHIVE_FILENAME = "storm-archive.dat";

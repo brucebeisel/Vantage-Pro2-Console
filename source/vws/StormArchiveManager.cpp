@@ -114,7 +114,7 @@ StormArchiveManager::formatStormJSON(const std::vector<StormData> & storms) cons
         oss << "{ "
             << "\"start\" : \"" << Weather::formatDate(storm.stormStart) << "\", "
             << "\"end\" : \"" << Weather::formatDate(storm.stormEnd) << "\", "
-            << "\"rainfall\" : " << Weather::formatDate(storm.stormRain)
+            << "\"rainfall\" : " << storm.stormRain
             << "}";
     }
     oss << "] }" << endl;
