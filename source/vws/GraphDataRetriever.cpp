@@ -59,9 +59,9 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
     //
     StormData storm;
     for (int i = 0; i < NUM_RAIN_STORM_RECORDS; i++) {
-        storm.stormRain = VantageDecoder::decodeStormRain(buffer, i * 2);
-        storm.stormStart = VantageDecoder::decodeStormDate(buffer, (2 * NUM_RAIN_STORM_RECORDS) + (i * 2));
-        storm.stormEnd = VantageDecoder::decodeStormDate(buffer, (4 * NUM_RAIN_STORM_RECORDS) + (i * 2));
+        storm.stormRain = VantageDecoder::decodeStormRain(buffer, i * STORM_RAINFALL_RECORD_SIZE);
+        storm.stormStart = VantageDecoder::decodeStormDate(buffer, (STORM_RAINFALL_RECORD_SIZE * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE));
+        storm.stormEnd = VantageDecoder::decodeStormDate(buffer, ((STORM_RAINFALL_RECORD_SIZE + STORM_DATE_RECORD_SIZE) * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE));
         logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved storm record from EEPROM. Record[" << i << "]: "
                                                    << "Start: " << Weather::formatDate(storm.stormStart)
                                                    << " End: " << Weather::formatDate(storm.stormEnd)
