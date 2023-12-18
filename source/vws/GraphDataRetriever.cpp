@@ -69,8 +69,9 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
         if (storm.stormStart != 0)
             storms.push_back(storm);
 
-        logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved " << storms.size() << " storm records from EEPROM" << endl;
     }
+
+    logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved " << storms.size() << " storm records from EEPROM" << endl;
 
     std::sort(storms.begin(), storms.end(), [](const StormData & a, const StormData & b) {return a.stormStart < b.stormStart;});
 
