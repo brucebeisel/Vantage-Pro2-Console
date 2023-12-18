@@ -89,7 +89,6 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         station.addLoopPacketListener(alarmManager);
         station.addLoopPacketListener(network);
         station.addLoopPacketListener(driver);
-        station.addLoopPacketListener(graphDataRetriever);
 
         //
         // Initialize objects that require it before entering the main loop

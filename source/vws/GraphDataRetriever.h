@@ -22,14 +22,12 @@
 
 namespace vws {
 class VantageWeatherStation;
+class VantageLogger;
 
-class GraphDataRetriever: public VantageWeatherStation::LoopPacketListener {
+class GraphDataRetriever {
 public:
     GraphDataRetriever(VantageWeatherStation & station);
     virtual ~GraphDataRetriever();
-
-    virtual bool processLoopPacket(const LoopPacket & packet);
-    virtual bool processLoop2Packet(const Loop2Packet & packet);
 
     /**
      * Get all of the storm data from the EEPROM.
@@ -37,12 +35,18 @@ public:
     bool retrieveStormData(std::vector<StormData> & stormData);
 
 private:
-    static constexpr int RAIN_STORM_RECORD_SIZE = 6;
-    static constexpr int NUM_RAIN_STORM_RECORDS = 25;
-    static constexpr int RAIN_STORM_DATA_SIZE = RAIN_STORM_RECORD_SIZE * NUM_RAIN_STORM_RECORDS;
+    //
+    // The storm data is stored in 3 parallel buffer arrays. The EEPROM allocates 25 records for each
+    // array, but only 24 records are used.
+    //
+    static constexpr int STORM_RAINFALL_RECORD_SIZE = 2;
+    static constexpr int STORM_DATE_RECORD_SIZE = 2;
+    static constexpr int EEPROM_STORM_RECORDS = 25;
+    static constexpr int NUM_RAIN_STORM_RECORDS = 24;
+    static constexpr int EEPROM_STORM_DATA_SIZE = (STORM_RAINFALL_RECORD_SIZE * EEPROM_STORM_RECORDS) + (STORM_DATE_RECORD_SIZE * EEPROM_STORM_RECORDS * 2);
 
     VantageWeatherStation & station;
-    int nextRainStormDataPointer;
+    VantageLogger * logger;
 };
 
 } /* namespace vws */

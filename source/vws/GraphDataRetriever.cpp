@@ -21,8 +21,7 @@
 #include "VantageWeatherStation.h"
 #include "VantageEepromConstants.h"
 #include "VantageDecoder.h"
-#include "LoopPacket.h"
-#include "Loop2Packet.h"
+#include "VantageLogger.h"
 
 using namespace std;
 
@@ -30,8 +29,8 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-GraphDataRetriever::GraphDataRetriever(VantageWeatherStation & station) : station(station),
-                                                                          nextRainStormDataPointer(0) {
+GraphDataRetriever::GraphDataRetriever(VantageWeatherStation & station) : station(station), logger(&VantageLogger::getLogger("GraphDataRetriever")) {
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,28 +41,10 @@ GraphDataRetriever::~GraphDataRetriever() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-GraphDataRetriever::processLoopPacket(const LoopPacket & packet) {
-    return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-GraphDataRetriever::processLoop2Packet(const Loop2Packet & packet) {
-    //
-    // Pick out the graph data pointers for easier access to the graph data
-    //
-    nextRainStormDataPointer = packet.getNextRainStormGraphPointer();
-    return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
 GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
     storms.clear();
 
-    byte buffer[RAIN_STORM_DATA_SIZE];
+    byte buffer[EEPROM_STORM_DATA_SIZE];
 
     if (!station.eepromBinaryRead(VantageEepromConstants::EE_RAIN_STORM_DATA_ADDRESS, sizeof(buffer), buffer))
         return false;
@@ -78,8 +59,14 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
         storm.stormRain = VantageDecoder::decodeStormRain(buffer, i * 2);
         storm.stormStart = VantageDecoder::decodeStormDate(buffer, (2 * NUM_RAIN_STORM_RECORDS) + (i * 2));
         storm.stormEnd = VantageDecoder::decodeStormDate(buffer, (4 * NUM_RAIN_STORM_RECORDS) + (i * 2));
+        logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved storm record from EEPROM. Record[" << i << "]: "
+                                                   << "Start: " << Weather::formatDate(storm.stormStart)
+                                                   << " End: " << Weather::formatDate(storm.stormEnd)
+                                                   << " Rainfall: " << storm.stormRain << endl;
         if (storm.stormStart != 0)
             storms.push_back(storm);
+
+        logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved " << storms.size() << " storm records from EEPROM" << endl;
     }
 
     std::sort(storms.begin(), storms.end(), [](const StormData & a, const StormData & b) {return a.stormStart < b.stormStart;});
