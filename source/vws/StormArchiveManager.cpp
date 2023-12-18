@@ -73,7 +73,10 @@ StormArchiveManager::updateArchive() {
     }
 
     for (StormData record : stormData) {
-        if (record.stormStart > lastRecordTime)
+        //
+        // Only store new storms and storms that are not in progress (stormEnd == 0)
+        //
+        if (record.stormStart > lastRecordTime && record.stormEnd != 0)
             writeRecord(stream, record);
     }
 
