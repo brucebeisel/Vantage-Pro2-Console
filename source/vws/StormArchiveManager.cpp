@@ -94,8 +94,7 @@ StormArchiveManager::queryStorms(DateTime start, DateTime end, std::vector<Storm
 
     while (stream.good()) {
         StormData stormData;
-        readRecord(stream, stormData);
-        if (stormData.stormStart >= start && stormData.stormStart <= end) {
+        if (readRecord(stream, stormData) && stormData.stormStart >= start && stormData.stormStart <= end) {
             list.push_back(stormData);
             lastRecordTime = stormData.stormStart;
         }
