@@ -683,7 +683,8 @@ static const AlarmProperties alarmProperties[] = {
          85,   2,
           0,   1,
       65535,
-          (1 * 8) + 0
+          (1 * 8) + 0,
+          1, 60000
     },
     { // TBD, rate alarm need rain collector size
         "15 Minute Rain",

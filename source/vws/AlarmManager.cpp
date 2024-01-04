@@ -77,11 +77,11 @@ AlarmManager::formatAlarmThresholdsJSON() {
         double minValue = alarm.calculateActualValue(alarm.getAlarmProperties().minimumValue);
         double maxValue = alarm.calculateActualValue(alarm.getAlarmProperties().maximumValue);
 
-        oss << "{ \"alarmName\" : \"" << alarm.getAlarmName() << "\", "
-            << "\"minValue\" : " << minValue << ", \"maxValue\" : " << maxValue << ", "
-            << "\"isThresholdSet\" : " << std::boolalpha << alarm.isThresholdSet();
+        oss << "{ \"name\" : \"" << alarm.getAlarmName() << "\", "
+            << "\"min\" : " << minValue << ", \"max\" : " << maxValue << ", "
+            << "\"set\" : " << std::boolalpha << alarm.isThresholdSet();
 
-        if (alarm.isThresholdSet())
+        //if (alarm.isThresholdSet())
             oss << ", \"threshold\" : " << alarm.getActualThreshold();
 
         oss << " }";
