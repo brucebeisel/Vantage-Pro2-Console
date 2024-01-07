@@ -73,18 +73,20 @@ AlarmManager::formatAlarmThresholdsJSON() {
     oss << "{ \"alarmThresholds\" : [ ";
     bool first = true;
     for (auto alarm : alarms) {
-        if (!first) oss << ", "; else first = false;
-        double minValue = alarm.calculateActualValue(alarm.getAlarmProperties().minimumValue);
-        double maxValue = alarm.calculateActualValue(alarm.getAlarmProperties().maximumValue);
+        if (alarm.getAlarmProperties().fieldValid) {
+            if (!first) oss << ", "; else first = false;
+            double minValue = alarm.calculateActualValue(alarm.getAlarmProperties().minimumValue);
+            double maxValue = alarm.calculateActualValue(alarm.getAlarmProperties().maximumValue);
 
-        oss << "{ \"name\" : \"" << alarm.getAlarmName() << "\", "
-            << "\"min\" : " << minValue << ", \"max\" : " << maxValue << ", "
-            << "\"set\" : " << std::boolalpha << alarm.isThresholdSet();
+            oss << "{ \"name\" : \"" << alarm.getAlarmName() << "\", "
+                << "\"min\" : " << minValue << ", \"max\" : " << maxValue << ", "
+                << "\"set\" : " << std::boolalpha << alarm.isThresholdSet();
 
-        //if (alarm.isThresholdSet())
-            oss << ", \"threshold\" : " << alarm.getActualThreshold();
+            //if (alarm.isThresholdSet())
+                oss << ", \"threshold\" : " << alarm.getActualThreshold();
 
-        oss << " }";
+            oss << " }";
+        }
     }
 
     oss << " ] }";
@@ -101,7 +103,10 @@ AlarmManager::formatActiveAlarmsJSON() {
     for (auto alarm : alarms) {
         if (alarm.isTriggered()) {
             if (first) first = false; else oss << ", ";
-            oss << alarm.getAlarmName();
+            oss << "{ "
+                << "\"name\" : \"" << alarm.getAlarmName() << "\", "
+                << "\"field\" : \"" << alarm.getAlarmCurrentWeatherFieldName() << "\""
+                << " }";
         }
     }
 
@@ -126,8 +131,21 @@ AlarmManager::setAlarmThreshold(const std::string & alarmName, double actualThre
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
+AlarmManager::setAlarmThresholds(const vector<Threshold> & thresholds) {
+    clearAllThresholds();
+
+    for (auto & threshold : thresholds) {
+        setAlarmThreshold(threshold.first, threshold.second);
+    }
+
+    return updateThresholds();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
 AlarmManager::clearAlarmThreshold(const std::string & alarmName) {
-    for (auto alarm : alarms) {
+    for (auto & alarm : alarms) {
         if (alarm.getAlarmName() == alarmName) {
             alarm.clearThreshold();
             return true;
@@ -136,6 +154,16 @@ AlarmManager::clearAlarmThreshold(const std::string & alarmName) {
     return false;
 
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+AlarmManager::clearAllThresholds() {
+    for (auto & alarm : alarms) {
+        alarm.clearThreshold();
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
@@ -170,7 +198,7 @@ AlarmManager::updateThresholds() {
     byte buffer[EE_ALARM_THRESHOLDS_SIZE];
 
     for (vector<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
-        AlarmProperties props = it->getAlarmProperties();
+        const AlarmProperties props = it->getAlarmProperties();
         BitConverter::getBytes(it->getEepromThreshold(), buffer, props.eepromThresholdByte, props.eepromThresholdSize);
     }
 

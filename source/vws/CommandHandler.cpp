@@ -1069,14 +1069,19 @@ CommandHandler::handleQueryAlarmThresholds(const std::string & commandName, std:
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleUpdateAlarmThresholds(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
+    vector<AlarmManager::Threshold> thresholdList;
+    AlarmManager::Threshold threshold;
+
     for (auto arg : argumentList) {
-        if (arg.second != "")
-            alarmManager.setAlarmThreshold(arg.first, atof(arg.second.c_str()));
-        else
-            alarmManager.clearAlarmThreshold(arg.first);
+        threshold.first = arg.first;
+        threshold.second = atof(arg.second.c_str());
+        thresholdList.push_back(threshold);
     }
 
-    response.append(SUCCESS_TOKEN);
+    if (alarmManager.setAlarmThresholds(thresholdList))
+        response.append(SUCCESS_TOKEN);
+    else
+        response.append(buildFailureString("Alarm Thresholds failed to be saved to console"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -47,6 +47,13 @@ public:
     std::string getAlarmName() const;
 
     /**
+     * Get the name of this current weather field that applies to this alarm.
+     *
+     * @return The current weather field for this alarm
+     */
+    std::string getAlarmCurrentWeatherFieldName() const;
+
+    /**
      * Get the properties of this alarm.
      *
      * @return The properties of this alarm

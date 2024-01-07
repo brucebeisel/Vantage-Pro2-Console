@@ -25,6 +25,7 @@ namespace vws {
  */
 struct AlarmProperties {
     std::string alarmName;             // The name of this alarm
+    std::string currentWeatherField;   // The current weather field to which this alarm applies
     int         eepromThresholdByte;   // The byte within the EEPROM block that this alarm's threshold is stored
     int         eepromThresholdSize;   // The number of bytes the threshold value uses
     int         eepromThresholdOffset; // The amount to subtract from the value in the EEPROM
@@ -33,6 +34,7 @@ struct AlarmProperties {
     int         alarmBit;              // The bit within the LOOP packet that indicates if this alarm has been triggered
     int         minimumValue;          // The minimum value the threshold can be
     int         maximumValue;          // The maximum value the threshold can be
+    bool        fieldValid;            // Whether this field is valid in the current weather packets
 
     /**
      * Get the number of alarm properties.

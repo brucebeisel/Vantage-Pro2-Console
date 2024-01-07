@@ -56,9 +56,9 @@ Alarm::setThreshold(int eepromThreshold) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-Alarm::setThreshold(double actualThreshold) {
-    this->actualThreshold = actualThreshold;
-    int eepromThreshold = fromActualToEepromThreshold(actualThreshold, properties.eepromThresholdOffset, properties.eepromThresholdScale);
+Alarm::setThreshold(double threshold) {
+    actualThreshold = threshold;
+    eepromThreshold = fromActualToEepromThreshold(actualThreshold, properties.eepromThresholdOffset, properties.eepromThresholdScale);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +133,13 @@ Alarm::getAlarmProperties() const {
 std::string
 Alarm::getAlarmName() const {
     return properties.alarmName;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+Alarm::getAlarmCurrentWeatherFieldName() const {
+    return properties.currentWeatherField;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

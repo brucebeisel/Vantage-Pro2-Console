@@ -30,6 +30,7 @@ class VantageLogger;
 class AlarmManager : public VantageWeatherStation::LoopPacketListener {
 public:
     static const int NUM_ALARMS = 86;
+    typedef std::pair<std::string,double> Threshold;
 
     /**
      * Constructor.
@@ -92,6 +93,14 @@ public:
     bool setAlarmThreshold(const std::string & alarmName, double actualThreshold);
 
     /**
+     * Set the thresholds for a number of alarms, first clearing all alarm thresholds.
+     *
+     * @param threshold The list of thresholds to set
+     * @return True if successful
+     */
+    bool setAlarmThresholds(const std::vector<Threshold> & thresholds);
+
+    /**
      * Clear the threshold for the give alarm.
      *
      * @param alarmName The alarm for which to clear the threshold
@@ -113,6 +122,11 @@ private:
      * @return True of the update was successful
      */
     bool updateThresholds();
+
+    /**
+     * Clear all the thresholds to disabled values.
+     */
+    void clearAllThresholds();
 
     /**
      * Set the alarm bits as provided by the LOOP packet.
