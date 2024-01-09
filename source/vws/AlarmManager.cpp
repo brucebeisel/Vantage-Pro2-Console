@@ -120,7 +120,7 @@ AlarmManager::formatActiveAlarmsJSON() {
 bool
 AlarmManager::setAlarmThreshold(const std::string & alarmName, double actualThreshold) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Setting threshold for alarm " << alarmName << " to " << actualThreshold << endl;
-    for (auto alarm : alarms) {
+    for (auto & alarm : alarms) {
         if (alarm.getAlarmName() == alarmName) {
             alarm.setThreshold(actualThreshold);
             return true;
