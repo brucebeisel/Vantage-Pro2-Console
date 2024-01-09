@@ -147,13 +147,7 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "clear-high-values") {
             handleClearHighValues(commandName, argumentList, response);
         }
-        else if (commandName == "clear-highs") {
-            handleClearHighValues(commandName, argumentList, response);
-        }
         else if (commandName == "clear-low-values") {
-            handleClearLowValues(commandName, argumentList, response);
-        }
-        else if (commandName == "clear-lows") {
             handleClearLowValues(commandName, argumentList, response);
         }
         else if (commandName == "console-diagnostics") {
