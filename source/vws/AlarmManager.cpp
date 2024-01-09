@@ -119,6 +119,7 @@ AlarmManager::formatActiveAlarmsJSON() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 AlarmManager::setAlarmThreshold(const std::string & alarmName, double actualThreshold) {
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Setting threshold for alarm " << alarmName << " to " << actualThreshold << endl;
     for (auto alarm : alarms) {
         if (alarm.getAlarmName() == alarmName) {
             alarm.setThreshold(actualThreshold);
@@ -135,7 +136,10 @@ AlarmManager::setAlarmThresholds(const vector<Threshold> & thresholds) {
     clearAllThresholds();
 
     for (auto & threshold : thresholds) {
-        setAlarmThreshold(threshold.first, threshold.second);
+        if (!setAlarmThreshold(threshold.first, threshold.second)) {
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to set alarm threshold for alarm '" << threshold.first << "'" << endl;
+            return false;
+        }
     }
 
     return updateThresholds();

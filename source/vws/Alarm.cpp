@@ -57,8 +57,11 @@ Alarm::setThreshold(int eepromThreshold) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 Alarm::setThreshold(double threshold) {
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "######### Setting threshold for alarm " << properties.alarmName << " to " << threshold << endl;
     actualThreshold = threshold;
     eepromThreshold = fromActualToEepromThreshold(actualThreshold, properties.eepromThresholdOffset, properties.eepromThresholdScale);
+    alarmThresholdSet = true;
+    alarmTriggered = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

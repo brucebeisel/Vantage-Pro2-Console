@@ -1078,6 +1078,7 @@ CommandHandler::handleUpdateAlarmThresholds(const std::string & commandName, con
         thresholdList.push_back(threshold);
     }
 
+    logger.log(VantageLogger::VANTAGE_INFO) << "Setting thresholds for " << thresholdList.size() << " alarms" << endl;
     if (alarmManager.setAlarmThresholds(thresholdList))
         response.append(SUCCESS_TOKEN);
     else
