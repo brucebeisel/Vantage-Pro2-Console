@@ -47,13 +47,6 @@ public:
     bool initialize();
 
     /**
-     * Get the list of alarms that are currently triggered.
-     *
-     * @param triggeredList The container into which the triggered alarms will be copied
-     */
-    void getTriggeredList(std::vector<Alarm> & triggeredList) const;
-
-    /**
      * Process a LOOP packets as part of the LoopPacketListener interface.
      *
      * @param packet The LOOP packet
@@ -81,7 +74,7 @@ public:
      *
      * @return The formatted JSON message
      */
-    std::string formatActiveAlarmsJSON();
+    std::string formatActiveAlarmsJSON() const;
 
     /**
      * Set the threshold for the give alarm.

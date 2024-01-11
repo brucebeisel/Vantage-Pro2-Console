@@ -159,6 +159,9 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-alarm-thresholds") {
             handleQueryAlarmThresholds(commandName, response);
         }
+        else if (commandName == "query-active-alarms") {
+            response.append(alarmManager.formatActiveAlarmsJSON());
+        }
         else if (commandName == "query-archive-statistics") {
             handleQueryArchiveStatistics(commandName, response);
         }

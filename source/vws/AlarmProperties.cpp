@@ -663,14 +663,14 @@ static const AlarmProperties alarmProperties[] = {
           true
     },
     {
-        "UNAVAILABLE",
-        "",
+        "UV Dose",
+        "uvIndex",
          66,   1,
           0,   1,
           0,
          -1,
           0,   0,
-          false
+          true
     },
     {
         "Low Soil Moisture 1",

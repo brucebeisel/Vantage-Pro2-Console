@@ -55,8 +55,7 @@
 ../../target/vws/GraphDataRetriever.o: GraphDataRetriever.cpp \
  GraphDataRetriever.h VantageWeatherStation.h ArchivePacket.h \
  WeatherTypes.h Measurement.h BitConverter.h VantageProtocolConstants.h \
- Weather.h VantageEepromConstants.h VantageDecoder.h VantageLogger.h \
- LoopPacket.h Loop2Packet.h
+ Weather.h VantageEepromConstants.h VantageDecoder.h VantageLogger.h
 ../../target/vws/HiLowPacket.o: HiLowPacket.cpp HiLowPacket.h \
  Measurement.h VantageProtocolConstants.h WeatherTypes.h BitConverter.h \
  VantageDecoder.h VantageEepromConstants.h VantageLogger.h Weather.h

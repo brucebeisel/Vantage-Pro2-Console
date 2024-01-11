@@ -96,7 +96,7 @@ AlarmManager::formatAlarmThresholdsJSON() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-AlarmManager::formatActiveAlarmsJSON() {
+AlarmManager::formatActiveAlarmsJSON() const {
     ostringstream oss;
     oss << "{ \"activeAlarms\" : [ ";
     bool first = true;
