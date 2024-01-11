@@ -162,7 +162,6 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
         else if (commandName == "query-active-alarms") {
             response.append(SUCCESS_TOKEN).append(", ").append(DATA_TOKEN).append(" : ");
             response.append(alarmManager.formatActiveAlarmsJSON());
-            response.append(" }");
         }
         else if (commandName == "query-archive-statistics") {
             handleQueryArchiveStatistics(commandName, response);
