@@ -79,10 +79,11 @@ AlarmManager::formatAlarmThresholdsJSON() {
             double maxValue = alarm.calculateActualValue(alarm.getAlarmProperties().maximumValue);
 
             oss << "{ \"name\" : \"" << alarm.getAlarmName() << "\", "
+                << "\"field\" : \"" << alarm.getAlarmCurrentWeatherFieldName() << "\", "
                 << "\"min\" : " << minValue << ", \"max\" : " << maxValue << ", "
                 << "\"set\" : " << std::boolalpha << alarm.isThresholdSet();
 
-            //if (alarm.isThresholdSet())
+            if (alarm.isThresholdSet())
                 oss << ", \"threshold\" : " << alarm.getActualThreshold();
 
             oss << " }";

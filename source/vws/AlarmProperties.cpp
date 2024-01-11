@@ -663,14 +663,14 @@ static const AlarmProperties alarmProperties[] = {
           true
     },
     {
-        "UV Dose",
+        "UV Dose", // This alarm is a bit strange according to the serial protocol manual
         "uvIndex",
          66,   1,
           0,   1,
-          0,
-         -1,
-          0,   0,
-          true
+        255,
+          (3 * 8) + 3,
+          0,   254,
+          false
     },
     {
         "Low Soil Moisture 1",
