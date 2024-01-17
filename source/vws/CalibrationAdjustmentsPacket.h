@@ -47,9 +47,8 @@ public:
      * Decode the calibration block into members.
      *
      * @param buffer The buffer from which to decode the calibration block
-     * @return True if the decoding was successful
      */
-    bool decodePacket(const byte buffer[]);
+    void decodePacket(const byte buffer[]);
 
     /**
      * Encode the calibration members into the provided buffer.

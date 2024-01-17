@@ -39,9 +39,8 @@ public:
      * Parse the High/Lows packet buffer.
      * 
      * @param buffer The buffer to decodes
-     * @return True if the Hi/Low packet was decodes successfully
      */
-    bool decodeHiLowPacket(byte buffer[]);
+    void decodeHiLowPacket(byte buffer[]);
 
     std::string formatJSON() const;
 

@@ -45,7 +45,8 @@ CalibrationAdjustmentsPacket::~CalibrationAdjustmentsPacket() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
+// TODO Add sizeof buffer argument to prevent potential buffer overflows
+void
 CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
     int value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
     insideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
@@ -76,13 +77,11 @@ CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
         extraHumidityAdjustments[i] = BitConverter::toInt8(buffer, EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET + i);
 
     windDirectionAdjustment = BitConverter::toInt16(buffer, WIND_DIRECTION_ADJUSTMENT_OFFSET);
-
-    return true;
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+// TODO Add sizeof buffer argument to prevent potential buffer overflows
 void
 CalibrationAdjustmentsPacket::encodePacket(byte buffer[]) const {
     int8 value = static_cast<int>(insideTemperatureAdjustment * TEMPERATURE_ADJUSTMENT_SCALE);

@@ -157,11 +157,14 @@ VantageWeatherStation::retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport 
     if (!sendStringValueCommand(RECEIVE_CHECK_CMD, response))
         return false;
 
-    sscanf(response.c_str(), "%d %d %d %d %d", &report.packetCount,
-                                               &report.missedPacketCount,
-                                               &report.syncCount,
-                                               &report.maxPacketSequence,
-                                               &report.crcErrorCount);
+    if (sscanf(response.c_str(), "%d %d %d %d %d", &report.packetCount,
+                                                   &report.missedPacketCount,
+                                                   &report.syncCount,
+                                                   &report.maxPacketSequence,
+                                                   &report.crcErrorCount) != 5) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Console diagnostic report did not receive 5 tokens. Response: " << response << endl;
+        return false;
+    }
 
     return true;
 }
@@ -833,10 +836,21 @@ VantageWeatherStation::updateBaudRate(BaudRate baudRate) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateConsoleTime() {
-    if (!sendAckedCommand(SET_TIME_CMD))
-        return false;
+    DateTime currentStationTime;
 
+    //
+    // If the console time is close to the actual time, then don't set the time
+    //
     time_t now = time(0);
+    if (retrieveConsoleTime(currentStationTime)) {
+        DateTime delta = abs(now - currentStationTime);
+        logger.log(VantageLogger::VANTAGE_INFO) << "Console time delta to actual time: " << delta << endl;
+        if (delta < CONSOLE_TIME_DELTA_THRESHOLD_SECONDS) {
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Not setting console time because it is close to actual time" << endl;
+            return true;
+        }
+    }
+
     struct tm tm;
     Weather::localtime(now, tm);
     logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Setting console time to " << Weather::formatDateTime(now) << endl;
@@ -850,6 +864,9 @@ VantageWeatherStation::updateConsoleTime() {
 
     int crc = VantageCRC::calculateCRC(buffer, SET_TIME_LENGTH);
     BitConverter::getBytes(crc, buffer, SET_TIME_LENGTH, CRC_BYTES, false);
+
+    if (!sendAckedCommand(SET_TIME_CMD))
+        return false;
 
     bool success = false;
     if (serialPort.write(buffer, SET_TIME_LENGTH + CRC_BYTES)) {
@@ -1293,6 +1310,8 @@ VantageWeatherStation::sendStringValueCommand(const string & command, string & r
 
     if (!success)
         wakeupStation();
+    else
+        logger.log(VantageLogger::VANTAGE_INFO) << "String Value command read string '" << results << "' " << endl;
 
     return success;
 }

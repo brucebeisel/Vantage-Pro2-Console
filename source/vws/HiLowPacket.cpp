@@ -150,7 +150,7 @@ HiLowPacket::formatJSON() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
+void
 HiLowPacket::decodeHiLowPacket(byte buffer[]) {
 
     //
@@ -367,8 +367,6 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
         leafWetness[i].lows.yearExtremeValue     = VantageDecoder::decodeLeafWetness(buffer, 428 + i);
         leafWetness[i].highs.yearExtremeValue    = VantageDecoder::decodeLeafWetness(buffer, 432 + 1);
     }
-
-    return true;
 }
 
 }

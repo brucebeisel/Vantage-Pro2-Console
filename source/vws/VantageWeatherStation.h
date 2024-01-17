@@ -499,8 +499,9 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
 
 private:
-    static constexpr int WAKEUP_TRIES = 5;               // The number of times to try to wake up the console before performing a disconnect/reconnect cycle
-    static constexpr int CRC_BYTES = 2;                  // The number of bytes in the CRC
+    static constexpr int WAKEUP_TRIES = 5;                         // The number of times to try to wake up the console before performing a disconnect/reconnect cycle
+    static constexpr int CONSOLE_TIME_DELTA_THRESHOLD_SECONDS = 5; // The number of seconds that the console time can be off before the time will be set
+    static constexpr int CRC_BYTES = 2;                            // The number of bytes in the CRC
 
     static constexpr int NUM_ARCHIVE_PAGES = 512;        // The total number of pages in the console's memory
     static constexpr int ARCHIVE_PAGE_SIZE = 265;        // 1 sequence byte, 5 52 byte records (260 bytes) and 4 spare bytes. 1 + 260 + 4 = 265 bytes
