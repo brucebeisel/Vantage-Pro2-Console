@@ -373,6 +373,7 @@ public:
     
     /**
      * Update the console's time.
+     * Note that this command will also reset the diagnostic counters.
      * 
      * @return True if successful
      */

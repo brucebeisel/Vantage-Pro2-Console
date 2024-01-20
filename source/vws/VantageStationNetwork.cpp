@@ -421,7 +421,7 @@ VantageStationNetwork::retrieveStationInfo() {
     }
 
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "++++++++ STATION DATA +++++++" << endl
-                                              << "Monitored Station Mask: " << monitoredStationMask << endl;
+                                              << "Monitored Station Mask: " << static_cast<int>(monitoredStationMask) << endl;
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "ID: "  << stationData[i].stationId
                                                   << " Repeater ID: " << stationData[i].repeaterId
@@ -792,8 +792,6 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
     char buffer[EE_STATION_LIST_SIZE];
     for (int i = 0; i < MAX_STATIONS; i++)
         stationData[i].encode(buffer, i * 2);
-
-    cout << "Station List Buffer: " << Weather::dumpBuffer(buffer, sizeof(buffer)) << endl;
 
     /*
     if (!station.eepromBinaryWrite(EE_STATION_LIST_ADDRESS, buffer, EE_STATION_LIST_SIZE))

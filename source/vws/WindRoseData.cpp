@@ -58,8 +58,6 @@ WindSlice::applyWindSample(const Measurement<HeadingIndex> & sampleHeadingIndex,
         windySampleCount++;
 
     if (sampleSpeed > 0.0 && headingIndex == sampleHeadingIndex.getValue()) {
-        if (headingIndex == 1)
-            cout << "Speed for heading code NNE: " << sampleSpeed << endl;
         sliceSampleCount++;
 
         if (sampleSpeed > maxSpeed)

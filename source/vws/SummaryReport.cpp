@@ -21,6 +21,7 @@
 #include "ArchiveManager.h"
 #include "WindRoseData.h"
 #include "VantageEnums.h"
+#include "VantageLogger.h"
 
 using namespace std;
 
@@ -43,7 +44,8 @@ SummaryRecord::SummaryRecord(SummaryPeriod period, DateTime startDate, DateTime 
                                                                                            sustainedWindSpeed("sustainedWindSpeed"),
                                                                                            gustWindSpeed("windGustSpeed"),
                                                                                            uvIndex("uvIndex"),
-                                                                                           et("evapotranspiration") {
+                                                                                           et("evapotranspiration"),
+                                                                                           logger(VantageLogger::getLogger("SummaryRecord")) {
 
 
     for (int i = 0; i < ArchivePacket::MAX_EXTRA_TEMPERATURES; i++)
@@ -76,17 +78,16 @@ void
 SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
     DateTime packetTime = archivePacket.getDateTime();
 
-    //cout << "Checking time of " << Weather::formatDateTime(packetTime)
-    //     << " against SummaryRecord time range: " << Weather::formatDateTime(startDate) << " to " << Weather::formatDateTime(endDate) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Checking time of " << Weather::formatDateTime(packetTime)
+                                              << " against SummaryRecord time range: " << Weather::formatDateTime(startDate)
+                                              << " to " << Weather::formatDateTime(endDate) << endl;
 
     if (packetTime < startDate || packetTime > endDate) {
-        //cout << "------Ignoring packet" << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "------Ignoring packet" << endl;
         return;
     }
 
     packetCount++;
-
-    //cout << "Outside temperature for " << Weather::formatDate(startDate) << endl;
 
     outsideTemperature.applyMeasurement(packetTime,
                                         archivePacket.getAverageOutsideTemperature(),
@@ -194,7 +195,8 @@ SummaryReport::SummaryReport(SummaryPeriod period,
                                                    startDate(startDate),
                                                    endDate(endDate),
                                                    archiveManager(archiveManager),
-                                                   windRoseData(wrd) {
+                                                   windRoseData(wrd),
+                                                   logger(VantageLogger::getLogger("SummaryRecord")) {
     //
     // Set the start and end times to the start and end of the days
     //
@@ -287,7 +289,8 @@ SummaryReport::normalizeEndTime(DateTime startTime, DateTime endTime, SummaryPer
             normalizedTime = calculateLastSecondOfDay(mktime(&tm));
             break;
     }
-    cout << "Normalize end time from " << Weather::formatDateTime(endTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
+
+    //logger.log(VantageLogger::VANTAGE_DEBUG2) << "Normalize end time from " << Weather::formatDateTime(endTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
 
     return normalizedTime;
 
@@ -405,7 +408,7 @@ SummaryReport::loadData() {
     startDate = normalizeStartTime(startDate, period);
     endDate = normalizeEndTime(startDate, endDate, period);
 
-    cout << "Getting archive between " << Weather::formatDate(startDate) << " and " << Weather::formatDate(endDate) << endl;
+    //cout << "Getting archive between " << Weather::formatDate(startDate) << " and " << Weather::formatDate(endDate) << endl;
 
     vector<ArchivePacket> packets;
     DateTime lastRecordDate = archiveManager.queryArchiveRecords(startDate, endDate, packets);

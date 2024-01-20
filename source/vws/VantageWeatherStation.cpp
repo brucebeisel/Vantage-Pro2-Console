@@ -836,12 +836,15 @@ VantageWeatherStation::updateBaudRate(BaudRate baudRate) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateConsoleTime() {
-    DateTime currentStationTime;
 
     //
-    // If the console time is close to the actual time, then don't set the time
+    // If the console time is close to the actual time, then don't set the time.
+    // Note that the console has an undocumented feature, where setting the console's time
+    // will reset the diagnostics counters. So the time delta check is meant to keep the
+    // diagnostics counters from being reset.
     //
     time_t now = time(0);
+    DateTime currentStationTime;
     if (retrieveConsoleTime(currentStationTime)) {
         DateTime delta = abs(now - currentStationTime);
         logger.log(VantageLogger::VANTAGE_INFO) << "Console time delta to actual time: " << delta << endl;
