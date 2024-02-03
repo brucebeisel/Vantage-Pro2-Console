@@ -26,6 +26,7 @@
 #include "SummaryEnums.h"
 
 namespace vws {
+class VantageLogger;
 
 /**
  * Template class to calculate the average value of a measurement.
@@ -355,10 +356,57 @@ private:
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  soilTemperatures[ArchivePacket::MAX_SOIL_TEMPERATURES];
     SummaryMeasurement<LeafWetness,SummaryExtremes::MINIMUM_AND_MAXIMUM>  leafWetnesses[ArchivePacket::MAX_LEAF_WETNESSES];
     SummaryMeasurement<SoilMoisture,SummaryExtremes::MINIMUM_AND_MAXIMUM> soilMoistures[ArchivePacket::MAX_SOIL_MOISTURES];
+
+    VantageLogger & logger;
 };
 
 class ArchiveManager;
 
+/**
+ * Statistics
+ */
+class SummaryStatistics {
+public:
+    int totalDays;
+
+    int rainDays;
+    Rainfall highDayRainfall;
+    DateTime highDayRainfallDate;
+
+    Temperature averageOutsideTemperature;
+    Humidity averageOutsideHumidity;
+
+    // High barometer, low barometer, barometer range, average barometer
+    // Humidity range
+    // High UV index
+    // High solar radiation
+    // Max mean outside temperature, min mean outside temperature
+    // Max mean outside humidity, min mean outside humidity
+
+    Temperature highOutsideTemperature;
+    DateTime    highOutsideTemperatureTime;
+
+    Temperature lowOutsideTemperature;
+    DateTime    lowOutsideTemperatureTime;
+
+    Temperature lowTemperatureOnMinRangeDay;
+    Temperature highTemperatureOnMinRangeDay;
+    DateTime    minTemperatureRangeDate;
+
+    Temperature lowTemperatureOnMaxRangeDay;
+    Temperature highTemperatureOnMaxRangeDay;
+    DateTime    maxTemperatureRangeDate;
+
+    Speed maxAverageWind;
+    DateTime maxAverageWindDate;
+
+    Speed maxSustainedWind;
+    DateTime maxSustainedWindTime;
+
+    Speed maxWindGust;
+    DateTime maxWindGustTime;
+
+};
 /**
  * Holder of a summary report.
  */
@@ -409,6 +457,7 @@ private:
     std::vector<SummaryRecord> summaryRecords;
     Rainfall                   hourRainfallBuckets[24];   // Tracks when it has rained over the summary period
     WindRoseData &             windRoseData;
+    VantageLogger &            logger;
 };
 
 } /* namespace vws */

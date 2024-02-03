@@ -131,7 +131,7 @@ template<typename M, SummaryExtremes SE>
 std::string SummaryRecord::arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const {
     std::stringstream ss;
 
-    ss << "\"" << name << "\" : [ " << endl;
+    ss << "\"" << name << "\" : [ ";
 
     bool first = true;
 
@@ -139,7 +139,7 @@ std::string SummaryRecord::arrayFormatJSON(const std::string & name, const Summa
         string s = sm[i].formatJSON(false);
 
         if (s.length() > 0) {
-            if (!first) ss << ", " << endl; else first = false;
+            if (!first) ss << ", "; else first = false;
 
             ss << " { " << s << " } ";
         }
@@ -154,30 +154,31 @@ std::string SummaryRecord::arrayFormatJSON(const std::string & name, const Summa
 ////////////////////////////////////////////////////////////////////////////////
 std::string
 SummaryRecord::formatJSON() const {
+    // TODO remove all of the endl's in the JSON report
     std::stringstream ss;
     ss << " { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
-       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\"" << endl;
+       << "\"endDate\" : \"" << Weather::formatDate(endDate) << "\"";
     if (packetCount != 0) {
-        ss << outsideTemperature.formatJSON(true) << endl
-           << outsideHumidity.formatJSON(true) << endl
-           << solarRadiation.formatJSON(true) << endl
-           << insideTemperature.formatJSON(true) << endl
-           << insideHumidity.formatJSON(true) << endl
-           << barometer.formatJSON(true) << endl
-           << rainfallRate.formatJSON(true) << endl
-           << uvIndex.formatJSON(true) << endl
-           << et.formatJSON(true) << endl
-           << sustainedWindSpeed.formatJSON(true) << endl
-           << gustWindSpeed.formatJSON(true) << endl
-           << ", \"rainfall\" : { \"total\" : { \"value\" : " << totalRainfall << " } }, " << endl;
+        ss << outsideTemperature.formatJSON(true)
+           << outsideHumidity.formatJSON(true)
+           << solarRadiation.formatJSON(true)
+           << insideTemperature.formatJSON(true)
+           << insideHumidity.formatJSON(true)
+           << barometer.formatJSON(true)
+           << rainfallRate.formatJSON(true)
+           << uvIndex.formatJSON(true)
+           << et.formatJSON(true)
+           << sustainedWindSpeed.formatJSON(true)
+           << gustWindSpeed.formatJSON(true)
+           << ", \"rainfall\" : { \"total\" : { \"value\" : " << totalRainfall << " } }, ";
 
-        ss << arrayFormatJSON("extraTemperatures", extraTemperatures, ArchivePacket::MAX_EXTRA_TEMPERATURES) << ", " << endl
-           << arrayFormatJSON("extraHumidities", extraHumidities, ArchivePacket::MAX_EXTRA_HUMIDITIES) << ", " << endl
-           << arrayFormatJSON("leafTemperatures", leafTemperatures, ArchivePacket::MAX_LEAF_TEMPERATURES) << ", " << endl
-           << arrayFormatJSON("soilTemperatures", soilTemperatures, ArchivePacket::MAX_SOIL_TEMPERATURES) << ", " << endl
-           << arrayFormatJSON("leafWetnesses", leafWetnesses, ArchivePacket::MAX_LEAF_WETNESSES) << ", " << endl
-           << arrayFormatJSON("soilMoistures", soilMoistures, ArchivePacket::MAX_SOIL_MOISTURES) <<  endl; 
+        ss << arrayFormatJSON("extraTemperatures", extraTemperatures, ArchivePacket::MAX_EXTRA_TEMPERATURES) << ", "
+           << arrayFormatJSON("extraHumidities", extraHumidities, ArchivePacket::MAX_EXTRA_HUMIDITIES) << ", "
+           << arrayFormatJSON("leafTemperatures", leafTemperatures, ArchivePacket::MAX_LEAF_TEMPERATURES) << ", "
+           << arrayFormatJSON("soilTemperatures", soilTemperatures, ArchivePacket::MAX_SOIL_TEMPERATURES) << ", "
+           << arrayFormatJSON("leafWetnesses", leafWetnesses, ArchivePacket::MAX_LEAF_WETNESSES) << ", "
+           << arrayFormatJSON("soilMoistures", soilMoistures, ArchivePacket::MAX_SOIL_MOISTURES);
     }
 
     ss << " }";

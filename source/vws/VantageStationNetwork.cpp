@@ -404,10 +404,10 @@ VantageStationNetwork::retrieveStationInfo() {
 
     console.retransmitId = static_cast<StationId>(retransmitValue);
 
-    if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
+    if (!station.eepromBinaryRead(EE_USED_TRANSMITTERS_ADDRESS, 1, &monitoredStationMask))
         return false;
 
-    if (!station.eepromBinaryRead(EE_USED_TRANSMITTERS_ADDRESS, 1, &monitoredStationMask))
+    if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
         return false;
 
     windStationId = UNKNOWN_STATION_ID;
