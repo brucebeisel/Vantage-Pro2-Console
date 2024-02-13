@@ -154,7 +154,6 @@ std::string SummaryRecord::arrayFormatJSON(const std::string & name, const Summa
 ////////////////////////////////////////////////////////////////////////////////
 std::string
 SummaryRecord::formatJSON() const {
-    // TODO remove all of the endl's in the JSON report
     std::stringstream ss;
     ss << " { \"type\" : \"" << summaryPeriodEnum.valueToString(period) <<  "\", "
        << "\"startDate\" : \"" << Weather::formatDate(startDate) << "\", "
