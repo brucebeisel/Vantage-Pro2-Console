@@ -72,6 +72,7 @@ namespace VantageEepromConstants {
     static constexpr int      EE_ALARM_THRESHOLDS_SIZE = 94;
     static constexpr int      EE_GRAPH_POINTERS_SIZE = 8;
     static constexpr int      EE_STATION_LIST_SIZE = 16;
+    static constexpr int      EE_CALIBRATION_DATA_SIZE = 29;
 
     static constexpr int      EE_NON_GRAPH_DATA_SIZE = 176;
     static constexpr int      EE_GRAPH_DATA_SIZE = 3730 + 24;

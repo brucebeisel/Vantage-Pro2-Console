@@ -19,6 +19,7 @@
 #include <sstream>
 #include "BitConverter.h"
 #include "VantageLogger.h"
+#include "VantageEepromConstants.h"
 #include "json.hpp"
 
 using namespace std;
@@ -45,9 +46,11 @@ CalibrationAdjustmentsPacket::~CalibrationAdjustmentsPacket() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// TODO Add sizeof buffer argument to prevent potential buffer overflows
-void
-CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
+bool
+CalibrationAdjustmentsPacket::decodePacket(const byte buffer[], size_t buflen) {
+    if (buflen < VantageEepromConstants::EE_CALIBRATION_DATA_SIZE)
+        return false;
+
     int value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
     insideTemperatureAdjustment = static_cast<Temperature>(value8) / TEMPERATURE_ADJUSTMENT_SCALE;
 
@@ -77,13 +80,18 @@ CalibrationAdjustmentsPacket::decodePacket(const byte buffer[]) {
         extraHumidityAdjustments[i] = BitConverter::toInt8(buffer, EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET + i);
 
     windDirectionAdjustment = BitConverter::toInt16(buffer, WIND_DIRECTION_ADJUSTMENT_OFFSET);
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// TODO Add sizeof buffer argument to prevent potential buffer overflows
-void
-CalibrationAdjustmentsPacket::encodePacket(byte buffer[]) const {
+bool
+CalibrationAdjustmentsPacket::encodePacket(byte buffer[], size_t buflen) const {
+
+    if (buflen < VantageEepromConstants::EE_CALIBRATION_DATA_SIZE)
+        return false;
+
     int8 value = static_cast<int>(insideTemperatureAdjustment * TEMPERATURE_ADJUSTMENT_SCALE);
     BitConverter::getBytes(value, buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET, 1);
     BitConverter::getBytes(~value, buffer, INSIDE_TEMPERATURE_ADJUSTMENT_1S_COMPLIMENT_OFFSET, 1);
@@ -113,6 +121,8 @@ CalibrationAdjustmentsPacket::encodePacket(byte buffer[]) const {
         BitConverter::getBytes(extraHumidityAdjustments[i], buffer, EXTRA_HUMIDITY_ADJUSTMENTS_OFFSET + i, 1);
 
     BitConverter::getBytes(windDirectionAdjustment, buffer, WIND_DIRECTION_ADJUSTMENT_OFFSET, 2);
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

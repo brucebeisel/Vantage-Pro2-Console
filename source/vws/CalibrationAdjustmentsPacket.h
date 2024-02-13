@@ -47,15 +47,21 @@ public:
      * Decode the calibration block into members.
      *
      * @param buffer The buffer from which to decode the calibration block
+     * @param buflen The length of the buffer in argument 1
+     *
+     * @return True if the packet was decoded successfully
      */
-    void decodePacket(const byte buffer[]);
+    bool decodePacket(const byte buffer[], size_t buflen);
 
     /**
      * Encode the calibration members into the provided buffer.
      *
      * @param buffer The buffer into which the calibration values will be encoded
+     * @param buflen The length of the buffer in argument 1
+     *
+     * @return True if the packet was encoded successfully
      */
-    void encodePacket(byte buffer[]) const;
+    bool encodePacket(byte buffer[], size_t buflen) const;
 
     /**
      * Format the JSON message.

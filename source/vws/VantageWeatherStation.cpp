@@ -592,9 +592,7 @@ VantageWeatherStation::retrieveCalibrationAdjustments(CalibrationAdjustmentsPack
     if (!eepromBinaryRead(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE, buffer))
         return false;
 
-    calibrationPacket.decodePacket(buffer);
-
-    return true;
+    return calibrationPacket.decodePacket(buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -603,7 +601,10 @@ bool
 VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustmentsPacket & calibrationAdjustments) {
     byte buffer[CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE];
 
-    calibrationAdjustments.encodePacket(buffer);
+    if (!calibrationAdjustments.encodePacket(buffer, sizeof(buffer))) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Calibration adjustment encoding failed" << endl;
+        return false;
+    }
 
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Calibration Adjustment buffer: " << Weather::dumpBuffer(buffer, sizeof(buffer)) << endl;
 
