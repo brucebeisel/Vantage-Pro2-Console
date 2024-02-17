@@ -27,6 +27,7 @@
 
 namespace vws {
 class VantageLogger;
+class ArchiveManager;
 
 /**
  * Template class to calculate the average value of a measurement.
@@ -287,6 +288,7 @@ public:
         return ss.str();
     }
 
+private:
     std::string                                    summaryName;
     const SummaryExtremes                          extremesUsed;
     MeasurementAverage<M>                          average;
@@ -360,21 +362,76 @@ private:
     VantageLogger & logger;
 };
 
-class ArchiveManager;
-
 /**
  * Statistics
  */
+template<typename M>
+class MeasurementStatistics {
+public:
+    MeasurementStatistics(bool low, bool includeZero, bool range) : useLowValue(low), includeZeroValuesInAverage(includeZero), computeRange(range) {};
+    void applyValue(M value, DateTime time);
+    std::string formatJSON() const;
+
+private:
+    std::string name;
+    bool useLowValue;
+    bool includeZeroValuesInAverage;
+    bool computeRange;
+
+    M highValue;
+    DateTime highValueTime;
+
+    // All but solar radiation, UV index
+    M lowValue;
+    DateTime lowValueTime;
+
+    // Do zero values count for averages?
+    int averageSamples;
+    M average;
+
+    M highAverageDayValue;
+    DateTime highAverageDayDate;
+
+    M lowAverageDayValue;
+    DateTime lowAverageDayDate;
+
+    // Ranges for temperature, humidity, barometer,
+    M minimumRange;
+    DateTime minimumRangeDate;
+
+    M maximumRange;
+    DateTime maximumRangeDate;
+
+};
+
 class SummaryStatistics {
 public:
-    int totalDays;
+    SummaryStatistics() : outsideTemperature(true, true, true){}
+    void applyArchivePacket(const ArchivePacket & packet) {}
+    void applySummaryStatistics(const SummaryStatistics & statistics) {}
+    void clearData() {}
+    std::string formatJSON() const {return "";}
 
+    int totalDays;
     int rainDays;
+
+    MeasurementStatistics<Temperature> outsideTemperature; // true, true, true
+    /*
+    MeasurementStatistics<Temperature> insideTemperature;  // true, true, true
+    MeasurementStatistics<Humidity> outsideHumidity;       // true, true, true
+    MeasurementStatistics<Humidity> insideHumidity;        // true, true, true
+    MeasurementStatistics<SolarRadiation> solarRadiation;  // false, false, false
+    MeasurementStatistics<UvIndex> uvIndex;                // false, false, false
+    MeasurementStatistics<Speed> windSpeed;                // true, true, false
+    MeasurementStatistics<Speed> windGust;                 // true, true, false
+    MeasurementStatistics<Evapotranspiration> et;          // false, false, false
+    */
+
     Rainfall highDayRainfall;
     DateTime highDayRainfallDate;
 
-    Temperature averageOutsideTemperature;
-    Humidity averageOutsideHumidity;
+    Rainfall highDayRainfallRate;
+    DateTime highDayRainfallTime;
 
     // High barometer, low barometer, barometer range, average barometer
     // Humidity range
@@ -382,20 +439,6 @@ public:
     // High solar radiation
     // Max mean outside temperature, min mean outside temperature
     // Max mean outside humidity, min mean outside humidity
-
-    Temperature highOutsideTemperature;
-    DateTime    highOutsideTemperatureTime;
-
-    Temperature lowOutsideTemperature;
-    DateTime    lowOutsideTemperatureTime;
-
-    Temperature lowTemperatureOnMinRangeDay;
-    Temperature highTemperatureOnMinRangeDay;
-    DateTime    minTemperatureRangeDate;
-
-    Temperature lowTemperatureOnMaxRangeDay;
-    Temperature highTemperatureOnMaxRangeDay;
-    DateTime    maxTemperatureRangeDate;
 
     Speed maxAverageWind;
     DateTime maxAverageWindDate;
@@ -444,7 +487,7 @@ public:
 
 private:
     static DateTime normalizeStartTime(DateTime time, SummaryPeriod period);
-    static DateTime normalizeEndTime(DateTime startTime, DateTime endTime, SummaryPeriod period);
+    static DateTime normalizeEndTime(DateTime endTime, SummaryPeriod period);
     static DateTime calculateMidnight(DateTime time);
     static DateTime calculateLastSecondOfDay(DateTime time);
     static DateTime calculateEndTime(DateTime startTime, SummaryPeriod period);

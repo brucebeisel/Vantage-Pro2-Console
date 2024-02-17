@@ -78,12 +78,13 @@ void
 SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
     DateTime packetTime = archivePacket.getDateTime();
 
-    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Checking time of " << Weather::formatDateTime(packetTime)
-                                              << " against SummaryRecord time range: " << Weather::formatDateTime(startDate)
-                                              << " to " << Weather::formatDateTime(endDate) << endl;
+    // Note, this logger and the one below are commented out due to the impact on performance
+    //logger.log(VantageLogger::VANTAGE_DEBUG2) << "Checking time of " << Weather::formatDateTime(packetTime)
+    //                                          << " against SummaryRecord time range: " << Weather::formatDateTime(startDate)
+    //                                          << " to " << Weather::formatDateTime(endDate) << endl;
 
     if (packetTime < startDate || packetTime > endDate) {
-        logger.log(VantageLogger::VANTAGE_DEBUG3) << "------Ignoring packet" << endl;
+        //logger.log(VantageLogger::VANTAGE_DEBUG3) << "------Ignoring packet" << endl;
         return;
     }
 
@@ -188,12 +189,12 @@ SummaryRecord::formatJSON() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 SummaryReport::SummaryReport(SummaryPeriod period,
-                             DateTime startDate,
-                             DateTime endDate,
+                             DateTime start,
+                             DateTime end,
                              ArchiveManager & archiveManager,
                              WindRoseData & wrd) : period(period),
-                                                   startDate(startDate),
-                                                   endDate(endDate),
+                                                   startDate(start),
+                                                   endDate(end),
                                                    archiveManager(archiveManager),
                                                    windRoseData(wrd),
                                                    logger(VantageLogger::getLogger("SummaryRecord")) {
@@ -201,6 +202,7 @@ SummaryReport::SummaryReport(SummaryPeriod period,
     // Set the start and end times to the start and end of the days
     //
     startDate = normalizeStartTime(startDate, period);
+    endDate = normalizeEndTime(endDate, period);
 
     struct tm tm;
     localtime_r(&endDate, &tm);
@@ -223,43 +225,44 @@ SummaryReport::~SummaryReport() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
-SummaryReport::normalizeStartTime(DateTime time, SummaryPeriod period) {
+SummaryReport::normalizeStartTime(DateTime startTime, SummaryPeriod period) {
+    DateTime normalizedTime;
     struct tm tm;
-    DateTime startTime;
 
     switch (period) {
         case SummaryPeriod::DAY:
-            startTime = calculateMidnight(time);
+            normalizedTime = calculateMidnight(startTime);
             break;
 
         case SummaryPeriod::WEEK:
-            localtime_r(&time, &tm);
+            localtime_r(&startTime, &tm);
             tm.tm_mday -= tm.tm_wday;
-            startTime = calculateMidnight(mktime(&tm));
+            normalizedTime = calculateMidnight(mktime(&tm));
             break;
             break;
 
         case SummaryPeriod::MONTH:
-            localtime_r(&time, &tm);
+            localtime_r(&startTime, &tm);
             tm.tm_mday = 1;
-            startTime = calculateMidnight(mktime(&tm));
+            normalizedTime = calculateMidnight(mktime(&tm));
             break;
 
         case SummaryPeriod::YEAR:
-            localtime_r(&time, &tm);
+            localtime_r(&startTime, &tm);
             tm.tm_mon = 0;
             tm.tm_mday = 1;
-            startTime = calculateMidnight(mktime(&tm));
+            normalizedTime = calculateMidnight(mktime(&tm));
             break;
     }
 
-    return startTime;
+    cout << "Normalized start time from " << Weather::formatDateTime(startTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
+    return normalizedTime;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
-SummaryReport::normalizeEndTime(DateTime startTime, DateTime endTime, SummaryPeriod period) {
+SummaryReport::normalizeEndTime(DateTime endTime, SummaryPeriod period) {
     DateTime normalizedTime;
     struct tm tm;
 
@@ -290,7 +293,7 @@ SummaryReport::normalizeEndTime(DateTime startTime, DateTime endTime, SummaryPer
             break;
     }
 
-    //logger.log(VantageLogger::VANTAGE_DEBUG2) << "Normalize end time from " << Weather::formatDateTime(endTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
+    cout << "Normalize end time from " << Weather::formatDateTime(endTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
 
     return normalizedTime;
 
@@ -405,8 +408,6 @@ SummaryReport::incrementStartTime(DateTime time, SummaryPeriod period) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 SummaryReport::loadData() {
-    startDate = normalizeStartTime(startDate, period);
-    endDate = normalizeEndTime(startDate, endDate, period);
 
     //cout << "Getting archive between " << Weather::formatDate(startDate) << " and " << Weather::formatDate(endDate) << endl;
 
@@ -436,6 +437,10 @@ SummaryReport::loadData() {
     //
     // Now that we have create all of the summary records, go through and apply the ArchivePackets
     //
+    //SummaryStatistics summaryStatistics;
+    //SummaryStatistics dailyStatistics;
+    //int mday = -1;
+    //bool firstPacket = true;
     for (auto & packet : packets) {
         for (auto & summaryRecord : summaryRecords) {
             summaryRecord.applyArchivePacket(packet);
@@ -445,6 +450,16 @@ SummaryReport::loadData() {
         localtime_r(&packetTime, &tm);
         hourRainfallBuckets[tm.tm_hour] += packet.getRainfall();
         windRoseData.applyWindSample(packet.getPrevailingWindHeadingIndex(), packet.getAverageWindSpeed());
+
+        //if (tm.tm_mday != mday && !firstPacket) {
+        //    summaryStatistics.applySummaryStatistics(dailyStatistics);
+        //    dailyStatistics.clearData();
+        //    mday = tm.tm_mday;
+        //    firstPacket = false;
+        //}
+
+        // Apply the packet to the current statistics
+        //dailyStatistics.applyArchivePacket(packet);
     }
 
     return true;
