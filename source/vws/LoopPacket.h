@@ -91,7 +91,7 @@ public:
     const Measurement<Temperature> &        getLeafTemperature(int index) const;
     const Measurement<Humidity> &           getOutsideHumidity() const;
     const Measurement<Humidity> &           getExtraHumidity(int index) const;
-    Rainfall                                getRainRate() const;
+    RainfallRate                            getRainRate() const;
     const Measurement<UvIndex> &            getUvIndex() const;
     const Measurement<SolarRadiation> &     getSolarRadiation() const;
     bool                                    isStormOngoing() const;
@@ -176,7 +176,7 @@ private:
     Measurement<Temperature>          leafTemperature[ProtocolConstants::MAX_LEAF_TEMPERATURES];
     Measurement<Humidity>             outsideHumidity;
     Measurement<Humidity>             extraHumidity[ProtocolConstants::MAX_EXTRA_HUMIDITIES];
-    Rainfall                          rainRate;
+    RainfallRate                      rainRate;
     Measurement<UvIndex>              uvIndex;
     Measurement<SolarRadiation>       solarRadiation;
     Rainfall                          stormRain;

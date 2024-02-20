@@ -41,7 +41,7 @@ main(int argc, char * argv[]) {
              << "    where: archive-directory is the name of the directory where the archive file resides" << endl
              << "           start-date = start of summary in yyyy-mm-dd format" << endl
              << "           end-date = end of summary in yyyy-mm-dd format" << endl
-             << "           period = {day, week, month, year}" << endl;
+             << "           period = {Day, Week, Month, Year}" << endl;
 
         exit(1);
     }
@@ -74,7 +74,7 @@ main(int argc, char * argv[]) {
         SerialPort port("port", 19200);
         VantageWeatherStation station(port);
         ArchiveManager archiveManager(archiveFile, station);
-        WindRoseData windRoseData(ProtocolConstants::WindUnits::MPH, 2.0, 5);
+        WindRoseData windRoseData(ProtocolConstants::WindUnits::MPH, 5.0, 2);
 
 
         SummaryReport report(period, startDate, endDate, archiveManager, windRoseData);

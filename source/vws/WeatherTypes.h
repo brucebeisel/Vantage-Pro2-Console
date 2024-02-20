@@ -25,6 +25,7 @@ namespace vws {
 //
 using Speed = double;
 using Rainfall = double;
+using RainfallRate = double;
 using Temperature = double;
 using Pressure = double;
 using Humidity = double;

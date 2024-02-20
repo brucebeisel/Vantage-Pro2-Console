@@ -86,7 +86,7 @@ public:
     const Measurement<Temperature> &        getHeatIndex() const;
     const Measurement<Temperature> &        getWindChill() const;
     const Measurement<Temperature> &        getThsw() const;
-    Rainfall                                getRainRate() const;
+    RainfallRate                            getRainRate() const;
     const Measurement<UvIndex> &            getUvIndex() const;
     const Measurement<SolarRadiation> &     getSolarRadiation() const;
     Rainfall                                getStormRain() const;
@@ -198,7 +198,7 @@ private:
     Measurement<Temperature>          heatIndex;
     Measurement<Temperature>          windChill;
     Measurement<Temperature>          thsw;
-    Rainfall                          rainRate;
+    RainfallRate                      rainRate;
     Measurement<UvIndex>              uvIndex;
     Measurement<SolarRadiation>       solarRadiation;
     Rainfall                          stormRain;

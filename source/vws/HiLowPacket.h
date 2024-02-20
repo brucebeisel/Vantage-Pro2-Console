@@ -167,10 +167,10 @@ public:
     //
     // Rain Rate Highs
     //
-    Rainfall  getDayHighRainRate() const;
-    DateTime  getDayHighRainRateTime() const;
-    Rainfall  getMonthHighRainRate() const;
-    Rainfall  getYearHighRainRate() const;
+    RainfallRate  getDayHighRainRate() const;
+    DateTime      getDayHighRainRateTime() const;
+    RainfallRate  getMonthHighRainRate() const;
+    RainfallRate  getYearHighRainRate() const;
 
     //
     // Extra temperatures and soil and leaf wetness goes here
@@ -214,8 +214,8 @@ private:
     HighValues<Temperature>     thsw;
     HighValues<SolarRadiation>  solarRadiation;
     HighValues<UvIndex>         uvIndex;
-    HighValues<Rainfall>        rainRate;
-    Rainfall                    highHourRainRate;
+    HighValues<RainfallRate>    rainRate;
+    RainfallRate                highHourRainRate;
     HighLowValues<Temperature>  extraTemperature[ProtocolConstants::MAX_EXTRA_TEMPERATURES];
     HighLowValues<Temperature>  soilTemperature[ProtocolConstants::MAX_SOIL_TEMPERATURES];
     HighLowValues<Temperature>  leafTemperature[ProtocolConstants::MAX_LEAF_TEMPERATURES];

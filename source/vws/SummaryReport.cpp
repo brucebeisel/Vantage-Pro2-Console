@@ -425,42 +425,54 @@ SummaryReport::loadData() {
     DateTime summaryEnd = calculateEndTime(summaryStart, period);
 
     while (summaryEnd <= endDate) {
+        // TODO Should we create a new record if the summary start date is after today?
         SummaryRecord record(period, summaryStart, summaryEnd);
         summaryRecords.push_back(record);
 
         summaryStart = incrementStartTime(summaryStart, period);
         summaryEnd = calculateEndTime(summaryStart, period);
     }
-
     cout << "Created " << summaryRecords.size() << " summary records" << endl;
+
+    //
+    // Now build the summary records for calculating day-based statistics
+    //
+    vector<SummaryRecord> dayRecords;
+    summaryStart = startDate;
+    summaryEnd = calculateEndTime(summaryStart, period);
+    while (summaryEnd <= endDate) {
+        // TODO Should we create a new record if the summary start date is after today?
+        SummaryRecord record(period, summaryStart, summaryEnd);
+        dayRecords.push_back(record);
+
+        summaryStart = incrementStartTime(summaryStart, SummaryPeriod::DAY);
+        summaryEnd = calculateEndTime(summaryStart, SummaryPeriod::DAY);
+    }
+
+    cout << "Created " << dayRecords.size() << " day summary records" << endl;
 
     //
     // Now that we have create all of the summary records, go through and apply the ArchivePackets
     //
-    //SummaryStatistics summaryStatistics;
-    //SummaryStatistics dailyStatistics;
-    //int mday = -1;
-    //bool firstPacket = true;
+    bool firstPacket = true;
     for (auto & packet : packets) {
         for (auto & summaryRecord : summaryRecords) {
             summaryRecord.applyArchivePacket(packet);
         }
+
+        for (auto & summaryRecord : dayRecords) {
+            summaryRecord.applyArchivePacket(packet);
+        }
+
         DateTime packetTime = packet.getDateTime();
         struct tm tm;
         localtime_r(&packetTime, &tm);
         hourRainfallBuckets[tm.tm_hour] += packet.getRainfall();
         windRoseData.applyWindSample(packet.getPrevailingWindHeadingIndex(), packet.getAverageWindSpeed());
-
-        //if (tm.tm_mday != mday && !firstPacket) {
-        //    summaryStatistics.applySummaryStatistics(dailyStatistics);
-        //    dailyStatistics.clearData();
-        //    mday = tm.tm_mday;
-        //    firstPacket = false;
-        //}
-
-        // Apply the packet to the current statistics
-        //dailyStatistics.applyArchivePacket(packet);
     }
+
+    for (auto & summaryRecord : dayRecords)
+        summaryStatistics.applySummaryRecord(summaryRecord);
 
     return true;
 }
@@ -491,8 +503,135 @@ SummaryReport::formatJSON() const {
         ss << hourRainfallBuckets[i];
     }
 
-    ss << " ], " << endl << windRoseData.formatJSON();
+    ss << " ], " << endl << windRoseData.formatJSON() << ", " << endl;
+    ss << summaryStatistics.formatJSON();
     ss << " } }";
     return ss.str();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/*
+ *  statistics : {
+ *      totalDays: 100,
+ *      outsideTemperature : { // inside temperature, outsideHumidity, insideHumidity
+ *          high: {
+ *              { value: 95.0, time: "2024-02-15 13:25:25" },
+ *              { dayMinimum: 95.0, date: "2024-02-15" }
+ *          },
+ *          low: {
+ *              { value: 32, time: "2024-02-10 01:15:12" },
+ *              { dayMaximum: 95.0, date: "2024-02-15" }
+ *          },
+ *          averages: {
+ *              { average: 65, date: "2024-01-17" },
+ *              { high: 68, date: "2024-02-23" },
+ *              { low: 63, date: "2024-02-02" }
+ *          },
+ *          ranges: {
+ *              smallest: { range: 2.5, date: "2024-01-02" },
+ *              largest:  { range: 30.2, date: "2024-01029" }
+ *          }
+ *      },
+ *      solarRadiation : { // uvIndex
+ *          high: {
+ *              { value: 95.0, time: "2024-02-15 13:25:25" },
+ *              { dayMinimum: 95.0, date: "2024-02-15" }
+ *          },
+ *          averages: {
+ *              { average: 65, date: "2024-01-17" },
+ *              { high: 68, date: "2024-02-23" }
+ *          }
+ *       },
+ *       rain : {
+ *           rainDays: 10,
+ *           totalRain: 5.5,
+ *           averageRainPerDay : .04,
+ *           averageRainPerRainyDay : .1,
+ *           highRainDay: { value: 2.5, date: "2024-03-12" },
+ *           highRainRate { value: 1.5, time: "2024-03-12 10:10:11" }
+ *       }
+ *
+ */
+SummaryStatistics::SummaryStatistics() : outsideTemperature("outsideTemperature", true, true, true),
+                                         insideTemperature("insideTemperature", true, true, true),
+                                         outsideHumidity("outsideHumidity", true, true, true),
+                                         insideHumidity("insideHumidity", true, true, true),
+                                         solarRadiation("solarRadiation", false, false, false),
+                                         uvIndex("uvIndex", false, false, false),
+                                         windSpeed("windSpeed", false, false, false),
+                                         windGust("windGust", false, false, false),
+                                         et("ET", false, false, false),
+                                         barometer("barometricPressure", true, true, true),
+                                         totalDays(0),
+                                         rainDays(0),
+                                         totalRainfall(0.0),
+                                         highDayRainfall(0.0),
+                                         highDayRainfallDate(0),
+                                         highDayRainfallRate(0.0),
+                                         highDayRainfallRateTime(0) {
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+SummaryStatistics::applySummaryRecord(const SummaryRecord & record) {
+    totalDays++;
+    outsideTemperature.applySummaryMeasurement(record.startDate, record.outsideTemperature);
+    insideTemperature.applySummaryMeasurement(record.startDate, record.insideTemperature);
+    outsideHumidity.applySummaryMeasurement(record.startDate, record.outsideHumidity);
+    insideHumidity.applySummaryMeasurement(record.startDate, record.insideHumidity);
+    solarRadiation.applySummaryMeasurement(record.startDate, record.solarRadiation);
+    windSpeed.applySummaryMeasurement(record.startDate, record.sustainedWindSpeed);
+    windGust.applySummaryMeasurement(record.startDate, record.gustWindSpeed);
+    uvIndex.applySummaryMeasurement(record.startDate, record.uvIndex);
+    et.applySummaryMeasurement(record.startDate, record.et);
+    barometer.applySummaryMeasurement(record.startDate, record.barometer);
+
+    if (record.totalRainfall > 0.0) {
+        totalRainfall += record.totalRainfall;
+        rainDays++;
+    }
+
+    if (record.totalRainfall > highDayRainfall) {
+        highDayRainfall = record.totalRainfall;
+        highDayRainfallDate = record.startDate;
+    }
+
+    if (record.rainfallRate.high.extremeValue > highDayRainfallRate) {
+        highDayRainfallRate = record.rainfallRate.high.extremeValue;
+        highDayRainfallRateTime = record.rainfallRate.high.extremeTime;
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+SummaryStatistics::formatJSON() const {
+    ostringstream ss;
+
+    ss << "\"statistics\" : { " << endl
+       << " \"totalDays\" : " << totalDays << ", " << endl;
+    ss << outsideTemperature.formatJSON() << ", " << endl;
+    ss << outsideHumidity.formatJSON() << ", " << endl;
+    ss << insideTemperature.formatJSON() << ", " << endl;
+    ss << insideHumidity.formatJSON() << ", " << endl;
+    ss << barometer.formatJSON() << ", " << endl;
+    ss << windSpeed.formatJSON() << ", " << endl;
+    ss << windGust.formatJSON() << ", " << endl;
+    ss << solarRadiation.formatJSON() << ", " << endl;
+    ss << uvIndex.formatJSON() << ", " << endl;
+    ss << et.formatJSON() << ", " << endl;
+    ss << "\"rain\" : {" << endl;
+    ss << "\"rainDays\" : " << rainDays << ", " << endl
+       << "\"totalRain\" : " << totalRainfall << ", " << endl
+       << "\"highDayRain\" : { \"value\" : "  << highDayRainfall << ", \"date\" : \"" << Weather::formatDate(highDayRainfallDate) << "\" }, " << endl
+       << "\"highDayRainRate\" : { \"value\" : "  << highDayRainfallRate << ", \"time\" : \"" << Weather::formatDateTime(highDayRainfallRateTime) << "\" } " << endl;
+    ss << " } " << endl;
+    ss << "} ";
+    return ss.str();
+}
+
 } /* namespace vws */

@@ -18,6 +18,7 @@
 #define SUMMARY_RECORD_H
 #include <vector>
 #include <string>
+#include <sstream>
 #include "Weather.h"
 #include "WeatherTypes.h"
 #include "Measurement.h"
@@ -28,6 +29,12 @@
 namespace vws {
 class VantageLogger;
 class ArchiveManager;
+
+// TODO As a general capability, any measurements and statistics need to be qualified based on whether the weather
+// station has the appropriate sensor. That is, there should be no solar radiation values in the JSON if the weather
+// station does not have a solar radiation sensor.
+
+// TODO Figure out how to work in extra temperatures, extra humidities, and soil/moisture value
 
 /**
  * Template class to calculate the average value of a measurement.
@@ -47,6 +54,7 @@ public:
      * @param value The value to be applied to the value
      */
     void applyMeasurement(const Measurement<M> & value) {
+        // TODO Do we need an "ignore zero values" option for measurements link wind, solar radiation, rain, etc
 
         //
         // Ignore invalid values
@@ -210,7 +218,7 @@ public:
     }
 
     /**
-     * Apply a an average and an extreme measurement.
+     * Apply an average and an extreme measurement.
      *
      * @param measurementTime     The time of this measurement
      * @param avgMeasurement      A measurement that represent the average value over the archive packets time span
@@ -288,7 +296,6 @@ public:
         return ss.str();
     }
 
-private:
     std::string                                    summaryName;
     const SummaryExtremes                          extremesUsed;
     MeasurementAverage<M>                          average;
@@ -329,7 +336,6 @@ public:
      */
     std::string formatJSON() const;
 
-private:
     template<typename M, SummaryExtremes SE>
     std::string arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const;
 
@@ -365,12 +371,116 @@ private:
 /**
  * Statistics
  */
-template<typename M>
+template<typename M, SummaryExtremes SE>
 class MeasurementStatistics {
 public:
-    MeasurementStatistics(bool low, bool includeZero, bool range) : useLowValue(low), includeZeroValuesInAverage(includeZero), computeRange(range) {};
-    void applyValue(M value, DateTime time);
-    std::string formatJSON() const;
+    MeasurementStatistics(const std::string & name, bool low, bool includeZero, bool range) : name(name),
+                                                                                              useLowValue(low),
+                                                                                              includeZeroValuesInAverage(includeZero),
+                                                                                              computeRange(range),
+                                                                                              highValue(0.0),
+                                                                                              highValueTime(0),
+                                                                                              minimumDayHighValue(0.0),
+                                                                                              minimumDayHighValueDate(0),
+                                                                                              lowValue(0.0),
+                                                                                              lowValueTime(0),
+                                                                                              maximumDayLowValue(0.0),
+                                                                                              maximumDayLowValueDate(0),
+                                                                                              averageSamples(0),
+                                                                                              average(0.0),
+                                                                                              highAverageDayValue(0.0),
+                                                                                              highAverageDayDate(0),
+                                                                                              lowAverageDayValue(0.0),
+                                                                                              lowAverageDayDate(0),
+                                                                                              minimumRange(0),
+                                                                                              minimumRangeDate(0),
+                                                                                              maximumRange(0),
+                                                                                              maximumRangeDate(0) {
+    }
+
+    void applySummaryMeasurement(DateTime summaryDate, const SummaryMeasurement<M,SE> & summaryMeasurement) {
+        if (!summaryMeasurement.high.extremeValue.isValid())
+            return ;
+
+        if (summaryMeasurement.high.extremeValue > highValue || highValueTime == 0) {
+            highValue = summaryMeasurement.high.extremeValue;
+            highValueTime = summaryMeasurement.high.extremeTime;
+        }
+
+        if (summaryMeasurement.high.extremeValue < minimumDayHighValue || minimumDayHighValueDate == 0) {
+            minimumDayHighValue = summaryMeasurement.high.extremeValue;
+            minimumDayHighValueDate = summaryDate;
+        }
+
+        if (summaryMeasurement.low.extremeValue < lowValue || lowValueTime == 0) {
+            lowValue = summaryMeasurement.low.extremeValue;
+            lowValueTime = summaryMeasurement.low.extremeTime;
+        }
+
+        if (summaryMeasurement.low.extremeValue > maximumDayLowValue || maximumDayLowValueDate == 0) {
+            maximumDayLowValue = summaryMeasurement.low.extremeValue;
+            maximumDayLowValueDate = summaryDate;
+        }
+
+        averageSamples += summaryMeasurement.average.sampleCount;
+        sum += summaryMeasurement.average.sum;
+        average = sum / static_cast<M>(averageSamples);
+
+        if (summaryMeasurement.average.average > highAverageDayValue || highAverageDayDate == 0) {
+            highAverageDayValue = summaryMeasurement.average.average;
+            highAverageDayDate = summaryDate;
+        }
+
+        if (summaryMeasurement.average.average < highAverageDayValue || lowAverageDayDate == 0) {
+            lowAverageDayValue = summaryMeasurement.average.average;
+            lowAverageDayDate = summaryDate;
+        }
+
+        M range = summaryMeasurement.high.extremeValue - summaryMeasurement.low.extremeValue;
+        if (range < minimumRange || minimumRangeDate == 0) {
+            minimumRange = range;
+            minimumRangeDate = summaryDate;
+        }
+
+        if (range > maximumRange || maximumRangeDate == 0) {
+            maximumRange = range;
+            maximumRangeDate = summaryDate;
+        }
+    }
+
+    std::string formatJSON() const {
+        std::ostringstream ss;
+        ss << "\"" << name << "\"" << " : { " << std::endl;
+
+       ss  << "\"high\" : { " << std::endl
+           << "\"maximum\" :    { \"value\" : " << highValue << ", \"time\" : \"" << Weather::formatDateTime(highValueTime) << "\" }, " << std::endl
+           << "\"dayMinimum\" : { \"value\" : " << minimumDayHighValue << ", \"date\" : \"" << Weather::formatDate(minimumDayHighValueDate) << "\" } " << std::endl
+           << " }, " << std::endl;
+
+       if (useLowValue) {
+           ss  << "\"low\" : { " << std::endl
+               << " \"minimum\" : { \"value\" : " << lowValue << ", \"time\" : \"" << Weather::formatDateTime(lowValueTime) << "\" }," << std::endl
+               << " \"dayMaximum\" : { \"value\" : " << maximumDayLowValue << ", \"date\" : \"" << Weather::formatDate(maximumDayLowValueDate) << "\" }" << std::endl
+               << " }," << std::endl;
+       }
+
+       ss << "\"averages\" : {" << std::endl
+          << "\"average\" : " << average << "," << std::endl
+          << "\"high\" : { \"value\" : " << highAverageDayValue << ", \"date\" : \"" << Weather::formatDate(highAverageDayDate) << "\"}," << std::endl
+          << "\"low\" : { \"value\" : " << lowAverageDayValue << ", \"date\" : \"" << Weather::formatDate(lowAverageDayDate) << "\"}" << std::endl
+          << "}";
+
+       if (computeRange) {
+           ss << "," << std::endl << "\"ranges\" : { " << std::endl
+              << "\"smallest\" : " << "{ \"range\" : " << minimumRange << ", \"date\" : \""  << Weather::formatDate(minimumRangeDate) << "\" }, " << std::endl
+              << "\"largest\" : "  << "{ \"range\" : " << maximumRange << ", \"date\" : \""  << Weather::formatDate(maximumRangeDate) << "\" } " << std::endl
+              << " } ";
+       }
+
+       ss << std::endl << "}" << std::endl;
+
+       return ss.str();
+    }
 
 private:
     std::string name;
@@ -381,12 +491,19 @@ private:
     M highValue;
     DateTime highValueTime;
 
+    M minimumDayHighValue;
+    DateTime minimumDayHighValueDate;
+
     // All but solar radiation, UV index
     M lowValue;
     DateTime lowValueTime;
 
+    M maximumDayLowValue;
+    DateTime maximumDayLowValueDate;
+
     // Do zero values count for averages?
     int averageSamples;
+    M sum;
     M average;
 
     M highAverageDayValue;
@@ -404,52 +521,76 @@ private:
 
 };
 
+/*
+   statistics : {
+       totalDays: 100,
+       outsideTemperature : { // inside temperature, outsideHumidity, insideHumidity
+           high: {
+               maximum : { value: 95.0, time: "2024-02-15 13:25:25" },
+               dayMinimum: { value: 95.0, date: "2024-02-15" }
+           },
+           low: {
+               minimum: { value: 32, time: "2024-02-10 01:15:12" },
+               dayMaximum: { value: 95.0, date: "2024-02-15" }
+           },
+           averages: {
+               average: 65,
+               high: { value: 68, date: "2024-02-23" },
+               low: { value: 63, date: "2024-02-02" }
+           },
+           ranges: {
+               smallest: { range: 2.5, date: "2024-01-02" },
+               largest:  { range: 30.2, date: "2024-01029" }
+           }
+       },
+       solarRadiation : { // uvIndex
+           high: {
+               { value: 95.0, time: "2024-02-15 13:25:25" },
+               { dayMinimum: 95.0, date: "2024-02-15" }
+           },
+           averages: {
+               { average: 65, date: "2024-01-17" },
+               { high: 68, date: "2024-02-23" }
+           }
+        },
+        rain : {
+            rainDays: 10,
+            totalRain: 5.5,
+            averageRainPerDay : .04,
+            averageRainPerRainyDay : .1,
+            highRainDay: { value: 2.5, date: "2024-03-12" },
+            highRainRate { value: 1.5, time: "2024-03-12 10:10:11" }
+        }
+
+ */
 class SummaryStatistics {
 public:
-    SummaryStatistics() : outsideTemperature(true, true, true){}
-    void applyArchivePacket(const ArchivePacket & packet) {}
-    void applySummaryStatistics(const SummaryStatistics & statistics) {}
-    void clearData() {}
-    std::string formatJSON() const {return "";}
+    SummaryStatistics();
+    void applySummaryRecord(const SummaryRecord & record);
+    std::string formatJSON() const;
 
+private:
     int totalDays;
+
     int rainDays;
+    Rainfall     totalRainfall;
+    Rainfall     highDayRainfall;
+    DateTime     highDayRainfallDate;
+    RainfallRate highDayRainfallRate;
+    DateTime     highDayRainfallRateTime;
 
-    MeasurementStatistics<Temperature> outsideTemperature; // true, true, true
-    /*
-    MeasurementStatistics<Temperature> insideTemperature;  // true, true, true
-    MeasurementStatistics<Humidity> outsideHumidity;       // true, true, true
-    MeasurementStatistics<Humidity> insideHumidity;        // true, true, true
-    MeasurementStatistics<SolarRadiation> solarRadiation;  // false, false, false
-    MeasurementStatistics<UvIndex> uvIndex;                // false, false, false
-    MeasurementStatistics<Speed> windSpeed;                // true, true, false
-    MeasurementStatistics<Speed> windGust;                 // true, true, false
-    MeasurementStatistics<Evapotranspiration> et;          // false, false, false
-    */
-
-    Rainfall highDayRainfall;
-    DateTime highDayRainfallDate;
-
-    Rainfall highDayRainfallRate;
-    DateTime highDayRainfallTime;
-
-    // High barometer, low barometer, barometer range, average barometer
-    // Humidity range
-    // High UV index
-    // High solar radiation
-    // Max mean outside temperature, min mean outside temperature
-    // Max mean outside humidity, min mean outside humidity
-
-    Speed maxAverageWind;
-    DateTime maxAverageWindDate;
-
-    Speed maxSustainedWind;
-    DateTime maxSustainedWindTime;
-
-    Speed maxWindGust;
-    DateTime maxWindGustTime;
-
+    MeasurementStatistics<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideTemperature; // true, true, true
+    MeasurementStatistics<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideTemperature;  // true, true, true
+    MeasurementStatistics<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideHumidity;       // true, true, true
+    MeasurementStatistics<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideHumidity;        // true, true, true
+    MeasurementStatistics<SolarRadiation,SummaryExtremes::MAXIMUM_ONLY> solarRadiation;  // false, false, false
+    MeasurementStatistics<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;                // false, false, false
+    MeasurementStatistics<Speed,SummaryExtremes::MAXIMUM_ONLY> windSpeed;                // true, true, false
+    MeasurementStatistics<Speed,SummaryExtremes::MAXIMUM_ONLY> windGust;                 // true, true, false
+    MeasurementStatistics<Evapotranspiration,SummaryExtremes::MAXIMUM_ONLY> et;          // false, false, false
+    MeasurementStatistics<Evapotranspiration,SummaryExtremes::MINIMUM_AND_MAXIMUM> barometer;          // true, true, true
 };
+
 /**
  * Holder of a summary report.
  */
@@ -500,6 +641,7 @@ private:
     std::vector<SummaryRecord> summaryRecords;
     Rainfall                   hourRainfallBuckets[24];   // Tracks when it has rained over the summary period
     WindRoseData &             windRoseData;
+    SummaryStatistics          summaryStatistics;
     VantageLogger &            logger;
 };
 
