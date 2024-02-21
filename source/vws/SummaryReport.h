@@ -168,6 +168,9 @@ struct ExtremeMeasurement {
 /**
  * Template class that represents a single measurement within a summary record.
  */
+// TODO Add average high and average low to the SummaryMeasurement. This could be hard because we do not separate the
+// values into days in order to figure the high and low for the day. Also average high and average low do not make sense
+// when the period is Day.
 template<typename M, SummaryExtremes SE>
 class SummaryMeasurement {
 public:
@@ -387,6 +390,7 @@ public:
                                                                                               maximumDayLowValue(0.0),
                                                                                               maximumDayLowValueDate(0),
                                                                                               averageSamples(0),
+                                                                                              sum(0.0),
                                                                                               average(0.0),
                                                                                               highAverageDayValue(0.0),
                                                                                               highAverageDayDate(0),
