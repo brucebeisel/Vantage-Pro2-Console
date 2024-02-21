@@ -435,7 +435,7 @@ public:
             highAverageDayDate = summaryDate;
         }
 
-        if (summaryMeasurement.average.average < highAverageDayValue || lowAverageDayDate == 0) {
+        if (summaryMeasurement.average.average < lowAverageDayValue || lowAverageDayDate == 0) {
             lowAverageDayValue = summaryMeasurement.average.average;
             lowAverageDayDate = summaryDate;
         }
