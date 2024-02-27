@@ -1,0 +1,3 @@
+../../target/test/ArchiveVerifier.o: ArchiveVerifier.cpp \
+ ../vws/ArchiveManager.h ../vws/WeatherTypes.h ../vws/ArchivePacket.h \
+ ../vws/Measurement.h ../vws/Weather.h

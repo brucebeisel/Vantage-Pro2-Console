@@ -310,12 +310,13 @@ VantageDecoder::decodeStormDate(const byte buffer[], int offset) {
         int month = (value16 >> 12) & 0xF;
 
         struct tm tm = {0};
-        tm.tm_year = year - TIME_STRUCT_YEAR_OFFSET;
+        tm.tm_year = year - Weather::TIME_STRUCT_YEAR_OFFSET;
         tm.tm_mon = month - 1;
         tm.tm_mday = day;
         tm.tm_hour = 0;
         tm.tm_min = 0;
         tm.tm_sec = 0;
+        tm.tm_isdst = -1;
 
         stormStart = mktime(&tm);
     }
@@ -376,6 +377,7 @@ VantageDecoder::decodeTime(const byte buffer[], int offset) {
     tm.tm_hour = hour;
     tm.tm_min = minute;
     tm.tm_sec = 0;
+    tm.tm_isdst = -1;
     DateTime t = mktime(&tm);
 
     return t;

@@ -25,14 +25,15 @@
 
 namespace vws {
 
-const int SECONDS_PER_HOUR = 3600;
-const int TIME_STRUCT_YEAR_OFFSET = 1900;
 
 /**
  * Utility container class for various functions.
  */
 class Weather {
 public:
+    static constexpr int SECONDS_PER_HOUR = 3600;
+    static constexpr int TIME_STRUCT_YEAR_OFFSET = 1900;
+    static constexpr int SECONDS_PER_DAY = 86400;
     /**
      * Format the given date/time into the format used by the Vantage Weather Station software.
      * 

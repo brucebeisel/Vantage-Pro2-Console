@@ -61,7 +61,7 @@ VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfigurati
     // has not had a chance to synchronize its time with the Internet. This is most important with
     // computers like the Raspberry Pi.
     //
-    consoleTimeSetTime = time(0) - TIME_SET_INTERVAL + (1 * SECONDS_PER_HOUR);
+    consoleTimeSetTime = time(0) - TIME_SET_INTERVAL + (1 * Weather::SECONDS_PER_HOUR);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

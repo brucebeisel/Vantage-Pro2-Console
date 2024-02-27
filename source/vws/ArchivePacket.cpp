@@ -21,6 +21,7 @@
 #include <string>
 #include <ctime>
 #include <sstream>
+#include <iomanip>
 
 #include "BitConverter.h"
 #include "VantageDecoder.h"
@@ -116,24 +117,47 @@ ArchivePacket::archivePacketContainsData(const byte * buffer, int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 ArchivePacket::extractArchiveDate() const {
+    PacketTimeFields fields;
+    fields = decodePacketDateTime();
+
+    struct tm tm{};
+    tm.tm_year = fields.year - Weather::TIME_STRUCT_YEAR_OFFSET;
+    tm.tm_mon = fields.month - 1;
+    tm.tm_mday = fields.monthDay;
+    tm.tm_hour = fields.hour;
+    tm.tm_min = fields.minute;
+    tm.tm_sec = 0;
+    tm.tm_isdst = -1;
+    return mktime(&tm);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+ArchivePacket::getPacketDateTimeString() const {
+    PacketTimeFields fields;
+    fields = decodePacketDateTime();
+
+    ostringstream oss;
+    oss << setfill('0') << fields.year << "-" << setw(2) << fields.month << "-" << setw(2) << fields.monthDay << " " << setw(2) << fields.hour << ":" << setw(2) << fields.minute;
+
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+ArchivePacket::PacketTimeFields
+ArchivePacket::decodePacketDateTime() const {
     int date = BitConverter::toUint16(buffer, DATE_STAMP_OFFSET);
     int time = BitConverter::toUint16(buffer, TIME_STAMP_OFFSET);
-    int year = ((date >> 9) & 0x3F) + 2000;
-    int month = (date >> 5) & 0xF;
-    int day = date & 0x1F;
-    int hour = time / 100;
-    int minute = time % 100;
+    PacketTimeFields fields;
+    fields.year = ((date >> 9) & 0x3F) + YEAR_OFFSET;
+    fields.month = (date >> 5) & 0xF;
+    fields.monthDay = date & 0x1F;
+    fields.hour = time / 100;
+    fields.minute = time % 100;
 
-    time_t now = ::time(0);
-    struct tm tm;
-    Weather::localtime(now, tm);
-    tm.tm_year = year - TIME_STRUCT_YEAR_OFFSET;
-    tm.tm_mon = month - 1;
-    tm.tm_mday = day;
-    tm.tm_hour = hour;
-    tm.tm_min = minute;
-    tm.tm_sec = 0;
-    return mktime(&tm);
+    return fields;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

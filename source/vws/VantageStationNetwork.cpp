@@ -509,7 +509,7 @@ VantageStationNetwork::calculateDailyNetworkStatus() {
     //
     // Subtract enough seconds to move the time into the previous day.
     //
-    now -= 86400;
+    now -= Weather::SECONDS_PER_DAY;
 
     struct tm tm;
     Weather::localtime(now, tm);

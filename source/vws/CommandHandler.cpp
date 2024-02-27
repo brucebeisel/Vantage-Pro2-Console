@@ -129,8 +129,14 @@ CommandHandler::handleCommand(const std::string & commandJson, std::string & res
             handleNoArgCommand(&VantageWeatherStation::clearArchive, commandName, response);
         }
         else if (commandName == "clear-extended-archive") {
-            archiveManager.clearArchiveFile();
-            response.append(SUCCESS_TOKEN);
+            bool success = false;
+            if (archiveManager.backupArchiveFile())
+                success = archiveManager.clearArchiveFile();
+
+            if (success)
+                response.append(SUCCESS_TOKEN);
+            else
+                response.append(CONSOLE_COMMAND_FAILURE_STRING);
         }
         else if (commandName == "clear-calibration-offsets") {
             handleNoArgCommand(&VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets, commandName, response);

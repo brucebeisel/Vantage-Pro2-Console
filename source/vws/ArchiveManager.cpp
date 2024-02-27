@@ -17,10 +17,14 @@
 
 #include "ArchiveManager.h"
 
+#include <sys/stat.h>
+#include <dirent.h>
 #include <time.h>
+#include <unistd.h>
 #include <math.h>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <vector>
 #include <chrono>
 #include <ratio>
@@ -41,6 +45,9 @@ using vws::VantageLogger;
 ////////////////////////////////////////////////////////////////////////////////
 ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStation & station) :
                                                                     archiveFile(dataDirectory + "/" + ARCHIVE_FILE),
+                                                                    archiveBackupDir(dataDirectory + "/" + ARCHIVE_BACKUP_DIR),
+                                                                    lastBackupTime(0),
+                                                                    archiveTempFile(dataDirectory + "/" + ARCHIVE_TEMP_FILE),
                                                                     station(station),
                                                                     newestPacketTime(0),
                                                                     oldestPacketTime(0),
@@ -57,6 +64,8 @@ ArchiveManager::~ArchiveManager() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+// TODO There seems to be a bug with daylight savings time. There is an hour gap in the archive records
+// when DST start and ends.
 bool
 ArchiveManager::synchronizeArchive() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing local archive from Vantage console's archive" << endl;
@@ -73,6 +82,8 @@ ArchiveManager::synchronizeArchive() {
             break;
         }
     }
+
+    backupArchiveFile();
 
     return result;
 }
@@ -296,6 +307,162 @@ bool
 ArchiveManager::clearArchiveFile() {
     ofstream stream(archiveFile.c_str(), ios::out | ios::trunc);
     return stream.good();
+}
+
+void
+ArchiveManager::trimBackupDirectory() {
+    DIR * dir;
+    struct dirent * ent;
+    time_t now = time(0);
+    vector<string> deleteList;
+    if ((dir = opendir(archiveBackupDir.c_str())) == NULL) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "trimBackupDirectory(): Failed to open archive backup directory" << endl;
+        return;
+    }
+
+    while ((ent = readdir(dir)) != NULL) {
+        struct stat sbuf;
+        stat(ent->d_name, &sbuf);
+        time_t mtime = sbuf.st_mtim.tv_sec;
+        if (mtime + (Weather::SECONDS_PER_DAY * BACKUP_RETAIN_DAYS) < now)
+            deleteList.push_back(string(archiveBackupDir + "/" + ent->d_name));
+    }
+
+    closedir (dir);
+
+    for (auto path : deleteList) {
+        if (unlink(path.c_str()) != 0)
+            logger.log(VantageLogger::VANTAGE_WARNING) << "trimBackupDirectory(): Failed to delete archive backup file " << path << endl;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchiveManager::backupArchiveFile() {
+    //
+    // Backup the archive about once a day
+    //
+    DateTime now = time(0);
+    if (lastBackupTime + Weather::SECONDS_PER_DAY < now)
+        return true;
+
+    lastBackupTime = now;
+
+    if (!std::filesystem::exists(archiveBackupDir))
+        std::filesystem::create_directories(archiveBackupDir);
+
+    //
+    // Building the dateString separately fixes a warning from Eclipse
+    //
+    const string dateString = Weather::formatDate(now);
+    const string backupFile(archiveBackupDir + "/" + dateString + "_" + ARCHIVE_BACKUP_FILE);
+
+    std::error_code errorCode;
+    if (!std::filesystem::copy_file(archiveFile, backupFile, std::filesystem::copy_options::overwrite_existing, errorCode)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to backup archive file. Error = " << errorCode.message() << endl;
+        return false;
+    }
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Backed up archive file '" << archiveFile << "' to '" << backupFile << "'" << endl;
+
+    trimBackupDirectory();
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/*
+bool
+ArchiveManager::restoreArchiveFile(const string & backupFile) {
+    //
+    // Switch the backup and the archive file so the current archive file is backed up
+    //
+    if (std::rename(archiveFile.c_str(), archiveTempFile.c_str()) != 0) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to move archive file to temp file during archive file restore." << endl;
+        return false;
+    }
+
+    if (std::rename(backupFile.c_str(), archiveFile.c_str()) != 0) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to move backup archive file to main archive file during archive file restore." << endl;
+        return false;
+    }
+
+    if (std::rename(archiveTempFile.c_str(), backupFile.c_str()) != 0) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to temp file to backup archive file during archive file restore." << endl;
+        return false;
+    }
+
+    return true;
+}
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchiveManager::verifyArchiveFile() const {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Verifying current archive file" << endl;
+    ifstream is(archiveFile, ios::in | ios::binary);
+
+    if (is.fail()) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to open archive file '" << archiveFile << " for verification" << endl;
+        return false;
+    }
+
+    int packetsRead = 0;
+    int errorCount = 0;
+    int warningCount = 0;
+    ArchivePacket lastPacket;
+    DateTime lastPacketTime = 0;
+    DateTime lastDelta = 0;
+    int deltaTimeMismatchCount = 0;
+    char buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
+    do {
+        is.read(buffer, sizeof(buffer));
+        if (!is.eof()) {
+            packetsRead++;
+            ios::pos_type position = is.tellg();
+
+            ArchivePacket packet(buffer);
+            DateTime currentPacketTime = packet.getDateTime();
+
+            if (currentPacketTime <= lastPacketTime) {
+                logger.log(VantageLogger::VANTAGE_WARNING) << "Detected out of order packets at file location " << position << ". " << endl
+                                                           << "Packet with time " << Weather::formatDateTime(currentPacketTime) << " (" << packet.getPacketDateTimeString() << ")"
+                                                           << " is before packet with time: " << Weather::formatDateTime(lastPacketTime) << " (" << lastPacket.getPacketDateTimeString() << ")" << endl;
+                errorCount++;
+            }
+
+            DateTime currentDelta = currentPacketTime - lastPacketTime;
+            if (packetsRead > 2 && currentDelta != lastDelta) {
+                logger.log(VantageLogger::VANTAGE_INFO) << "Detected inconsistent time delta between packet at file location " << position << ". " << endl
+                                                        << "Expected time delta is " << lastDelta << ", actual delta is " << currentDelta
+                                                        << " for packet with times " << "[" << lastPacketTime << "] " << Weather::formatDateTime(lastPacketTime) << " (" << lastPacket.getPacketDateTimeString() << ")" << " and "
+                                                        << "[" << currentPacketTime << "] " << Weather::formatDateTime(currentPacketTime) << " (" << packet.getPacketDateTimeString() << ")" << endl;
+                warningCount++;
+
+                //
+                // Only change the expected delta if more than two mismatches happen in a row
+                //
+                if (++deltaTimeMismatchCount > 1)
+                    lastDelta = currentDelta;
+            }
+            else
+                deltaTimeMismatchCount = 0;
+
+            if (packetsRead == 2)
+                lastDelta = currentDelta;
+
+            lastPacketTime = currentPacketTime;
+            lastPacket.updateArchivePacketData(buffer, 0);
+        }
+
+    } while (!is.eof());
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Archive verification complete for archive with " << packetsRead << " packets. Found " << errorCount << " errors and " << warningCount << " warnings" << endl;
+
+    return errorCount == 0 && warningCount == 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

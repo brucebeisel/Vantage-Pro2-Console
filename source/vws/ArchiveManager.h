@@ -28,10 +28,15 @@ class VantageWeatherStation;
 class VantageLogger;
 
 static const std::string ARCHIVE_FILE = "weather-archive.dat";
+static const std::string ARCHIVE_BACKUP_FILE = "weather-archive-backup.dat";
+static const std::string ARCHIVE_BACKUP_DIR = "backup";
+static const std::string ARCHIVE_TEMP_FILE = "weather-archive-temp.dat";
 
 /**
  * The ArchiveManager class manages a file that contains the raw data read from the DMP and DMPAFT command of the Vantage console.
- * This archive acts as augmented storage for the console.
+ * This archive acts as augmented storage for the console. The console has a storage capacity of 2450 records which translate to
+ * approximately 42 hours of storage at 1 minute intervals. Not only will this class the console memory and the disk archive in sync,
+ * it will also keep backups that will enable the archive to be restored in case of an error.
  */
 class ArchiveManager {
 public:
@@ -99,6 +104,33 @@ public:
     bool clearArchiveFile();
 
     /**
+     * Backup the archive file.
+     * This is a safety feature to preserve data before clearing the archive.
+     *
+     * @return True if successful
+     */
+    bool backupArchiveFile();
+
+    /**
+     * Restore the archive file from the latest backup.
+     *
+     * @return True if successful
+     */
+    bool restoreArchiveFile();
+
+    /**
+     * Trim the backup directory to a reasonable number of backup files.
+     */
+    void trimBackupDirectory();
+
+    /**
+     * Verify that the archive file is good.
+     *
+     * @return True if the archive file is good
+     */
+    bool verifyArchiveFile() const;
+
+    /**
      * Set the state of archiving.
      * Note that this state can be explicitly set of implicitly determined based on the
      * archive interval and the time of the newest record in the archive.
@@ -116,6 +148,7 @@ public:
 
 private:
     static constexpr int SYNC_RETRIES = 5;
+    static constexpr int BACKUP_RETAIN_DAYS = 5;
 
     /**
      * Position the stream to begin reading the archive based on the time.
@@ -152,7 +185,10 @@ private:
      */
     void determineIfArchivingIsActive();
 
-    std::string              archiveFile;          // The name of the archive file
+    const std::string        archiveFile;          // The name of the archive file
+    std::string        archiveBackupDir;     // The name of the archive backup directory
+    std::string              archiveTempFile;      // The name of the temporary file used during a restore
+    DateTime                 lastBackupTime;       // The last time the archive was backed up
     DateTime                 newestPacketTime;     // The time of the newest packet in the archive file
     DateTime                 oldestPacketTime;     // The time of the oldest packet in the archive file
     int                      archivePacketCount;   // The number of packets in the archive

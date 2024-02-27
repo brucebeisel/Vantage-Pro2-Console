@@ -82,7 +82,7 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
         time_t now = time(0);
         long fileAge = now - fileinfo.st_mtim.tv_sec;
 
-        if (fileAge > SECONDS_PER_HOUR) {
+        if (fileAge > Weather::SECONDS_PER_HOUR) {
             mode |= ios::trunc;
         }
         else {
@@ -220,7 +220,7 @@ CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<Current
     if (hours >= 24)
         hours = 23;
 
-    DateTime archiveTime = time(0) - (SECONDS_PER_HOUR * hours);
+    DateTime archiveTime = time(0) - (Weather::SECONDS_PER_HOUR * hours);
 
     ios_base::openmode mode = ios::binary | ios::in;
 
@@ -234,7 +234,7 @@ CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<Current
             readArchiveFile(ifs, list);
             ifs.close();
         }
-        archiveTime += SECONDS_PER_HOUR;
+        archiveTime += Weather::SECONDS_PER_HOUR;
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Current weather archive records found: " << list.size() << endl;
     }
 }
@@ -257,7 +257,7 @@ CurrentWeatherManager::cleanupArchive() {
     //
     // If an archive file is older than 24 hours, the file is obsolete and must be deleted
     //
-    DateTime tooOldFileTime = time(0) - 86400;
+    DateTime tooOldFileTime = time(0) - Weather::SECONDS_PER_DAY;
     for (int i = 0; i < 24; i++) {
         string archiveFilename = archiveFilenameByHour(i);
         struct stat statbuf;

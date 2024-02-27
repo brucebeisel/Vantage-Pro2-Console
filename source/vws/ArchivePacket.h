@@ -94,6 +94,13 @@ public:
     DateTime getDateTime() const;
 
     /**
+     * Return a date string in the format yyyy-mm-dd hh:mm built using the raw packet data.
+     *
+     * @return The date string
+     */
+    std::string getPacketDateTimeString() const;
+
+    /**
      * Check whether this is an empty packet, the empty packet concept is used to avoid the use of NULL.
      * 
      * @return True if it is an empty packet
@@ -153,11 +160,21 @@ public:
     std::string formatJSON() const;
 
 private:
-    DateTime extractArchiveDate() const;
+    struct PacketTimeFields {
+        int year;
+        int month;
+        int monthDay;
+        int hour;
+        int minute;
+    };
 
-    static const DateTime EMPTY_ARCHIVE_PACKET_TIME = 0;
-    static const int UNKNOWN_ET = 0;
-    static const int UNKNOWN_SOLAR_RADIATION = 0;
+    DateTime extractArchiveDate() const;
+    PacketTimeFields decodePacketDateTime() const;
+
+    static constexpr DateTime EMPTY_ARCHIVE_PACKET_TIME = 0;
+    static constexpr int UNKNOWN_ET = 0;
+    static constexpr int UNKNOWN_SOLAR_RADIATION = 0;
+    static constexpr int YEAR_OFFSET = 2000;
 
     //
     // Archive packet (Rev B)
