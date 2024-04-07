@@ -15,6 +15,7 @@ SRCS=\
 	CurrentWeather.cpp \
 	CurrentWeatherManager.cpp \
 	CurrentWeatherSocket.cpp \
+	DateTimeFields.cpp \
 	DominantWindDirections.cpp \
 	EventManager.cpp \
 	ForecastRule.cpp \

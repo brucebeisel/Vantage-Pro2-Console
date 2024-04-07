@@ -18,6 +18,8 @@
 #define WEATHER_TYPES_H
 
 #include <time.h>
+#include <ostream>
+#include <iomanip>
 
 namespace vws {
 //

@@ -76,7 +76,7 @@ SummaryRecord::~SummaryRecord() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
-    DateTime packetTime = archivePacket.getDateTime();
+    DateTime packetTime = archivePacket.getEpochDateTime();
 
     // Note, this logger and the one below are commented out due to the impact on performance
     //logger.log(VantageLogger::VANTAGE_DEBUG2) << "Checking time of " << Weather::formatDateTime(packetTime)
@@ -425,7 +425,8 @@ SummaryReport::loadData() {
     DateTime summaryEnd = calculateEndTime(summaryStart, period);
 
     while (summaryEnd <= endDate) {
-        // TODO Should we create a new record if the summary start date is after today?
+        // TODO Should we create a new record if the summary start date is after today or
+        // before the start of the data archive?
         SummaryRecord record(period, summaryStart, summaryEnd);
         summaryRecords.push_back(record);
 
@@ -464,7 +465,7 @@ SummaryReport::loadData() {
             summaryRecord.applyArchivePacket(packet);
         }
 
-        DateTime packetTime = packet.getDateTime();
+        DateTime packetTime = packet.getEpochDateTime();
         struct tm tm;
         localtime_r(&packetTime, &tm);
         hourRainfallBuckets[tm.tm_hour] += packet.getRainfall();

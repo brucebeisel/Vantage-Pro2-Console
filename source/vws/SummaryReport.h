@@ -54,7 +54,7 @@ public:
      * @param value The value to be applied to the value
      */
     void applyMeasurement(const Measurement<M> & value) {
-        // TODO Do we need an "ignore zero values" option for measurements link wind, solar radiation, rain, etc
+        // TODO Do we need an "ignore zero values" option for measurements like wind, solar radiation, rain, etc
 
         //
         // Ignore invalid values

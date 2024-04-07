@@ -258,12 +258,12 @@ public:
     /**
      * Perform a dump of the archive after the specified time.
      * 
-     * @param time    The time after which to dump the archive
+     * @param time    The fields that define the date and time after which to dump
      * @param archive The vector into which the dumped archive packets will be returned sorted by time
      *
      * @return True if successful
      */
-    bool dumpAfter(DateTime time, std::vector<ArchivePacket> & archive);
+    bool dumpAfter(const DateTimeFields & time, std::vector<ArchivePacket> & archive);
 
     /////////////////////////////////////////////////////////////////////////////////
     // End Download Commands
@@ -553,7 +553,7 @@ private:
      *
      * @return True if successful
      */
-    bool readAfterArchivePages(DateTime afterTime, std::vector<ArchivePacket> & list, int firstRecordInFirstPageToProcess, int numPages);
+    bool readAfterArchivePages(const DateTimeFields & afterTime, std::vector<ArchivePacket> & list, int firstRecordInFirstPageToProcess, int numPages);
 
     /**
      * Read the next archive page that is part of the one of the dump commands.
@@ -564,7 +564,7 @@ private:
      *
      * @return True if the page was read successfully
      */
-    bool readNextArchivePage(std::vector<ArchivePacket> & packets, int firstRecordInPageToProcess, DateTime newestPacketTime);
+    bool readNextArchivePage(std::vector<ArchivePacket> & packets, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime);
 
     /**
      * Decode an archive page that contains up to 5 packets.
@@ -573,7 +573,7 @@ private:
      * @param firstRecordInPageToProcess The first record in the page to process, which may not be zero if this is the first page that is being dumped by a DMPAFT command
      * @param newestPacketTime           The newest packet used to detect if the page contains the end of the ring buffer
      */
-    void decodeArchivePage(std::vector<ArchivePacket> &, const byte * buffer, int firstRecordInPageToProcess, DateTime newestPacketTime);
+    void decodeArchivePage(std::vector<ArchivePacket> &, const byte * buffer, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime);
 
     /**
      * Checks if an archive packet contains data.

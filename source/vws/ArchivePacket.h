@@ -20,6 +20,7 @@
 
 #include "WeatherTypes.h"
 #include "Measurement.h"
+#include "DateTimeFields.h"
 
 namespace vws {
 
@@ -34,17 +35,20 @@ public:
     static constexpr int BYTES_PER_ARCHIVE_PACKET = 52;
     static constexpr int PACKET_NO_VALUE = 0xFF;
 
-    static const int MAX_EXTRA_TEMPERATURES = 3;
-    static const int MAX_EXTRA_HUMIDITIES = 2;
+    static constexpr int MAX_EXTRA_TEMPERATURES = 3;
+    static constexpr int MAX_EXTRA_HUMIDITIES = 2;
 
     //
     // The serial protocol document says this is 4, but the 4th value is not set to the Dash value when there
     // are not soil temperature sensors.
     //
-    static const int MAX_SOIL_TEMPERATURES = 3;
-    static const int MAX_SOIL_MOISTURES = 4;
-    static const int MAX_LEAF_WETNESSES = 2;
-    static const int MAX_LEAF_TEMPERATURES = 2;
+    static constexpr int MAX_SOIL_TEMPERATURES = 3;
+    static constexpr int MAX_SOIL_MOISTURES = 4;
+    static constexpr int MAX_LEAF_WETNESSES = 2;
+    static constexpr int MAX_LEAF_TEMPERATURES = 2;
+
+    static constexpr int TIME_STAMP_BUFFER_LENGTH = 2;
+    static constexpr int DATE_STAMP_BUFFER_LENGTH = 2;
 
     /**
      * Default constructor required for STL containers and arrays.
@@ -87,11 +91,18 @@ public:
     int getWindSampleCount() const;
     
     /**
-     * Get the date/time that was extracted from the packet.
+     * Get the epoch based date/time that was extracted from the packet.
      * 
      * @return The date.time
      */
-    DateTime getDateTime() const;
+    DateTime getEpochDateTime() const;
+
+    /**
+     * Get the Date/Time fields that were extracted from the packet.
+     *
+     * @return the DataTimeFields structure
+     */
+    const DateTimeFields & getDateTimeFields() const;
 
     /**
      * Return a date string in the format yyyy-mm-dd hh:mm built using the raw packet data.
@@ -108,7 +119,7 @@ public:
     bool isEmptyPacket() const;
     
     /**
-     * Checks if an archive packet contains data.
+     * Checks if an archive packet buffer contains data.
      *
      * @param buffer The buffer containing the packet
      * @param offset The offset within the buffer where the packet starts
@@ -151,6 +162,9 @@ public:
     Measurement<Temperature> getSoilTemperature(int index) const;
     Measurement<SoilMoisture> getSoilMoisture(int index) const;
 
+    bool operator==(const ArchivePacket & other);
+    bool operator<(const ArchivePacket & other);
+
 
     /**
      * Format the Archive packet as JSON.
@@ -160,16 +174,7 @@ public:
     std::string formatJSON() const;
 
 private:
-    struct PacketTimeFields {
-        int year;
-        int month;
-        int monthDay;
-        int hour;
-        int minute;
-    };
-
-    DateTime extractArchiveDate() const;
-    PacketTimeFields decodePacketDateTime() const;
+    void decodeDateTimeValues();
 
     static constexpr DateTime EMPTY_ARCHIVE_PACKET_TIME = 0;
     static constexpr int UNKNOWN_ET = 0;
@@ -213,10 +218,11 @@ private:
     static constexpr int SOIL_MOISTURES_BASE_OFFSET = 48;
 
 
-    DateTime        packetTime;
+    DateTime        packetEpochDateTime;
+    DateTimeFields  packetDateTimeFields;
     int             windSampleCount;
     byte            buffer[BYTES_PER_ARCHIVE_PACKET];
-    VantageLogger & logger;
+    VantageLogger * logger;
 };
 
 }

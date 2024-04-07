@@ -72,6 +72,8 @@ StormArchiveManager::updateArchive() {
         }
     }
 
+    // TBD There appears to be a bug here. There have been times when the last storm gets added to the archive
+    // multiple times.
     for (StormData record : stormData) {
         //
         // Only store new storms and storms that are not in progress (stormEnd == 0)

@@ -867,7 +867,7 @@ VantageStationNetwork::todayNetworkStatusJSON() const {
     for (const ArchivePacket & packet : list) {
         if (!first) oss << ", "; else first = false;
         linkQuality = calculateLinkQualityFromArchiveRecord(packet);
-        oss << " { \"time\" : \""  << Weather::formatDateTime(packet.getDateTime()) << "\", "
+        oss << " { \"time\" : \""  << packet.getPacketDateTimeString() << "\", "
             << " \"linkQuality\" : " << linkQuality << " }";
     }
 

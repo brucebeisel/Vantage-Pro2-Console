@@ -21,9 +21,9 @@
 #include <vector>
 
 #include "WeatherTypes.h"
+#include "ArchivePacket.h"
 
 namespace vws {
-class ArchivePacket;
 class VantageWeatherStation;
 class VantageLogger;
 
@@ -37,6 +37,18 @@ static const std::string ARCHIVE_TEMP_FILE = "weather-archive-temp.dat";
  * This archive acts as augmented storage for the console. The console has a storage capacity of 2450 records which translate to
  * approximately 42 hours of storage at 1 minute intervals. Not only will this class the console memory and the disk archive in sync,
  * it will also keep backups that will enable the archive to be restored in case of an error.
+ *
+ * Note that the Vantage archive has a limitation with daylight savings time. When daylight savings time starts in the spring,
+ * it behaves are you would expect. Assuming a 5 minute archive interval, you will find a record at 1:55 AM followed by a record
+ * at 3:00 AM. Per Bruce Johnson at Davis Instruments, the logger will ignore any records for which it already has a record.
+ * When DST ends, the clock is turned backward. The time of the final record during DST will be 1:55 AM. The next record that
+ * the logger attempts to save is 1:00 AM. Since this record already exists, the logger will ignore the data.This will behavior
+ * will continue until 2:00 AM, when the logger will resume logging. From a time since epoch time perspective, there will be a
+ * 3900 second gap in the logger. 3600 for the DST change and 300 for the 5 minute archive interval. All of this means that
+ * this software must always assume that the 1 AM hour that occurs on the day DST ends is with DST on.
+ * The issue is that some operating systems will default to DST on during the 1 AM hour, other will default to off. So we need
+ * to compensate for the inconsistency.
+ *
  */
 class ArchiveManager {
 public:
@@ -58,15 +70,6 @@ public:
      * @return True if successful
      */
     bool synchronizeArchive();
-
-    /**
-     * Get the archive records after the specified time.
-     *
-     * @param afterTime The time that is used to find archive records that are older
-     * @param list      The list into which any found archive records will be added
-     * @return The time of the last record in the list
-     */ 
-    DateTime getArchiveRecordsAfter(DateTime afterTime, std::vector<ArchivePacket> & list);
 
     /**
      * Query the archive records that occur between the specified times (inclusive).
@@ -185,15 +188,21 @@ private:
      */
     void determineIfArchivingIsActive();
 
-    const std::string        archiveFile;          // The name of the archive file
-    std::string        archiveBackupDir;     // The name of the archive backup directory
-    std::string              archiveTempFile;      // The name of the temporary file used during a restore
-    DateTime                 lastBackupTime;       // The last time the archive was backed up
-    DateTime                 newestPacketTime;     // The time of the newest packet in the archive file
-    DateTime                 oldestPacketTime;     // The time of the oldest packet in the archive file
-    int                      archivePacketCount;   // The number of packets in the archive
-    bool                     archivingActive;      // Whether archiving is active
-    VantageWeatherStation &  station;              // Reference to the Vantage weather station object
+    const std::string        archiveFile;            // The name of the archive file
+    std::string              archiveBackupDir;       // The name of the archive backup directory
+    std::string              archiveTempFile;        // The name of the temporary file used during a restore
+    DateTime                 lastBackupTime;         // The last time the archive was backed up
+
+    DateTime                 newestPacketTime;       // The time of the newest packet in the archive file
+    DateTimeFields           newestPacketTimeFields; // The time of the newest packet in the archive file
+    DateTime                 oldestPacketTime;       // The time of the oldest packet in the archive file
+    ArchivePacket            newestPacket;
+    ArchivePacket            oldestPacket;
+
+
+    int                      archivePacketCount;     // The number of packets in the archive
+    bool                     archivingActive;        // Whether archiving is active
+    VantageWeatherStation &  station;                // Reference to the Vantage weather station object
     VantageLogger &          logger;
 };
 }

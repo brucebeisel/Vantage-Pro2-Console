@@ -65,7 +65,7 @@ ArchiveManager::~ArchiveManager() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // TODO There seems to be a bug with daylight savings time. There is an hour gap in the archive records
-// when DST start and ends.
+// when DST ends.
 bool
 ArchiveManager::synchronizeArchive() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing local archive from Vantage console's archive" << endl;
@@ -74,9 +74,11 @@ ArchiveManager::synchronizeArchive() {
     vector<ArchivePacket> list;
     bool result = false;
 
+    DateTimeFields timeFields = newestPacket.getDateTimeFields();
+
     for (int i = 0; i < SYNC_RETRIES && !result; i++) {
         list.clear();
-        if (station.wakeupStation() && station.dumpAfter(newestPacketTime, list)) {
+        if (station.wakeupStation() && station.dumpAfter(timeFields, list)) {
             addPacketsToArchive(list);
             result = true;
             break;
@@ -86,46 +88,6 @@ ArchiveManager::synchronizeArchive() {
     backupArchiveFile();
 
     return result;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-DateTime
-ArchiveManager::getArchiveRecordsAfter(DateTime afterTime, vector<ArchivePacket>& list) {
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Reading packets after " << Weather::formatDateTime(afterTime) << endl;
-    //logger.log(VantageLogger::VANTAGE_INFO) << "DMPAFT is temporarily disabled" << endl;
-    //return time(0);
-
-    byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
-    ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
-    if (stream.fail()) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
-        return 0;
-    }
-
-    positionStream(stream, afterTime, true);
-    list.clear();
-    
-    //
-    // Cap the number of records to the number of archive records that the console holds.
-    // If there are more records, then the caller needs to call this method until the
-    // list returns empty.
-    //
-    DateTime timeOfLastRecord = 0;
-    while (list.size() < ProtocolConstants::NUM_ARCHIVE_RECORDS) {
-        stream.read(buffer, sizeof(buffer));
-
-        if (stream.eof())
-            break;
-
-        ArchivePacket packet(buffer);
-        list.push_back(packet);
-        timeOfLastRecord = packet.getDateTime();
-    }
-
-    stream.close();
-
-    return timeOfLastRecord;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +119,7 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, vector
 
         if (!stream.eof()) {
             ArchivePacket packet(buffer);
-            packetTime = packet.getDateTime();
+            packetTime = packet.getEpochDateTime();
             if (packetTime <= endTime) {
                 list.push_back(packet);
                 timeOfLastRecord = packetTime;
@@ -199,7 +161,6 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
     //
     // If the start time is newer than the oldest packet in the archive, look for the packet that is after the specified time.
     // Otherwise the start time is before the beginning of the file, so just start at the beginning.
-    // This a linear search from the end of the archive. A binary search would be more efficient.
     //
     if (searchTime <= oldestPacketTime) {
         stream.seekg(0, ios::beg);
@@ -227,7 +188,7 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
             stream.read(buffer, sizeof(buffer));
             forwardReadsPerformed++;
             ArchivePacket packet(buffer);
-            packetTime = packet.getDateTime();
+            packetTime = packet.getEpochDateTime();
         } while (packetTime < searchTime && !stream.eof());
 
         //
@@ -240,7 +201,7 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
             stream.read(buffer, sizeof(buffer));
             backwardReadsPerformed++;
             ArchivePacket packet(buffer);
-            packetTime = packet.getDateTime();
+            packetTime = packet.getEpochDateTime();
             stream.seekg(-(ArchivePacket::BYTES_PER_ARCHIVE_PACKET * 2), ios::cur);
         } while (searchTime <= packetTime && streamPosition > 0);
 
@@ -425,7 +386,7 @@ ArchiveManager::verifyArchiveFile() const {
             ios::pos_type position = is.tellg();
 
             ArchivePacket packet(buffer);
-            DateTime currentPacketTime = packet.getDateTime();
+            DateTime currentPacketTime = packet.getEpochDateTime();
 
             if (currentPacketTime <= lastPacketTime) {
                 logger.log(VantageLogger::VANTAGE_WARNING) << "Detected out of order packets at file location " << position << ". " << endl
@@ -503,15 +464,25 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
     }
 
     for (vector<ArchivePacket>::const_iterator it = packets.begin(); it != packets.end(); ++it) {
-        if (newestPacketTime < it->getDateTime()) {
+        //
+        // This check may not be necessary and it may be a bug due to daylight savings time.
+        // When DST ends, the 1 AM hour is repeated. How this is handled by the dump after command
+        // or the console itself, is not known. It could get very confused if you ask for a DMPAFT
+        // at 01:20 AM. Which 1:20 will it dump after, the first or the second. On the other hand,
+        // the console may not store any data until 2:00 AM standard time, leaving an hour gap in
+        // the archive.
+        //
+        if (newestPacketTime < it->getEpochDateTime()) {
             stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
-            newestPacketTime = it->getDateTime();
+            newestPacketTime = it->getEpochDateTime();
+            newestPacketTimeFields = it->getDateTimeFields();
+            newestPacket = *it;
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: "
-                                                      << Weather::formatDateTime(it->getDateTime()) << endl;
+                                                      << Weather::formatDateTime(it->getEpochDateTime()) << endl;
         }
         else
             logger.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time "
-                                                    << Weather::formatDateTime(it->getDateTime()) << endl;
+                                                    << Weather::formatDateTime(it->getEpochDateTime()) << endl;
     }
 
     streampos fileSize = stream.tellp();
@@ -540,15 +511,17 @@ ArchiveManager::findArchivePacketTimeRange() {
         stream.seekg(0, ios::beg);
         stream.read(buffer, sizeof(buffer));
         ArchivePacket packet(buffer);
-        oldestPacketTime = packet.getDateTime();
+        oldestPacket.updateArchivePacketData(buffer, 0);
+        oldestPacketTime = oldestPacket.getEpochDateTime();
 
         //
         // Read the packet at the end of the file
         //
         stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
         stream.read(buffer, sizeof(buffer));
-        packet.updateArchivePacketData(buffer);
-        newestPacketTime = packet.getDateTime();
+        newestPacket.updateArchivePacketData(buffer);
+        newestPacketTime = newestPacket.getEpochDateTime();
+        newestPacketTimeFields = newestPacket.getDateTimeFields();
         determineIfArchivingIsActive();
     }
     else {

@@ -240,8 +240,7 @@ VantageDriver::mainLoop() {
                 if (archiveManager.synchronizeArchive()) {
                     ArchivePacket packet;
                     archiveManager.getNewestRecord(packet);
-                    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: "
-                                                              << Weather::formatDateTime(packet.getDateTime());
+                    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: " << packet.getPacketDateTimeString() << endl;
                     previousNextRecord = nextRecord;
                 }
             }

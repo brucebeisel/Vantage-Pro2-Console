@@ -21,6 +21,7 @@
 #include <string>
 #include <ctime>
 #include <sstream>
+#include <cstring>
 #include <iomanip>
 
 #include "BitConverter.h"
@@ -38,13 +39,13 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchivePacket::ArchivePacket() : packetTime(0), windSampleCount(0), buffer(""), logger(VantageLogger::getLogger("ArchivePacket")) {
+ArchivePacket::ArchivePacket() : packetEpochDateTime(0), windSampleCount(0), buffer(""), logger(&VantageLogger::getLogger("ArchivePacket")) {
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchivePacket::ArchivePacket(const byte buffer[], int offset) : logger(VantageLogger::getLogger("ArchivePacket")) {
+ArchivePacket::ArchivePacket(const byte buffer[], int offset) : logger(&VantageLogger::getLogger("ArchivePacket")) {
     updateArchivePacketData(buffer, offset);
 }
 
@@ -65,7 +66,7 @@ ArchivePacket::updateArchivePacketData(const byte buffer[], int offset) {
     }
 
     windSampleCount = BitConverter::toUint16(this->buffer, NUM_WIND_SAMPLES_OFFSET);
-    packetTime = extractArchiveDate();
+    decodeDateTimeValues();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,14 +86,14 @@ ArchivePacket::getWindSampleCount() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
-ArchivePacket::getDateTime() const {
-    return packetTime;
+ArchivePacket::getEpochDateTime() const {
+    return packetEpochDateTime;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool ArchivePacket::isEmptyPacket() const {
-    return packetTime == EMPTY_ARCHIVE_PACKET_TIME;
+    return packetEpochDateTime == EMPTY_ARCHIVE_PACKET_TIME;
 }
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,49 +116,51 @@ ArchivePacket::archivePacketContainsData(const byte * buffer, int offset) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
-ArchivePacket::extractArchiveDate() const {
-    PacketTimeFields fields;
-    fields = decodePacketDateTime();
+void
+ArchivePacket::decodeDateTimeValues() {
+    int date = BitConverter::toUint16(buffer, DATE_STAMP_OFFSET);
+    int time = BitConverter::toUint16(buffer, TIME_STAMP_OFFSET);
 
+    packetDateTimeFields.year = ((date >> 9) & 0x3F) + YEAR_OFFSET;
+    packetDateTimeFields.month = (date >> 5) & 0xF;
+    packetDateTimeFields.monthDay = date & 0x1F;
+    packetDateTimeFields.hour = time / 100;
+    packetDateTimeFields.minute = time % 100;
+
+    //
+    // Note that this technique works in general, but because the Vantage Console does not report
+    // weather DST is on or off, the conversion to the UNIX epoch is platform dependent. The epoch-based
+    // date time should only be used for relative comparisons, not actual values.
+    //
     struct tm tm{};
-    tm.tm_year = fields.year - Weather::TIME_STRUCT_YEAR_OFFSET;
-    tm.tm_mon = fields.month - 1;
-    tm.tm_mday = fields.monthDay;
-    tm.tm_hour = fields.hour;
-    tm.tm_min = fields.minute;
+    tm.tm_year = packetDateTimeFields.year - Weather::TIME_STRUCT_YEAR_OFFSET;
+    tm.tm_mon = packetDateTimeFields.month - 1;
+    tm.tm_mday = packetDateTimeFields.monthDay;
+    tm.tm_hour = packetDateTimeFields.hour;
+    tm.tm_min = packetDateTimeFields.minute;
     tm.tm_sec = 0;
     tm.tm_isdst = -1;
-    return mktime(&tm);
+    packetEpochDateTime =  mktime(&tm);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const DateTimeFields &
+ArchivePacket::getDateTimeFields() const {
+    return packetDateTimeFields;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
 ArchivePacket::getPacketDateTimeString() const {
-    PacketTimeFields fields;
-    fields = decodePacketDateTime();
-
     ostringstream oss;
-    oss << setfill('0') << fields.year << "-" << setw(2) << fields.month << "-" << setw(2) << fields.monthDay << " " << setw(2) << fields.hour << ":" << setw(2) << fields.minute;
+    oss << setfill('0')
+        << packetDateTimeFields.year << "-" << setw(2) << packetDateTimeFields.month << "-" << setw(2) << packetDateTimeFields.monthDay
+        << " " << setw(2) << packetDateTimeFields.hour << ":" << setw(2) << packetDateTimeFields.minute;
 
     return oss.str();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-ArchivePacket::PacketTimeFields
-ArchivePacket::decodePacketDateTime() const {
-    int date = BitConverter::toUint16(buffer, DATE_STAMP_OFFSET);
-    int time = BitConverter::toUint16(buffer, TIME_STAMP_OFFSET);
-    PacketTimeFields fields;
-    fields.year = ((date >> 9) & 0x3F) + YEAR_OFFSET;
-    fields.month = (date >> 5) & 0xF;
-    fields.monthDay = date & 0x1F;
-    fields.hour = time / 100;
-    fields.minute = time % 100;
-
-    return fields;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -363,11 +366,26 @@ ArchivePacket::getSoilMoisture(int index) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+bool
+ArchivePacket::operator==(const ArchivePacket & other) {
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchivePacket::operator<(const ArchivePacket & other) {
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 std::string
 ArchivePacket::formatJSON() const {
     ostringstream ss;
-    DateTime archiveTime = extractArchiveDate();
-    ss << "{ \"time\" : \"" << Weather::formatDateTime(archiveTime) << "\"";
+    ss << "{ \"time\" : \"" << packetDateTimeFields << "\"";
 
     Measurement<Temperature> temperature = getAverageOutsideTemperature();
     ss << temperature.formatJSON("avgOutsideTemperature", true);
