@@ -18,6 +18,7 @@
 #define DATE_TIME_FIELDS_H
 
 #include <iosfwd>
+#include "WeatherTypes.h"
 
 namespace vws {
 
@@ -32,6 +33,8 @@ struct DateTimeFields {
     int monthDay;
     int hour;
     int minute;
+
+    DateTime getEpochDateTime() const;
 
     bool operator==(const DateTimeFields & other) const;
     bool operator<(const DateTimeFields & other) const;

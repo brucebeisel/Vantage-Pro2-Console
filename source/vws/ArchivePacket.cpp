@@ -132,15 +132,7 @@ ArchivePacket::decodeDateTimeValues() {
     // weather DST is on or off, the conversion to the UNIX epoch is platform dependent. The epoch-based
     // date time should only be used for relative comparisons, not actual values.
     //
-    struct tm tm{};
-    tm.tm_year = packetDateTimeFields.year - Weather::TIME_STRUCT_YEAR_OFFSET;
-    tm.tm_mon = packetDateTimeFields.month - 1;
-    tm.tm_mday = packetDateTimeFields.monthDay;
-    tm.tm_hour = packetDateTimeFields.hour;
-    tm.tm_min = packetDateTimeFields.minute;
-    tm.tm_sec = 0;
-    tm.tm_isdst = -1;
-    packetEpochDateTime =  mktime(&tm);
+    packetEpochDateTime =  packetDateTimeFields.getEpochDateTime();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

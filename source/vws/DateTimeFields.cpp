@@ -17,6 +17,7 @@
 #include "DateTimeFields.h"
 
 #include <iomanip>
+#include "Weather.h"
 
 using namespace std;
 
@@ -27,6 +28,20 @@ namespace vws {
 DateTimeFields::DateTimeFields() :  year(0), month(1), monthDay(1), hour(0), minute(0) {
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+DateTime
+DateTimeFields::getEpochDateTime() const {
+    struct tm tm{};
+    tm.tm_year = year - Weather::TIME_STRUCT_YEAR_OFFSET;
+    tm.tm_mon = month - 1;
+    tm.tm_mday = monthDay;
+    tm.tm_hour = hour;
+    tm.tm_min = minute;
+    tm.tm_sec = 0;
+    tm.tm_isdst = -1;
+    return mktime(&tm);
+}
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool

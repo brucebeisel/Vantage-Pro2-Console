@@ -48,7 +48,8 @@
  VantageProtocolConstants.h WeatherTypes.h LoopPacket.h \
  CurrentWeatherPublisher.h VantageWeatherStation.h ArchivePacket.h \
  DateTimeFields.h BitConverter.h VantageLogger.h
-../../target/vws/DateTimeFields.o: DateTimeFields.cpp DateTimeFields.h
+../../target/vws/DateTimeFields.o: DateTimeFields.cpp DateTimeFields.h \
+ WeatherTypes.h Weather.h Measurement.h
 ../../target/vws/DominantWindDirections.o: DominantWindDirections.cpp \
  DominantWindDirections.h WeatherTypes.h WindDirectionSlice.h \
  VantageLogger.h Weather.h Measurement.h
