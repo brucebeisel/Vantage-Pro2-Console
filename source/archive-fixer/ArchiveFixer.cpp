@@ -40,7 +40,7 @@ main(int argc, char *argv[]) {
             ArchivePacket packet(buffer);
             packetsRead++;
 
-            DateTime currentPacketTime = packet.getDateTime();
+            DateTime currentPacketTime = packet.getEpochDateTime();
             cout << "Processing packet with time: " << Weather::formatDateTime(currentPacketTime) << endl;
 
             if (currentPacketTime > lastPacketTime) {

@@ -193,9 +193,6 @@ private:
     std::string              archiveTempFile;        // The name of the temporary file used during a restore
     DateTime                 lastBackupTime;         // The last time the archive was backed up
 
-    DateTime                 newestPacketTime;       // The time of the newest packet in the archive file
-    DateTimeFields           newestPacketTimeFields; // The time of the newest packet in the archive file
-    DateTime                 oldestPacketTime;       // The time of the oldest packet in the archive file
     ArchivePacket            newestPacket;
     ArchivePacket            oldestPacket;
 

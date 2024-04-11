@@ -107,7 +107,7 @@ main(int argc, char *argv[]) {
     DateTime newestRecord = 0;
     int record = 0;
     for (auto packet : packets) {
-        DateTime packetTime = packet.getDateTime();
+        DateTime packetTime = packet.getEpochDateTime();
         if (oldestRecord == 0) {
             oldestRecord = packetTime;
             newestRecord = packetTime;

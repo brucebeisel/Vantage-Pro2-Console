@@ -79,7 +79,7 @@ main(int argc, char *argv[]) {
             cout << packet.formatJSON() << endl << endl;
         }
         else {
-            cout << setw(5) << setfill('0') << record << " - " << packet.getPacketDateTimeString() << " " << Weather::formatDateTime(packet.getDateTime()) << endl;
+            cout << setw(5) << setfill('0') << record << " - " << packet.getPacketDateTimeString() << " " << Weather::formatDateTime(packet.getEpochDateTime()) << endl;
             if (dumpBinary)
                 cout << Weather::dumpBuffer(buffer, sizeof(buffer));
         }

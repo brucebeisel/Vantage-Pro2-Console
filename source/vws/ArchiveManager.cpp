@@ -49,8 +49,6 @@ ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStati
                                                                     lastBackupTime(0),
                                                                     archiveTempFile(dataDirectory + "/" + ARCHIVE_TEMP_FILE),
                                                                     station(station),
-                                                                    newestPacketTime(0),
-                                                                    oldestPacketTime(0),
                                                                     archivePacketCount(0),
                                                                     archivingActive(true),
                                                                     logger(VantageLogger::getLogger("ArchiveManager")) {
@@ -139,6 +137,9 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, vector
 ////////////////////////////////////////////////////////////////////////////////
 bool
 ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool afterTime) {
+    if (archivePacketCount < 2)
+        return true;
+
     //
     // Use high resolution clock to track performance of positioning the stream
     //
@@ -157,6 +158,9 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
     //
     if (afterTime)
         searchTime++;
+
+    DateTime oldestPacketTime = oldestPacket.getEpochDateTime();
+    DateTime newestPacketTime = newestPacket.getEpochDateTime();
 
     //
     // If the start time is newer than the oldest packet in the archive, look for the packet that is after the specified time.
@@ -222,8 +226,8 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
 
     logger.log(VantageLogger::VANTAGE_DEBUG2) <<  "Positioning stream to find archive record of time "
                                               << Weather::formatDateTime(searchTime)
-                                              << " in archive with range of " << Weather::formatDateTime(oldestPacketTime)
-                                              << " to " << Weather::formatDateTime(newestPacketTime)
+                                              << " in archive with range of " << oldestPacket.getPacketDateTimeString()
+                                              << " to " << newestPacket.getPacketDateTimeString()
                                               << " took " << timeSpan.count() << " seconds"
                                               << " and required " << forwardReadsPerformed << " forward reads and "
                                               << backwardReadsPerformed << " backward reads" << endl;
@@ -257,8 +261,8 @@ ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
 ////////////////////////////////////////////////////////////////////////////////
 void
 ArchiveManager::getArchiveRange(DateTime & oldest, DateTime & newest, int & count) const {
-    oldest = oldestPacketTime;
-    newest = newestPacketTime;
+    oldest = oldestPacket.getEpochDateTime();
+    newest = newestPacket.getEpochDateTime();
     count = archivePacketCount;
 }
 
@@ -270,6 +274,8 @@ ArchiveManager::clearArchiveFile() {
     return stream.good();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
 ArchiveManager::trimBackupDirectory() {
     DIR * dir;
@@ -316,8 +322,9 @@ ArchiveManager::backupArchiveFile() {
     //
     // Building the dateString separately fixes a warning from Eclipse
     //
-    const string dateString = Weather::formatDate(now);
-    const string backupFile(archiveBackupDir + "/" + dateString + "_" + ARCHIVE_BACKUP_FILE);
+    string dateString;
+    dateString = Weather::formatDate(now);
+    string backupFile(archiveBackupDir + "/" + dateString + "_" + ARCHIVE_BACKUP_FILE);
 
     std::error_code errorCode;
     if (!std::filesystem::copy_file(archiveFile, backupFile, std::filesystem::copy_options::overwrite_existing, errorCode)) {
@@ -472,10 +479,8 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
         // the console may not store any data until 2:00 AM standard time, leaving an hour gap in
         // the archive.
         //
-        if (newestPacketTime < it->getEpochDateTime()) {
+        if (newestPacket.getEpochDateTime() < it->getEpochDateTime()) {
             stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
-            newestPacketTime = it->getEpochDateTime();
-            newestPacketTimeFields = it->getDateTimeFields();
             newestPacket = *it;
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: "
                                                       << Weather::formatDateTime(it->getEpochDateTime()) << endl;
@@ -512,7 +517,6 @@ ArchiveManager::findArchivePacketTimeRange() {
         stream.read(buffer, sizeof(buffer));
         ArchivePacket packet(buffer);
         oldestPacket.updateArchivePacketData(buffer, 0);
-        oldestPacketTime = oldestPacket.getEpochDateTime();
 
         //
         // Read the packet at the end of the file
@@ -520,13 +524,10 @@ ArchiveManager::findArchivePacketTimeRange() {
         stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
         stream.read(buffer, sizeof(buffer));
         newestPacket.updateArchivePacketData(buffer);
-        newestPacketTime = newestPacket.getEpochDateTime();
-        newestPacketTimeFields = newestPacket.getDateTimeFields();
         determineIfArchivingIsActive();
     }
     else {
-        oldestPacketTime = 0;
-        newestPacketTime = 0;
+        archivePacketCount = 0;
     }
 
     stream.close();
@@ -537,9 +538,11 @@ ArchiveManager::findArchivePacketTimeRange() {
 void
 ArchiveManager::determineIfArchivingIsActive() {
 
-    if (newestPacketTime == 0 || station.getArchivePeriod() == 0)
+    archivingActive = false;
+
+    if (archivePacketCount == 0 || station.getArchivePeriod() == 0)
         return;
 
-    archivingActive = newestPacketTime > time(0) - (station.getArchivePeriod() * 60);
+    archivingActive = newestPacket.getEpochDateTime() > (time(0) - (station.getArchivePeriod() * 60));
 }
 }

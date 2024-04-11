@@ -54,17 +54,17 @@ main(int argc, char * argv[]) {
 
     cout << "Archive time range: " << Weather::formatDateTime(oldestPacket) << " to " << Weather::formatDateTime(newestPacket) << " Packet Count: " << packetCount << endl;
 
-    struct tm starttm;
+    struct tm starttm{0};
 
     sscanf(argv[2], "%d-%d-%d", &starttm.tm_year, &starttm.tm_mon, &starttm.tm_mday);
     starttm.tm_mon--;
     starttm.tm_year -= 1900;
     starttm.tm_isdst = -1;
     DateTime startDate = mktime(&starttm);
-    DateTime endDate = startDate + 6000;
+    DateTime endDate = startDate + 7200;
 
     vector<ArchivePacket> packets;
     archiveManager.queryArchiveRecords(startDate, endDate, packets);
-    cout << "First packet found time: " << Weather::formatDateTime(packets[0].getDateTime()) << endl;
+    cout << "First packet found time: " << packets[0].getPacketDateTimeString() << endl;
 }
 

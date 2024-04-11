@@ -14,6 +14,7 @@ VWSOBJS = \
 	$(VWSOBJDIR)/BitConverter.o \
 	$(VWSOBJDIR)/Weather.o \
 	$(VWSOBJDIR)/VantageDecoder.o \
+	$(VWSOBJDIR)/DateTimeFields.o \
 	$(VWSOBJDIR)/VantageLogger.o \
 	$(VWSOBJDIR)/ArchivePacket.o
 

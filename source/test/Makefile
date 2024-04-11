@@ -35,6 +35,7 @@ SUMMARYOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o \
 	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
 	$(VWSTESTOBJDIR)/VantageCRC.o \
@@ -53,6 +54,7 @@ ARCHIVEOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o \
 	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
 	$(VWSTESTOBJDIR)/UnitConverter.o \
