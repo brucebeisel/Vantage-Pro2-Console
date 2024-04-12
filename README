@@ -1,1 +1,21 @@
-Vantage Pro2 Console project is software that creates a virtual console for a Davis Instruments Vantage Pro2 console. The projecthas two parts, one to communicate with the Vantage Pro2 console, the other to provide a user interface for interacting with the console.Note that the user interface is only designed to interact with the console, not provide a full weather reporting interface, just enough to interact with the Vantage Pro2 console.The driver part has three main functions:    1.	Publish the current weather data being received by the console    2.	Provide a command interface to configure the console. Commands include things like controlling the backlight and    	setting the display units.    3.	Download the archive data that is collected by the console. This provides an all but unlimit buffer for archive data.    	The console's data collection module can hold a small amount of data (2 days to many weeks depending on the archive interval),    	but this driver will store the archive data and allow it to be queried.A Davis Instruments Vantage Pro2 console with a data logger (6510USB) is required for this software. Future versions may also include the Vantage Vue console.This software is designed to be built and run on a Raspberry Pi. A Raspberry Pi 4 Version B is recommended. This software is not very CPUintensive, so any configuration should be fine.
+Vantage Pro2 Console project is software that creates a virtual console for a Davis Instruments Vantage Pro2 console. The project
+has two parts, one to communicate with the Vantage Pro2 console, the other to provide a user interface for interacting with the console.
+Note that the user interface is only designed to interact with the console, not provide a full weather reporting interface, just enough
+to interact with the Vantage Pro2 console.
+
+The driver part has three main functions:
+    1. Publish the current weather data being received by the console
+    2. Provide a command interface to configure the console. Commands include things like controlling the backlight and
+       setting the display units.
+    3. Download the archive data that is collected by the console. This provides an all but unlimit buffer for archive data.
+
+The console's data collection module can hold a small amount of data (2 days to many weeks depending on the archive interval),
+but this driver will store the archive data and allow it to be queried.
+    
+A Davis Instruments Vantage Pro2 console with a data logger (6510USB) is required for this software. Future versions may
+also include the Vantage Vue console.
+    
+This software is designed to be built and run on a Raspberry Pi. A Raspberry Pi 4 Version B is recommended. This software is not very CPU
+intensive, so any configuration should be fine.
+    
+
