@@ -94,6 +94,9 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         // Initialize objects that require it before entering the main loop
         //
         logger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
+
+        currentWeatherManager.initialize();
+
         //
         // The driver must be initialized before any communication is performed with the console
         //
