@@ -34,7 +34,7 @@ static const std::string ARCHIVE_TEMP_FILE = "weather-archive-temp.dat";
 
 /**
  * The ArchiveManager class manages a file that contains the raw data read from the DMP and DMPAFT command of the Vantage console.
- * This archive acts as augmented storage for the console. The console has a storage capacity of 2450 records which translate to
+ * This archive acts as augmented storage for the console. The console has a storage capacity of 2450 records which translates to
  * approximately 42 hours of storage at 1 minute intervals. Not only will this class the console memory and the disk archive in sync,
  * it will also keep backups that will enable the archive to be restored in case of an error.
  *
@@ -42,7 +42,7 @@ static const std::string ARCHIVE_TEMP_FILE = "weather-archive-temp.dat";
  * it behaves are you would expect. Assuming a 5 minute archive interval, you will find a record at 1:55 AM followed by a record
  * at 3:00 AM. Per Bruce Johnson at Davis Instruments, the logger will ignore any records for which it already has a record.
  * When DST ends, the clock is turned backward. The time of the final record during DST will be 1:55 AM. The next record that
- * the logger attempts to save is 1:00 AM. Since this record already exists, the logger will ignore the data.This will behavior
+ * the logger attempts to save is 1:00 AM. Since this record already exists, the logger will ignore the data. This behavior
  * will continue until 2:00 AM, when the logger will resume logging. From a time since epoch time perspective, there will be a
  * 3900 second gap in the logger. 3600 for the DST change and 300 for the 5 minute archive interval. All of this means that
  * this software must always assume that the 1 AM hour that occurs on the day DST ends is with DST on.
@@ -56,6 +56,7 @@ public:
      * Constructor.
      * 
      * @param dataDirctory The directory into which the archive will be written
+     * @param station      The weather station object used to communicate with the console
      */
     ArchiveManager(const std::string & dataDirectory, VantageWeatherStation & station);
 
@@ -92,8 +93,8 @@ public:
     /**
      * Get the time range of data in the archive.
      *
-     * @param[out] oldest Reference to a DateTime that will be filled in with the oldest packet time
-     * @param[out] newest Reference to a DateTime that will be filled in with the newest packet time
+     * @param[out] oldest Reference to a DateTime that will be filled in with the oldest packet time or set to zero if the archive is empty
+     * @param[out] newest Reference to a DateTime that will be filled in with the newest packet time or set to zero if the archive is empty
      * @param[out] count  The number of archive records in the archive
      */
     void getArchiveRange(DateTime & oldest, DateTime & newest, int & count) const;
@@ -135,7 +136,7 @@ public:
 
     /**
      * Set the state of archiving.
-     * Note that this state can be explicitly set of implicitly determined based on the
+     * Note that this state can be explicitly set or implicitly determined based on the
      * archive interval and the time of the newest record in the archive.
      *
      * @param active True if archiving is active

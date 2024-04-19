@@ -255,7 +255,7 @@ SummaryReport::normalizeStartTime(DateTime startTime, SummaryPeriod period) {
             break;
     }
 
-    cout << "Normalized start time from " << Weather::formatDateTime(startTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
+    //cout << "Normalized start time from " << Weather::formatDateTime(startTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
     return normalizedTime;
 }
 
@@ -293,7 +293,7 @@ SummaryReport::normalizeEndTime(DateTime endTime, SummaryPeriod period) {
             break;
     }
 
-    cout << "Normalize end time from " << Weather::formatDateTime(endTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
+    //cout << "Normalized end time from " << Weather::formatDateTime(endTime) << " to " << Weather::formatDateTime(normalizedTime) << endl;
 
     return normalizedTime;
 
@@ -409,16 +409,17 @@ SummaryReport::incrementStartTime(DateTime time, SummaryPeriod period) {
 bool
 SummaryReport::loadData() {
 
-    //cout << "Getting archive between " << Weather::formatDate(startDate) << " and " << Weather::formatDate(endDate) << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Loading data for summary report..." << endl;
 
     vector<ArchivePacket> packets;
     DateTime lastRecordDate = archiveManager.queryArchiveRecords(startDate, endDate, packets);
     if (lastRecordDate == 0) {
-        cout << "Failed to read archive" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read archive for summary report" << endl;
         return false;
     }
 
-    cout << "Received " << packets.size() << " packets from the archive" << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Summary report received " << packets.size() << " packets from the archive" << endl;
+
     summaryRecords.clear();
 
     DateTime summaryStart = startDate;
@@ -433,7 +434,8 @@ SummaryReport::loadData() {
         summaryStart = incrementStartTime(summaryStart, period);
         summaryEnd = calculateEndTime(summaryStart, period);
     }
-    cout << "Created " << summaryRecords.size() << " summary records" << endl;
+
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Created " << summaryRecords.size() << " summary records" << endl;
 
     //
     // Now build the summary records for calculating day-based statistics
@@ -450,7 +452,7 @@ SummaryReport::loadData() {
         summaryEnd = calculateEndTime(summaryStart, SummaryPeriod::DAY);
     }
 
-    cout << "Created " << dayRecords.size() << " day summary records" << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Created " << dayRecords.size() << " day summary records" << endl;
 
     //
     // Now that we have create all of the summary records, go through and apply the ArchivePackets

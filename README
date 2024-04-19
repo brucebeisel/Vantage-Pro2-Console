@@ -1,21 +1,15 @@
-Vantage Pro2 Console project is software that creates a virtual console for a Davis Instruments Vantage Pro2 console. The project
-has two parts, one to communicate with the Vantage Pro2 console, the other to provide a user interface for interacting with the console.
-Note that the user interface is only designed to interact with the console, not provide a full weather reporting interface, just enough
-to interact with the Vantage Pro2 console.
+Vantage Pro2 Console project is software that creates a virtual console for a Davis Instruments Vantage Pro2 console.This project provides a command interface to the console and a data collector.
 
-The driver part has three main functions:
-    1. Publish the current weather data being received by the console
+The driver part has the following main functions:
+    1. Publish and log the current weather data being received by the console via the LOOP and LOOP2 packets
     2. Provide a command interface to configure the console. Commands include things like controlling the backlight and
        setting the display units.
-    3. Download the archive data that is collected by the console. This provides an all but unlimit buffer for archive data.
-
+    3. Download the archive data that is collected by the console. This provides an all but unlimited buffer for archive data.    4. An interface to retrieve the stored archive data.
 The console's data collection module can hold a small amount of data (2 days to many weeks depending on the archive interval),
-but this driver will store the archive data and allow it to be queried.
+but this driver will store the archive data and allow it to be queried.No formal database is used to store the archive data. A previous version of this software used a MySQL database, but itbecame too difficult to maintain the software and the data itself. Instead this software stores the archive data in a simple flat file using the console's native archive packet format. Given the small amount of data, this approach simplifiesthe overall design. For reference, the console will generate approximately 5 MB a year when the archive interval is setto 5 minutes. Even at a 1 minute archive interval, it will only generate 25 MB per year. A simple indexed lookup algorithmhas been implemented to minimize data retrieval times. See the API documentation for details of the commands supported.
     
 A Davis Instruments Vantage Pro2 console with a data logger (6510USB) is required for this software. Future versions may
 also include the Vantage Vue console.
     
-This software is designed to be built and run on a Raspberry Pi. A Raspberry Pi 4 Version B is recommended. This software is not very CPU
+This software is designed to be built and run on a Raspberry Pi. A Raspberry Pi 4 Version B or 5 is recommended. This software is not very CPU
 intensive, so any configuration should be fine.
-    
-

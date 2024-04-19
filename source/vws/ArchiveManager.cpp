@@ -287,6 +287,9 @@ ArchiveManager::trimBackupDirectory() {
         return;
     }
 
+    //
+    // Build the list of archive backup files that are too old
+    //
     while ((ent = readdir(dir)) != NULL) {
         struct stat sbuf;
         stat(ent->d_name, &sbuf);
