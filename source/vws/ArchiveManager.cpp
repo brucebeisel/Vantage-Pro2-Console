@@ -46,7 +46,7 @@ using vws::VantageLogger;
 ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStation & station) :
                                                                     archiveFile(dataDirectory + "/" + ARCHIVE_FILE),
                                                                     archiveBackupDir(dataDirectory + "/" + ARCHIVE_BACKUP_DIR),
-                                                                    lastBackupTime(0),
+                                                                    nextBackupTime(0),
                                                                     archiveTempFile(dataDirectory + "/" + ARCHIVE_TEMP_FILE),
                                                                     station(station),
                                                                     archivePacketCount(0),
@@ -314,10 +314,11 @@ ArchiveManager::backupArchiveFile() {
     // Backup the archive about once a day
     //
     DateTime now = time(0);
-    if (lastBackupTime + Weather::SECONDS_PER_DAY < now)
+
+    if (now < nextBackupTime)
         return true;
 
-    lastBackupTime = now;
+    nextBackupTime = now + Weather::SECONDS_PER_DAY;
 
     if (!std::filesystem::exists(archiveBackupDir))
         std::filesystem::create_directories(archiveBackupDir);

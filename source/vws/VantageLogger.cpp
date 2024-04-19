@@ -193,7 +193,7 @@ VantageLogger::log(Level level) const {
         struct tm tm;
         Weather::localtime(now, tm);
         strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", &tm);
-        *loggerStream << setw(20) << loggerName << ": " << timeString << " --- " << LEVEL_STRINGS[level] << " --- ";
+        *loggerStream << setfill(' ') << setw(25) << loggerName << ": " << timeString << " --- " << LEVEL_STRINGS[level] << " --- ";
         return *loggerStream;
     }
     else {

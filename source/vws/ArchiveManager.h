@@ -192,7 +192,7 @@ private:
     const std::string        archiveFile;            // The name of the archive file
     std::string              archiveBackupDir;       // The name of the archive backup directory
     std::string              archiveTempFile;        // The name of the temporary file used during a restore
-    DateTime                 lastBackupTime;         // The last time the archive was backed up
+    DateTime                 nextBackupTime;         // The next time the archive should be backed up
 
     ArchivePacket            newestPacket;
     ArchivePacket            oldestPacket;
