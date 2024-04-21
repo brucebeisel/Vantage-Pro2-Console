@@ -1,6 +1,12 @@
 TOPTARGETS := all clean depend
 
-SUBDIRS := source/vws source/archive-dumper source/console-archive-dumper source/loop-packet-dumper
+SUBDIRS := \
+	source/archive-dumper \
+	source/archive-fixer \
+	source/archive-verifier \
+	source/console-archive-dumper \
+	source/loop-packet-dumper \
+	source/vws 
 
 $(TOPTARGETS): $(SUBDIRS)
 
