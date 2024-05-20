@@ -29,9 +29,9 @@ public:
      * Return the string representation of this rule's forecast.
      * 
      * @param rule The rule
-     * @return  The forecast string
+     * @return  The forecast string or an error string if the rule is out of range
      */
-    static const std::string & forecastString(int rule);
+    static const std::string forecastString(int rule);
 
 private:
     ForecastRule() = delete;

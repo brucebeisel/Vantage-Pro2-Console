@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "ForecastRule.h"
+#include <sstream>
 
 /*
  * This text for the forecast rules was obtained off the Internet. Using Google will turn up many references to the list.
@@ -217,15 +218,17 @@ const std::string ForecastRule::FORECAST[] = {
     "Forecast requires 3 hours of recent data."
 };
 
-static const std::string EMPTY_STRING = "";
 const int ForecastRule::NUM_RULES = sizeof(FORECAST) / sizeof(FORECAST[0]);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const std::string &
+const std::string
 ForecastRule::forecastString(int rule) {
-    if (rule < 0 || rule >= NUM_RULES)
-        return EMPTY_STRING;
+    if (rule < 0 || rule >= NUM_RULES) {
+        std::ostringstream ss;
+        ss << "Unknown forecast rule (" << rule << ")";
+        return ss.str();
+    }
     else
         return FORECAST[rule];
 }
