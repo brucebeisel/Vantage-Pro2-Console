@@ -20,7 +20,7 @@
 #include "VantageWeatherStation.h"
 #include "ArchiveManager.h"
 
-#include "../vws/SummaryReport.h"
+#include "SummaryReport.h"
 #include "SerialPort.h"
 #include "VantageLogger.h"
 #include "VantageDecoder.h"

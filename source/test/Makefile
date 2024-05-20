@@ -2,13 +2,14 @@ CC= g++
 CXXFLAGS= -g -I../vws -std=c++20 -Wno-psabi
 
 SRCS=\
+	ArchiveManagerTest.cpp \
+	ArchivePacketTest.cpp \
+	BitConverterTest.cpp \
 	DominantWindTest.cpp \
 	EnumTest.cpp \
-	BitConverterTest.cpp \
-	SummaryTest.cpp \
-	WindDirectionSliceTest.cpp \
 	LoggerTest.cpp \
-	ArchiveManagerTest.cpp
+	SummaryTest.cpp \
+	WindDirectionSliceTest.cpp
 
 
 OBJDIR=../../target/test
@@ -28,9 +29,11 @@ DOMWINDOBJS=\
 ENUMOBJS=\
 	$(VWSTESTOBJDIR)/Weather.o 
 	
-BITCONVERTEROBJS= $(VWSTESTOBJDIR)/BitConverter.o 
+BITCONVERTEROBJS= \
+	$(VWSTESTOBJDIR)/BitConverter.o 
 
-SUMMARYOBJS= $(VWSTESTOBJDIR)/Weather.o \
+SUMMARYOBJS= \
+	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
@@ -49,7 +52,8 @@ SUMMARYOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/WindRoseData.o 
         
 	
-ARCHIVEOBJS= $(VWSTESTOBJDIR)/Weather.o \
+ARCHIVEMANAGEROBJS= \
+	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
@@ -65,13 +69,27 @@ ARCHIVEOBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSTESTOBJDIR)/SerialPort.o
 	
+ARCHIVEPACKETOBJS= \
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/ArchivePacket.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o
+	
 LOGGEROBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o
 	
-all: DominantWindTest EnumTest BitConverterTest WindDirectionSliceTest SummaryTest ArchiveTest LoggerTest
+all: ArchiveManagerTest ArchivePacketTest BitConverterTest DominantWindTest EnumTest LoggerTest SummaryTest WindDirectionSliceTest
 
-WindDirectionSliceTest: $(OBJDIR) $(OBJDIR)/WindDirectionSliceTest.o
-	$(CC) -g -o WindDirectionSliceTest $(OBJDIR)/WindDirectionSliceTest.o $(DOMWINDOBJS)
+ArchiveManagerTest: $(OBJDIR) $(OBJDIR)/ArchiveManagerTest.o
+	$(CC) -g -o ArchiveManagerTest $(OBJDIR)/ArchiveManagerTest.o $(ARCHIVEMANAGEROBJS)
+
+ArchivePacketTest: $(OBJDIR) $(OBJDIR)/ArchivePacketTest.o
+	$(CC) -g -o ArchivePacketTest $(OBJDIR)/ArchivePacketTest.o $(ARCHIVEPACKETOBJS)
+
+BitConverterTest: $(OBJDIR) $(OBJDIR)/BitConverterTest.o
+	$(CC) -g -o BitConverterTest $(OBJDIR)/BitConverterTest.o $(BITCONVERTEROBJS)
 
 DominantWindTest: $(OBJDIR) $(OBJDIR)/DominantWindTest.o
 	$(CC) -g -o DominantWindTest $(OBJDIR)/DominantWindTest.o $(DOMWINDOBJS)
@@ -79,20 +97,17 @@ DominantWindTest: $(OBJDIR) $(OBJDIR)/DominantWindTest.o
 EnumTest: $(OBJDIR) $(OBJDIR)/EnumTest.o
 	$(CC) -g -o EnumTest $(OBJDIR)/EnumTest.o $(ENUMOBJS)
 	
-BitConverterTest: $(OBJDIR) $(OBJDIR)/BitConverterTest.o
-	$(CC) -g -o BitConverterTest $(OBJDIR)/BitConverterTest.o $(BITCONVERTEROBJS)
+LoggerTest: $(OBJDIR) $(OBJDIR)/LoggerTest.o
+	$(CC) -g -o LoggerTest $(OBJDIR)/LoggerTest.o $(LOGGEROBJS)
 
 SummaryTest: $(OBJDIR) $(OBJDIR)/SummaryTest.o
 	$(CC) -g -o SummaryTest $(OBJDIR)/SummaryTest.o $(SUMMARYOBJS)
 
-ArchiveTest: $(OBJDIR) $(OBJDIR)/ArchiveManagerTest.o
-	$(CC) -g -o ArchiveTest $(OBJDIR)/ArchiveManagerTest.o $(ARCHIVEOBJS)
-
-LoggerTest: $(OBJDIR) $(OBJDIR)/LoggerTest.o
-	$(CC) -g -o LoggerTest $(OBJDIR)/LoggerTest.o $(LOGGEROBJS)
+WindDirectionSliceTest: $(OBJDIR) $(OBJDIR)/WindDirectionSliceTest.o
+	$(CC) -g -o WindDirectionSliceTest $(OBJDIR)/WindDirectionSliceTest.o $(DOMWINDOBJS)
 
 clean:
-	rm -f $(OBJS) $(OBJDIR)/EnumTest.o 
+	rm -f $(OBJS)
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)

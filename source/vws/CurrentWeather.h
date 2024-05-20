@@ -104,9 +104,10 @@ public:
     /**
      * Format the Current Weather JSON message.
      * 
+     * @param pretty Whether to format the JSON with newlines and spaces
      * @return The formatted current weather message
      */
-    std::string formatJSON() const;
+    std::string formatJSON(bool pretty = false) const;
 
 private:
     LoopPacket               loopPacket;

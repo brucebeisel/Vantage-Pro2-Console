@@ -116,14 +116,22 @@ public:
     /**
      * Format a JSON string for the measurement.
      *
-     * @param element The JSON element name to be used
+     * @param element       The JSON element name to be used
+     * @param indentLevel   The level of indent for this element. 0 means no indent and no newline
+     * @param leadingComma  Whether a comma should precede the label
      * @return An JSON element with the element name provided and the value OR a blank string if the measurement is not valid
      */
-    std::string formatJSON(const std::string & element, bool leadingComma = false)  const {
+    std::string formatJSON(const std::string & element, int indentLevel = 0, bool leadingComma = false)  const {
         std::ostringstream ss;
         if (valid) {
             if (leadingComma)
                 ss << ", ";
+
+            if (indentLevel > 0) {
+                ss << std::endl;
+                for (int i = 0; i < indentLevel; i++)
+                    ss << "    ";
+            }
 
             ss << "\"" << element << "\" : " << value;
         }

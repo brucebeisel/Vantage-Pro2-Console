@@ -111,7 +111,7 @@ CurrentWeather::getWindDirection() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-CurrentWeather::formatJSON() const {
+CurrentWeather::formatJSON(bool pretty) const {
     DateTime cwTime;
 
     if (packetTime == 0)
@@ -119,23 +119,27 @@ CurrentWeather::formatJSON() const {
     else
         cwTime = packetTime;
 
+    int indentLevel = 0;
+    if (pretty)
+        indentLevel = 1;
+
     ostringstream ss;
     ss << "{"
        << "\"time\" : \"" << Weather::formatDateTime(cwTime) << "\""
-       << loopPacket.getInsideTemperature().formatJSON("insideTemperature", true)
-       << loopPacket.getInsideHumidity().formatJSON("insideHumidity", true)
-       << loopPacket.getOutsideTemperature().formatJSON("outsideTemperature", true)
-       << loopPacket.getOutsideHumidity().formatJSON("outsideHumidity", true)
-       << loop2Packet.getDewPoint().formatJSON("dewPoint", true)
-       << loop2Packet.getWindChill().formatJSON("windChill", true)
-       << loop2Packet.getHeatIndex().formatJSON("heatIndex", true)
-       << loop2Packet.getThsw().formatJSON("thsw", true)
-       << windSpeed.formatJSON("windSpeed", true)
-       << windDirection.formatJSON("windDirection", true)
-       << loop2Packet.getWindGust10Minute().formatJSON("gustSpeed", true)
-       << loop2Packet.getWindGustDirection10Minute().formatJSON("gustDirection", true)
-       << loop2Packet.getWindSpeed10MinuteAverage().formatJSON("windSpeed10MinAvg", true)
-       << loop2Packet.getWindSpeed2MinuteAverage().formatJSON("windSpeed2MinAvg", true);
+       << loopPacket.getInsideTemperature().formatJSON("insideTemperature", indentLevel, true)
+       << loopPacket.getInsideHumidity().formatJSON("insideHumidity", indentLevel, true)
+       << loopPacket.getOutsideTemperature().formatJSON("outsideTemperature", indentLevel, true)
+       << loopPacket.getOutsideHumidity().formatJSON("outsideHumidity", indentLevel, true)
+       << loop2Packet.getDewPoint().formatJSON("dewPoint", indentLevel, true)
+       << loop2Packet.getWindChill().formatJSON("windChill", indentLevel, true)
+       << loop2Packet.getHeatIndex().formatJSON("heatIndex", indentLevel, true)
+       << loop2Packet.getThsw().formatJSON("thsw", indentLevel, true)
+       << windSpeed.formatJSON("windSpeed", indentLevel, true)
+       << windDirection.formatJSON("windDirection", indentLevel, true)
+       << loop2Packet.getWindGust10Minute().formatJSON("gustSpeed", indentLevel, true)
+       << loop2Packet.getWindGustDirection10Minute().formatJSON("gustDirection", indentLevel, true)
+       << loop2Packet.getWindSpeed10MinuteAverage().formatJSON("windSpeed10MinAvg", indentLevel, true)
+       << loop2Packet.getWindSpeed2MinuteAverage().formatJSON("windSpeed2MinAvg", indentLevel, true);
 
     ss << ", \"dominantWindDirections\" : [";
     for (unsigned int i = 0; i < dominantWindDirections.size(); i++) {
@@ -146,8 +150,8 @@ CurrentWeather::formatJSON() const {
     }
     ss << "]";
 
-    ss << loopPacket.getBarometricPressure().formatJSON("barometricPressure", true)
-       << loop2Packet.getBarometricSensorRawReading().formatJSON("atmosphericPressure", true)
+    ss << loopPacket.getBarometricPressure().formatJSON("barometricPressure", indentLevel, true)
+       << loop2Packet.getBarometricSensorRawReading().formatJSON("atmosphericPressure", indentLevel, true)
        << ", \"barometerTrend\" : \"" << loopPacket.getBarometerTrendString() << "\""
        << ", \"rainRate\" : " << loopPacket.getRainRate()
        << ", \"rainToday\" : " << loopPacket.getDayRain()
@@ -157,7 +161,7 @@ CurrentWeather::formatJSON() const {
        << ", \"rain24Hour\" : " << loop2Packet.get24HourRain()
        << ", \"rainMonth\" : " << loopPacket.getMonthRain()
        << ", \"rainWeatherYear\" : " << loopPacket.getYearRain()
-       << loopPacket.getSolarRadiation().formatJSON("solarRadiation", true);
+       << loopPacket.getSolarRadiation().formatJSON("solarRadiation", indentLevel, true);
 
     if (loopPacket.getDayET() > 0.0)
         ss << ", \"dayET\" : " << loopPacket.getDayET();
@@ -168,7 +172,7 @@ CurrentWeather::formatJSON() const {
     if (loopPacket.getYearET() > 0.0)
         ss << ", \"yearET\" : " << loopPacket.getYearET();
 
-    ss << loopPacket.getUvIndex().formatJSON("uvIndex", true);
+    ss << loopPacket.getUvIndex().formatJSON("uvIndex", indentLevel, true);
 
     if (loopPacket.isStormOngoing())
         ss << ", \"stormStart\" : \"" << Weather::formatDate(loopPacket.getStormStart()) << "\""

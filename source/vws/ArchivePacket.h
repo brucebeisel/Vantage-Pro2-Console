@@ -50,6 +50,9 @@ public:
     static constexpr int TIME_STAMP_BUFFER_LENGTH = 2;
     static constexpr int DATE_STAMP_BUFFER_LENGTH = 2;
 
+    static constexpr int ARCHIVE_PACKET_REV_A = 0xff;
+    static constexpr int ARCHIVE_PACKET_REV_B = 0x00;
+
     /**
      * Default constructor required for STL containers and arrays.
      */
@@ -128,6 +131,7 @@ public:
      */
     static bool archivePacketContainsData(const byte * buffer, int offset);
 
+
     Measurement<Temperature> getAverageOutsideTemperature() const;
     Measurement<Temperature> getLowOutsideTemperature() const;
     Measurement<Temperature> getHighOutsideTemperature() const;
@@ -162,6 +166,8 @@ public:
     Measurement<Temperature> getSoilTemperature(int index) const;
     Measurement<SoilMoisture> getSoilMoisture(int index) const;
 
+    int getArchiveRecordType() const;
+
     bool operator==(const ArchivePacket & other);
     bool operator<(const ArchivePacket & other);
 
@@ -169,9 +175,10 @@ public:
     /**
      * Format the Archive packet as JSON.
      * 
+     * @param pretty Whether to format the JSON with indenting and spacing
      * @return The formatted message
      */
-    std::string formatJSON() const;
+    std::string formatJSON(bool pretty = false) const;
 
 private:
     void decodeDateTimeValues();

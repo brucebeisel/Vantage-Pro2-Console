@@ -67,6 +67,10 @@ ArchivePacket::updateArchivePacketData(const byte buffer[], int offset) {
 
     windSampleCount = BitConverter::toUint16(this->buffer, NUM_WIND_SAMPLES_OFFSET);
     decodeDateTimeValues();
+
+    int archiveType = getArchiveRecordType();
+    if (archiveType != ARCHIVE_PACKET_REV_B)
+        logger->log(VantageLogger::VANTAGE_WARNING) << "The archive type is not Rev B. Value is: " << archiveType << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -273,7 +277,24 @@ ArchivePacket::getEvapotranspiration() const {
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<SolarRadiation>
 ArchivePacket::getHighSolarRadiation() const {
-    return VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET);
+    //
+    // The protocol document states that the high solar radiation invalid value is 0.
+    // This does not make much sense, since 0 is a valid value.
+    // This method instead tests the average solar radiation for validity and
+    // passes that onward to the high solar radiation.
+    // There are three possible scenarios that need to be validated with the actual console that
+    // does not have a solar radiation sensor.
+    //     1) The document is correct and a zero value is invalid
+    //     2) The document is incorrect and the invalid value is actually 32767 as is the case for the average solar radiation
+    //     3) This approach is correct and the protocol document just assumes that if the average solar radiation
+    //        is invalid, then so is the high solar radiation.
+    //
+    Measurement<SolarRadiation> invalidSolarRadiation;
+
+    if (getAverageSolarRadiation().isValid())
+        return VantageDecoder::decodeSolarRadiation(buffer, HIGH_SOLAR_RADIATION_OFFSET);
+    else
+        return invalidSolarRadiation;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -358,6 +379,15 @@ ArchivePacket::getSoilMoisture(int index) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+int
+ArchivePacket::getArchiveRecordType() const {
+    int recordType = BitConverter::toUint8(this->buffer, RECORD_TYPE_OFFSET);
+
+    return recordType & 0xff;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
 ArchivePacket::operator==(const ArchivePacket & other) {
 
@@ -375,137 +405,208 @@ ArchivePacket::operator<(const ArchivePacket & other) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-ArchivePacket::formatJSON() const {
+ArchivePacket::formatJSON(bool pretty) const {
     ostringstream ss;
-    ss << "{ \"time\" : \"" << packetDateTimeFields << "\"";
+    ss << "{";
+
+    if (pretty) ss << endl << "    ";
+
+    ss << "\"time\" : \"" << packetDateTimeFields << "\"";
 
     Measurement<Temperature> temperature = getAverageOutsideTemperature();
-    ss << temperature.formatJSON("avgOutsideTemperature", true);
+    ss << temperature.formatJSON("avgOutsideTemperature", pretty ? 1 : 0, true);
 
     temperature = getHighOutsideTemperature();
-    ss << temperature.formatJSON("highOutsideTemperature", true);
+    ss << temperature.formatJSON("highOutsideTemperature", pretty ? 1 : 0, true);
 
     temperature = getLowOutsideTemperature();
-    ss << temperature.formatJSON("lowOutsideTemperature", true);
+    ss << temperature.formatJSON("lowOutsideTemperature", pretty ? 1 : 0, true);
 
     Rainfall r = getRainfall();
-    ss << ", \"rainfall\" : " << r;
+    ss << ", ";
+    if (pretty) ss << endl << "    ";
+    ss << "\"rainfall\" : " << r;
 
     r = getHighRainfallRate();
-    ss << ", \"highRainfallRate\" : " << r;
+    ss << ",";
+    if (pretty) ss << endl << "    ";
+    ss << "\"highRainfallRate\" : " << r;
 
     Measurement<Pressure> baroPressure = getBarometricPressure();
-    ss << baroPressure.formatJSON("barometricPressure", true);
+    ss << baroPressure.formatJSON("barometricPressure", pretty ? 1 : 0, true);
 
     Measurement<SolarRadiation> solarRadiation = getAverageSolarRadiation();
-    ss << solarRadiation.formatJSON("avgSolarRadiation", true);
+    ss << solarRadiation.formatJSON("avgSolarRadiation", pretty ? 1 : 0, true);
 
     temperature = getInsideTemperature();
-    ss << temperature.formatJSON("insideTemperature", true);
+    ss << temperature.formatJSON("insideTemperature", pretty ? 1 : 0, true);
 
     Measurement<Humidity> humidity = getInsideHumidity();
-    ss << humidity.formatJSON("insideHumidity", true);
+    ss << humidity.formatJSON("insideHumidity", pretty ? 1 : 0, true);
 
     humidity = getOutsideHumidity();
-    ss << humidity.formatJSON("outsideHumidity", true);
+    ss << humidity.formatJSON("outsideHumidity", pretty ? 1 : 0, true);
 
     //
     // Both wind speed and direction must be valid to generate the JSON
     //
     Measurement<Speed> windSpeed = getAverageWindSpeed();
-    ss << windSpeed.formatJSON("avgWindSpeed", true);
+    ss << windSpeed.formatJSON("avgWindSpeed", pretty ? 1 : 0, true);
 
     Measurement<HeadingIndex> windDir = getPrevailingWindHeadingIndex();
-    ss << windDir.formatJSON("avgWindDirection", true);
+    ss << windDir.formatJSON("avgWindDirection", pretty ? 1 : 0, true);
 
     windSpeed = getHighWindSpeed();
-    ss << windSpeed.formatJSON("highWindSpeed", true);
+    ss << windSpeed.formatJSON("highWindSpeed", pretty ? 1 : 0, true);
 
     windDir = getHighWindHeadingIndex();
-    ss << windDir.formatJSON("highWindDirection", true);
+    ss << windDir.formatJSON("highWindDirection", pretty ? 1 : 0, true);
 
     Measurement<UvIndex> uvIndex = getAverageUvIndex();
-    ss << uvIndex.formatJSON("avgUvIndex", true);
+    ss << uvIndex.formatJSON("avgUvIndex", pretty ? 1 : 0, true);
 
     Measurement<Evapotranspiration> et = getEvapotranspiration();
     if (et.isValid())
-        ss <<  et.formatJSON("evapotranspiration", true);
+        ss <<  et.formatJSON("evapotranspiration", pretty ? 1 : 0, true);
 
     solarRadiation = getHighSolarRadiation();
-    ss << solarRadiation.formatJSON("highSolarRadiation", true);
+    ss << solarRadiation.formatJSON("highSolarRadiation", pretty ? 1 : 0, true);
 
     uvIndex = getHighUvIndex();
-    ss << uvIndex.formatJSON("highUvIndex", true);
+    ss << uvIndex.formatJSON("highUvIndex", pretty ? 1 : 0, true);
 
     int forecastRule = getForecastRule();
-    ss << ", \"forcastRule\" : " << forecastRule;
+    ss << ", ";
+    if (pretty) ss << endl << "    ";
+    ss <<"\"forcastRule\" : " << forecastRule;
 
     bool firstValue = true;
-    ss << ", \"extraHumidities\" : [";
+    ss << ", ";
+    if (pretty) ss << endl << "    ";
+    ss << "\"extraHumidities\" : [";
     for (int i = 0; i < MAX_EXTRA_HUMIDITIES; i++) {
         humidity = getExtraHumidity(i);
         if (humidity.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << humidity.getValue() << " }";
+            if (pretty) ss << endl << "        ";
+            ss << "{ ";
+            if (pretty) ss << endl << "            ";
+            ss << "\"index\" : " << i << ", ";
+            if (pretty) ss << endl << "            ";
+            ss << "\"value\" : " << humidity.getValue();
+            if (pretty) ss << endl << "        ";
+            ss << "}";
         }
     }
-    ss << " ]";
+    if (pretty) ss << endl << "    ";
+    ss << "]";
 
     firstValue = true;
-    ss << ", \"extraTemperatures\" : [ ";
+    ss << ",";
+    if (pretty) ss << endl << "    ";
+    ss << "\"extraTemperatures\" : [ ";
     for (int i = 0; i < MAX_EXTRA_TEMPERATURES; i++) {
         temperature = getExtraTemperature(i);
         if (temperature.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << temperature.getValue() << " }";
+            if (pretty) ss << endl << "        ";
+            ss << "{ ";
+            if (pretty) ss << endl << "            ";
+            ss << "\"index\" : " << i << ", ";
+            if (pretty) ss << endl << "            ";
+            ss << "\"value\" : " << temperature.getValue();
+            if (pretty) ss << endl << "        ";
+            ss << "}";
         }
     }
-    ss << " ] ";
+    if (pretty) ss << endl << "    ";
+    ss << "] ";
 
     firstValue = true;
-    ss << ", \"leafTemperatures\" : [ ";
+    ss << ",";
+    if (pretty) ss << endl << "    ";
+    ss << "\"leafTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_TEMPERATURES; i++) {
         temperature = getLeafTemperature(i);
         if (temperature.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << temperature.getValue() << " }";
+            if (pretty) ss << endl << "        ";
+            ss << "{";
+            if (pretty) ss << endl << "            ";
+            ss << "\"index\" : " << i << ",";
+            if (pretty) ss << endl << "            ";
+            ss << "\"value\" : " << temperature.getValue();
+            if (pretty) ss << endl << "        ";
+            ss << "}";
         }
     }
-    ss << " ]";
+    if (pretty) ss << endl << "    ";
+    ss << "]";
 
     firstValue = true;
-    ss << ", \"leafWetnesses\" : [ ";
+    ss << ",";
+    if (pretty) ss << endl << "    ";
+    ss << "\"leafWetnesses\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_LEAF_WETNESSES; i++) {
         Measurement<LeafWetness> leafWetness = getLeafWetness(i);
         if (leafWetness.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << leafWetness.getValue() << " }";
+            if (pretty) ss << endl << "        ";
+            ss << "{";
+            if (pretty) ss << endl << "            ";
+            ss << "\"index\" : " << i << ",";
+            if (pretty) ss << endl << "            ";
+            ss << "\"value\" : " << leafWetness.getValue();
+            if (pretty) ss << endl << "        ";
+            ss << "}";
         }
     }
-    ss << " ]";
+    if (pretty) ss << endl << "    ";
+    ss << "]";
 
     firstValue = true;
-    ss << ", \"soilTemperatures\" : [ ";
+    ss << ",";
+    if (pretty) ss << endl << "    ";
+    ss << "\"soilTemperatures\" : [ ";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_TEMPERATURES; i++) {
         temperature = getSoilTemperature(i);
         if (temperature.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << temperature.getValue() << " }";
+            if (pretty) ss << endl << "        ";
+            ss << "{";
+            if (pretty) ss << endl << "            ";
+            ss << "\"index\" : " << i << ",";
+            if (pretty) ss << endl << "            ";
+            ss << "\"value\" : " << temperature.getValue();
+            if (pretty) ss << endl << "        ";
+            ss << " }";
         }
     }
-    ss << " ]";
+    if (pretty) ss << endl << "    ";
+    ss << "]";
 
     firstValue = true;
-    ss << ", \"soilMoistures\" : [";
+    ss << ",";
+    if (pretty) ss << endl << "    ";
+    ss << "\"soilMoistures\" : [";
     for (int i = 0; i < ProtocolConstants::MAX_SOIL_MOISTURES; i++) {
         Measurement<SoilMoisture> soilMoisture = getSoilMoisture(i);
         if (soilMoisture.isValid()) {
             if (!firstValue) ss << ", "; else firstValue = false;
-            ss << "{ \"index\" : " << i << ", \"value\" : " << soilMoisture.getValue() << " }";
+            if (pretty) ss << endl << "        ";
+            ss << "{";
+            if (pretty) ss << endl << "            ";
+            ss << "\"index\" : " << i << ",";
+            if (pretty) ss << endl << "            ";
+            ss << "\"value\" : " << soilMoisture.getValue();
+            if (pretty) ss << endl << "        ";
+            ss << " }";
         }
     }
-    ss << " ] ";
+    if (pretty) ss << endl << "    ";
+    ss << "] ";
 
+    if (pretty) ss << endl;
     ss << "}";
 
     return ss.str();
