@@ -80,17 +80,29 @@ public:
      *
      * @param elevation An elevation in feet
      */
-    static double feetToMillimeters(double elevation);
+    static Elevation feetToMillimeters(Elevation elevation);
+
 private:
+    //
+    // All of these factors are for converting from the Vantage console units to the units in the name of the constant.
+    //
+    static constexpr Temperature CELSIUS_OFFSET = 32.0;
+    static constexpr Temperature CELSIUS_FACTOR = 1.8;
+    static constexpr Rainfall    MILLIMETER_FACTOR = 25.4;
+    static constexpr Pressure    MILLIBAR_FACTOR = 33.86386;
+    static constexpr Speed       METERS_PER_SECOND_FACTOR = 0.44704;
+    static constexpr Speed       KILOMETERS_PER_HOUR_FACTOR = 1.609344;
+    static constexpr Speed       KNOTS_FACTOR = 0.868976;
+    static constexpr Elevation   MILLIMETERS_FACTOR = 304.8;
     /**
-     * Unimplemented constructor.
+     * Private constructor to prevent object from being created.
      */
-    UnitConverter();
+    UnitConverter() = delete;
 
     /**
-     * Unimplemented destructor.
+     * Private destructor which should never be called.
      */
-    ~UnitConverter();
+    ~UnitConverter() = delete;
 };
 }
 #endif
