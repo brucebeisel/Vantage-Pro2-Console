@@ -43,12 +43,10 @@ VantageDecoder::decode16BitTemperature(const byte buffer[], int offset, bool sca
     if (scaleValue)
         scale = TEMPERATURE_16BIT_SCALE;
 
-    if (value16 == INVALID_16BIT_TEMPERATURE || value16 == INVALID_16BIT_TEMPERATURE_NEGATIVE) {
+    if (value16 == INVALID_16BIT_TEMPERATURE || value16 == INVALID_16BIT_TEMPERATURE_NEGATIVE)
         measurement.invalidate();
-    }
-    else {
+    else
         measurement.setValue(static_cast<Temperature>(value16) / scale);
-    }
 
     return measurement;
 }
@@ -75,7 +73,10 @@ VantageDecoder::decodeBarometricPressure(const byte buffer[], int offset) {
     Measurement<Pressure> measurement;
     int16 value16 = BitConverter::toInt16(buffer, offset);
 
-    measurement = static_cast<Pressure>(value16) / BAROMETER_SCALE;
+    if (value16 != 0)
+        measurement.setValue(static_cast<Pressure>(value16) / BAROMETER_SCALE);
+    else
+        measurement.invalidate();
 
     return measurement;
 }
