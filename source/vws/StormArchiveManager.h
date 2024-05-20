@@ -28,20 +28,62 @@ class GraphDataRetriever;
 class VantageLogger;
 struct StormData;
 
+/**
+ * Class to manager the storm archive. Note that the console only stores data for the past 24 storms.
+ * This class will read the storm data and archive it.
+ */
 class StormArchiveManager {
 public:
+    /**
+     * Constructor.
+     *
+     * @param archiveDirectory The directory into which the archive will be stored
+     * @param dataRetriever    The object that knows how to query the console's graph data`
+     */
     StormArchiveManager(const std::string & archiveDirectory, GraphDataRetriever & dataRetriever);
 
+    /**
+     * Destructor.
+     */
     virtual ~StormArchiveManager();
 
+    /**
+     * Update the storm archive.
+     */
     void updateArchive();
 
+    /**
+     * Query the storm data.
+     *
+     * @param start The lower range of the query
+     * @param end   The upper range of the query
+     * @param list  The results of the query
+     */
     DateTime queryStorms(DateTime start, DateTime end, std::vector<StormData> & list) const;
 
+    /**
+     * Format in JSON the provided list of storms.
+     *
+     * @param storms The list of storms to format in JSON
+     */
     std::string formatStormJSON(const std::vector<StormData> & storms) const;
 
 private:
+    /**
+     * Read a record from the storm archive.
+     *
+     * @param fs   The file stream that is reading from the storm archive
+     * @param data The resulting data that was read from the storm archive
+     * @return True if the read was successful
+     */
     bool readRecord(std::fstream & fs, StormData & data) const;
+
+    /**
+     * Write a record to the storm archive.
+     *
+     * @param fs   The file stream that is writing to the storm archive
+     * @param data The storm data to be written
+     */
     void writeRecord(std::fstream & fs, StormData & data);
 
     //
