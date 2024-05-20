@@ -48,7 +48,7 @@ public:
     /**
      * Apply the wind sample if it the direction falls within this slice.
      *
-     * @param headingIndex   The wind direction index that this slice represents: 0 = N, 15 = NNW
+     * @param headingIndex The wind direction index that this slice represents: 0 = N, 15 = NNW
      * @param speed        The speed of the wind for this sample
      */
     void applyWindSample(const Measurement<HeadingIndex> & headingIndex, Speed speed);
