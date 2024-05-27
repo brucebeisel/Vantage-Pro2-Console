@@ -69,6 +69,7 @@ StormArchiveManager::updateArchive() {
 
         if (readRecord(stream, lastRecord)) {
             lastRecordTime = lastRecord.stormEnd;
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Last storm record time " << Weather::formatDateTime(lastRecordTime) << endl;
         }
     }
 
@@ -79,6 +80,7 @@ StormArchiveManager::updateArchive() {
         // Only store new storms and storms that are not in progress (stormEnd == 0)
         //
         if (record.stormStart > lastRecordTime && record.stormEnd != 0)
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Writing storm record with start time " << Weather::formatDateTime(record.stormStart) << endl;
             writeRecord(stream, record);
     }
 
@@ -134,6 +136,7 @@ StormArchiveManager::readRecord(fstream & fs, StormData & data) const {
     buffer[STORM_RECORD_LENGTH] = '\0';
 
     if (fs.eof()) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Reading storm archive record failed (EOF)" << endl;
         return false;
     }
 
