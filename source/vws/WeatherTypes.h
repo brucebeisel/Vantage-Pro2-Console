@@ -49,11 +49,6 @@ using uint16 = unsigned short;
 using int32 = int;
 using uint32 = unsigned int;
 
-struct StormData {
-    DateTime stormStart;
-    DateTime stormEnd;
-    Rainfall stormRain;
-};
 
 }
 

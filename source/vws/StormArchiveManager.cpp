@@ -62,26 +62,33 @@ StormArchiveManager::updateArchive() {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Read " << stormData.size() << " storm records from EEPROM" << endl;
 
     StormData lastRecord;
-    DateTime lastRecordTime = 0;
+    DateTimeFields lastRecordTime;
     stream.seekg(0, ios::end);
-    if (stream.tellg() > STORM_RECORD_LENGTH) {
+
+    if (stream.tellg() >= STORM_RECORD_LENGTH) {
         stream.seekg(-STORM_RECORD_LENGTH, ios::end);
 
         if (readRecord(stream, lastRecord)) {
-            lastRecordTime = lastRecord.stormEnd;
-            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Last storm record time " << Weather::formatDateTime(lastRecordTime) << endl;
+            lastRecordTime = lastRecord.getStormEnd();
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Last storm record time " << lastRecordTime.formatDate() << endl;
+        }
+        else {
+            //
+            // Unable to read the last record in the archive, clear out the storm vector so that no records are added to the archive
+            //
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read last record of storm archive. Skipping update." << endl;
+            stormData.clear();
         }
     }
 
-    // TBD There appears to be a bug here. There have been times when the last storm gets added to the archive
-    // multiple times.
     for (StormData record : stormData) {
         //
         // Only store new storms and storms that are not in progress (stormEnd == 0)
         //
-        if (record.stormStart > lastRecordTime && record.stormEnd != 0)
-            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Writing storm record with start time " << Weather::formatDateTime(record.stormStart) << endl;
+        if (record.getStormStart() > lastRecordTime && record.getStormEnd().isDateTimeValid()) {
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Writing storm record with start time " << record.getStormStart().formatDate() << endl;
             writeRecord(stream, record);
+        }
     }
 
     stream.close();
@@ -89,18 +96,18 @@ StormArchiveManager::updateArchive() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
-StormArchiveManager::queryStorms(DateTime start, DateTime end, std::vector<StormData> & list) const {
-    DateTime lastRecordTime = 0;
+DateTimeFields
+StormArchiveManager::queryStorms(const DateTimeFields & start, const DateTimeFields & end, std::vector<StormData> & list) const {
+    DateTimeFields lastRecordTime;
 
     fstream stream;
     stream.open(stormArchiveFilename.c_str(), ios::in);
 
     while (stream.good()) {
         StormData stormData;
-        if (readRecord(stream, stormData) && stormData.stormStart >= start && stormData.stormStart <= end) {
+        if (readRecord(stream, stormData) && stormData.getStormStart() >= start && stormData.getStormStart() <= end) {
             list.push_back(stormData);
-            lastRecordTime = stormData.stormStart;
+            lastRecordTime = stormData.getStormStart();
         }
     }
 
@@ -118,9 +125,9 @@ StormArchiveManager::formatStormJSON(const std::vector<StormData> & storms) cons
         if (!first) oss << ", "; first = false;
 
         oss << "{ "
-            << "\"start\" : \"" << Weather::formatDate(storm.stormStart) << "\", "
-            << "\"end\" : \"" << Weather::formatDate(storm.stormEnd) << "\", "
-            << "\"rainfall\" : " << storm.stormRain
+            << "\"start\" : \"" << storm.getStormStart().formatDate() << "\", "
+            << "\"end\" : \"" << storm.getStormEnd().formatDate() << "\", "
+            << "\"rainfall\" : " << storm.getStormRain()
             << "}";
     }
     oss << "] }" << endl;
@@ -145,9 +152,13 @@ StormArchiveManager::readRecord(fstream & fs, StormData & data) const {
     double stormRain;
     sscanf(buffer, "%s %s %lf", startDateString, endDateString, &stormRain);
 
-    data.stormStart = Weather::parseDate(startDateString);
-    data.stormEnd = Weather::parseDate(endDateString);
-    data.stormRain = stormRain;
+    DateTimeFields stormStart;
+    DateTimeFields stormEnd;
+
+    if (!stormStart.parseDate(startDateString) || !stormEnd.parseDate(startDateString))
+        return false;
+
+    data.setStormData(stormStart, stormEnd, stormRain);
 
     return true;
 }
@@ -157,10 +168,10 @@ StormArchiveManager::readRecord(fstream & fs, StormData & data) const {
 void
 StormArchiveManager::writeRecord(fstream & fs, StormData & data) {
     string stormStartString;
-    stormStartString = Weather::formatDate(data.stormStart);
+    stormStartString = data.getStormStart().formatDate();
     string stormEndString;
-    stormEndString = Weather::formatDate(data.stormEnd);
+    stormEndString = data.getStormEnd().formatDate();
 
-    fs << stormStartString << " " << stormEndString << " " << fixed << setprecision(2) << setw(5) << data.stormRain << endl;
+    fs << stormStartString << " " << stormEndString << " " << fixed << setprecision(2) << setw(5) << data.getStormRain() << endl;
 }
 } /* namespace vws */

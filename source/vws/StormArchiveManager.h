@@ -21,12 +21,12 @@
 #include <fstream>
 #include <vector>
 #include "Weather.h"
+#include "StormData.h"
 
 namespace vws {
 
 class GraphDataRetriever;
 class VantageLogger;
-struct StormData;
 
 /**
  * Class to manager the storm archive. Note that the console only stores data for the past 24 storms.
@@ -59,12 +59,13 @@ public:
      * @param end   The upper range of the query
      * @param list  The results of the query
      */
-    DateTime queryStorms(DateTime start, DateTime end, std::vector<StormData> & list) const;
+    DateTimeFields queryStorms(const DateTimeFields & start, const DateTimeFields & end, std::vector<StormData> & list) const;
 
     /**
      * Format in JSON the provided list of storms.
      *
      * @param storms The list of storms to format in JSON
+     * @return The formatted JSON
      */
     std::string formatStormJSON(const std::vector<StormData> & storms) const;
 

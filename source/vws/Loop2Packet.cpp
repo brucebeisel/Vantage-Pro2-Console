@@ -41,7 +41,6 @@ Loop2Packet::Loop2Packet() : logger(&VantageLogger::getLogger("Loop2Packet")),
                              packetType(-1),
                              rainRate(0.0),
                              stormRain(0.0),
-                             stormStart(0),
                              rainDay(0.0),
                              rain15Minute(0.0),
                              rainHour(0.0),
@@ -227,7 +226,7 @@ Loop2Packet::getStormRain() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
+const DateTimeFields &
 Loop2Packet::getStormStart() const {
     return stormStart;
 }

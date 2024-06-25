@@ -175,7 +175,7 @@ CurrentWeather::formatJSON(bool pretty) const {
     ss << loopPacket.getUvIndex().formatJSON("uvIndex", indentLevel, true);
 
     if (loopPacket.isStormOngoing())
-        ss << ", \"stormStart\" : \"" << Weather::formatDate(loopPacket.getStormStart()) << "\""
+        ss << ", \"stormStart\" : \"" << loopPacket.getStormStart().formatDate() << "\""
            << ", \"stormRain\" : " << loopPacket.getStormRain();
 
 

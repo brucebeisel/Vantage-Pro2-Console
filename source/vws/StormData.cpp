@@ -26,7 +26,14 @@ StormData::StormData() : stormState(StormState::STORM_IDLE), stormRain(0) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-StormData::StormData(const DateTimeFields & start, const DateTimeFields & end, Rainfall rain) {
+StormData::StormData(const DateTimeFields & start, const DateTimeFields & end, Rainfall rain) : stormState(StormState::STORM_IDLE),
+                                                                                                stormStart(start),
+                                                                                                stormEnd(end),
+                                                                                                stormRain(rain) {
+    if (stormStart.isDateTimeValid() && !stormEnd.isDateTimeValid() && stormRain > 0.0)
+        stormState = StormState::STORM_ACTIVE;
+    else if (stormStart.isDateTimeValid() && stormEnd.isDateTimeValid() && stormRain > 0.0)
+        stormState = StormState::STORM_ENDED;
 
 }
 
@@ -39,6 +46,8 @@ StormData::~StormData() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 StormData::resetStormData() {
+    stormStart.resetDateTimeFields();
+    stormEnd.resetDateTimeFields();
     stormState = StormState::STORM_IDLE;
     stormRain = 0.0;
 }
@@ -72,6 +81,7 @@ StormData::setStormEnd(const DateTimeFields & end) {
         return false;
 
     stormEnd.setDateTime(end);
+    stormState = StormState::STORM_ENDED;
     return true;
 }
 
@@ -80,6 +90,7 @@ StormData::setStormEnd(const DateTimeFields & end) {
 void
 StormData::setStormEnd(int year, int month, int day) {
     stormEnd.setDate(year, month, day);
+    stormState = StormState::STORM_ENDED;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

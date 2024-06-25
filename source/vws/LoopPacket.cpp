@@ -45,7 +45,6 @@ LoopPacket::LoopPacket(void) : logger(&VantageLogger::getLogger("LoopPacket")),
                                yearRain(0.0),
                                consoleBatteryVoltage(0.0),
                                forecastRuleIndex(0),
-                               stormStart(0),
                                sunriseTime(0),
                                sunsetTime(0),
                                transmitterBatteryStatus(0),
@@ -71,6 +70,8 @@ LoopPacket::getPacketData() const {
 bool
 LoopPacket::decodeLoopPacket(byte buffer[]) {
     memcpy(packetData, buffer, LOOP_PACKET_SIZE);
+    stormStart.resetDateTimeFields();
+
     //
     // Perform a number of validation on the Loop packet before decoding all of the values
     //
@@ -285,7 +286,7 @@ LoopPacket::getStormRain() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
+const DateTimeFields &
 LoopPacket::getStormStart() const {
     return stormStart;
 }
@@ -426,7 +427,7 @@ LoopPacket::isStormOngoing() const {
     // but we are not using that at this point in time. By definition the storm rain has to be > 0, so
     // we will stop reporting an ongoing storm if the storm rain is 0.0
     //
-    return stormStart != 0 && stormRain > 0.0;
+    return stormStart.isDateTimeValid() && stormRain > 0.0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

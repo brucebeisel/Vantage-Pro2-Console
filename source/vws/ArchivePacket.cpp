@@ -125,11 +125,13 @@ ArchivePacket::decodeDateTimeValues() {
     int date = BitConverter::toUint16(buffer, DATE_STAMP_OFFSET);
     int time = BitConverter::toUint16(buffer, TIME_STAMP_OFFSET);
 
-    packetDateTimeFields.year = ((date >> 9) & 0x3F) + YEAR_OFFSET;
-    packetDateTimeFields.month = (date >> 5) & 0xF;
-    packetDateTimeFields.monthDay = date & 0x1F;
-    packetDateTimeFields.hour = time / 100;
-    packetDateTimeFields.minute = time % 100;
+    int year = ((date >> 9) & 0x3F) + YEAR_OFFSET;
+    int month = (date >> 5) & 0xF;
+    int monthDay = date & 0x1F;
+    int hour = time / 100;
+    int minute = time % 100;
+
+    packetDateTimeFields.setDateTime(year, month, monthDay, hour, minute, 0);
 
     //
     // Note that this technique works in general, but because the Vantage Console does not report
@@ -152,9 +154,10 @@ ArchivePacket::getDateTimeFields() const {
 std::string
 ArchivePacket::getPacketDateTimeString() const {
     ostringstream oss;
-    oss << setfill('0')
-        << packetDateTimeFields.year << "-" << setw(2) << packetDateTimeFields.month << "-" << setw(2) << packetDateTimeFields.monthDay
-        << " " << setw(2) << packetDateTimeFields.hour << ":" << setw(2) << packetDateTimeFields.minute;
+    oss << packetDateTimeFields.formatDateTime();
+    //oss << setfill('0')
+    //    << packetDateTimeFields.year << "-" << setw(2) << packetDateTimeFields.month << "-" << setw(2) << packetDateTimeFields.monthDay
+    //    << " " << setw(2) << packetDateTimeFields.hour << ":" << setw(2) << packetDateTimeFields.minute;
 
     return oss.str();
 }

@@ -26,6 +26,7 @@ SRCS=\
 	main.cpp \
  	SerialPort.cpp \
  	StormArchiveManager.cpp \
+ 	StormData.cpp \
  	SummaryReport.cpp \
 	UnitConverter.cpp \
 	VantageCRC.cpp \

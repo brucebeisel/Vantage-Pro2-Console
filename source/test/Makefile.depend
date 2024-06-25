@@ -9,9 +9,13 @@
  ../vws/VantageLogger.h
 ../../target/test/ArchivePacketTest.o: ArchivePacketTest.cpp \
  ../vws/ArchivePacket.h ../vws/WeatherTypes.h ../vws/Measurement.h \
- ../vws/DateTimeFields.h
+ ../vws/DateTimeFields.h ../vws/VantageDecoder.h \
+ ../vws/VantageEepromConstants.h ../vws/VantageLogger.h \
+ ../vws/VantageProtocolConstants.h
 ../../target/test/BitConverterTest.o: BitConverterTest.cpp \
  ../vws/BitConverter.h ../vws/WeatherTypes.h ../vws/WeatherTypes.h
+../../target/test/DateTimeFieldsTest.o: DateTimeFieldsTest.cpp \
+ ../vws/DateTimeFields.h ../vws/WeatherTypes.h
 ../../target/test/DominantWindTest.o: DominantWindTest.cpp \
  ../vws/DominantWindDirections.h ../vws/WeatherTypes.h \
  ../vws/WindDirectionSlice.h ../vws/VantageLogger.h ../vws/Weather.h \

@@ -22,6 +22,7 @@
 #include "VantageEepromConstants.h"
 #include "VantageDecoder.h"
 #include "VantageLogger.h"
+#include "StormData.h"
 
 using namespace std;
 
@@ -59,21 +60,24 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
     //
     StormData storm;
     for (int i = 0; i < NUM_RAIN_STORM_RECORDS; i++) {
-        storm.stormRain = VantageDecoder::decodeStormRain(buffer, i * STORM_RAINFALL_RECORD_SIZE);
-        storm.stormStart = VantageDecoder::decodeStormDate(buffer, (STORM_RAINFALL_RECORD_SIZE * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE));
-        storm.stormEnd = VantageDecoder::decodeStormDate(buffer, ((STORM_RAINFALL_RECORD_SIZE + STORM_DATE_RECORD_SIZE) * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE));
+        storm.setStormStart(VantageDecoder::decodeStormDate(buffer, (STORM_RAINFALL_RECORD_SIZE * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE)),
+                            VantageDecoder::decodeStormRain(buffer, i * STORM_RAINFALL_RECORD_SIZE));
+
+        storm.setStormEnd(VantageDecoder::decodeStormDate(buffer, ((STORM_RAINFALL_RECORD_SIZE + STORM_DATE_RECORD_SIZE) * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE)));
         logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved storm record from EEPROM. Record[" << i << "]: "
-                                                   << "Start: " << Weather::formatDate(storm.stormStart)
-                                                   << " End: " << Weather::formatDate(storm.stormEnd)
-                                                   << " Rainfall: " << storm.stormRain << endl;
-        if (storm.stormStart != 0)
+                                                   << "Start: " << storm.getStormStart().formatDate()
+                                                   << " End: " << storm.getStormEnd().formatDate()
+                                                   << " Rainfall: " << storm.getStormRain() << endl;
+
+        if (storm.hasStormEnded())
             storms.push_back(storm);
 
     }
 
     logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved " << storms.size() << " storm records from EEPROM" << endl;
 
-    std::sort(storms.begin(), storms.end(), [](const StormData & a, const StormData & b) {return a.stormStart < b.stormStart;});
+    //std::sort(storms.begin(), storms.end(), [](const StormData & a, const StormData & b) {return a.stormStart < b.stormStart;});
+    std::sort(storms.begin(), storms.end());
 
     return true;
 }

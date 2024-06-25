@@ -694,26 +694,23 @@ CommandHandler::handleQueryArchivePeriod(const std::string & commandName, std::s
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryStormArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    DateTime startDate = 0;
-    DateTime endDate = 0;
-    struct tm tm;
+    DateTimeFields startDate;
+    DateTimeFields endDate;
 
     for (CommandArgument arg : argumentList) {
-        tm = {0};
-        tm.tm_isdst = -1;
+        int year, month, monthDay;
         if (arg.first == "start-time") {
-            std::stringstream ss(arg.second);
-            ss >> std::get_time(&tm, "%Y-%m-%d");
-            startDate = mktime(&tm);
+            sscanf(arg.second.c_str(), "%d-%d-%d", &year, &month, &monthDay);
+            startDate.setDate(year, month, monthDay);
         }
         else if (arg.first == "end-time") {
             std::stringstream ss(arg.second);
-            ss >> std::get_time(&tm, "%Y-%m-%d");
-            endDate = mktime(&tm);
+            sscanf(arg.second.c_str(), "%d-%d-%d", &year, &month, &monthDay);
+            endDate.setDate(year, month, monthDay);
         }
     }
 
-    if (startDate == 0 || endDate == 0) {
+    if (!startDate.isDateTimeValid() || !endDate.isDateTimeValid()) {
         response.append(buildFailureString("Missing argument"));
     }
     else {

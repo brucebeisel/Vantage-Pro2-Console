@@ -20,6 +20,7 @@
 #include "Measurement.h"
 #include "VantageProtocolConstants.h"
 #include "WeatherTypes.h"
+#include "DateTimeFields.h"
 
 namespace vws {
 class VantageLogger;
@@ -90,7 +91,7 @@ public:
     const Measurement<UvIndex> &            getUvIndex() const;
     const Measurement<SolarRadiation> &     getSolarRadiation() const;
     Rainfall                                getStormRain() const;
-    DateTime                                getStormStart() const;
+    const DateTimeFields &                  getStormStart() const;
     Rainfall                                getDayRain() const;
     Rainfall                                get15MinuteRain() const;
     Rainfall                                getHourRain() const;
@@ -202,7 +203,7 @@ private:
     Measurement<UvIndex>              uvIndex;
     Measurement<SolarRadiation>       solarRadiation;
     Rainfall                          stormRain;
-    DateTime                          stormStart;
+    DateTimeFields                    stormStart;
     Rainfall                          rainDay;
     Rainfall                          rain15Minute;
     Rainfall                          rainHour;

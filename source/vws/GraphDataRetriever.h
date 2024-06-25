@@ -23,6 +23,7 @@
 namespace vws {
 class VantageWeatherStation;
 class VantageLogger;
+class StormData;
 
 class GraphDataRetriever {
 public:

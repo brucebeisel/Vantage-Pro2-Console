@@ -420,8 +420,8 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
     //struct tm tm;
     //Weather::localtime(time, tm);
 
-    int datestamp = time.monthDay + (time.month * 32) + ((time.year - VANTAGE_YEAR_OFFSET) * 512);
-    int timestamp = (time.hour * 100) + time.minute;
+    int datestamp = time.getMonthDay() + (time.getMonth() * 32) + ((time.getYear() - VANTAGE_YEAR_OFFSET) * 512);
+    int timestamp = (time.getHour() * 100) + time.getMinute();
 
     byte dateTimeBytes[TIME_LENGTH + CRC_BYTES];
     BitConverter::getBytes(datestamp, dateTimeBytes, 0, 2);

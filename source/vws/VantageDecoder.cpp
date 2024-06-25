@@ -300,9 +300,9 @@ VantageDecoder::decodeRain(const byte buffer[], int offset) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
+DateTimeFields
 VantageDecoder::decodeStormDate(const byte buffer[], int offset) {
-    DateTime stormStart = 0;
+    DateTimeFields stormDate;
     uint16 value16 = BitConverter::toUint16(buffer, offset);
 
     if (value16 != NO_STORM_ACTIVE_DATE) {
@@ -310,19 +310,10 @@ VantageDecoder::decodeStormDate(const byte buffer[], int offset) {
         int day = (value16 >> 7) & 0x1F;
         int month = (value16 >> 12) & 0xF;
 
-        struct tm tm = {0};
-        tm.tm_year = year - Weather::TIME_STRUCT_YEAR_OFFSET;
-        tm.tm_mon = month - 1;
-        tm.tm_mday = day;
-        tm.tm_hour = 0;
-        tm.tm_min = 0;
-        tm.tm_sec = 0;
-        tm.tm_isdst = -1;
-
-        stormStart = mktime(&tm);
+        stormDate.setDate(year, month, day);
     }
 
-    return stormStart;
+    return stormDate;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

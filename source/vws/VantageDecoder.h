@@ -22,6 +22,7 @@
 #include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
 #include "WeatherTypes.h"
+#include "DateTimeFields.h"
 
 namespace vws {
 
@@ -72,7 +73,7 @@ public:
 
     static Rainfall decodeRain(const byte buffer[], int offset);
 
-    static DateTime decodeStormDate(const byte buffer[], int offset);
+    static DateTimeFields decodeStormDate(const byte buffer[], int offset);
 
     static float decodeConsoleBatteryVoltage(const byte buffer[], int offset);
 

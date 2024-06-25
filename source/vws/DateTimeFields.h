@@ -26,21 +26,213 @@ namespace vws {
 // Fields for the standard date and time. Note that the values in this structure do
 // not apply any offsets. That is, the year is the actual year (e.g. 2021)
 //
-struct DateTimeFields {
+class DateTimeFields {
+public:
+    /**
+     * Constructor used to set fields to valid ranges.
+     */
     DateTimeFields();
-    int year;
-    int month;
-    int monthDay;
-    int hour;
-    int minute;
 
+    /**
+     * Copy constructor.
+     *
+     * @param rhs The Date/Time to copy
+     */
+    DateTimeFields(const DateTimeFields & rhs);
+
+    /**
+     * Reset the date/time fields to the defaults, which are not valid.
+     */
+    void resetDateTimeFields();
+
+    /**
+     * Return whether this date/time has been set.
+     *
+     * @return bool True if it is valid
+     */
+    bool isDateTimeValid() const;
+
+    /**
+     * Set the date fields of this date/time.
+     *
+     * @param year  The year of the date
+     * @param month The month of the date (1-12)
+     * @param monthDay The day of the month of this date (1 - 31)
+     */
+    void setDate(int year, int month, int monthDay);
+
+    /**
+     * Set the time fields of this date/time.
+     *
+     * @param hour   The hour of the time (0 - 23)
+     * @param minute The minute of the time (0 - 59)
+     * @param second The second of the time (0 - 59)
+     */
+    void setTime(int hour, int minute, int second);
+
+    /**
+     * Set the date and time fields of this date/time.
+     *
+     * @param year  The year of the date
+     * @param month The month of the date (1-12)
+     * @param monthDay The day of the month of this date (1 - 31)
+     * @param hour   The hour of the time (0 - 23)
+     * @param minute The minute of the time (0 - 59)
+     * @param second The second of the time (0 - 59)
+     */
+    void setDateTime(int year, int month, int monthDay, int hour, int minute, int second);
+
+    /**
+     * Set the date/time fields from another date/time object.
+     *
+     * @param other The other date/time object from which to copy the fields
+     */
+    void setDateTime(const DateTimeFields & other);
+
+    /**
+     * Parse a date and load the date fields.
+     *
+     * @param dateString The date string in the YYYY-mm-dd format
+     *
+     * @return True if the date is valid
+     */
+    bool parseDate(const std::string & dateString);
+
+    /**
+     * Parse a date/time and load the date and time fields.
+     *
+     * @param dateString The date string in the YYYY-mm-dd hh:mm[:ss] format
+     *
+     * @return True if the date/time is valid
+     */
+    bool parseDateTime(const std::string & dateTimeString);
+
+    /**
+     * Getters and setters.
+     */
+    void setYear(int year);
+    void setMonth(int month);
+    void setMonthDay(int monthDay);
+    void setHour(int hour);
+    void setMinute(int minute);
+    void setSecond(int second);
+
+    int getYear() const;
+    int getMonth() const;
+    int getMonthDay() const;
+    int getHour() const;
+    int getMinute() const;
+    int getSecond() const;
+
+    /**
+     * Get the time since the epoch using the system default to adjust for daylight savings time.
+     *
+     * @return The number of seconds since the epoch
+     */
     DateTime getEpochDateTime() const;
 
+    /**
+     * Format the date portion of the Date/Time fields.
+     *
+     * @return The formatted date in yyyy-mm-dd format
+     */
+    std::string formatDate() const;
+
+    /**
+     * Format the time portion of the Date/Time fields.
+     *
+     * @param displaySeconds Whether seconds should output in the time string
+     *
+     * @return The formatted date in hh:mm format
+     */
+    std::string formatTime(bool displaySeconds = false) const;
+
+    /**
+     * Format the date/time fields.
+     *
+     * @param displaySeconds Whether seconds should output in the time string
+     *
+     * @return The formatted date and time in yyyy-mm-dd hh:mm format
+     */
+    std::string formatDateTime(bool displaySeconds = false) const;
+
+    /**
+     * Equals operator.
+     *
+     * @param other The other DateTimeFields object being compared with "this"
+     *
+     * @return True if "other" and "this" are equal.
+     */
     bool operator==(const DateTimeFields & other) const;
+
+    /**
+     * Not equals operator.
+     *
+     * @param other The other DateTimeFields object being compared with "this"
+     *
+     * @return True if "other" and "this" are not equal.
+     */
+    bool operator!=(const DateTimeFields & other) const;
+
+    /**
+     * Less than operator.
+     *
+     * @param other The other DateTimeFields object being compared with "this"
+     *
+     * @return True if "this" is less than "other"
+     */
     bool operator<(const DateTimeFields & other) const;
+
+    /**
+     * Greater than operator.
+     *
+     * @param other The other DateTimeFields object being compared with "this"
+     *
+     * @return True if "this" is greater than "other"
+     */
     bool operator>(const DateTimeFields & other) const;
 
+    /**
+     * Greater than or equal to operator.
+     *
+     * @param other The other DateTimeFields object being compared with "this"
+     *
+     * @return True if "this" is greater than or equal to "other"
+     */
+    bool operator>=(const DateTimeFields & other) const;
+
+    /**
+     * Less than or equal to operator.
+     *
+     * @param other The other DateTimeFields object being compared with "this"
+     *
+     * @return True if "this" is less than or equal to "other"
+     */
+    bool operator<=(const DateTimeFields & other) const;
+
+    /**
+     * Ostream operator.
+     *
+     * @param os     The output stream
+     * @param fields The object to be output on the stream
+     *
+     * @return The stream provided in the first argument
+     */
     friend std::ostream & operator<<(std::ostream & os, const DateTimeFields & fields);
+
+private:
+    /**
+     * If the year is 0, then the date is not valid.
+     */
+    static constexpr int INVALID_YEAR = 0;
+
+    int year;            // The actual year, e.g. 2025
+    int month;           // The month. Range 1 - 12
+    int monthDay;        // The day of the month. Range 1 - 31
+    int hour;            // The hour in 24 hour format. Range 0 - 23
+    int minute;          // The minute of the hour. Range 0 - 59
+    int second;          // The second of the minute. Range 0 - 59
+
 };
 
 }

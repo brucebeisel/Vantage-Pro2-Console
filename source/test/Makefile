@@ -5,6 +5,7 @@ SRCS=\
 	ArchiveManagerTest.cpp \
 	ArchivePacketTest.cpp \
 	BitConverterTest.cpp \
+	DateTimeFieldsTest.cpp \
 	DominantWindTest.cpp \
 	EnumTest.cpp \
 	LoggerTest.cpp \
@@ -79,8 +80,12 @@ ARCHIVEPACKETOBJS= \
 	
 LOGGEROBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o
+
+DATETIMEFIELDSOBJS= \
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o
 	
-all: ArchiveManagerTest ArchivePacketTest BitConverterTest DominantWindTest EnumTest LoggerTest SummaryTest WindDirectionSliceTest
+all: ArchiveManagerTest ArchivePacketTest BitConverterTest DateTimeFieldsTest DominantWindTest EnumTest LoggerTest SummaryTest WindDirectionSliceTest
 
 ArchiveManagerTest: $(OBJDIR) $(OBJDIR)/ArchiveManagerTest.o
 	$(CC) -g -o ArchiveManagerTest $(OBJDIR)/ArchiveManagerTest.o $(ARCHIVEMANAGEROBJS)
@@ -90,6 +95,9 @@ ArchivePacketTest: $(OBJDIR) $(OBJDIR)/ArchivePacketTest.o
 
 BitConverterTest: $(OBJDIR) $(OBJDIR)/BitConverterTest.o
 	$(CC) -g -o BitConverterTest $(OBJDIR)/BitConverterTest.o $(BITCONVERTEROBJS)
+
+DateTimeFieldsTest: $(OBJDIR) $(OBJDIR)/DateTimeFieldsTest.o
+	$(CC) -g -o DateTimeFieldsTest $(OBJDIR)/DateTimeFieldsTest.o $(DATETIMEFIELDSOBJS)
 
 DominantWindTest: $(OBJDIR) $(OBJDIR)/DominantWindTest.o
 	$(CC) -g -o DominantWindTest $(OBJDIR)/DominantWindTest.o $(DOMWINDOBJS)
