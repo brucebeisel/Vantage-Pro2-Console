@@ -25,6 +25,14 @@
  ../vws/SummaryEnums.h ../vws/VantageEepromConstants.h \
  ../vws/WeatherTypes.h ../vws/VantageProtocolConstants.h
 ../../target/test/LoggerTest.o: LoggerTest.cpp ../vws/VantageLogger.h
+../../target/test/StormArchiveManagerTest.o: StormArchiveManagerTest.cpp \
+ ../vws/VantageWeatherStation.h ../vws/ArchivePacket.h \
+ ../vws/WeatherTypes.h ../vws/Measurement.h ../vws/DateTimeFields.h \
+ ../vws/BitConverter.h ../vws/VantageProtocolConstants.h \
+ ../vws/StormArchiveManager.h ../vws/Weather.h ../vws/StormData.h \
+ ../vws/GraphDataRetriever.h ../vws/SerialPort.h ../vws/VantageLogger.h \
+ ../vws/VantageDecoder.h ../vws/VantageEepromConstants.h \
+ ../vws/VantageLogger.h
 ../../target/test/StormDataTest.o: StormDataTest.cpp ../vws/StormData.h \
  ../vws/DateTimeFields.h ../vws/WeatherTypes.h
 ../../target/test/SummaryTest.o: SummaryTest.cpp ../vws/SummaryReport.h \
