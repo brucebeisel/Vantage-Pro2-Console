@@ -15,7 +15,8 @@
 ../../target/test/BitConverterTest.o: BitConverterTest.cpp \
  ../vws/BitConverter.h ../vws/WeatherTypes.h ../vws/WeatherTypes.h
 ../../target/test/DateTimeFieldsTest.o: DateTimeFieldsTest.cpp \
- ../vws/DateTimeFields.h ../vws/WeatherTypes.h
+ ../vws/DateTimeFields.h ../vws/WeatherTypes.h ../vws/Weather.h \
+ ../vws/Measurement.h
 ../../target/test/DominantWindTest.o: DominantWindTest.cpp \
  ../vws/DominantWindDirections.h ../vws/WeatherTypes.h \
  ../vws/WindDirectionSlice.h ../vws/VantageLogger.h ../vws/Weather.h \
@@ -24,6 +25,8 @@
  ../vws/SummaryEnums.h ../vws/VantageEepromConstants.h \
  ../vws/WeatherTypes.h ../vws/VantageProtocolConstants.h
 ../../target/test/LoggerTest.o: LoggerTest.cpp ../vws/VantageLogger.h
+../../target/test/StormDataTest.o: StormDataTest.cpp ../vws/StormData.h \
+ ../vws/DateTimeFields.h ../vws/WeatherTypes.h
 ../../target/test/SummaryTest.o: SummaryTest.cpp ../vws/SummaryReport.h \
  ../vws/Weather.h ../vws/Measurement.h ../vws/WeatherTypes.h \
  ../vws/ArchivePacket.h ../vws/DateTimeFields.h ../vws/WindRoseData.h \

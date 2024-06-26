@@ -18,7 +18,6 @@
 #define GRAPH_DATA_RETRIEVER_H
 
 #include <vector>
-#include "VantageWeatherStation.h"
 
 namespace vws {
 class VantageWeatherStation;

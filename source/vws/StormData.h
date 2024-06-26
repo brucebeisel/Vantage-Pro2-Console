@@ -17,6 +17,7 @@
 #ifndef STORM_DATA_H
 #define STORM_DATA_H
 
+#include <iostream>
 #include "DateTimeFields.h"
 
 namespace vws {
@@ -147,6 +148,16 @@ public:
      * @return True if "this" is less than other
      */
     bool operator<(const StormData & other) const;
+
+    /**
+     * OStream operator.
+     *
+     * @param os The ostream
+     * @param sd The StormData to output
+     *
+     * @return The same ostream passed in
+     */
+    friend std::ostream & operator<<(std::ostream & os, const StormData & sd);
 
 private:
     StormState     stormState;

@@ -152,6 +152,12 @@ StormData::getStormRain() const {
 bool
 StormData::operator<(const StormData & other) const {
     return stormStart < other.stormStart;
-
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::ostream &
+operator<<(std::ostream & os, const StormData & sd)  {
+    os << "Storm: Start: " << sd.stormStart.formatDate() << " End: " << sd.stormEnd.formatDate() << " Rainfall: " << sd.stormRain;
+    return os;
 }
 }

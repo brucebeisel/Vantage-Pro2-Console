@@ -9,6 +9,8 @@ SRCS=\
 	DominantWindTest.cpp \
 	EnumTest.cpp \
 	LoggerTest.cpp \
+	StormArchiveManagerTest.cpp \
+	StormDataTest.cpp \
 	SummaryTest.cpp \
 	WindDirectionSliceTest.cpp
 
@@ -85,7 +87,33 @@ DATETIMEFIELDSOBJS= \
 	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o
 	
-all: ArchiveManagerTest ArchivePacketTest BitConverterTest DateTimeFieldsTest DominantWindTest EnumTest LoggerTest SummaryTest WindDirectionSliceTest
+STORMDATAOBJS= \
+	$(VWSTESTOBJDIR)/StormData.o \
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o
+	
+STORMARCHIVEMANAGEROBJS= \
+	$(VWSTESTOBJDIR)/StormArchiveManager.o \
+	$(VWSTESTOBJDIR)/StormData.o \
+	$(VWSTESTOBJDIR)/SerialPort.o \
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/GraphDataRetriever.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o
+	
+all: ArchiveManagerTest \
+	ArchivePacketTest \
+	BitConverterTest \
+	DateTimeFieldsTest \
+	DominantWindTest \
+	EnumTest \
+	LoggerTest \
+	StormArchiveManagerTest \
+	StormDataTest \
+	SummaryTest \
+	WindDirectionSliceTest
 
 ArchiveManagerTest: $(OBJDIR) $(OBJDIR)/ArchiveManagerTest.o
 	$(CC) -g -o ArchiveManagerTest $(OBJDIR)/ArchiveManagerTest.o $(ARCHIVEMANAGEROBJS)
@@ -107,6 +135,12 @@ EnumTest: $(OBJDIR) $(OBJDIR)/EnumTest.o
 	
 LoggerTest: $(OBJDIR) $(OBJDIR)/LoggerTest.o
 	$(CC) -g -o LoggerTest $(OBJDIR)/LoggerTest.o $(LOGGEROBJS)
+
+StormArchiveManagerTest: $(OBJDIR) $(OBJDIR)/StormArchiveManagerTest.o
+	$(CC) -g -o StormArchiveManagerTest $(OBJDIR)/StormArchiveManagerTest.o $(STORMARCHIVEMANAGEROBJS)
+
+StormDataTest: $(OBJDIR) $(OBJDIR)/StormDataTest.o
+	$(CC) -g -o StormDataTest $(OBJDIR)/StormDataTest.o $(STORMDATAOBJS)
 
 SummaryTest: $(OBJDIR) $(OBJDIR)/SummaryTest.o
 	$(CC) -g -o SummaryTest $(OBJDIR)/SummaryTest.o $(SUMMARYOBJS)

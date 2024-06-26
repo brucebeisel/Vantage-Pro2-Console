@@ -43,6 +43,7 @@ GraphDataRetriever::~GraphDataRetriever() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
+    logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieving storm data from EEPROM" << endl;
     storms.clear();
 
     byte buffer[EEPROM_STORM_DATA_SIZE];
@@ -58,12 +59,19 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
     // and the amount of rain accumulated as of midnight. It is currently (12/2023) unknown if the record will be updated
     // on the next midnight if the storm has not ended yet.
     //
-    StormData storm;
     for (int i = 0; i < NUM_RAIN_STORM_RECORDS; i++) {
+        DateTimeFields stormStart = VantageDecoder::decodeStormDate(buffer, (STORM_RAINFALL_RECORD_SIZE * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE));
+        DateTimeFields stormEnd = VantageDecoder::decodeStormDate(buffer, ((STORM_RAINFALL_RECORD_SIZE + STORM_DATE_RECORD_SIZE) * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE));
+        Rainfall rainfall = VantageDecoder::decodeStormRain(buffer, i * STORM_RAINFALL_RECORD_SIZE);
+
+        StormData storm(stormStart, stormEnd, rainfall);
+
+        /*
         storm.setStormStart(VantageDecoder::decodeStormDate(buffer, (STORM_RAINFALL_RECORD_SIZE * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE)),
                             VantageDecoder::decodeStormRain(buffer, i * STORM_RAINFALL_RECORD_SIZE));
 
         storm.setStormEnd(VantageDecoder::decodeStormDate(buffer, ((STORM_RAINFALL_RECORD_SIZE + STORM_DATE_RECORD_SIZE) * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE)));
+        */
         logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved storm record from EEPROM. Record[" << i << "]: "
                                                    << "Start: " << storm.getStormStart().formatDate()
                                                    << " End: " << storm.getStormEnd().formatDate()
