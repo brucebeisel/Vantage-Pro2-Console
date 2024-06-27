@@ -718,7 +718,7 @@ CommandHandler::handleQueryStormArchive(const std::string & commandName, const C
         stormArchiveManager.queryStorms(startDate, endDate, storms);
         ostringstream oss;
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
-        oss << stormArchiveManager.formatStormJSON(storms);
+        oss << StormArchiveManager::formatStormJSON(storms);
         response.append(oss.str());
     }
 }

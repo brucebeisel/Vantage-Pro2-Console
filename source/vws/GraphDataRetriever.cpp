@@ -53,8 +53,8 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
 
     //
     // This is a ring buffer, so we will read the entire buffer, storing the valid storms, then sort.
-    // Note that the current insert location in the ring buffer is marked by a start and end date of 0xFFFF
-    // and a rainfall amount of 0.0 inches.
+    // The ring buffer actually has room for 25 storms, but the 25th record is always the "dashed" values and
+    // is therefore ignored.
     // During a storm, a new rain storm record will be stored at midnight. It will contain the start date, an end date of 0,
     // and the amount of rain accumulated as of midnight. It is currently (12/2023) unknown if the record will be updated
     // on the next midnight if the storm has not ended yet.
@@ -66,12 +66,6 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
 
         StormData storm(stormStart, stormEnd, rainfall);
 
-        /*
-        storm.setStormStart(VantageDecoder::decodeStormDate(buffer, (STORM_RAINFALL_RECORD_SIZE * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE)),
-                            VantageDecoder::decodeStormRain(buffer, i * STORM_RAINFALL_RECORD_SIZE));
-
-        storm.setStormEnd(VantageDecoder::decodeStormDate(buffer, ((STORM_RAINFALL_RECORD_SIZE + STORM_DATE_RECORD_SIZE) * EEPROM_STORM_RECORDS) + (i * STORM_DATE_RECORD_SIZE)));
-        */
         logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved storm record from EEPROM. Record[" << i << "]: "
                                                    << "Start: " << storm.getStormStart().formatDate()
                                                    << " End: " << storm.getStormEnd().formatDate()
@@ -84,7 +78,6 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
 
     logger->log(VantageLogger::VANTAGE_DEBUG2) << "Retrieved " << storms.size() << " storm records from EEPROM" << endl;
 
-    //std::sort(storms.begin(), storms.end(), [](const StormData & a, const StormData & b) {return a.stormStart < b.stormStart;});
     std::sort(storms.begin(), storms.end());
 
     return true;

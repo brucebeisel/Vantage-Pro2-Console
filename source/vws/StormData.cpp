@@ -56,7 +56,7 @@ StormData::resetStormData() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 StormData::setStormStart(const DateTimeFields & start, Rainfall rain) {
-    if (!stormStart.isDateTimeValid())
+    if (!start.isDateTimeValid())
         return false;
 
     stormStart.setDateTime(start);

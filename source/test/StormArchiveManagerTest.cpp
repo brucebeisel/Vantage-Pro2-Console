@@ -25,6 +25,31 @@ static const unsigned char testBuffer[] = {
     0x98, 0x33, 0x18, 0x35, 0xff, 0xff, 0xc4, 0x86                                                  // 152
 };
 
+static const unsigned char testBuffer2[] = {
+    // Rainfall
+    0x09, 0x00, 0x8f, 0x00, 0x9f, 0x00, 0x03, 0x00, 0x4f, 0x00, //  10
+    0x1a, 0x00, 0x02, 0x00, 0x05, 0x00, 0x0c, 0x00, 0x2d, 0x00, //  20
+    0x0f, 0x00, 0x49, 0x00, 0x02, 0x00, 0x04, 0x00, 0x1b, 0x00, //  30
+    0x1e, 0x00, 0x26, 0x00, 0x06, 0x00, 0x22, 0x00, 0x67, 0x00, //  40
+    0xae, 0x00, 0x39, 0x00, 0xba, 0x00, 0x3f, 0x00, 0x00, 0x00, //  50
+
+    // Storm Start
+    0x98, 0x37, 0x98, 0x3b, 0x98, 0x3d, 0x18, 0x3f, 0x98, 0x40, //  60
+    0x98, 0x45, 0x98, 0x4a, 0x98, 0x52, 0x18, 0x53, 0x18, 0x55, //  70
+    0x18, 0x56, 0x98, 0x57, 0x98, 0x58, 0x18, 0x59, 0x18, 0x5c, //  80
+    0x98, 0x5d, 0x98, 0x5e, 0x98, 0x62, 0x98, 0x65, 0x18, 0x67, //  90
+    0x18, 0x31, 0x18, 0x32, 0x18, 0x33, 0x98, 0x34, 0xff, 0xff, // 100
+
+    // Storm End
+    0x18, 0x38, 0x98, 0x3b, 0x18, 0x3e, 0x98, 0x3f, 0x18, 0x42, // 110
+    0x18, 0x46, 0x98, 0x4a, 0x98, 0x52, 0x98, 0x53, 0x18, 0x55, // 120
+    0x18, 0x56, 0x98, 0x57, 0x98, 0x58, 0x18, 0x59, 0x18, 0x5c, // 130
+    0x18, 0x5e, 0x18, 0x5f, 0x18, 0x63, 0x98, 0x65, 0x18, 0x67, // 140
+    0x18, 0x31, 0x98, 0x32, 0x98, 0x33, 0x18, 0x35, 0xff, 0xff, // 150
+    0xc4, 0x86                                                  // 152
+};
+
+
 VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
                                                                         archivePeriodMinutes(0),
                                                                         consoleType(VANTAGE_PRO_2),
@@ -37,7 +62,7 @@ VantageWeatherStation::~VantageWeatherStation() {
 
 bool
 VantageWeatherStation::VantageWeatherStation::eepromBinaryRead(unsigned address, unsigned count, char * output) {
-    memcpy(output, testBuffer, count);
+    memcpy(output, testBuffer2, count);
     return true;
 }
 
@@ -47,19 +72,30 @@ int
 main(int argc, char * argv[]) {
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     VantageDecoder::setRainCollectorSize(.01);
-    cout << "Here 1" << endl;
     SerialPort port("device", 19200);
-
-    cout << "Here 2" << endl;
     VantageWeatherStation station(port);
-
-    cout << "Here 3" << endl;
     GraphDataRetriever gdr(station);
-
-    cout << "Here 4" << endl;
     StormArchiveManager sam(".", gdr);
-
-    cout << "Here 5" << endl;
     sam.updateArchive();
 
+    DateTimeFields min;
+    min.setDate(2024, 4, 1);
+    DateTimeFields max;
+    max.setDate(2024, 7, 1);
+
+    cout << "Testing queryStorms()" << endl;
+    std::vector<StormData> list;
+    DateTimeFields last = sam.queryStorms(min, max, list);
+    cout << "Retrieved " << list.size() << " storms with max start of " << last.formatDate() << endl;
+    int lastCount = list.size();
+
+    cout << StormArchiveManager::formatStormJSON(list) << endl;
+
+    cout << "Testing second archive update with same data" << endl;
+    sam.updateArchive();
+
+    if (list.size() == lastCount)
+        cout << "PASSED: Second update yielded same number of storms in the archive" << endl;
+    else
+        cout << "FAILED: Second update yielded a different number of storms in the archive. Old = " << lastCount << " New: " << list.size() << endl;
 }

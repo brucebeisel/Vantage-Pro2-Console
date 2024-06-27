@@ -42,6 +42,34 @@ StormArchiveManager::~StormArchiveManager() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+bool
+StormArchiveManager::validateArchive(fstream & stream) const {
+    stream.seekg(0, ios::end);
+
+    if (!stream.good()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed seeking stream to end" << endl;
+        return false;
+    }
+
+    long archiveSize = stream.tellg();
+
+    if (!stream.good()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed querying archive size via stream.tellg()" << endl;
+        return false;
+    }
+
+    if (archiveSize % STORM_RECORD_LENGTH != 0) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Archive is not valid. It does not contain the right number of bytes for the fixed record archive. Size = "
+                                                 << archiveSize << " Modulus: " << (archiveSize % STORM_RECORD_LENGTH) << endl;
+        return false;
+    }
+
+    return true;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
 StormArchiveManager::updateArchive() {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Updating storm archive file at " << stormArchiveFilename << endl;
@@ -52,6 +80,9 @@ StormArchiveManager::updateArchive() {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open storm archive file \"" << stormArchiveFilename << "\"" << endl;
         return;
     }
+
+    if (!validateArchive(stream))
+        return;
 
     vector<StormData> stormData;
     if (!dataRetriever.retrieveStormData(stormData)) {
@@ -103,6 +134,9 @@ StormArchiveManager::queryStorms(const DateTimeFields & start, const DateTimeFie
     fstream stream;
     stream.open(stormArchiveFilename.c_str(), ios::in);
 
+    if (!validateArchive(stream))
+        return lastRecordTime;
+
     while (stream.good()) {
         StormData stormData;
         if (readRecord(stream, stormData) && stormData.getStormStart() >= start && stormData.getStormStart() <= end) {
@@ -117,7 +151,7 @@ StormArchiveManager::queryStorms(const DateTimeFields & start, const DateTimeFie
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-StormArchiveManager::formatStormJSON(const std::vector<StormData> & storms) const {
+StormArchiveManager::formatStormJSON(const std::vector<StormData> & storms) {
     ostringstream oss;
     oss << "{ \"storms\" : [";
     bool first = true;
@@ -143,20 +177,38 @@ StormArchiveManager::readRecord(fstream & fs, StormData & data) const {
     buffer[STORM_RECORD_LENGTH] = '\0';
 
     if (fs.eof()) {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Reading storm archive record failed (EOF)" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Reached EOF when reading storm archive record" << endl;
+        return false;
+    }
+
+    if (!fs.good()) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Reading storm archive record failed. "
+                                                   << " Bad bit: " << boolalpha << fs.bad()
+                                                   << " Fail bit: " << fs.fail() << noboolalpha << endl;
         return false;
     }
 
     char startDateString[20];
     char endDateString[20];
     double stormRain;
-    sscanf(buffer, "%s %s %lf", startDateString, endDateString, &stormRain);
+
+    if (sscanf(buffer, "%s %s %lf", startDateString, endDateString, &stormRain) != 3) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Storm record did not contain 3 tokens <start> <end> <rain>: '" << buffer << "'" << endl;
+        return false;
+    }
 
     DateTimeFields stormStart;
     DateTimeFields stormEnd;
 
-    if (!stormStart.parseDate(startDateString) || !stormEnd.parseDate(startDateString))
+    if (!stormStart.parseDate(startDateString)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Storm start date string is not valid: '" << startDateString << "'" << endl;
         return false;
+    }
+
+    if (!stormEnd.parseDate(endDateString)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Storm end date string is not valid: '" << endDateString << "'" << endl;
+        return false;
+    }
 
     data.setStormData(stormStart, stormEnd, stormRain);
 

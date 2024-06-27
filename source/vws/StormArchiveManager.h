@@ -67,7 +67,7 @@ public:
      * @param storms The list of storms to format in JSON
      * @return The formatted JSON
      */
-    std::string formatStormJSON(const std::vector<StormData> & storms) const;
+    static std::string formatStormJSON(const std::vector<StormData> & storms);
 
 private:
     /**
@@ -86,6 +86,14 @@ private:
      * @param data The storm data to be written
      */
     void writeRecord(std::fstream & fs, StormData & data);
+
+    /**
+     * Validate that the archive is valid.
+     *
+     * @param fs The file stream that is connected to the archive file
+     * @return True if the archive is valid
+     */
+    bool validateArchive(std::fstream & fs) const;
 
     //
     // Format of record: YYYY-MM-DD<SP>YYYY-MM-DD<SP>00.00<LF>
