@@ -12,7 +12,7 @@ using namespace std;
 
 namespace vws {
 
-static const unsigned char testBuffer[] = {
+static const unsigned char testBuffer1[] = {
     0x09, 0x00, 0x8f, 0x00, 0x9f, 0x00, 0x03, 0x00, 0x4f, 0x00, 0x1a, 0x00, 0x02, 0x00, 0x05, 0x00, //  16
     0x0c, 0x00, 0x2d, 0x00, 0x0f, 0x00, 0x49, 0x00, 0x02, 0x00, 0x04, 0x00, 0x1b, 0x00, 0x1e, 0x00, //  32
     0x26, 0x00, 0x06, 0x00, 0x22, 0x00, 0x67, 0x00, 0xae, 0x00, 0x39, 0x00, 0xba, 0x00, 0x3f, 0x00, //  48
@@ -25,6 +25,7 @@ static const unsigned char testBuffer[] = {
     0x98, 0x33, 0x18, 0x35, 0xff, 0xff, 0xc4, 0x86                                                  // 152
 };
 
+// 2024-03-02 to 2024-06-14
 static const unsigned char testBuffer2[] = {
     // Rainfall
     0x09, 0x00, 0x8f, 0x00, 0x9f, 0x00, 0x03, 0x00, 0x4f, 0x00, //  10
@@ -49,6 +50,36 @@ static const unsigned char testBuffer2[] = {
     0xc4, 0x86                                                  // 152
 };
 
+// 2024-03-05 to 2024-06-27
+static const unsigned char testBuffer3[] = {
+    // Rainfall
+    0x09, 0x00, 0x8f, 0x00, 0x9f, 0x00, 0x03, 0x00, 0x4f, 0x00,
+    0x1a, 0x00, 0x02, 0x00, 0x05, 0x00, 0x0c, 0x00, 0x2d, 0x00,
+    0x0f, 0x00, 0x49, 0x00, 0x02, 0x00, 0x04, 0x00, 0x1b, 0x00,
+    0x1e, 0x00, 0x26, 0x00, 0x06, 0x00, 0x22, 0x00, 0x67, 0x00,
+    0x3a, 0x00, 0x39, 0x00, 0xba, 0x00, 0x3f, 0x00, 0x00, 0x00,
+
+    // Storm Start
+    0x98, 0x37, 0x98, 0x3b, 0x98, 0x3d, 0x18, 0x3f, 0x98, 0x40,
+    0x98, 0x45, 0x98, 0x4a, 0x98, 0x52, 0x18, 0x53, 0x18, 0x55,
+    0x18, 0x56, 0x98, 0x57, 0x98, 0x58, 0x18, 0x59, 0x18, 0x5c,
+    0x98, 0x5d, 0x98, 0x5e, 0x98, 0x62, 0x98, 0x65, 0x18, 0x67,
+    0x18, 0x6d, 0x18, 0x32, 0x18, 0x33, 0x98, 0x34, 0xff, 0xff,
+
+    // Storm End
+    0x18, 0x38, 0x98, 0x3b, 0x18, 0x3e, 0x98, 0x3f, 0x18, 0x42,
+    0x18, 0x46, 0x98, 0x4a, 0x98, 0x52, 0x98, 0x53, 0x18, 0x55,
+    0x18, 0x56, 0x98, 0x57, 0x98, 0x58, 0x18, 0x59, 0x18, 0x5c,
+    0x18, 0x5e, 0x18, 0x5f, 0x18, 0x63, 0x98, 0x65, 0x98, 0x67,
+    0x98, 0x6d, 0x98, 0x32, 0x98, 0x33, 0x18, 0x35, 0xff, 0xff,
+
+    // CRC
+    0x6a, 0xb2
+};
+
+
+
+static const unsigned char * testBufferToUse = NULL;
 
 VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
                                                                         archivePeriodMinutes(0),
@@ -62,7 +93,10 @@ VantageWeatherStation::~VantageWeatherStation() {
 
 bool
 VantageWeatherStation::VantageWeatherStation::eepromBinaryRead(unsigned address, unsigned count, char * output) {
-    memcpy(output, testBuffer2, count);
+    if (testBufferToUse == NULL)
+        return false;
+
+    memcpy(output, testBufferToUse, count);
     return true;
 }
 
@@ -76,12 +110,13 @@ main(int argc, char * argv[]) {
     VantageWeatherStation station(port);
     GraphDataRetriever gdr(station);
     StormArchiveManager sam(".", gdr);
+    testBufferToUse = testBuffer2;
     sam.updateArchive();
 
     DateTimeFields min;
-    min.setDate(2024, 4, 1);
+    min.setDate(2024, 1, 1);
     DateTimeFields max;
-    max.setDate(2024, 7, 1);
+    max.setDate(2024, 12, 31);
 
     cout << "Testing queryStorms()" << endl;
     std::vector<StormData> list;
@@ -94,8 +129,31 @@ main(int argc, char * argv[]) {
     cout << "Testing second archive update with same data" << endl;
     sam.updateArchive();
 
+    last = sam.queryStorms(min, max, list);
+
     if (list.size() == lastCount)
         cout << "PASSED: Second update yielded same number of storms in the archive" << endl;
     else
         cout << "FAILED: Second update yielded a different number of storms in the archive. Old = " << lastCount << " New: " << list.size() << endl;
+
+    testBufferToUse = testBuffer3;
+    sam.updateArchive();
+
+    min.setDate(2024, 3, 31);
+    max.setDate(2024, 5, 30);
+    last = sam.queryStorms(min, max, list);
+
+    if (list.size() == 13)
+        cout << "PASSED: Query of 2024-03-31 to 2024-05-30 yielded 13 storms" << endl;
+    else
+        cout << "FAILED: Query of 2024-03-31 to 2024-05-30 did not yield 13 storms, but " << list.size() << " storms" << endl;
+
+    min.setDate(2024, 4, 1);
+    max.setDate(2024, 5, 18);
+    last = sam.queryStorms(min, max, list);
+
+    if (list.size() == 10)
+        cout << "PASSED: Query of 2024-04-01 to 2024-05-18 yielded 10 storms" << endl;
+    else
+        cout << "FAILED: Query of 2024-04-01 to 2024-05-18 did not yield 10 storms, but " << list.size() << " storms" << endl;
 }

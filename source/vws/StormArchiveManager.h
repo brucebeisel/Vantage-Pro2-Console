@@ -57,7 +57,7 @@ public:
      *
      * @param start The lower range of the query
      * @param end   The upper range of the query
-     * @param list  The results of the query
+     * @param list  The results of the query. Note the vector will be cleared before adding any existing storms.
      */
     DateTimeFields queryStorms(const DateTimeFields & start, const DateTimeFields & end, std::vector<StormData> & list) const;
 

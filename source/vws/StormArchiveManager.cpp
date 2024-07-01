@@ -44,6 +44,7 @@ StormArchiveManager::~StormArchiveManager() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 StormArchiveManager::validateArchive(fstream & stream) const {
+    streampos oldPosition = stream.tellg();
     stream.seekg(0, ios::end);
 
     if (!stream.good()) {
@@ -63,6 +64,11 @@ StormArchiveManager::validateArchive(fstream & stream) const {
                                                  << archiveSize << " Modulus: " << (archiveSize % STORM_RECORD_LENGTH) << endl;
         return false;
     }
+
+    //
+    // Put the stream back where the called had it
+    //
+    stream.seekg(oldPosition, ios::beg);
 
     return true;
 
@@ -129,6 +135,7 @@ StormArchiveManager::updateArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 DateTimeFields
 StormArchiveManager::queryStorms(const DateTimeFields & start, const DateTimeFields & end, std::vector<StormData> & list) const {
+    list.clear();
     DateTimeFields lastRecordTime;
 
     fstream stream;
