@@ -63,7 +63,6 @@ ARCHIVEMANAGEROBJS= \
 	$(VWSTESTOBJDIR)/BitConverter.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o \
-	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
 	$(VWSTESTOBJDIR)/UnitConverter.o \
 	$(VWSTESTOBJDIR)/VantageCRC.o \
 	$(VWSTESTOBJDIR)/LoopPacket.o \

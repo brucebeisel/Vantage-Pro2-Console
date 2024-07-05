@@ -132,6 +132,13 @@ public:
     DateTime getEpochDateTime() const;
 
     /**
+     * Set the date/time fields from an Epoch timestamp.
+     *
+     * @param epoch The epoch time
+     */
+    void setFromEpoch(DateTime epoch);
+
+    /**
      * Format the date portion of the Date/Time fields.
      *
      * @return The formatted date in yyyy-mm-dd format

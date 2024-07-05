@@ -10,7 +10,6 @@
 using namespace vws;
 using namespace std;
 
-namespace vws {
 
 static const unsigned char testBuffer1[] = {
     0x09, 0x00, 0x8f, 0x00, 0x9f, 0x00, 0x03, 0x00, 0x4f, 0x00, 0x1a, 0x00, 0x02, 0x00, 0x05, 0x00, //  16
@@ -81,6 +80,7 @@ static const unsigned char testBuffer3[] = {
 
 static const unsigned char * testBufferToUse = NULL;
 
+namespace vws {
 VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
                                                                         archivePeriodMinutes(0),
                                                                         consoleType(VANTAGE_PRO_2),
@@ -99,8 +99,7 @@ VantageWeatherStation::VantageWeatherStation::eepromBinaryRead(unsigned address,
     memcpy(output, testBufferToUse, count);
     return true;
 }
-
-};
+}
 
 int
 main(int argc, char * argv[]) {

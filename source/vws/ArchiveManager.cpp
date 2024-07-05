@@ -476,22 +476,17 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
 
     for (vector<ArchivePacket>::const_iterator it = packets.begin(); it != packets.end(); ++it) {
         //
-        // This check may not be necessary and it may be a bug due to daylight savings time.
-        // When DST ends, the 1 AM hour is repeated. How this is handled by the dump after command
-        // or the console itself, is not known. It could get very confused if you ask for a DMPAFT
-        // at 01:20 AM. Which 1:20 will it dump after, the first or the second. On the other hand,
-        // the console may not store any data until 2:00 AM standard time, leaving an hour gap in
-        // the archive.
+        // Only save the packet to the archive if it is newer than the newest packet in the archive
         //
-        if (newestPacket.getEpochDateTime() < it->getEpochDateTime()) {
+        if (newestPacket.getDateTimeFields() < it->getDateTimeFields()) {
             stream.write(it->getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
             newestPacket = *it;
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: "
-                                                      << Weather::formatDateTime(it->getEpochDateTime()) << endl;
+                                                      << it->getDateTimeFields().formatDateTime() << endl;
         }
         else
             logger.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time "
-                                                    << Weather::formatDateTime(it->getEpochDateTime()) << endl;
+                                                    << it->getDateTimeFields().formatDateTime() << endl;
     }
 
     streampos fileSize = stream.tellp();

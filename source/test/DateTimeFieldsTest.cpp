@@ -105,6 +105,13 @@ main(int argc, char *argv[]) {
     else
         cout << "FAILED: getEpochDateTime()" << endl;
 
+    t += 3600;
+    DateTimeFields fromEpoch;
+    fromEpoch.setFromEpoch(t);
+
+    cout << "From epoch. Source: " << dtf1.formatDateTime() << " 1 hour later: " << fromEpoch.formatDateTime(true) << endl;
+
+
     cout << endl << "Validity test" << endl;
     if (dtf1.isDateTimeValid())
         cout << "PASSED: Existing time is valid" << endl;

@@ -35,7 +35,7 @@ static const std::string ARCHIVE_TEMP_FILE = "weather-archive-temp.dat";
 /**
  * The ArchiveManager class manages a file that contains the raw data read from the DMP and DMPAFT command of the Vantage console.
  * This archive acts as augmented storage for the console. The console has a storage capacity of 2450 records which translates to
- * approximately 42 hours of storage at 1 minute intervals. Not only will this class the console memory and the disk archive in sync,
+ * approximately 42 hours of storage at 1 minute intervals. Not only will this class keep the console memory and the disk archive in sync,
  * it will also keep backups that will enable the archive to be restored in case of an error.
  *
  * Note that the Vantage archive has a limitation with daylight savings time. When daylight savings time starts in the spring,
