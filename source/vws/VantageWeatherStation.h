@@ -382,10 +382,10 @@ public:
     /**
      * Get the clock time on the console.
      * 
-     * @param stationTime The time that was retrieved or 0 on failure
+     * @param stationTime The time that was retrieved or invalid on failure
      * @return True if the time was retrieved successfully
      */
-    bool retrieveConsoleTime(vws::DateTime & stationTime);
+    bool retrieveConsoleTime(vws::DateTimeFields & stationTime);
 
     /**
      * Update the archive period to one of the allowed intervals.

@@ -189,12 +189,12 @@ SummaryRecord::formatJSON() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 SummaryReport::SummaryReport(SummaryPeriod period,
-                             DateTime start,
-                             DateTime end,
+                             const DateTimeFields & start,
+                             const DateTimeFields & end,
                              ArchiveManager & archiveManager,
                              WindRoseData & wrd) : period(period),
-                                                   startDate(start),
-                                                   endDate(end),
+                                                   startDate(start.getEpochDateTime()),
+                                                   endDate(end.getEpochDateTime()),
                                                    archiveManager(archiveManager),
                                                    windRoseData(wrd),
                                                    logger(VantageLogger::getLogger("SummaryRecord")) {
@@ -412,8 +412,13 @@ SummaryReport::loadData() {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Loading data for summary report..." << endl;
 
     vector<ArchivePacket> packets;
-    DateTime lastRecordDate = archiveManager.queryArchiveRecords(startDate, endDate, packets);
-    if (lastRecordDate == 0) {
+    DateTimeFields sd;
+    DateTimeFields ed;
+    sd.setFromEpoch(startDate);
+    ed.setFromEpoch(endDate);
+    DateTimeFields lastRecordDate = archiveManager.queryArchiveRecords(sd, ed, packets);
+
+    if (!lastRecordDate.isDateTimeValid()) {
         logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read archive for summary report" << endl;
         return false;
     }

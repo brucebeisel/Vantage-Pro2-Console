@@ -847,9 +847,9 @@ VantageWeatherStation::updateConsoleTime() {
     // diagnostics counters from being reset.
     //
     time_t now = time(0);
-    DateTime currentStationTime;
+    DateTimeFields currentStationTime;
     if (retrieveConsoleTime(currentStationTime)) {
-        DateTime delta = abs(now - currentStationTime);
+        DateTime delta = abs(now - currentStationTime.getEpochDateTime());
         logger.log(VantageLogger::VANTAGE_INFO) << "Console time delta to actual time: " << delta << endl;
         if (delta < CONSOLE_TIME_DELTA_THRESHOLD_SECONDS) {
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "Not setting console time because it is close to actual time" << endl;
@@ -889,26 +889,22 @@ VantageWeatherStation::updateConsoleTime() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::retrieveConsoleTime(DateTime & stationTime) {
+VantageWeatherStation::retrieveConsoleTime(DateTimeFields & stationTime) {
     bool success = true;
-    stationTime = 0;
+    stationTime.resetDateTimeFields();
 
     if (!sendAckedCommand(GET_TIME_CMD))
         return false;
 
     if (serialPort.readBytes(buffer, TIME_RESPONSE_LENGTH + CRC_BYTES)) {
         if (VantageCRC::checkCRC(buffer, TIME_RESPONSE_LENGTH)) {
-            time_t now = time(0);
-            struct tm tm;
-            Weather::localtime(now, tm);
-            int n = 0;
-            tm.tm_sec = buffer[n++];
-            tm.tm_min = buffer[n++];
-            tm.tm_hour = buffer[n++];
-            tm.tm_mday = buffer[n++];
-            tm.tm_mon = buffer[n++] - 1;
-            tm.tm_year = buffer[n];
-            stationTime = mktime(&tm);
+            int second = buffer[0];
+            int minute = buffer[1];
+            int hour = buffer[2];
+            int mday = buffer[3];
+            int month = buffer[4];
+            int year = buffer[5] + Weather::TIME_STRUCT_YEAR_OFFSET;
+            stationTime.setDateTime(year, month, mday, hour, minute, second);
         }
         else {
             logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Received time failed CRC check" << endl;

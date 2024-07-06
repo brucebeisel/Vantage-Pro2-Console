@@ -82,13 +82,6 @@ public:
      */
     static DateTime extractDate(int time);
 
-    /**
-     * Parse a date in the format of YYYY-mm-dd and return the DateTime value.
-     *
-     * @param dateString The string containing the date to be parsed
-     * @return The value of the date at midnight
-     */
-    static DateTime parseDate(const std::string & dateString);
 };
 }
 

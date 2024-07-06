@@ -357,21 +357,19 @@ VantageDecoder::decodeSoilMoisture(const byte buffer[], int offset) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
+DateTimeFields
 VantageDecoder::decodeTime(const byte buffer[], int offset) {
     int16 value16 = BitConverter::toInt16(buffer, offset);
     int minute = value16 % 100;
     int hour = value16 / 100;
 
+    //
+    // Use the UNIX time to set the date to today's date
+    //
     time_t now = time(0);
-    struct tm tm;
-    Weather::localtime(now, tm);
-    tm.tm_hour = hour;
-    tm.tm_min = minute;
-    tm.tm_sec = 0;
-    tm.tm_isdst = -1;
-    DateTime t = mktime(&tm);
-
-    return t;
+    DateTimeFields dateTime;
+    dateTime.setFromEpoch(now);
+    dateTime.setTime(hour, minute, 0);
+    return dateTime;
 }
 }

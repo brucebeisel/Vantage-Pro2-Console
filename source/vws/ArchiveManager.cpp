@@ -90,34 +90,29 @@ ArchiveManager::synchronizeArchive() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
-ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, vector<ArchivePacket> & list) {
+DateTimeFields
+ArchiveManager::queryArchiveRecords(const DateTimeFields & startTime, const DateTimeFields & endTime, vector<ArchivePacket> & list) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Querying archive records between "
-                                              << Weather::formatDateTime(startTime)
-                                              << " and " << Weather::formatDateTime(endTime) << endl;
+                                              << startTime.formatDateTime()
+                                              << " and " << endTime.formatDateTime() << endl;
     list.clear();
+    DateTimeFields timeOfLastRecord;
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
     if (stream.fail()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
-        return 0;
+        return timeOfLastRecord;
     }
 
-    positionStream(stream, startTime, false);
+    positionStream(stream, startTime.getEpochDateTime(), false);
 
-    //
-    // Cap the number of records to the number of archive records that the console holds.
-    // If there are more records, then the caller needs to call this method until the
-    // list returns empty.
-    //
-    DateTime packetTime = 0;
-    DateTime timeOfLastRecord = 0;
+    DateTimeFields packetTime;
     do {
         stream.read(buffer, sizeof(buffer));
 
         if (!stream.eof()) {
             ArchivePacket packet(buffer);
-            packetTime = packet.getEpochDateTime();
+            packetTime = packet.getDateTimeFields();
             if (packetTime <= endTime) {
                 list.push_back(packet);
                 timeOfLastRecord = packetTime;
@@ -129,7 +124,7 @@ ArchiveManager::queryArchiveRecords(DateTime startTime, DateTime endTime, vector
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query found " << list.size()
                                               << " items. Time of last record is "
-                                              << Weather::formatDateTime(timeOfLastRecord) << endl;
+                                              << timeOfLastRecord.formatDateTime() << endl;
     return timeOfLastRecord;
 }
 
@@ -260,9 +255,9 @@ ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-ArchiveManager::getArchiveRange(DateTime & oldest, DateTime & newest, int & count) const {
-    oldest = oldestPacket.getEpochDateTime();
-    newest = newestPacket.getEpochDateTime();
+ArchiveManager::getArchiveRange(DateTimeFields & oldest, DateTimeFields & newest, int & count) const {
+    oldest = oldestPacket.getDateTimeFields();
+    newest = newestPacket.getDateTimeFields();
     count = archivePacketCount;
 }
 

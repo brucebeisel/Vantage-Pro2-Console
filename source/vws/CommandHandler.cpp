@@ -656,17 +656,10 @@ CommandHandler::handleUpdateArchivePeriod(const string & commandName, const Comm
 void
 CommandHandler::handleQueryConsoleTime(const std::string & commandName, std::string & response) {
     ostringstream oss;
-    DateTime consoleTime;
+    DateTimeFields consoleTime;
 
-    if (station.retrieveConsoleTime(consoleTime)) {
-        char timeString[100];
-        struct tm tm = {0};
-        Weather::localtime(consoleTime, tm);
-
-        strftime(timeString, sizeof(timeString), "%Y-%m-%d %T", &tm);
-
-        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"time\" : \"" << timeString << "\" } ";
-    }
+    if (station.retrieveConsoleTime(consoleTime))
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"time\" : \"" << consoleTime.formatDateTime(true) << "\" } ";
     else
         oss << CONSOLE_COMMAND_FAILURE_STRING;
 
@@ -852,16 +845,16 @@ CommandHandler::handleUpdateConfigurationData(const std::string & commandName, c
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryArchiveStatistics(const std::string & commandName, std::string & response) {
-    DateTime oldestRecordTime;
-    DateTime newestRecordTime;
-    int      archiveRecordCount;
+    DateTimeFields oldestRecordTime;
+    DateTimeFields newestRecordTime;
+    int            archiveRecordCount;
 
     archiveManager.getArchiveRange(oldestRecordTime, newestRecordTime, archiveRecordCount);
 
     ostringstream oss;
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { "
-        << "\"oldestRecordTime\" : \"" << Weather::formatDateTime(oldestRecordTime) << "\", "
-        << "\"newestRecordTime\" : \"" << Weather::formatDateTime(newestRecordTime) << "\", "
+        << "\"oldestRecordTime\" : \"" << oldestRecordTime.formatDateTime() << "\", "
+        << "\"newestRecordTime\" : \"" << newestRecordTime.formatDateTime() << "\", "
         << "\"recordCount\" : " << archiveRecordCount << ", "
         << "\"archivingActive\" : " << boolalpha << archiveManager.getArchivingState() << noboolalpha
         << "}";
@@ -873,8 +866,8 @@ CommandHandler::handleQueryArchiveStatistics(const std::string & commandName, st
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryArchive(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    DateTime startTime = 0;
-    DateTime endTime = 0;
+    DateTimeFields startTime;
+    DateTimeFields endTime;
 
     struct tm tm;
 
@@ -884,20 +877,20 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
         if (arg.first == "start-time") {
             std::stringstream ss(arg.second);
             ss >> std::get_time(&tm, "%Y-%m-%dT%T");
-            startTime = mktime(&tm);
+            startTime.setDateTime(tm);
         }
         else if (arg.first == "end-time") {
             std::stringstream ss(arg.second);
             ss >> std::get_time(&tm, "%Y-%m-%dT%T");
-            endTime = mktime(&tm);
+            endTime.setDateTime(tm);
         }
     }
 
-    if (startTime == 0 || endTime == 0) {
+    if (!startTime.isDateTimeValid() || !endTime.isDateTimeValid()) {
         response.append(buildFailureString("Missing argument"));
     }
     else {
-        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the archive with times: " << startTime << " - " << endTime << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the archive with times: " << startTime.formatDateTime() << " - " << endTime.formatDateTime() << endl;
         vector<ArchivePacket> packets;
         archiveManager.queryArchiveRecords(startTime, endTime, packets);
 
@@ -919,8 +912,8 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    DateTime startTime = 0;
-    DateTime endTime = 0;
+    DateTimeFields startTime;
+    DateTimeFields endTime;
     SummaryPeriod summaryPeriod;
     int speedBinCount = 0;
     Speed speedBinIncrement = 0.0;
@@ -936,12 +929,12 @@ CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const
             if (arg.first == "start-time") {
                 std::stringstream ss(arg.second);
                 ss >> std::get_time(&tm, "%Y-%m-%dT%T");
-                startTime = mktime(&tm);
+                startTime.setDateTime(tm);
             }
             else if (arg.first == "end-time") {
                 std::stringstream ss(arg.second);
                 ss >> std::get_time(&tm, "%Y-%m-%dT%T");
-                endTime = mktime(&tm);
+                endTime.setDateTime(tm);
             }
             else if (arg.first == "summary-period") {
                 summaryPeriod = summaryPeriodEnum.stringToValue(arg.second);
@@ -959,7 +952,7 @@ CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const
             }
         }
 
-        if (startTime == 0 || endTime == 0 ||
+        if (!startTime.isDateTimeValid() || !endTime.isDateTimeValid() ||
             speedBinCount == 0 || speedBinIncrement == 0.0 ||
             !foundWindUnits ||
             !foundSummaryPeriodArgument)
@@ -1097,8 +1090,8 @@ CommandHandler::handleInitialization(const std::string & commandName, const Comm
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::handleQueryNetworkStatus(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
-    DateTime startTime = 0;
-    DateTime endTime = 0;
+    DateTimeFields startTime;
+    DateTimeFields endTime;
 
     struct tm tm = {0};
 
@@ -1106,22 +1099,27 @@ CommandHandler::handleQueryNetworkStatus(const std::string & commandName, const 
         if (arg.first == "start-time") {
             std::stringstream ss(arg.second);
             ss >> std::get_time(&tm, "%Y-%m-%d");
-            startTime = mktime(&tm);
+            startTime.setDateTime(tm);
         }
         else if (arg.first == "end-time") {
             std::stringstream ss(arg.second);
             ss >> std::get_time(&tm, "%Y-%m-%d");
-            endTime = mktime(&tm);
+            endTime.setDateTime(tm);
         }
     }
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the network status with times: " << startTime << " - " << endTime << endl;
+    if (!startTime.isDateTimeValid() || !endTime.isDateTimeValid()) {
+        response.append(buildFailureString("Missing argument"));
+    }
+    else {
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the network status with times: " << startTime.formatDateTime() << " - " << endTime.formatDateTime() << endl;
 
-    ostringstream oss;
-    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
-    oss << network.formatStatusJSON(startTime, endTime);
+        ostringstream oss;
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+        oss << network.formatStatusJSON(startTime, endTime);
 
-    response.append(oss.str());
+        response.append(oss.str());
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

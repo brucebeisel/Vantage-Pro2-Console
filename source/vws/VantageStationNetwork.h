@@ -203,7 +203,7 @@ public:
      *
      * @return The JSON message
      */
-    std::string formatStatusJSON(DateTime startDate, DateTime endDate) const;
+    std::string formatStatusJSON(const DateTimeFields & startDate, const DateTimeFields & endDate) const;
 
     /**
      * Format the JSON message containing the network status data for today.

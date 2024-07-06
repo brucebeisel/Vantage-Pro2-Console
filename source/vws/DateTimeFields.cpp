@@ -90,6 +90,18 @@ DateTimeFields::setDateTime(const DateTimeFields & other) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+void
+DateTimeFields::setDateTime(const struct tm & tm) {
+    year = tm.tm_year + Weather::TIME_STRUCT_YEAR_OFFSET;
+    month = tm.tm_mon + 1;
+    monthDay = tm.tm_mday;
+    hour = tm.tm_hour;
+    minute = tm.tm_min;
+    second = tm.tm_sec;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
 DateTimeFields::parseDate(const std::string & dateString) {
     int yr, mon, mday;
@@ -225,6 +237,12 @@ DateTimeFields::isDateTimeValid() const {
 ////////////////////////////////////////////////////////////////////////////////
 DateTime
 DateTimeFields::getEpochDateTime() const {
+    //
+    // Note that mktime() is implemented differently on different platforms.
+    // For instance on windows the time 2024-11-03 01:55:00 is converted to
+    // a time that is not in DST where 2024-11-03 01:50:00 is in DST.
+    // On LINUX both of these times are converted to times in DST.
+    //
     struct tm tm{};
     tm.tm_year = year - Weather::TIME_STRUCT_YEAR_OFFSET;
     tm.tm_mon = month - 1;

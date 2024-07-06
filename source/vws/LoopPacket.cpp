@@ -45,8 +45,6 @@ LoopPacket::LoopPacket(void) : logger(&VantageLogger::getLogger("LoopPacket")),
                                yearRain(0.0),
                                consoleBatteryVoltage(0.0),
                                forecastRuleIndex(0),
-                               sunriseTime(0),
-                               sunsetTime(0),
                                transmitterBatteryStatus(0),
                                nextRecord(-1),
                                barometerTrend(BarometerTrend::STEADY),
@@ -453,14 +451,14 @@ LoopPacket::getAlarmBits() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
+DateTimeFields
 LoopPacket::getSunriseTime() const {
     return sunriseTime;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DateTime
+DateTimeFields
 LoopPacket::getSunsetTime() const {
     return sunsetTime;
 }
@@ -542,8 +540,8 @@ operator<<(std::ostream & os, const LoopPacket & packet) {
        << "Console Battery Voltage: " << packet.getConsoleBatteryVoltage() << endl
        << "Forecast Icons: " << packet.getForecastIcon() << endl
        << "Forecast Rule Number: " << packet.getForecastRuleIndex() << endl
-       << "Sunrise Time: " << packet.getSunriseTime() << endl
-       << "Sunset Time: " << packet.getSunsetTime() << endl
+       << "Sunrise Time: " << packet.getSunriseTime().formatTime() << endl
+       << "Sunset Time: " << packet.getSunsetTime().formatTime() << endl
        << "Terminator 1: 0x" << hex << setw(2) << setfill('0') << static_cast<int>(packet.packetData[95]) << dec << endl
        << "Terminator 2: 0x" << hex << setw(2) << setfill('0') << static_cast<int>(packet.packetData[96]) << dec << endl;
 

@@ -112,8 +112,8 @@ public:
     ProtocolConstants::Forecast             getForecastIcon() const;
     std::string                             getForecastIconString() const;
     int                                     getForecastRuleIndex() const;
-    DateTime                                getSunriseTime() const;
-    DateTime                                getSunsetTime() const;
+    DateTimeFields                          getSunriseTime() const;
+    DateTimeFields                          getSunsetTime() const;
 
     friend std::ostream & operator<<(std::ostream & os, const LoopPacket & packet);
 
@@ -195,8 +195,8 @@ private:
     float                             consoleBatteryVoltage;
     ProtocolConstants::Forecast       forecastIcon;
     int                               forecastRuleIndex;
-    DateTime                          sunriseTime;
-    DateTime                          sunsetTime;
+    DateTimeFields                    sunriseTime;
+    DateTimeFields                    sunsetTime;
     VantageLogger *                   logger;
 };
 }

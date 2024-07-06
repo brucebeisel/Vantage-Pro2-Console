@@ -81,7 +81,7 @@ public:
 
     static Measurement<SoilMoisture> decodeSoilMoisture(const byte buffer[], int offset);
     
-    static DateTime decodeTime(const byte buffer[], int offset);
+    static DateTimeFields decodeTime(const byte buffer[], int offset);
 
     /**
      * Set the rain collector size needed to decode rain measurements that are usually in bucket tips.

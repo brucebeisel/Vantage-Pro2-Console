@@ -20,6 +20,7 @@
 #include <iosfwd>
 #include "WeatherTypes.h"
 
+struct tm;
 namespace vws {
 
 //
@@ -88,6 +89,13 @@ public:
      * @param other The other date/time object from which to copy the fields
      */
     void setDateTime(const DateTimeFields & other);
+
+    /**
+     * Set the date/time fields from a POSIX time structure.
+     *
+     * @param tm The POSIX time structure
+     */
+    void setDateTime(const struct tm & tm);
 
     /**
      * Parse a date and load the date fields.

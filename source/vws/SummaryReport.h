@@ -609,7 +609,7 @@ public:
      * @param archiveManager The manager used to retrieve the ArchivePackets needed to build the summary report
      * @param wrd            The WindRoseData object used to analyze wind direction and speed data
      */
-    SummaryReport(SummaryPeriod period, DateTime startDate, DateTime endDate, ArchiveManager & archiveManager, WindRoseData & wrd);
+    SummaryReport(SummaryPeriod period, const DateTimeFields & startDate, const DateTimeFields & endDate, ArchiveManager & archiveManager, WindRoseData & wrd);
 
     /**
      * Destructor.

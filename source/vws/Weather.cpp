@@ -101,22 +101,4 @@ Weather::localtime(DateTime time, struct tm & tm) {
 #endif
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-DateTime
-Weather::parseDate(const std::string & dateString) {
-    DateTime time;
-    struct tm tm = {0};
-    tm.tm_isdst = -1;
-    int year, month, day;
-
-    sscanf(dateString.c_str(), "%d-%d-%d", &year, &month, &day);
-    tm.tm_year = year - 1900;
-    tm.tm_mon = month - 1;
-    tm.tm_mday = day;
-
-    time = mktime(&tm);
-
-    return time;
-}
 }

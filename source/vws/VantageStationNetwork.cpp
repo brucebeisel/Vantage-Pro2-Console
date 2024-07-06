@@ -480,12 +480,14 @@ VantageStationNetwork::queryArchiveForDay(DateTime day, vector<ArchivePacket> & 
     tm.tm_hour = 0;
     tm.tm_min = 0;
     tm.tm_sec = 0;
-    DateTime startTime = mktime(&tm);
+    DateTimeFields startTime;
+    startTime.setDateTime(tm);
 
     tm.tm_hour = 23;
     tm.tm_min = 59;
     tm.tm_sec = 59;
-    DateTime endTime = mktime(&tm);
+    DateTimeFields endTime;
+    endTime.setDateTime(tm);
 
     archiveManager.queryArchiveRecords(startTime, endTime, list);
 }
@@ -804,7 +806,7 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 std::string
-VantageStationNetwork::formatStatusJSON(DateTime startDate, DateTime endDate) const {
+VantageStationNetwork::formatStatusJSON(const DateTimeFields & startDate, const DateTimeFields & endDate) const {
     ostringstream oss;
 
     oss << "{ \"networkStatus\" : [ ";
@@ -817,12 +819,8 @@ VantageStationNetwork::formatStatusJSON(DateTime startDate, DateTime endDate) co
             int pos = line.find(':');
             pos = line.find('"', pos);
             string date = line.substr(pos + 1, 10);
-            struct tm tm = {0};
-            sscanf(date.c_str(), "%d-%d-%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday);
-
-            tm.tm_year -= 1900;
-            tm.tm_mon--;
-            DateTime recordTime = mktime(&tm);
+            DateTimeFields recordTime;
+            recordTime.parseDate(date);
 
             if (recordTime > endDate)
                 break;

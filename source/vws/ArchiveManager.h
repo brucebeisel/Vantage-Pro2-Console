@@ -80,7 +80,7 @@ public:
      * @param list      The list into which any found archive records will be added
      * @return The time of the last record in the list
      */
-    DateTime queryArchiveRecords(DateTime startTime, DateTime endTime, std::vector<ArchivePacket> & list);
+    DateTimeFields queryArchiveRecords(const DateTimeFields & startTime, const DateTimeFields & endTime, std::vector<ArchivePacket> & list);
 
     /**
      * Get the newest record from the archive.
@@ -97,7 +97,7 @@ public:
      * @param[out] newest Reference to a DateTime that will be filled in with the newest packet time or set to zero if the archive is empty
      * @param[out] count  The number of archive records in the archive
      */
-    void getArchiveRange(DateTime & oldest, DateTime & newest, int & count) const;
+    void getArchiveRange(DateTimeFields & oldest, DateTimeFields & newest, int & count) const;
 
     /**
      * Clear the archive file. This should only be used after the weather station has been moved to a new location or
