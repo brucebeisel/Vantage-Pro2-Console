@@ -693,13 +693,10 @@ CommandHandler::handleQueryStormArchive(const std::string & commandName, const C
     for (CommandArgument arg : argumentList) {
         int year, month, monthDay;
         if (arg.first == "start-time") {
-            sscanf(arg.second.c_str(), "%d-%d-%d", &year, &month, &monthDay);
-            startDate.setDate(year, month, monthDay);
+            startDate.parseDate(arg.second);
         }
         else if (arg.first == "end-time") {
-            std::stringstream ss(arg.second);
-            sscanf(arg.second.c_str(), "%d-%d-%d", &year, &month, &monthDay);
-            endDate.setDate(year, month, monthDay);
+            endDate.parseDate(arg.second);
         }
     }
 
@@ -1097,14 +1094,10 @@ CommandHandler::handleQueryNetworkStatus(const std::string & commandName, const 
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "start-time") {
-            std::stringstream ss(arg.second);
-            ss >> std::get_time(&tm, "%Y-%m-%d");
-            startTime.setDateTime(tm);
+            startTime.parseDate(arg.second);
         }
         else if (arg.first == "end-time") {
-            std::stringstream ss(arg.second);
-            ss >> std::get_time(&tm, "%Y-%m-%d");
-            endTime.setDateTime(tm);
+            endTime.parseDate(arg.second);
         }
     }
 

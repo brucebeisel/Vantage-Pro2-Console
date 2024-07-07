@@ -57,19 +57,12 @@ main(int argc, char * argv[]) {
     endtm.tm_isdst = -1;
 
     try {
-        sscanf(startDateArg, "%d-%d-%d", &starttm.tm_year, &starttm.tm_mon, &starttm.tm_mday);
-        starttm.tm_mon--;
-        starttm.tm_year -= 1900;
-        DateTime startDate = mktime(&starttm);
-
-        sscanf(endDateArg, "%d-%d-%d", &endtm.tm_year, &endtm.tm_mon, &endtm.tm_mday);
-        endtm.tm_mon--;
-        endtm.tm_year -= 1900;
-        DateTime endDate = mktime(&endtm);
+        DateTimeFields startDate(startDateArg);
+        DateTimeFields endDate(endDateArg);
 
         SummaryPeriod period = summaryPeriodEnum.stringToValue(periodArg);
 
-        cout << "Summarizing " << period << " period from " << startDate << " to " << endDate << " from file " << archiveFile << endl;
+        cout << "Summarizing " << period << " period from " << startDate.formatDate() << " to " << endDate.formatDate() << " from file " << archiveFile << endl;
 
         SerialPort port("port", 19200);
         VantageWeatherStation station(port);

@@ -130,12 +130,12 @@ main(int argc, char * argv[]) {
     numberOfPacketsToDump = 1;
     archiveManager.synchronizeArchive();
 
-    DateTime oldestPacket;
-    DateTime newestPacket;
+    DateTimeFields oldestPacket;
+    DateTimeFields newestPacket;
     int packetCount;
     archiveManager.getArchiveRange(oldestPacket, newestPacket, packetCount);
 
-    cout << "Archive time range: " << Weather::formatDateTime(oldestPacket) << " to " << Weather::formatDateTime(newestPacket) << " Packet Count: " << packetCount << endl;
+    cout << "Archive time range: " << oldestPacket.formatDateTime() << " to " << newestPacket.formatDateTime() << " Packet Count: " << packetCount << endl;
 
     struct tm starttm{0};
 
@@ -143,8 +143,11 @@ main(int argc, char * argv[]) {
     starttm.tm_mon--;
     starttm.tm_year -= 1900;
     starttm.tm_isdst = -1;
-    DateTime startDate = mktime(&starttm);
-    DateTime endDate = startDate + 7200;
+    DateTime t = mktime(&starttm);
+    DateTimeFields startDate;
+    DateTimeFields endDate;
+    startDate.setFromEpoch(t);
+    endDate.setFromEpoch(t + 7200);
 
     vector<ArchivePacket> packets;
     archiveManager.queryArchiveRecords(startDate, endDate, packets);

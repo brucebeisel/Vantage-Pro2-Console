@@ -42,6 +42,50 @@ public:
     DateTimeFields(const DateTimeFields & rhs);
 
     /**
+     * Construct that takes a date string, note that an invalid date will leave the object in the
+     * same state as the default constructor.
+     *
+     * @param dateTimeString The date and or time in yyyy-mm-dd[ hh:mm[:ss]] format
+     */
+    DateTimeFields(const std::string & dateTimeString);
+
+    /**
+     * Constructor that sets the date fields only.
+     *
+     * @param year  The year of the date
+     * @param month The month of the date (1-12)
+     * @param monthDay The day of the month of this date (1 - 31)
+     */
+    DateTimeFields(int year, int month, int day);
+
+    /**
+     * Constructor that sets the date and time fields
+     *
+     * @param year  The year of the date
+     * @param month The month of the date (1-12)
+     * @param monthDay The day of the month of this date (1 - 31)
+     * @param hour   The hour of the time (0 - 23)
+     * @param minute The minute of the time (0 - 59)
+     * @param second Optional argument containing the second of the time (0 - 59)
+     */
+    DateTimeFields(int year, int month, int day, int hour, int minutes, int seconds = 0);
+
+    /**
+     * Constructor that sets the date/time fields from a POSIX time structure.
+     *
+     * @param tm The POSIX time structure
+     */
+    DateTimeFields(const struct tm & tm);
+
+
+    /**
+     * Constructor that sets the date/time fields from a POSIX time.
+     *
+     * @param timeFromEpoch The POSIX time
+     */
+    DateTimeFields(DateTime timeFromEpoch);
+
+    /**
      * Reset the date/time fields to the defaults, which are not valid.
      */
     void resetDateTimeFields();

@@ -32,6 +32,11 @@ int
 main(int argc, char *argv[]) {
     DateTimeFields dtf1, dtf2;
 
+    if (!dtf1.isDateTimeValid())
+        cout << "PASSED: Constructor with no arguments created an invalid object" << endl;
+    else
+        cout << "FAILED: Constructor with no arguments did NOT create an invalid object: " << dtf1.formatDateTime() << endl;
+
     dtf1.setYear(2024);
     dtf1.setMonth(2);
 
@@ -162,6 +167,49 @@ main(int argc, char *argv[]) {
         cout << "PASSED: operator=()" << endl;
     else
         cout << "FAILED: operator=()" << endl;
+
+    cout << endl << "Constructor Tests" << endl;
+    DateTimeFields df7(2024, 10, 9);
+
+    if (df7.getYear() == 2024 && df7.getMonth() == 10 && df7.getMonthDay() == 9 && df7.getHour() == 0 && df7.getMinute() == 0 && df7.getSecond() == 0)
+        cout << "PASSED: DateTimeField(year, month, day) constructor" << endl;
+    else
+        cout << "FAILED: DateTimeField(year, month, day) constructor created: " << df7.formatDateTime()  << endl;
+
+    DateTimeFields df8(2024, 10, 9, 1, 2, 3);
+
+    if (df8.getYear() == 2024 && df8.getMonth() == 10 && df8.getMonthDay() == 9 && df8.getHour() == 1 && df8.getMinute() == 2 && df8.getSecond() == 3)
+        cout << "PASSED: DateTimeField(year, month, day, hour, minute, second) constructor" << endl;
+    else
+        cout << "FAILED: DateTimeField(year, month, day) constructor created: " << df8.formatDateTime()  << endl;
+
+    DateTimeFields df9("2024-05-06 02:03:04");
+
+    if (df9.getYear() == 2024 && df9.getMonth() == 5 && df9.getMonthDay() == 6 && df9.getHour() == 2 && df9.getMinute() == 3 && df9.getSecond() == 4)
+        cout << "PASSED: DateTimeField(Date String) constructor" << endl;
+    else
+        cout << "FAILED: DateTimeField(Date String) constructor created: " << df9.formatDateTime()  << endl;
+
+    DateTimeFields df10(1720397350);
+
+    if (df10.getYear() == 2024 && df10.getMonth() == 7 && df10.getMonthDay() == 7 && df10.getHour() == 20 && df10.getMinute() == 9 && df10.getSecond() == 10)
+        cout << "PASSED: DateTimeField(Epoch time) constructor" << endl;
+    else
+        cout << "FAILED: DateTimeField(Epoch time) constructor created: " << df10.formatDateTime()  << endl;
+
+    tm.tm_year = 124;
+    tm.tm_mon = 6;
+    tm.tm_mday = 7;
+    tm.tm_hour = 5;
+    tm.tm_min = 6;
+    tm.tm_sec = 7;
+
+    DateTimeFields df11(tm);
+
+    if (df11.getYear() == 2024 && df11.getMonth() == 7 && df11.getMonthDay() == 7 && df11.getHour() == 5 && df11.getMinute() == 6 && df11.getSecond() == 7)
+        cout << "PASSED: DateTimeField(struct tm) constructor" << endl;
+    else
+        cout << "FAILED: DateTimeField(struct tm) constructor created: " << df11.formatDateTime()  << endl;
 
     return 0;
 }
