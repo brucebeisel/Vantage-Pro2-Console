@@ -80,6 +80,11 @@ public:
     void updateArchivePacketData(const byte buffer[], int offset = 0);
 
     /**
+     * Clear the contents of this packet.
+     */
+    void clearArchivePacketData();
+
+    /**
      * Get the raw packet data used to extract the archive data.
      * 
      * @return The raw packet
