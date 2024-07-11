@@ -12,6 +12,7 @@ OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
 VWSOBJS = \
 	$(VWSOBJDIR)/BitConverter.o \
+	$(VWSOBJDIR)/DateTimeFields.o \
 	$(VWSOBJDIR)/Weather.o \
 	$(VWSOBJDIR)/VantageDecoder.o \
 	$(VWSOBJDIR)/VantageLogger.o \
