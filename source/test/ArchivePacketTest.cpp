@@ -169,5 +169,11 @@ main(int argc, char * argv[]) {
     else
         cout << "FAILED: High solar radiation is valid when it should not be" << endl;
 
+    packet.clearArchivePacketData();
+    if (packet.isEmptyPacket() && !packet.getDateTimeFields().isDateTimeValid() && packet.getEpochDateTime() == 0 && packet.getWindSampleCount() == 0)
+        cout << "PASSED: Cleared packet is empty" << endl;
+    else
+        cout << "FAILED: Cleared packet has data" << endl;
+
     return 0;
 }
