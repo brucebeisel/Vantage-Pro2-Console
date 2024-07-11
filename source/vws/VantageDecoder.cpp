@@ -43,10 +43,10 @@ VantageDecoder::decode16BitTemperature(const byte buffer[], int offset, bool sca
     if (scaleValue)
         scale = TEMPERATURE_16BIT_SCALE;
 
-    if (value16 == INVALID_16BIT_TEMPERATURE || value16 == INVALID_16BIT_TEMPERATURE_NEGATIVE)
-        measurement.invalidate();
-    else
+    if (value16 != INVALID_16BIT_TEMPERATURE && value16 != INVALID_16BIT_TEMPERATURE_NEGATIVE)
         measurement.setValue(static_cast<Temperature>(value16) / scale);
+    else
+        measurement.invalidate();
 
     return measurement;
 }
@@ -367,8 +367,7 @@ VantageDecoder::decodeTime(const byte buffer[], int offset) {
     // Use the UNIX time to set the date to today's date
     //
     time_t now = time(0);
-    DateTimeFields dateTime;
-    dateTime.setFromEpoch(now);
+    DateTimeFields dateTime(now);
     dateTime.setTime(hour, minute, 0);
     return dateTime;
 }
