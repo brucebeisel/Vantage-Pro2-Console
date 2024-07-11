@@ -152,6 +152,13 @@ main(int argc, char *argv[]) {
     else
         cout << "FAILED: Parsed date is NOT correct: " << dtf4.formatDateTime(true) << endl;
 
+    cout << "Parsing date/time 2024-10-20T12:59:23" << endl;
+    dtf4.parseDateTime("2024-10-20T12:59:23");
+    if (dtf4.getYear() == 2024 && dtf4.getMonth() == 10 && dtf4.getMonthDay() == 20 && dtf4.getHour() == 12 && dtf4.getMinute() == 59 && dtf4.getSecond() == 23)
+        cout << "PASSED: Parsed date is correct" << endl;
+    else
+        cout << "FAILED: Parsed date is NOT correct: " << dtf4.formatDateTime(true) << endl;
+
     cout << endl << "Copy constructor tests" << endl;
     DateTimeFields dtf5(dtf4);
 
