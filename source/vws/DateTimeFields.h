@@ -153,7 +153,7 @@ public:
     /**
      * Parse a date/time and load the date and time fields.
      *
-     * @param dateString The date string in the YYYY-mm-dd hh:mm[:ss] format
+     * @param dateString The date string in the YYYY-mm-dd hh:mm[:ss] or YYYY-mm-ddThh:mm[:ss] format
      *
      * @return True if the date/time is valid
      */

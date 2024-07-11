@@ -156,10 +156,11 @@ DateTimeFields::parseDateTime(const std::string & dateTimeString) {
     int hr = 0;
     int min = 0;
     int sec = 0;
+    char dateTimeSeparator;
 
-    int rv = sscanf(dateTimeString.c_str(), "%d-%d-%d %d:%d:%d", &yr, &mon, & mday, &hr, &min, &sec);
+    int rv = sscanf(dateTimeString.c_str(), "%d-%d-%d%1c%d:%d:%d", &yr, &mon, &mday, &dateTimeSeparator, &hr, &min, &sec);
 
-    if (rv != 5 && rv != 6) {
+    if (rv != 6 && rv != 7) {
         return false;
     }
 
