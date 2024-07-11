@@ -866,20 +866,12 @@ CommandHandler::handleQueryArchive(const std::string & commandName, const Comman
     DateTimeFields startTime;
     DateTimeFields endTime;
 
-    struct tm tm;
-
     for (CommandArgument arg : argumentList) {
-        tm = {0};
-        tm.tm_isdst = -1;
         if (arg.first == "start-time") {
-            std::stringstream ss(arg.second);
-            ss >> std::get_time(&tm, "%Y-%m-%dT%T");
-            startTime.setDateTime(tm);
+            startTime.parseDateTime(arg.second);
         }
         else if (arg.first == "end-time") {
-            std::stringstream ss(arg.second);
-            ss >> std::get_time(&tm, "%Y-%m-%dT%T");
-            endTime.setDateTime(tm);
+            endTime.parseDateTime(arg.second);
         }
     }
 
@@ -917,21 +909,14 @@ CommandHandler::handleQueryArchiveSummary(const std::string & commandName, const
     bool foundSummaryPeriodArgument = false;
     ProtocolConstants::WindUnits windUnits;
     bool foundWindUnits = false;
-    struct tm tm;
 
     try {
         for (CommandArgument arg : argumentList) {
-            tm = {0};
-            tm.tm_isdst = -1;
             if (arg.first == "start-time") {
-                std::stringstream ss(arg.second);
-                ss >> std::get_time(&tm, "%Y-%m-%dT%T");
-                startTime.setDateTime(tm);
+                startTime.parseDateTime(arg.second);
             }
             else if (arg.first == "end-time") {
-                std::stringstream ss(arg.second);
-                ss >> std::get_time(&tm, "%Y-%m-%dT%T");
-                endTime.setDateTime(tm);
+                endTime.parseDateTime(arg.second);
             }
             else if (arg.first == "summary-period") {
                 summaryPeriod = summaryPeriodEnum.stringToValue(arg.second);
@@ -1089,8 +1074,6 @@ void
 CommandHandler::handleQueryNetworkStatus(const std::string & commandName, const CommandArgumentList & argumentList, std::string & response) {
     DateTimeFields startTime;
     DateTimeFields endTime;
-
-    struct tm tm = {0};
 
     for (CommandArgument arg : argumentList) {
         if (arg.first == "start-time") {
