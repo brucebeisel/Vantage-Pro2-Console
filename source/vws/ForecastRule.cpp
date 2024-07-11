@@ -222,7 +222,7 @@ const int ForecastRule::NUM_RULES = sizeof(FORECAST) / sizeof(FORECAST[0]);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const std::string
+std::string
 ForecastRule::forecastString(int rule) {
     if (rule < 0 || rule >= NUM_RULES) {
         std::ostringstream ss;

@@ -63,7 +63,7 @@ EventManager::processNextEvent() {
     CommandData event;
     std::string response;
     if (consumeEvent(event)) {
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event" << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event with command '" << event.command << "'" << endl;
         commandHandler.handleCommand(event.command, response);
         event.responseHandler->handleCommandResponse(event, response);
     }

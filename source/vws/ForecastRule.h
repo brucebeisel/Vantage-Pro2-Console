@@ -31,7 +31,7 @@ public:
      * @param rule The rule
      * @return  The forecast string or an error string if the rule is out of range
      */
-    static const std::string forecastString(int rule);
+    static std::string forecastString(int rule);
 
 private:
     ForecastRule() = delete;
