@@ -114,37 +114,37 @@ all: ArchiveManagerTest \
 	SummaryTest \
 	WindDirectionSliceTest
 
-ArchiveManagerTest: $(OBJDIR) $(OBJDIR)/ArchiveManagerTest.o
+ArchiveManagerTest: $(ARCHIVEMANAGEROBJS) $(OBJDIR)/ArchiveManagerTest.o
 	$(CC) -g -o ArchiveManagerTest $(OBJDIR)/ArchiveManagerTest.o $(ARCHIVEMANAGEROBJS)
 
-ArchivePacketTest: $(OBJDIR) $(OBJDIR)/ArchivePacketTest.o
+ArchivePacketTest: $(ARCHIVEPACKETOBJS) $(OBJDIR)/ArchivePacketTest.o
 	$(CC) -g -o ArchivePacketTest $(OBJDIR)/ArchivePacketTest.o $(ARCHIVEPACKETOBJS)
 
-BitConverterTest: $(OBJDIR) $(OBJDIR)/BitConverterTest.o
+BitConverterTest: $(BITCONVERTEROBJS) $(OBJDIR)/BitConverterTest.o
 	$(CC) -g -o BitConverterTest $(OBJDIR)/BitConverterTest.o $(BITCONVERTEROBJS)
 
-DateTimeFieldsTest: $(OBJDIR) $(OBJDIR)/DateTimeFieldsTest.o
+DateTimeFieldsTest: $(DATETIMEFIELDSOBJS) $(OBJDIR)/DateTimeFieldsTest.o
 	$(CC) -g -o DateTimeFieldsTest $(OBJDIR)/DateTimeFieldsTest.o $(DATETIMEFIELDSOBJS)
 
-DominantWindTest: $(OBJDIR) $(OBJDIR)/DominantWindTest.o
+DominantWindTest: $(DOMWINDOBJS) $(OBJDIR)/DominantWindTest.o
 	$(CC) -g -o DominantWindTest $(OBJDIR)/DominantWindTest.o $(DOMWINDOBJS)
 	
-EnumTest: $(OBJDIR) $(OBJDIR)/EnumTest.o
+EnumTest: $(ENUMOBJS) $(OBJDIR)/EnumTest.o
 	$(CC) -g -o EnumTest $(OBJDIR)/EnumTest.o $(ENUMOBJS)
 	
-LoggerTest: $(OBJDIR) $(OBJDIR)/LoggerTest.o
+LoggerTest: $(LOGGEROBJS) $(OBJDIR)/LoggerTest.o
 	$(CC) -g -o LoggerTest $(OBJDIR)/LoggerTest.o $(LOGGEROBJS)
 
-StormArchiveManagerTest: $(OBJDIR) $(OBJDIR)/StormArchiveManagerTest.o
+StormArchiveManagerTest: $(STORMARCHIVEMANAGEROBJS) $(OBJDIR)/StormArchiveManagerTest.o
 	$(CC) -g -o StormArchiveManagerTest $(OBJDIR)/StormArchiveManagerTest.o $(STORMARCHIVEMANAGEROBJS)
 
-StormDataTest: $(OBJDIR) $(OBJDIR)/StormDataTest.o
+StormDataTest: $(STORMDATAOBJS) $(OBJDIR)/StormDataTest.o
 	$(CC) -g -o StormDataTest $(OBJDIR)/StormDataTest.o $(STORMDATAOBJS)
 
-SummaryTest: $(OBJDIR) $(OBJDIR)/SummaryTest.o
+SummaryTest: $(SUMMARYOBJS) $(OBJDIR)/SummaryTest.o
 	$(CC) -g -o SummaryTest $(OBJDIR)/SummaryTest.o $(SUMMARYOBJS)
 
-WindDirectionSliceTest: $(OBJDIR) $(OBJDIR)/WindDirectionSliceTest.o
+WindDirectionSliceTest: $(DOMWINDOBJS) $(OBJDIR)/WindDirectionSliceTest.o
 	$(CC) -g -o WindDirectionSliceTest $(OBJDIR)/WindDirectionSliceTest.o $(DOMWINDOBJS)
 
 clean:

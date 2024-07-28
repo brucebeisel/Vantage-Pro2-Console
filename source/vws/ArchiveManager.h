@@ -61,6 +61,15 @@ public:
     ArchiveManager(const std::string & dataDirectory, VantageWeatherStation & station);
 
     /**
+     * Constructor where the archive file is specified.
+     *
+     * @param dataDirctory The directory into which the archive will be written
+     * @param archiveFile  The name of the file to be used as the archive
+     * @param station      The weather station object used to communicate with the console
+     */
+    ArchiveManager(const std::string & dataDirectory, const std::string & archiveFile, VantageWeatherStation & station);
+
+    /**
      * Destructor.
      */
     ~ArchiveManager();
@@ -111,9 +120,10 @@ public:
      * Backup the archive file.
      * This is a safety feature to preserve data before clearing the archive.
      *
+     * @param now  Optional time used to override default behavior for test purposes
      * @return True if successful
      */
-    bool backupArchiveFile();
+    bool backupArchiveFile(DateTime now = 0);
 
     /**
      * Restore the archive file from the latest backup.

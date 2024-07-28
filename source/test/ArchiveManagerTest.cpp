@@ -16,6 +16,7 @@
  */
 #include <iostream>
 #include <cstring>
+#include <unistd.h>
 #include "Weather.h"
 #include "VantageEnums.h"
 #include "VantageWeatherStation.h"
@@ -85,7 +86,14 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & after, vector<ArchivePac
     vws::byte packetData[54];
     memcpy(packetData, &archivePage[1], ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
 
-    DateTime packetEpochTime = after.getEpochDateTime();
+    DateTime packetEpochTime;
+    if (after.isDateTimeValid())
+        packetEpochTime = after.getEpochDateTime();
+    else {
+        DateTimeFields today(time(0));
+        today.setTime(0, 0, 0);
+        packetEpochTime = today.getEpochDateTime();
+    }
 
     for (int i = 0; i < numberOfPacketsToDump; i++) {
         packetEpochTime += 300;
@@ -168,5 +176,28 @@ main(int argc, char * argv[]) {
 
     cout << "Epoch time for " << dtf1.formatDateTime(true) << " is " << dtf1.getEpochDateTime() << endl;
     cout << "Epoch time for " << dtf2.formatDateTime(true) << " is " << dtf2.getEpochDateTime() << endl;
+
+    unlink(std::string(std::string(archiveDirectory) + "/test-archive.dat").c_str());
+    ArchiveManager am2(archiveDirectory, "test-archive.dat", station);
+
+    am2.synchronizeArchive();
+
+    am2.getArchiveRange(oldestPacket, newestPacket, packetCount);
+
+    if (packetCount == 1)
+        cout << "PASSED: New archive contains exactly 1 packet" << endl;
+    else
+        cout << "FAILED: New archive does not contain exactly 1 packet. Count: " << packetCount << endl;
+
+    if (!am2.clearArchiveFile())
+        cout << "clearArchiveFile() returned FALSE" << endl;
+
+    am2.getArchiveRange(oldestPacket, newestPacket, packetCount);
+
+    if (packetCount == 0)
+        cout << "PASSED: Cleared archive contains exactly 0 packet" << endl;
+    else
+        cout << "FAILED: Cleared archive does not contain exactly 0 packet. Count: " << packetCount << endl;
+
 }
 

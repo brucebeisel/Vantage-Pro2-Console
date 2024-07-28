@@ -405,6 +405,27 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePacket> & list) {
+    int year, month, monthDay, hour, minute;
+
+    //
+    // If the provided time is not a valid time, then just use 2000-01-01 00:00
+    //
+    if (time.isDateTimeValid()) {
+        year = time.getYear();
+        month = time.getMonth();
+        monthDay = time.getMonthDay();
+        hour = time.getHour();
+        minute = time.getMinute();
+    }
+    else {
+        year = 2000;
+        month = 1;
+        monthDay = 1;
+        hour = 0;
+        minute = 0;
+    }
+
+
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << time << endl;
     list.clear();
 
@@ -417,11 +438,8 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
     //
     // Next send the date with a checksum
     //
-    //struct tm tm;
-    //Weather::localtime(time, tm);
-
-    int datestamp = time.getMonthDay() + (time.getMonth() * 32) + ((time.getYear() - VANTAGE_YEAR_OFFSET) * 512);
-    int timestamp = (time.getHour() * 100) + time.getMinute();
+    int datestamp = monthDay + (month * 32) + ((year - VANTAGE_YEAR_OFFSET) * 512);
+    int timestamp = (hour * 100) + minute;
 
     byte dateTimeBytes[TIME_LENGTH + CRC_BYTES];
     BitConverter::getBytes(datestamp, dateTimeBytes, 0, 2);

@@ -57,6 +57,20 @@ ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStati
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+ArchiveManager::ArchiveManager(const string & dataDirectory, const string & archiveFile, VantageWeatherStation & station) :
+                                                                    archiveFile(dataDirectory + "/" + archiveFile),
+                                                                    archiveBackupDir(dataDirectory + "/" + ARCHIVE_BACKUP_DIR),
+                                                                    nextBackupTime(0),
+                                                                    archiveTempFile(dataDirectory + "/" + ARCHIVE_TEMP_FILE),
+                                                                    station(station),
+                                                                    archivePacketCount(0),
+                                                                    archivingActive(true),
+                                                                    logger(VantageLogger::getLogger("ArchiveManager")) {
+    findArchivePacketTimeRange();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ArchiveManager::~ArchiveManager() {
 }
 
@@ -266,7 +280,15 @@ ArchiveManager::getArchiveRange(DateTimeFields & oldest, DateTimeFields & newest
 bool
 ArchiveManager::clearArchiveFile() {
     ofstream stream(archiveFile.c_str(), ios::out | ios::trunc);
-    return stream.good();
+
+    if (stream.good()) {
+        oldestPacket.clearArchivePacketData();
+        newestPacket.clearArchivePacketData();
+        archivePacketCount = 0;
+        return true;
+    }
+    else
+        return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -286,6 +308,11 @@ ArchiveManager::trimBackupDirectory() {
     // Build the list of archive backup files that are too old
     //
     while ((ent = readdir(dir)) != NULL) {
+        //
+        // Ignore any file that starts with ".", including ".."
+        //
+        if (ent->d_name[0] == '.')
+            continue;
         struct stat sbuf;
         stat(ent->d_name, &sbuf);
         time_t mtime = sbuf.st_mtim.tv_sec;
@@ -296,6 +323,7 @@ ArchiveManager::trimBackupDirectory() {
     closedir (dir);
 
     for (auto path : deleteList) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "Deleting backup archive file '" << path << "'" << endl;
         if (unlink(path.c_str()) != 0)
             logger.log(VantageLogger::VANTAGE_WARNING) << "trimBackupDirectory(): Failed to delete archive backup file " << path << endl;
     }
@@ -304,11 +332,12 @@ ArchiveManager::trimBackupDirectory() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-ArchiveManager::backupArchiveFile() {
+ArchiveManager::backupArchiveFile(DateTime now) {
     //
     // Backup the archive about once a day
     //
-    DateTime now = time(0);
+    if (now == 0)
+        now = time(0);
 
     if (now < nextBackupTime)
         return true;
