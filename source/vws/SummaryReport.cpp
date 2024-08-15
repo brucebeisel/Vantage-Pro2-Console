@@ -447,7 +447,7 @@ SummaryReport::loadData() {
     //
     vector<SummaryRecord> dayRecords;
     summaryStart = startDate;
-    summaryEnd = calculateEndTime(summaryStart, period);
+    summaryEnd = calculateEndTime(summaryStart, SummaryPeriod::DAY);
     while (summaryEnd <= endDate) {
         // TODO Should we create a new record if the summary start date is after today?
         SummaryRecord record(SummaryPeriod::DAY, summaryStart, summaryEnd);
