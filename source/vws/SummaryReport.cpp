@@ -450,7 +450,7 @@ SummaryReport::loadData() {
     summaryEnd = calculateEndTime(summaryStart, period);
     while (summaryEnd <= endDate) {
         // TODO Should we create a new record if the summary start date is after today?
-        SummaryRecord record(period, summaryStart, summaryEnd);
+        SummaryRecord record(SummaryPeriod::DAY, summaryStart, summaryEnd);
         dayRecords.push_back(record);
 
         summaryStart = incrementStartTime(summaryStart, SummaryPeriod::DAY);
@@ -460,7 +460,7 @@ SummaryReport::loadData() {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Created " << dayRecords.size() << " day summary records" << endl;
 
     //
-    // Now that we have create all of the summary records, go through and apply the ArchivePackets
+    // Now that we have created all of the summary records, go through and apply the ArchivePackets
     //
     bool firstPacket = true;
     for (auto & packet : packets) {
