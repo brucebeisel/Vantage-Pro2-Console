@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "WeatherTypes.h"
 #include "ArchivePacket.h"
@@ -30,7 +31,8 @@ class VantageLogger;
 static const std::string ARCHIVE_FILE = "weather-archive.dat";
 static const std::string ARCHIVE_BACKUP_FILE = "weather-archive-backup.dat";
 static const std::string ARCHIVE_BACKUP_DIR = "backup";
-static const std::string ARCHIVE_TEMP_FILE = "weather-archive-temp.dat";
+static const std::string ARCHIVE_SAVE_FILE_PREFIX = "save_";
+static const std::string ARCHIVE_VERIFY_LOG = "weather-archive-verify.log";
 
 /**
  * The ArchiveManager class manages a file that contains the raw data read from the DMP and DMPAFT command of the Vantage console.
@@ -138,11 +140,35 @@ public:
     void trimBackupDirectory();
 
     /**
-     * Verify that the archive file is good.
+     * Restore the current archive file from a backup.
+     *
+     * @param backupFile The file from which restore the current archive file
+     * @return True if the restore succeeded
+     */
+    bool restoreArchiveFile(const std::string & backupFile);
+
+    /**
+     * Get the list of backup archive files.
+     *
+     * @param fileList The vector into which the backup archive files will be added
+     * @return True if successful
+     */
+    bool getBackupFileList(std::vector<std::string> & fileList) const;
+
+    /**
+     * Verify that the current archive file is good.
      *
      * @return True if the archive file is good
      */
-    bool verifyArchiveFile() const;
+    bool verifyCurrentArchiveFile() const;
+
+    /**
+     * Verify that the specified archive file is good.
+     *
+     * @param archiveFilePath The path to the archive file to be verified
+     * @return True if the archive file is good
+     */
+    bool verifyArchiveFile(const std::string & archiveFilePath) const;
 
     /**
      * Set the state of archiving.
@@ -162,7 +188,7 @@ public:
 
 private:
     static constexpr int SYNC_RETRIES = 5;
-    static constexpr int BACKUP_RETAIN_DAYS = 5;
+    static constexpr int BACKUP_RETAIN_DAYS = 30;
 
     /**
      * Position the stream to begin reading the archive based on the time.
@@ -201,7 +227,7 @@ private:
 
     const std::string        archiveFile;            // The name of the archive file
     std::string              archiveBackupDir;       // The name of the archive backup directory
-    std::string              archiveTempFile;        // The name of the temporary file used during a restore
+    std::string              archiveVerifyLog;       // The name of the file where the verification results are written
     DateTime                 nextBackupTime;         // The next time the archive should be backed up
 
     ArchivePacket            newestPacket;
@@ -212,6 +238,7 @@ private:
     bool                     archivingActive;        // Whether archiving is active
     VantageWeatherStation &  station;                // Reference to the Vantage weather station object
     VantageLogger &          logger;
+    mutable std::mutex       mutex;                  // The mutex to protect the archive file against access by multiple threads
 };
 }
 

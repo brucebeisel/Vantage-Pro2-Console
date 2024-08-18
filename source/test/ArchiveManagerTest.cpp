@@ -161,7 +161,7 @@ main(int argc, char * argv[]) {
     archiveManager.queryArchiveRecords(startDate, endDate, packets);
     cout << "First packet found time: " << packets[0].getPacketDateTimeString() << endl;
 
-    bool valid = archiveManager.verifyArchiveFile();
+    bool valid = archiveManager.verifyCurrentArchiveFile();
 
     if (valid)
         cout << "Archive is valid" << endl;
@@ -179,6 +179,8 @@ main(int argc, char * argv[]) {
 
     unlink(std::string(std::string(archiveDirectory) + "/test-archive.dat").c_str());
     ArchiveManager am2(archiveDirectory, "test-archive.dat", station);
+
+    numberOfPacketsToDump = 1;
 
     am2.synchronizeArchive();
 
@@ -199,5 +201,13 @@ main(int argc, char * argv[]) {
     else
         cout << "FAILED: Cleared archive does not contain exactly 0 packet. Count: " << packetCount << endl;
 
+    numberOfPacketsToDump = 10;
+    am2.synchronizeArchive();
+
+    t = time(0);
+    am2.backupArchiveFile(t);
+
+    t += 86500;
+    am2.backupArchiveFile(t);
 }
 

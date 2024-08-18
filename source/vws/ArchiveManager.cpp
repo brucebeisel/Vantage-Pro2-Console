@@ -46,8 +46,8 @@ using vws::VantageLogger;
 ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStation & station) :
                                                                     archiveFile(dataDirectory + "/" + ARCHIVE_FILE),
                                                                     archiveBackupDir(dataDirectory + "/" + ARCHIVE_BACKUP_DIR),
+                                                                    archiveVerifyLog(dataDirectory + "/" + ARCHIVE_VERIFY_LOG),
                                                                     nextBackupTime(0),
-                                                                    archiveTempFile(dataDirectory + "/" + ARCHIVE_TEMP_FILE),
                                                                     station(station),
                                                                     archivePacketCount(0),
                                                                     archivingActive(true),
@@ -60,8 +60,8 @@ ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStati
 ArchiveManager::ArchiveManager(const string & dataDirectory, const string & archiveFile, VantageWeatherStation & station) :
                                                                     archiveFile(dataDirectory + "/" + archiveFile),
                                                                     archiveBackupDir(dataDirectory + "/" + ARCHIVE_BACKUP_DIR),
+                                                                    archiveVerifyLog(dataDirectory + "/" + ARCHIVE_VERIFY_LOG),
                                                                     nextBackupTime(0),
-                                                                    archiveTempFile(dataDirectory + "/" + ARCHIVE_TEMP_FILE),
                                                                     station(station),
                                                                     archivePacketCount(0),
                                                                     archivingActive(true),
@@ -112,6 +112,7 @@ ArchiveManager::queryArchiveRecords(const DateTimeFields & startTime, const Date
     list.clear();
     DateTimeFields timeOfLastRecord;
     byte buffer[ArchivePacket::BYTES_PER_ARCHIVE_PACKET];
+    std::lock_guard<std::mutex> guard(mutex);
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary);
     if (stream.fail()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
@@ -248,6 +249,7 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
 ////////////////////////////////////////////////////////////////////////////////
 bool
 ArchiveManager::getNewestRecord(ArchivePacket & packet) const {
+    std::lock_guard<std::mutex> guard(mutex);
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary | ios::ate);
     if (stream.fail()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open archive file \"" << archiveFile << "\"" << endl;
@@ -279,6 +281,7 @@ ArchiveManager::getArchiveRange(DateTimeFields & oldest, DateTimeFields & newest
 ////////////////////////////////////////////////////////////////////////////////
 bool
 ArchiveManager::clearArchiveFile() {
+    std::lock_guard<std::mutex> guard(mutex);
     ofstream stream(archiveFile.c_str(), ios::out | ios::trunc);
 
     if (stream.good()) {
@@ -369,40 +372,92 @@ ArchiveManager::backupArchiveFile(DateTime now) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-/*
 bool
 ArchiveManager::restoreArchiveFile(const string & backupFile) {
     //
-    // Switch the backup and the archive file so the current archive file is backed up
+    // Copy the current archive to preserve it for debugging or for failure recovery
     //
-    if (std::rename(archiveFile.c_str(), archiveTempFile.c_str()) != 0) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to move archive file to temp file during archive file restore." << endl;
+    string dateString;
+    dateString = Weather::formatDate(time(0));
+    string archiveSaveFile(archiveBackupDir + ARCHIVE_SAVE_FILE_PREFIX + dateString + "_" + ARCHIVE_FILE);
+
+    //
+    // Move the archive file to the backup directory with a date string prefix
+    //
+    if (std::rename(archiveFile.c_str(), archiveSaveFile.c_str()) != 0) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to move archive file to save file during archive file restore." << endl;
         return false;
     }
 
-    if (std::rename(backupFile.c_str(), archiveFile.c_str()) != 0) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to move backup archive file to main archive file during archive file restore." << endl;
-        return false;
-    }
+    //
+    // Copy the backup file to the current archive file
+    //
+    std::error_code errorCode;
+    if (!std::filesystem::copy_file(backupFile, archiveFile, std::filesystem::copy_options::overwrite_existing, errorCode)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to restore backup archive file " << backupFile << ". Error = " << errorCode.message() << endl;
 
-    if (std::rename(archiveTempFile.c_str(), backupFile.c_str()) != 0) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to temp file to backup archive file during archive file restore." << endl;
+        //
+        // If the copy fails try and restore the saved archive file
+        //
+        if (std::rename(archiveSaveFile.c_str(), archiveFile.c_str()) != 0)
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to move save file back to archive file as a result of a restore error." << endl;
+
         return false;
     }
 
     return true;
 }
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-ArchiveManager::verifyArchiveFile() const {
+ArchiveManager::getBackupFileList(vector<string> & fileList) const {
+    fileList.clear();
+
+    DIR * dir;
+    if ((dir = opendir(archiveBackupDir.c_str())) == NULL) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "getBackupFileList(): Failed to open archive backup directory" << endl;
+        return false;
+    }
+
+    //
+    // Build the list of archive backup files that are too old
+    //
+    struct dirent * ent;
+    while ((ent = readdir(dir)) != NULL) {
+        //
+        // All backup file begin with the year, so it must start with a "2". This will work until the year 3000.
+        // Note: this will not find any of the save files created as a result of a restore
+        //
+        if (ent->d_name[0] == '2')
+            fileList.push_back(ent->d_name);
+    }
+
+    closedir (dir);
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchiveManager::verifyCurrentArchiveFile() const {
+    return verifyArchiveFile(archiveFile);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchiveManager::verifyArchiveFile(const string & archiveFilePath) const {
+    ofstream vlog(archiveVerifyLog, ios::app);
+    vlog << "--------------------------------------------------------------------------------" << endl;
+    vlog << "Verifying archive file: " << archiveFilePath << " at " << Weather::formatDateTime(time(0)) << endl;
     logger.log(VantageLogger::VANTAGE_INFO) << "Verifying current archive file" << endl;
-    ifstream is(archiveFile, ios::in | ios::binary);
+    std::lock_guard<std::mutex> guard(mutex);
+    ifstream is(archiveFilePath, ios::in | ios::binary);
 
     if (is.fail()) {
-        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to open archive file '" << archiveFile << " for verification" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to open archive file '" << archiveFilePath << " for verification" << endl;
+        vlog << "Aborting verification. Archive file could not be opened" << endl;
         return false;
     }
 
@@ -424,6 +479,10 @@ ArchiveManager::verifyArchiveFile() const {
             DateTime currentPacketTime = packet.getEpochDateTime();
 
             if (currentPacketTime <= lastPacketTime) {
+                vlog << "Detected out of order packets at file location " << position << ". " << endl
+                     << "Packet with time " << Weather::formatDateTime(currentPacketTime) << " (" << packet.getPacketDateTimeString() << ")"
+                     << " is before packet with time: " << Weather::formatDateTime(lastPacketTime) << " (" << lastPacket.getPacketDateTimeString() << ")" << endl;
+
                 logger.log(VantageLogger::VANTAGE_WARNING) << "Detected out of order packets at file location " << position << ". " << endl
                                                            << "Packet with time " << Weather::formatDateTime(currentPacketTime) << " (" << packet.getPacketDateTimeString() << ")"
                                                            << " is before packet with time: " << Weather::formatDateTime(lastPacketTime) << " (" << lastPacket.getPacketDateTimeString() << ")" << endl;
@@ -432,6 +491,11 @@ ArchiveManager::verifyArchiveFile() const {
 
             DateTime currentDelta = currentPacketTime - lastPacketTime;
             if (packetsRead > 2 && currentDelta != lastDelta) {
+                vlog << "Detected inconsistent time delta between packet at file location " << position << ". " << endl
+                     << "Expected time delta is " << lastDelta << ", actual delta is " << currentDelta
+                     << " for packet with times " << "[" << lastPacketTime << "] " << Weather::formatDateTime(lastPacketTime) << " (" << lastPacket.getPacketDateTimeString() << ")" << " and "
+                     << "[" << currentPacketTime << "] " << Weather::formatDateTime(currentPacketTime) << " (" << packet.getPacketDateTimeString() << ")" << endl;
+
                 logger.log(VantageLogger::VANTAGE_INFO) << "Detected inconsistent time delta between packet at file location " << position << ". " << endl
                                                         << "Expected time delta is " << lastDelta << ", actual delta is " << currentDelta
                                                         << " for packet with times " << "[" << lastPacketTime << "] " << Weather::formatDateTime(lastPacketTime) << " (" << lastPacket.getPacketDateTimeString() << ")" << " and "
@@ -457,6 +521,8 @@ ArchiveManager::verifyArchiveFile() const {
     } while (!is.eof());
 
     logger.log(VantageLogger::VANTAGE_INFO) << "Archive verification complete for archive with " << packetsRead << " packets. Found " << errorCount << " errors and " << warningCount << " warnings" << endl;
+    vlog << "Archive verification complete for archive with " << packetsRead << " packets. Found " << errorCount << " errors and " << warningCount << " warnings" << endl;
+    vlog << "--------------------------------------------------------------------------------" << endl;
 
     return errorCount == 0 && warningCount == 0;
 }
@@ -488,6 +554,7 @@ ArchiveManager::addPacketToArchive(const ArchivePacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
+    std::lock_guard<std::mutex> guard(mutex);
     if (packets.size() == 0)
         return;
 
@@ -525,6 +592,7 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 ArchiveManager::findArchivePacketTimeRange() {
+    std::lock_guard<std::mutex> guard(mutex);
     ifstream stream(archiveFile.c_str(), ios::in | ios::binary | ios::ate);
 
     streampos fileSize = stream.tellg();
