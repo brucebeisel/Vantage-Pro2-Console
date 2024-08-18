@@ -78,6 +78,7 @@ StormArchiveManager::validateArchive(fstream & stream) const {
 ////////////////////////////////////////////////////////////////////////////////
 void
 StormArchiveManager::updateArchive() {
+    std::lock_guard<std::mutex> guard(mutex);
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Updating storm archive file at " << stormArchiveFilename << endl;
 
     fstream stream;
@@ -135,6 +136,7 @@ StormArchiveManager::updateArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 DateTimeFields
 StormArchiveManager::queryStorms(const DateTimeFields & start, const DateTimeFields & end, std::vector<StormData> & list) const {
+    std::lock_guard<std::mutex> guard(mutex);
     list.clear();
     DateTimeFields lastRecordTime;
 

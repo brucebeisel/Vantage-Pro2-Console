@@ -20,6 +20,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <mutex>
 #include "Weather.h"
 #include "StormData.h"
 
@@ -103,6 +104,7 @@ private:
 
     std::string          stormArchiveFilename;
     GraphDataRetriever & dataRetriever;
+    mutable std::mutex   mutex;
     VantageLogger &      logger;
 };
 
