@@ -128,8 +128,36 @@ SummaryRecord::applyArchivePacket(const ArchivePacket & archivePacket) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+void
+SummaryRecord::applyDaySummaryRecord(const SummaryRecord  & daySummary) {
+    //
+    // Ignore the day summary record if it does not fall within the summary record period or if this SummaryRecord
+    // has a period of DAY. Calculating the average day high and low for a SummaryRecord with a period of DAY does
+    // not make any sense as the actual high would be equal to the average high.
+    //
+    if (daySummary.startDate < startDate || daySummary.endDate > endDate || period == SummaryPeriod::DAY) {
+        //logger.log(VantageLogger::VANTAGE_DEBUG3) << "------Ignoring day summary" << endl;
+        return;
+    }
+
+    if (daySummary.period != SummaryPeriod::DAY) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Day summary record passed to applyDaySummary() with period != DAY. Start date: " << Weather::formatDateTime(daySummary.startDate) << endl;
+        return;
+    }
+
+    outsideTemperature.applyDayExtremes(daySummary.outsideTemperature.high.extremeValue, daySummary.outsideTemperature.low.extremeValue);
+    outsideHumidity.applyDayExtremes(daySummary.outsideHumidity.high.extremeValue, daySummary.outsideHumidity.low.extremeValue);
+    solarRadiation.applyDayExtremes(daySummary.solarRadiation.high.extremeValue, daySummary.solarRadiation.low.extremeValue);
+    insideTemperature.applyDayExtremes(daySummary.insideTemperature.high.extremeValue, daySummary.insideTemperature.low.extremeValue);
+
+    // TODO Add calls for all measurements
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 template<typename M, SummaryExtremes SE>
-std::string SummaryRecord::arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const {
+std::string
+SummaryRecord::arrayFormatJSON(const std::string & name, const SummaryMeasurement<M,SE> sm[], int numSummaries) const {
     std::stringstream ss;
 
     ss << "\"" << name << "\" : [ ";
@@ -477,6 +505,16 @@ SummaryReport::loadData() {
         localtime_r(&packetTime, &tm);
         hourRainfallBuckets[tm.tm_hour] += packet.getRainfall();
         windRoseData.applyWindSample(packet.getPrevailingWindHeadingIndex(), packet.getAverageWindSpeed());
+    }
+
+    //
+    // For any period longer than a day, calculate average day highs and lows
+    //
+    if (period != SummaryPeriod::DAY) {
+        for (auto & summaryRecord : summaryRecords) {
+            for (auto & dayRecord : dayRecords)
+                summaryRecord.applyDaySummaryRecord(dayRecord);
+        }
     }
 
     for (auto & summaryRecord : dayRecords)

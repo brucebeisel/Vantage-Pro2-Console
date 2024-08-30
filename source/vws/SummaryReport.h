@@ -46,7 +46,7 @@ public:
     /**
      * Constructor.
      */
-    MeasurementAverage() : sampleCount(0) {}
+    MeasurementAverage(bool useZeroValues = true) : useZeroValues(useZeroValues), sampleCount(0) {}
 
     /**
      * Apply a single measurement to the average.
@@ -54,12 +54,10 @@ public:
      * @param value The value to be applied to the value
      */
     void applyMeasurement(const Measurement<M> & value) {
-        // TODO Do we need an "ignore zero values" option for measurements like wind, solar radiation, rain, etc
-
         //
         // Ignore invalid values
         //
-        if (value.isValid()) {
+        if (value.isValid() && (value.getValue() != 0.0 || useZeroValues)) {
             sampleCount++;
             sum.setValue(sum.getValue() + value.getValue());
             average.setValue(sum.getValue() / static_cast<M>(sampleCount));
@@ -75,9 +73,10 @@ public:
         return "\"average\" : { " + average.formatJSON("value") + " }";
     }
 
-    int            sampleCount;  // The number of valid measurements applied
-    Measurement<M> sum;          // The sum of the valid measurements
-    Measurement<M> average;      // The average that is calculated after each valid measurement is applied
+    bool           useZeroValues; // Whether to use zero values in the average calculation
+    int            sampleCount;   // The number of valid measurements applied
+    Measurement<M> sum;           // The sum of the valid measurements
+    Measurement<M> average;       // The average that is calculated after each valid measurement is applied
 
 };
 
@@ -272,6 +271,17 @@ public:
     }
 
     /**
+     * Apply the extreme values for a given day and apply them to the average day high and day low of this measurement.
+     *
+     * @param highMeasurement The high measurement for a given day
+     * @param lowMeasurement  The low measurement for a given day
+     */
+    void applyDayExtremes(const Measurement<M> & highMeasurement, const Measurement<M> & lowMeasurement) {
+        averageDayHigh.applyMeasurement(highMeasurement);
+        averageDayLow.applyMeasurement(lowMeasurement);
+    }
+
+    /**
      * Format the summary measurement into JSON.
      *
      * @return The JSON string
@@ -285,14 +295,18 @@ public:
         if (addLeadingComma)
             ss << ", ";
 
-        ss << "\"" <<  summaryName << "\" : {  "
-           << average.formatJSON();
+        ss << "\"" <<  summaryName << "\" : { " << average.formatJSON();
 
         if (extremesUsed == SummaryExtremes::MINIMUM_ONLY || extremesUsed == SummaryExtremes::MINIMUM_AND_MAXIMUM)
            ss << ", " << low.formatJSON();
 
         if (extremesUsed == SummaryExtremes::MAXIMUM_ONLY || extremesUsed == SummaryExtremes::MINIMUM_AND_MAXIMUM)
            ss << ", " << high.formatJSON();
+
+        if (averageDayHigh.sampleCount > 0) {
+            ss << ", \"dayAverageHigh\" : { " << averageDayHigh.formatJSON() << " }, ";
+            ss << "\"dayAverageLow\" : { " << averageDayLow.formatJSON() << " } ";
+        }
 
         ss << " }" << std::endl;
 
@@ -303,7 +317,9 @@ public:
     const SummaryExtremes                          extremesUsed;
     MeasurementAverage<M>                          average;
     ExtremeMeasurement<M,SummaryExtremeType::HIGH> high;
+    MeasurementAverage<M>                          averageDayHigh;
     ExtremeMeasurement<M,SummaryExtremeType::LOW>  low;
+    MeasurementAverage<M>                          averageDayLow;
 };
 
 /**
@@ -333,6 +349,13 @@ public:
     void applyArchivePacket(const ArchivePacket & archivePacket);
 
     /**
+     * Apply a summary record with a period of DAY to a summary record
+     *
+     * @param daySummary The summary record for a day
+     */
+    void applyDaySummaryRecord(const SummaryRecord  & daySummary);
+
+    /**
      * Format the summary record into JSON.
      *
      * @return The JSON string
@@ -350,6 +373,8 @@ public:
     Rainfall      totalRainfall;
 
     SummaryMeasurement<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM>  outsideTemperature;
+    MeasurementAverage<Temperature>                                       averageHighOutdoorTemperature;
+    MeasurementAverage<Temperature>                                       averageLowOutdoorTemperature;
     SummaryMeasurement<Rainfall,SummaryExtremes::MAXIMUM_ONLY>            rainfallRate;
     SummaryMeasurement<Pressure,SummaryExtremes::MINIMUM_AND_MAXIMUM>     barometer;
     SummaryMeasurement<SolarRadiation,SummaryExtremes::MAXIMUM_ONLY>      solarRadiation;
@@ -373,6 +398,8 @@ public:
 
 /**
  * Statistics
+ *
+ * TODO Added average high and average low
  */
 template<typename M, SummaryExtremes SE>
 class MeasurementStatistics {
@@ -587,12 +614,12 @@ private:
     MeasurementStatistics<Temperature,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideTemperature;  // true, true, true
     MeasurementStatistics<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> outsideHumidity;       // true, true, true
     MeasurementStatistics<Humidity,SummaryExtremes::MINIMUM_AND_MAXIMUM> insideHumidity;        // true, true, true
-    MeasurementStatistics<SolarRadiation,SummaryExtremes::MAXIMUM_ONLY> solarRadiation;  // false, false, false
-    MeasurementStatistics<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;                // false, false, false
-    MeasurementStatistics<Speed,SummaryExtremes::MAXIMUM_ONLY> windSpeed;                // true, true, false
-    MeasurementStatistics<Speed,SummaryExtremes::MAXIMUM_ONLY> windGust;                 // true, true, false
-    MeasurementStatistics<Evapotranspiration,SummaryExtremes::MAXIMUM_ONLY> et;          // false, false, false
-    MeasurementStatistics<Evapotranspiration,SummaryExtremes::MINIMUM_AND_MAXIMUM> barometer;          // true, true, true
+    MeasurementStatistics<SolarRadiation,SummaryExtremes::MAXIMUM_ONLY> solarRadiation;         // false, false, false
+    MeasurementStatistics<UvIndex,SummaryExtremes::MAXIMUM_ONLY> uvIndex;                       // false, false, false
+    MeasurementStatistics<Speed,SummaryExtremes::MAXIMUM_ONLY> windSpeed;                       // true, true, false
+    MeasurementStatistics<Speed,SummaryExtremes::MAXIMUM_ONLY> windGust;                        // true, true, false
+    MeasurementStatistics<Evapotranspiration,SummaryExtremes::MAXIMUM_ONLY> et;                 // false, false, false
+    MeasurementStatistics<Evapotranspiration,SummaryExtremes::MINIMUM_AND_MAXIMUM> barometer;   // true, true, true
 };
 
 /**
