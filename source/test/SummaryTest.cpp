@@ -51,14 +51,12 @@ main(int argc, char * argv[]) {
     char * endDateArg = argv[3];
     char * periodArg = argv[4];
 
-    struct tm starttm = {0};
-    struct tm endtm = {0};
-    starttm.tm_isdst = -1;
-    endtm.tm_isdst = -1;
-
     try {
-        DateTimeFields startDate(startDateArg);
-        DateTimeFields endDate(endDateArg);
+        DateTimeFields startDate;
+        startDate.parseDate(startDateArg);
+
+        DateTimeFields endDate;
+        endDate.parseDate(endDateArg);
 
         SummaryPeriod period = summaryPeriodEnum.stringToValue(periodArg);
 
