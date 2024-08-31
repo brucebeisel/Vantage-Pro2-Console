@@ -13,7 +13,7 @@ int
 main(int argc, char *argv[]) {
 
     if (argc != 2) {
-        cerr << "Usage: archive-verifier <archive directory>" << endl;
+        cerr << "Usage: archive-verifier <archive file>" << endl;
         exit(1);
     }
 
@@ -23,6 +23,6 @@ main(int argc, char *argv[]) {
     VantageWeatherStation station(port);
     ArchiveManager mgr(archiveDir, station);
 
-    mgr.verifyArchiveFile();
+    mgr.verifyCurrentArchiveFile();
 
 }
