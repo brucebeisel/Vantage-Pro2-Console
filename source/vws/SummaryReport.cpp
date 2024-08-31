@@ -149,6 +149,15 @@ SummaryRecord::applyDaySummaryRecord(const SummaryRecord  & daySummary) {
     outsideHumidity.applyDayExtremes(daySummary.outsideHumidity.high.extremeValue, daySummary.outsideHumidity.low.extremeValue);
     solarRadiation.applyDayExtremes(daySummary.solarRadiation.high.extremeValue, daySummary.solarRadiation.low.extremeValue);
     insideTemperature.applyDayExtremes(daySummary.insideTemperature.high.extremeValue, daySummary.insideTemperature.low.extremeValue);
+    insideHumidity.applyDayExtremes(daySummary.insideHumidity.high.extremeValue, daySummary.insideHumidity.low.extremeValue);
+    barometer.applyDayExtremes(daySummary.barometer.high.extremeValue, daySummary.barometer.low.extremeValue);
+    // highRainfallRate
+    uvIndex.applyDayExtremes(daySummary.uvIndex.high.extremeValue, daySummary.uvIndex.low.extremeValue);
+    // Evapotranspiration
+    sustainedWindSpeed.applyDayExtremes(daySummary.sustainedWindSpeed.high.extremeValue, daySummary.sustainedWindSpeed.low.extremeValue);
+    gustWindSpeed.applyDayExtremes(daySummary.gustWindSpeed.high.extremeValue, daySummary.gustWindSpeed.low.extremeValue);
+    // Rainfall
+    // Extra values, soil and moisture values
 
     // TODO Add calls for all measurements
 }

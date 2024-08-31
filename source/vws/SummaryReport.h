@@ -69,8 +69,8 @@ public:
      *
      * @return The JSON string
      */
-    std::string formatJSON() const {
-        return "\"average\" : { " + average.formatJSON("value") + " }";
+    std::string formatJSON(const std::string jsonName) const {
+        return "\"" + jsonName + "\" : { " + average.formatJSON("value") + " }";
     }
 
     bool           useZeroValues; // Whether to use zero values in the average calculation
@@ -295,7 +295,7 @@ public:
         if (addLeadingComma)
             ss << ", ";
 
-        ss << "\"" <<  summaryName << "\" : { " << average.formatJSON();
+        ss << "\"" <<  summaryName << "\" : { " << average.formatJSON("average");
 
         if (extremesUsed == SummaryExtremes::MINIMUM_ONLY || extremesUsed == SummaryExtremes::MINIMUM_AND_MAXIMUM)
            ss << ", " << low.formatJSON();
@@ -303,10 +303,11 @@ public:
         if (extremesUsed == SummaryExtremes::MAXIMUM_ONLY || extremesUsed == SummaryExtremes::MINIMUM_AND_MAXIMUM)
            ss << ", " << high.formatJSON();
 
-        if (averageDayHigh.sampleCount > 0) {
-            ss << ", \"dayAverageHigh\" : { " << averageDayHigh.formatJSON() << " }, ";
-            ss << "\"dayAverageLow\" : { " << averageDayLow.formatJSON() << " } ";
-        }
+        if (averageDayHigh.sampleCount > 0)
+            ss << ", " << averageDayHigh.formatJSON("averageDayHigh");
+
+        if (averageDayLow.sampleCount > 0)
+            ss << ", " << averageDayLow.formatJSON("averageDayLow");
 
         ss << " }" << std::endl;
 
