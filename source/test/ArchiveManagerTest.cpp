@@ -208,6 +208,21 @@ main(int argc, char * argv[]) {
     am2.backupArchiveFile(t);
 
     t += 86500;
+    am2.synchronizeArchive();
     am2.backupArchiveFile(t);
-}
 
+    t += 86500;
+    am2.synchronizeArchive();
+    am2.backupArchiveFile(t);
+
+    vector<string> fileList;
+    am2.synchronizeArchive();
+    am2.getBackupFileList(fileList);
+
+    if (fileList.size() == 3)
+        cout << "PASSED: There are 3 backup files as expected" << endl;
+    else
+        cout << "FAILED: Expected 3 backup files, found " << fileList.size() << endl;
+
+    //am2.restoreArchiveFile();
+}

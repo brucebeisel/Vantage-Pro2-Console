@@ -128,13 +128,6 @@ public:
     bool backupArchiveFile(DateTime now = 0);
 
     /**
-     * Restore the archive file from the latest backup.
-     *
-     * @return True if successful
-     */
-    bool restoreArchiveFile();
-
-    /**
      * Trim the backup directory to a reasonable number of backup files.
      */
     void trimBackupDirectory();
