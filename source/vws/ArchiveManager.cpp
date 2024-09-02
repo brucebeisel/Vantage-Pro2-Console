@@ -315,21 +315,20 @@ ArchiveManager::trimBackupDirectory() {
     vector<string> deleteList;
     while ((ent = readdir(dir)) != NULL) {
         //
-        // Ignore any file that starts with ".", including ".."
+        // Only consider files that start with a '2', which is the first digit of the year
         //
-        if (ent->d_name[0] == '.')
-            continue;
-
-        string path(archiveBackupDir + "/" + ent->d_name);
-        struct stat sbuf;
-        if (stat(path.c_str(), &sbuf) == 0) {
-            time_t mtime = sbuf.st_mtim.tv_sec;
-            if (mtime + (Weather::SECONDS_PER_DAY * BACKUP_RETAIN_DAYS) < now)
-                deleteList.push_back(path);
-        }
-        else {
-            string errorString(strerror(errno));
-            logger.log(VantageLogger::VANTAGE_WARNING) << "Called to stat() failed for file " << path << ". Error: " << errorString << endl;
+        if (ent->d_name[0] == '2') {
+            string path(archiveBackupDir + "/" + ent->d_name);
+            struct stat sbuf;
+            if (stat(path.c_str(), &sbuf) == 0) {
+                time_t mtime = sbuf.st_mtim.tv_sec;
+                if (mtime + (Weather::SECONDS_PER_DAY * BACKUP_RETAIN_DAYS) < now)
+                    deleteList.push_back(path);
+            }
+            else {
+                string errorString(strerror(errno));
+                logger.log(VantageLogger::VANTAGE_WARNING) << "Called to stat() failed for file " << path << ". Error: " << errorString << endl;
+            }
         }
 
     }
