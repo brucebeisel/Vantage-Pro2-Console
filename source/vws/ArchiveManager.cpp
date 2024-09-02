@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <time.h>
+#include <string.h>
 #include <unistd.h>
 #include <math.h>
 #include <iostream>
@@ -301,7 +302,8 @@ ArchiveManager::trimBackupDirectory() {
     DIR * dir;
     struct dirent * ent;
     time_t now = time(0);
-    vector<string> deleteList;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Trimming backup directory at time " << now << endl;
+
     if ((dir = opendir(archiveBackupDir.c_str())) == NULL) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "trimBackupDirectory(): Failed to open archive backup directory" << endl;
         return;
@@ -310,17 +312,26 @@ ArchiveManager::trimBackupDirectory() {
     //
     // Build the list of archive backup files that are too old
     //
+    vector<string> deleteList;
     while ((ent = readdir(dir)) != NULL) {
         //
         // Ignore any file that starts with ".", including ".."
         //
         if (ent->d_name[0] == '.')
             continue;
+
+        string path(archiveBackupDir + "/" + ent->d_name);
         struct stat sbuf;
-        stat(ent->d_name, &sbuf);
-        time_t mtime = sbuf.st_mtim.tv_sec;
-        if (mtime + (Weather::SECONDS_PER_DAY * BACKUP_RETAIN_DAYS) < now)
-            deleteList.push_back(string(archiveBackupDir + "/" + ent->d_name));
+        if (stat(path.c_str(), &sbuf) == 0) {
+            time_t mtime = sbuf.st_mtim.tv_sec;
+            if (mtime + (Weather::SECONDS_PER_DAY * BACKUP_RETAIN_DAYS) < now)
+                deleteList.push_back(path);
+        }
+        else {
+            string errorString(strerror(errno));
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Called to stat() failed for file " << path << ". Error: " << errorString << endl;
+        }
+
     }
 
     closedir (dir);
