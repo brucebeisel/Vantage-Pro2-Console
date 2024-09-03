@@ -610,18 +610,19 @@ ArchiveManager::savePacketToFile(const ArchivePacket & packet) {
     // So each directory will hold a day's worth of packets. The number of packets will depend on the archive period.
     //
     ostringstream oss;
-    oss << packetSaveDirectory << "/" << packet.getDateTimeFields().getYear() << setw(2) << setfill('0')
-                               << "/" + packet.getDateTimeFields().getMonth()
-                               << "/" + packet.getDateTimeFields().getMonthDay();
+    oss << setfill('0');
+    oss << packetSaveDirectory << "/" << packet.getDateTimeFields().getYear()
+                               << "/" << setw(2) << packet.getDateTimeFields().getMonth()
+                               << "/" << setw(2) << packet.getDateTimeFields().getMonthDay();
 
     std::error_code errorCode;
-    if (!std::filesystem::create_directories(oss.str(), errorCode)) {
+    if (!std::filesystem::create_directories(oss.str(), errorCode) && errorCode) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() failed to save packet due to directory creation error (" << errorCode.message() << "). Directory = '" << oss.str() << "'" << endl;
         return;
     }
 
-    oss << "/ap-" << packet.getDateTimeFields().getHour()
-        << "-" << packet.getDateTimeFields().getMinute()
+    oss << "/ap-" << setw(2) << packet.getDateTimeFields().getHour()
+        << "-"    << setw(2) << packet.getDateTimeFields().getMinute()
         << ".dat";
 
     const string & filename = oss.str();
