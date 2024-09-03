@@ -29,7 +29,7 @@ class VantageWeatherStation;
 class VantageLogger;
 
 static const std::string ARCHIVE_FILE = "/weather-archive.dat";
-static const std::string ARCHIVE_BACKUP_FILE = "/weather-archive-backup.dat";
+static const std::string ARCHIVE_BACKUP_FILE = "weather-archive-backup.dat";
 static const std::string ARCHIVE_BACKUP_DIR = "/backup";
 static const std::string ARCHIVE_SAVE_FILE_PREFIX = "save_";
 static const std::string ARCHIVE_VERIFY_LOG = "/weather-archive-verify.log";
