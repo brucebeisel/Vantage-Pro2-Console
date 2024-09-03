@@ -45,9 +45,10 @@ using vws::VantageLogger;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStation & station) :
-                                                                    archiveFile(dataDirectory + "/" + ARCHIVE_FILE),
-                                                                    archiveBackupDir(dataDirectory + "/" + ARCHIVE_BACKUP_DIR),
-                                                                    archiveVerifyLog(dataDirectory + "/" + ARCHIVE_VERIFY_LOG),
+                                                                    archiveFile(dataDirectory + ARCHIVE_FILE),
+                                                                    packetSaveDirectory(dataDirectory + PACKET_SAVE_DIR),
+                                                                    archiveBackupDir(dataDirectory + ARCHIVE_BACKUP_DIR),
+                                                                    archiveVerifyLog(dataDirectory + ARCHIVE_VERIFY_LOG),
                                                                     nextBackupTime(0),
                                                                     station(station),
                                                                     archivePacketCount(0),
@@ -59,9 +60,10 @@ ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStati
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ArchiveManager::ArchiveManager(const string & dataDirectory, const string & archiveFile, VantageWeatherStation & station) :
-                                                                    archiveFile(dataDirectory + "/" + archiveFile),
-                                                                    archiveBackupDir(dataDirectory + "/" + ARCHIVE_BACKUP_DIR),
-                                                                    archiveVerifyLog(dataDirectory + "/" + ARCHIVE_VERIFY_LOG),
+                                                                    archiveFile(dataDirectory + archiveFile),
+                                                                    packetSaveDirectory(dataDirectory + PACKET_SAVE_DIR),
+                                                                    archiveBackupDir(dataDirectory + ARCHIVE_BACKUP_DIR),
+                                                                    archiveVerifyLog(dataDirectory + ARCHIVE_VERIFY_LOG),
                                                                     nextBackupTime(0),
                                                                     station(station),
                                                                     archivePacketCount(0),
@@ -584,6 +586,7 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
             newestPacket = *it;
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "Archived packet with time: "
                                                       << it->getDateTimeFields().formatDateTime() << endl;
+            savePacketToFile(*it);
         }
         else
             logger.log(VantageLogger::VANTAGE_INFO) << "Skipping archive of packet with time "
@@ -596,6 +599,47 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
     stream.close();
 
     determineIfArchivingIsActive();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+ArchiveManager::savePacketToFile(const ArchivePacket & packet) {
+    //
+    // Build the path to the save file <dir>/yy/mm/dd/ap-hh-mm.dat
+    // So each directory will hold a day's worth of packets. The number of packets will depend on the archive period.
+    //
+    ostringstream oss;
+    oss << packetSaveDirectory << "/" << packet.getDateTimeFields().getYear() << setw(2) << setfill('0')
+                               << "/" + packet.getDateTimeFields().getMonth()
+                               << "/" + packet.getDateTimeFields().getMonthDay();
+
+    std::error_code errorCode;
+    if (!std::filesystem::create_directories(oss.str(), errorCode)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() failed to save packet due to directory creation error (" << errorCode.message() << "). Directory = '" << oss.str() << "'" << endl;
+        return;
+    }
+
+    oss << "/ap-" << packet.getDateTimeFields().getHour()
+        << "-" << packet.getDateTimeFields().getMinute()
+        << ".dat";
+
+    const string & filename = oss.str();
+
+    if (std::filesystem::exists(filename)) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "savePacketToFile() ignoring packet because file '" << filename << "' already exists" << endl;
+        return;
+    }
+
+    ofstream stream(filename, ios::binary);
+
+    if (stream.is_open()) {
+        stream.write(packet.getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
+        if (stream.fail())
+            logger.log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() did not write to packet file '" << filename << "' due to write error" << endl;
+    }
+    else
+        logger.log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() did not write to packet file '" << filename << "' due to open error" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

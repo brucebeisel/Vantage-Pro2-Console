@@ -28,11 +28,12 @@ namespace vws {
 class VantageWeatherStation;
 class VantageLogger;
 
-static const std::string ARCHIVE_FILE = "weather-archive.dat";
-static const std::string ARCHIVE_BACKUP_FILE = "weather-archive-backup.dat";
-static const std::string ARCHIVE_BACKUP_DIR = "backup";
+static const std::string ARCHIVE_FILE = "/weather-archive.dat";
+static const std::string ARCHIVE_BACKUP_FILE = "/weather-archive-backup.dat";
+static const std::string ARCHIVE_BACKUP_DIR = "/backup";
 static const std::string ARCHIVE_SAVE_FILE_PREFIX = "save_";
-static const std::string ARCHIVE_VERIFY_LOG = "weather-archive-verify.log";
+static const std::string ARCHIVE_VERIFY_LOG = "/weather-archive-verify.log";
+static const std::string PACKET_SAVE_DIR = "/packets";
 
 /**
  * The ArchiveManager class manages a file that contains the raw data read from the DMP and DMPAFT command of the Vantage console.
@@ -208,6 +209,13 @@ private:
     void addPacketsToArchive(const std::vector<ArchivePacket> & packets);
 
     /**
+     * Save a packet to a file that can be replayed at a later time.
+     *
+     * @param packet The packet to save
+     */
+    void savePacketToFile(const ArchivePacket & packet);
+
+    /**
      * Finds the time range of the archive and set the packet time members.
      */
     void findArchivePacketTimeRange();
@@ -219,8 +227,9 @@ private:
     void determineIfArchivingIsActive();
 
     const std::string        archiveFile;            // The name of the archive file
-    std::string              archiveBackupDir;       // The name of the archive backup directory
-    std::string              archiveVerifyLog;       // The name of the file where the verification results are written
+    const std::string        packetSaveDirectory;    // The directory into which the packets will be saved
+    const std::string        archiveBackupDir;       // The name of the archive backup directory
+    const std::string        archiveVerifyLog;       // The name of the file where the verification results are written
     DateTime                 nextBackupTime;         // The next time the archive should be backed up
 
     ArchivePacket            newestPacket;

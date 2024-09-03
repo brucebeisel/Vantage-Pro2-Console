@@ -165,8 +165,11 @@ CommandSocket::readCommand(int fd) {
     //
     while (readPosition < HEADER_SIZE) {
         int nbytes = read(fd, &buffer[readPosition], HEADER_SIZE - readPosition);
+        //
+        // If 0 bytes are read that most likely means the other end has closed the socket
+        //
         if (nbytes == 0) {
-            logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to read command header, closing socket. Read returned 0." << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Attempted read of command header indicates the socket has been closed by the other end, closing socket. Read returned 0." << endl;
             closeSocket(fd);
             return;
         }

@@ -355,7 +355,7 @@ DominantWindDirections::dumpData() const {
             << endl;
     }
 
-    logger.log(VantageLogger::VANTAGE_DEBUG3) << oss.str() << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << endl << oss.str() << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
