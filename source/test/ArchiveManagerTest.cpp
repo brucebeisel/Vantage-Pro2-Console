@@ -131,12 +131,13 @@ main(int argc, char * argv[]) {
 
     char * archiveDirectory = argv[1];
 
+    //
+    // This archive manager uses the default file, which should not be changed for data integrity reasons.
+    // You don't want to accidentally change the deployed archive file
+    //
     SerialPort port("port", 19200);
     VantageWeatherStation station(port);
     ArchiveManager archiveManager(archiveDirectory, station);
-
-    numberOfPacketsToDump = 1;
-    archiveManager.synchronizeArchive();
 
     DateTimeFields oldestPacket;
     DateTimeFields newestPacket;
