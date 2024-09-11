@@ -1,0 +1,16 @@
+--------------------------------------------------------------------------------
+Verifying archive file: ./weather-archive.dat at 2024-09-10 23:39:49
+Detected inconsistent time delta between packet at file location 3685968. 
+Expected time delta is 300, actual delta is 3900 for packet with times [1699160400] 2023-11-05 01:00:00 (2023-11-05 01:00) and [1699164300] 2023-11-05 01:05:00 (2023-11-05 01:05)
+Detected inconsistent time delta between packet at file location 3686540. 
+Expected time delta is 300, actual delta is 3900 for packet with times [1699167300] 2023-11-05 01:55:00 (2023-11-05 01:55) and [1699171200] 2023-11-05 03:00:00 (2023-11-05 03:00)
+Detected out of order packets at file location 6926036. 
+Packet with time 1999-11-30 00:00:00 (2000-00-00 00:00) is before packet with time: 2024-06-08 11:25:00 (2024-06-08 11:25)
+Detected inconsistent time delta between packet at file location 6926036. 
+Expected time delta is 300, actual delta is -773922300 for packet with times [1717860300] 2024-06-08 11:25:00 (2024-06-08 11:25) and [943938000] 1999-11-30 00:00:00 (2000-00-00 00:00)
+Detected inconsistent time delta between packet at file location 6926088. 
+Expected time delta is 300, actual delta is 773163600 for packet with times [943938000] 1999-11-30 00:00:00 (2000-00-00 00:00) and [1717101600] 2024-05-30 16:40:00 (2024-05-30 16:40)
+Detected inconsistent time delta between packet at file location 6926140. 
+Expected time delta is 773163600, actual delta is 300 for packet with times [1717101600] 2024-05-30 16:40:00 (2024-05-30 16:40) and [1717101900] 2024-05-30 16:45:00 (2024-05-30 16:45)
+Archive verification complete for archive with 159728 packets. Found 1 errors and 5 warnings
+--------------------------------------------------------------------------------

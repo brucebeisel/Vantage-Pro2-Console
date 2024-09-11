@@ -67,6 +67,13 @@ public:
     ArchivePacket(const byte buffer[], int offset = 0);
 
     /**
+     * Constructor that loads data from a file.
+     *
+     * @param filename The file to load as the buffer
+     */
+    ArchivePacket(const std::string & filename);
+
+    /**
      * Destructor.
      */
     virtual ~ArchivePacket();
@@ -78,6 +85,23 @@ public:
      * @param offset The offset within the specified buffer from which to copy the data
      */
     void updateArchivePacketData(const byte buffer[], int offset = 0);
+
+    /**
+     * Update the underlying data from a file.
+     *
+     * @param filename The name of the file that contains the packet data
+     * @return True if file was loaded successfully
+     */
+    bool updateArchivePacketDataFromFile(const std::string & filename);
+
+    /**
+     * Save the archive packet to a file.
+     *
+     * @param filename  The file to which to save the packet
+     * @param overwrite Whether an existing file should be overwritten
+     * @return True if the packet was written to the specified file
+     */
+    bool saveArchivePacketToFile(const std::string  & filename, bool overwrite = false) const;
 
     /**
      * Clear the contents of this packet.

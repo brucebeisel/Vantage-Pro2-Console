@@ -144,6 +144,7 @@ int
 main(int argc, char * argv[]) {
     VantageDecoder::setRainCollectorSize(.01);
     ArchivePacket packet(packetData1, 0);
+    Measurement<Temperature> t1 = packet.getHighOutsideTemperature();
 
     cout << "All fields valid packet:" << endl << packet.formatJSON(true) << endl << endl;
 
@@ -174,6 +175,26 @@ main(int argc, char * argv[]) {
         cout << "PASSED: Cleared packet is empty" << endl;
     else
         cout << "FAILED: Cleared packet has data" << endl;
+
+    if (!packet.updateArchivePacketDataFromFile("./badfile.dat"))
+        cout << "PASSED: Non-existent file generated error" << endl;
+    else
+        cout << "FAILED: Non-existent file did NOT generate error" << endl;
+
+    if (!packet.updateArchivePacketDataFromFile("./toosmallpacket.dat"))
+        cout << "PASSED: Too small file generated error" << endl;
+    else
+        cout << "FAILED: Too small file did NOT generate error" << endl;
+
+    if (packet.updateArchivePacketDataFromFile("./packet-data.dat")) {
+        Measurement<Temperature> t2 = packet.getHighOutsideTemperature();
+        if (t1 == t2)
+            cout << "PASSED: Updated archive packet data from file" << endl;
+        else
+            cout << "FAILED: Archive packet data is not correct" << endl;
+    }
+    else
+        cout << "FAILED: Update of archive packet data failed" << endl;
 
     return 0;
 }

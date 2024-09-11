@@ -627,20 +627,8 @@ ArchiveManager::savePacketToFile(const ArchivePacket & packet) {
 
     const string & filename = oss.str();
 
-    if (std::filesystem::exists(filename)) {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "savePacketToFile() ignoring packet because file '" << filename << "' already exists" << endl;
-        return;
-    }
-
-    ofstream stream(filename, ios::binary);
-
-    if (stream.is_open()) {
-        stream.write(packet.getBuffer(), ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
-        if (stream.fail())
-            logger.log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() did not write to packet file '" << filename << "' due to write error" << endl;
-    }
-    else
-        logger.log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() did not write to packet file '" << filename << "' due to open error" << endl;
+    if (!packet.saveArchivePacketToFile(filename))
+        logger.log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() did not write to packet file '" << filename << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

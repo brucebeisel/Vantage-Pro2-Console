@@ -23,6 +23,8 @@
 #include <sstream>
 #include <cstring>
 #include <iomanip>
+#include <filesystem>
+#include <fstream>
 
 #include "BitConverter.h"
 #include "VantageDecoder.h"
@@ -51,6 +53,13 @@ ArchivePacket::ArchivePacket(const byte buffer[], int offset) : logger(&VantageL
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+ArchivePacket::ArchivePacket(const string & filename) {
+    if (!updateArchivePacketDataFromFile(filename))
+        throw invalid_argument("Error while loading archive packet data from file " + filename);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ArchivePacket::~ArchivePacket() {
 }
 
@@ -71,6 +80,70 @@ ArchivePacket::updateArchivePacketData(const byte buffer[], int offset) {
     int archiveType = getArchiveRecordType();
     if (archiveType != ARCHIVE_PACKET_REV_B)
         logger->log(VantageLogger::VANTAGE_WARNING) << "The archive type is not Rev B. Value is: " << archiveType << endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchivePacket::updateArchivePacketDataFromFile(const std::string & filename) {
+    error_code ec;
+    std::uintmax_t fileSize;
+    if ((fileSize = std::filesystem::file_size(filename, ec)) == static_cast<std::uintmax_t>(-1)) {
+        logger->log(VantageLogger::VANTAGE_WARNING) << "Failed to get file size to update archive packet data. File: " << filename << endl;
+        return false;
+    }
+
+    if (fileSize != BYTES_PER_ARCHIVE_PACKET) {
+        logger->log(VantageLogger::VANTAGE_WARNING) << "File size of archive packet data file " << filename
+                                                    << " is not correct. It should be " << BYTES_PER_ARCHIVE_PACKET << " but is " << fileSize << endl;
+    }
+
+    ifstream ifs(filename.c_str(), std::fstream::in | std::fstream::binary);
+
+    if (!ifs.is_open()) {
+        logger->log(VantageLogger::VANTAGE_WARNING) << "Failed to open archive packet data file " << filename << endl;
+        return false;
+    }
+
+    byte readBuffer[BYTES_PER_ARCHIVE_PACKET];
+    ifs.read(readBuffer, sizeof(readBuffer));
+
+    if (!ifs) {
+        logger->log(VantageLogger::VANTAGE_WARNING) << "Failed to read " << BYTES_PER_ARCHIVE_PACKET << " bytes from archive packet file. Only " << ifs.gcount() << " bytes were read." << endl;
+        return false;
+    }
+
+    ifs.close();
+
+    updateArchivePacketData(readBuffer);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+ArchivePacket::saveArchivePacketToFile(const std::string & filename, bool overwrite) const {
+    if (!overwrite && std::filesystem::exists(filename)) {
+        logger->log(VantageLogger::VANTAGE_WARNING) << "savePacketToFile() ignoring packet because file '" << filename << "' already exists" << endl;
+        return false;
+    }
+
+    ofstream stream(filename, ios::binary);
+
+    if (stream.is_open()) {
+        stream.write(buffer, ArchivePacket::BYTES_PER_ARCHIVE_PACKET);
+        if (stream.fail()) {
+            logger->log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() did not write to packet file '" << filename << "' due to write error" << endl;
+            return false;
+        }
+    }
+    else {
+        logger->log(VantageLogger::VANTAGE_ERROR) << "savePacketToFile() did not write to packet file '" << filename << "' due to open error" << endl;
+        return false;
+    }
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
