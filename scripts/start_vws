@@ -1,5 +1,7 @@
 #!/bin/bash
 
-echo "Starting VWS"
-cd /weathersense/pre-4.0/bin
+version=4.0.0
+
+echo "Starting version $version of VWS"
+cd /weathersense/$version/bin
 ./vws /dev/ttyUSB0 ../archive/ ../log/vws_log

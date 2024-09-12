@@ -1,6 +1,8 @@
 #!/bin/bash
 
-echo "Starting Node for wunderground uploader"
-cd /weathersense/development/git/Vantage-Console-Node/VantageUploader
-node ./vantageUploader.js
+version=4.0.0
+
+echo "Starting Node for version $version of wunderground uploader"
+cd /weathersense/$version/Vantage-Console-Node/VantageUploader
+node ./vantage-uploader.js
 echo "Node Started for wunderground uploader"

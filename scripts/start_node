@@ -1,6 +1,8 @@
 #!/bin/bash
 
-echo "Starting Node"
-cd /weathersense/development/git/Vantage-Console-Node/VantageConsole
-node ./index.js
-echo "Node Started"
+version=4.0.0
+
+echo "Starting Node for version $version of Vantage Console Node"
+cd /weathersense/$version/Vantage-Console-Node/VantageConsole
+node ./vantage-console.js
+echo "Vantage Console Node Started"
