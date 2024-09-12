@@ -1,0 +1,17 @@
+#!/bin/bash
+
+sleep 30
+logfile=/tmp/weathersense.log
+
+echo "Starting VP2" >> $logfile
+su pi -c ./vws /dev/ttyUSB0 ../archive ../log/vws_log &> /dev/null &
+echo "VP2 Started" >> $logfile
+
+echo "Starting wunderground" >> $logfile
+su -l  pi -c "./wunderground" &> ../log/wunderground.log &
+echo "Wunderground Started" &>> $logfile
+
+echo "Starting Node" >> $logfile
+sleep 5
+su -l pi -c "./start_node" &> ../log/node.log &
+echo "Node Started" >> $logfile
