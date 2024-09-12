@@ -9,10 +9,13 @@ source/archive-dumper/archive-dumper
 source/console-archive-dumper/console-archive-dumper
 source/loop-packet-dumper/loop-dumper
 source/loop-packet-dumper/out
+source/archive-verifier/archive-verifier
 source/test/BitConverterTest
 source/test/DominantWindTest
 source/test/EnumTest
 source/vws/archive.dat
 source/vws/log/
 source/vws/out
-
+source/test/backup
+source/test/packets
+source/test/weather-archive-verify.log
