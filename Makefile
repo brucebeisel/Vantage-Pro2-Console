@@ -4,6 +4,7 @@ SUBDIRS := \
 	source/vws \
 	source/archive-dumper \
 	source/archive-fixer \
+	source/archive-rebuilder \
 	source/archive-verifier \
 	source/console-archive-dumper \
 	source/loop-packet-dumper \
