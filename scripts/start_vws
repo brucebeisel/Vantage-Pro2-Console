@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "Starting VWS"
+cd /weathersense/pre-4.0/bin
+./vws /dev/ttyUSB0 ../archive/ ../log/vws_log
