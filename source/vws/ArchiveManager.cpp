@@ -60,7 +60,7 @@ ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStati
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ArchiveManager::ArchiveManager(const string & dataDirectory, const string & archiveFile, VantageWeatherStation & station) :
-                                                                    archiveFile(dataDirectory + archiveFile),
+                                                                    archiveFile(dataDirectory + "/" + archiveFile),
                                                                     packetSaveDirectory(dataDirectory + PACKET_SAVE_DIR),
                                                                     archiveBackupDir(dataDirectory + ARCHIVE_BACKUP_DIR),
                                                                     archiveVerifyLog(dataDirectory + ARCHIVE_VERIFY_LOG),
