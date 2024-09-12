@@ -179,7 +179,7 @@ main(int argc, char * argv[]) {
     cout << "Epoch time for " << dtf2.formatDateTime(true) << " is " << dtf2.getEpochDateTime() << endl;
 
     unlink(std::string(std::string(archiveDirectory) + "/test-archive.dat").c_str());
-    ArchiveManager am2(archiveDirectory, "test-archive.dat", station);
+    ArchiveManager am2(archiveDirectory, "/test-archive.dat", station);
 
     numberOfPacketsToDump = 1;
 
