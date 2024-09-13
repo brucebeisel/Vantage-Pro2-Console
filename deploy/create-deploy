@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#
+# This script must be run in the deploy directory
+#
+echo "This script must be run in the deploy directory!"
+
+dirs="log bin archive"
+executables="archive-dumper/archive-dumper \
+             archive-fixer/archive-fixer \
+             archive-rebuilder/archive-rebuilder \
+             archive-verifier/archive-verifier \
+             console-archive-dumper/console-archive-dumper \
+             loop-packet-dumper/loop-dumper"
+
+echo $executables
+cwd=`pwd`
+dir=`basename $cwd`
+
+if [ $dir != "deploy" ]; then
+    echo "You are in the wrong directory"
+    exit 1
+fi
+
+if [ $# != 1 ]; then
+    echo "Usage: create-deploy <temp directory>"
+    exit 2
+fi
+
+basedir=$1
+
+for dir in $dirs; do
+    mkdir $basedir/$dir
+done
+
+for exe in $executables; do
+    cp ../source/$exe bin
+done

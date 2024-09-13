@@ -1,0 +1,6 @@
+The deployment of the Vantage Pro2 Console is fairly simple. It only requires a few executables
+and scripts as well as the creation of a few run-time directories.
+
+<install dir>/bin
+<install dir>/log
+<install dir>/archive
