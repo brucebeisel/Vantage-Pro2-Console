@@ -2,6 +2,10 @@
 
 version=4.0.0
 
-echo "Starting version $version of VWS"
+if [ $# > 0 ]; then
+    version = $1
+fi
+
+echo "Starting VWS version $version"
 cd /weathersense/$version/bin
 ./vws /dev/ttyUSB0 ../archive/ ../log/vws_log

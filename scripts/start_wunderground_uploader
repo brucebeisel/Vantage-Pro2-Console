@@ -1,0 +1,12 @@
+#!/bin/bash
+
+version=4.0.0
+
+if [ $# > 0 ]; then
+    version = $1
+fi
+
+echo "Starting Weather Underground Uploader version $version"
+cd /weathersense/$version/node/VantageUploader
+node ./vantage-uploader.js
+echo "Started Weather Underground Uploader"

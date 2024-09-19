@@ -1,0 +1,33 @@
+#!/bin/bash
+
+sleep 5
+
+
+if [$# != 2 ]; then
+    echo "Usage: start_weathersense <version> <user>"
+    exit 1
+fi
+
+
+logdir=../log
+logfile=$logdir/weathersense.log
+
+weathersense_version=$1
+weathersense_user=$2
+
+echo "Starting WeatherSense version $version" >> $logfile
+
+cd /weathersense/$version/bin
+
+echo "Starting VWS" >> $logfile
+su -l $weathersense_user -c ./start_vws $version &>> $logdir/vws.log &
+echo "VWS Started" >> $logfile
+
+echo "Starting weather underground uploader" >> $logfile
+su -l $weathersense_user -c ./start_wunderground-uploader $version &>> $logdir/ws_uploader.log &
+echo "weather underground uploader Started" >> $logfile
+
+echo "Starting Vantage Web Server" >> $logfile
+cd ../../node/VantageConsole
+su -l $weathersense_user -c ./start_web_server $version &>> $logdir/ws_web.log &
+echo "Vantage Web Server Started" >> $logfile

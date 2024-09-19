@@ -1,0 +1,12 @@
+#!/bin/bash
+
+version=4.0.0
+
+if [ $# > 0 ]; then
+    version = $1
+fi
+
+echo "Starting Vantage Console Web Server version $version"
+cd /weathersense/$version/node/VantageConsole
+node ./vantage-console.js
+echo "Vantage Console Web Server started"
