@@ -2,10 +2,18 @@
 
 version=4.0.0
 
+echo Arg count $#
+
 if [ $# > 0 ]; then
-    version = $1
+    version=$1
 fi
 
 echo "Starting VWS version $version"
-cd /weathersense/$version/bin
+cd /weathersense/$version/bin &> /dev/null
+
+if [ $? != 0 ]; then
+    echo "Directory /weathersense/$version/bin does not exist. Start failed"
+    exit 1
+fi
+
 ./vws /dev/ttyUSB0 ../archive/ ../log/vws_log
