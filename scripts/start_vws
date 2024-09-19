@@ -4,7 +4,7 @@ version=4.0.0
 
 echo Arg count $#
 
-if [ $# > 0 ]; then
+if [ $# = 1 ]; then
     version=$1
 fi
 
