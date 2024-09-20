@@ -17,18 +17,18 @@
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 WEATHERSENSE_DIR=/weathersense
 WEATHERSENSE_VERSION=4.0.0
-WEATHERSENSE_USER=pi
+WEATHERSENSE_USER=weathersense
 DESC="weathersense suite"
 NAME=weathersense
 SCRIPTNAME=/etc/init.d/"$NAME"
 
 case "$1" in
 start)	echo  "Starting weathersense suite" "weathersense"
-    cd $WEATHERSENSE_DIR/$WEATHERSENSE_VERSION/bin
+        cd $WEATHERSENSE_DIR/$WEATHERSENSE_VERSION/bin
 	./start_weathersense $WEATHERSENSE_VERSION $WEATHERSENSE_USER
 	;;
 stop)	echo "Stopping weathersense suite" "weathersense"
-        killall node vws
+        killall --quiet node vws
         ;;
 *)	echo "Usage: /etc/init.d/weathersense {start|stop}"
         exit 2
