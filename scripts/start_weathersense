@@ -13,7 +13,7 @@ logfile=$logdir/weathersense.log
 weathersense_version=$1
 weathersense_user=$2
 
-echo "Starting WeatherSense version $version" >> $logfile
+echo "Starting WeatherSense version $weathersense_version" |& tee $logfile
 
 bindir=/weathersense/$weathersense_version/bin
 
@@ -23,14 +23,16 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-echo `date` "Starting VWS" >> $logfile
+echo `date` "Starting VWS" |& tee $logfile
 su -l $weathersense_user -c $bindir/start_vws $weathersense_version &>> $logdir/vws.log &
-echo "VWS Started" >> $logfile
+echo "VWS Started" |& tee $logfile
 
-echo `date` "Starting weather underground uploader" >> $logfile
+echo `date` "Starting weather underground uploader" |& tee $logfile
 su -l $weathersense_user -c $bindir/start_wunderground_uploader $weathersense_version &>> $logdir/ws_uploader.log &
-echo "weather underground uploader Started" >> $logfile
+echo "weather underground uploader Started" |& tee $logfile
 
-echo `date` "Starting Vantage Web Server" >> $logfile
+echo `date` "Starting Vantage Web Server" |& tee $logfile
 su -l $weathersense_user -c $bindir/start_web_server $weathersense_version &>> $logdir/ws_web.log &
-echo "Vantage Web Server Started" >> $logfile
+echo "Vantage Web Server Started" |& tee $logfile
+
+echo "WeatherSense version $weathersense_version started" |& tee $logfile
