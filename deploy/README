@@ -4,3 +4,7 @@ and scripts as well as the creation of a few run-time directories.
 <install dir>/bin
 <install dir>/log
 <install dir>/archive
+
+/etc/init.d/weathersense
+/etc/rc.5/S99weathersense -> /etc/init.d/weathersense
+/etc/rc.5/K01weathersense -> /etc/init.d/weathersense
