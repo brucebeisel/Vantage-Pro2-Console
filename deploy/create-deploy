@@ -3,36 +3,79 @@
 #
 # This script must be run in the deploy directory
 #
-echo "This script must be run in the deploy directory!"
 
-dirs="log bin archive"
+dirs="log bin archive rc"
 executables="archive-dumper/archive-dumper \
              archive-fixer/archive-fixer \
              archive-rebuilder/archive-rebuilder \
              archive-verifier/archive-verifier \
              console-archive-dumper/console-archive-dumper \
-             loop-packet-dumper/loop-dumper"
+             loop-packet-dumper/loop-dumper \
+             vws/vws"
 
-echo $executables
+scripts="backup_archive \
+         start_vws \
+         start_weathersense \
+         start_web_server \
+         start_wunderground_uploader \
+         stop_weathersense"
+
 cwd=`pwd`
 dir=`basename $cwd`
 
 if [ $dir != "deploy" ]; then
     echo "You are in the wrong directory"
+    echo "This script must be run in the weathersense deploy directory!"
     exit 1
 fi
 
-if [ $# != 1 ]; then
-    echo "Usage: create-deploy <temp directory>"
+if [ $# != 2 ]; then
+    echo "Usage: create-deploy <version> <node directory>"
+    echo "Note: Node directory should include the version number"
     exit 2
 fi
 
-basedir=$1
+version=$1
+nodedir=$2
+
+mkdir tmp
+basedir=tmp
+installdir=$basedir/weathersense-$version
+
+mkdir $installdir
 
 for dir in $dirs; do
-    mkdir $basedir/$dir
+    mkdir $installdir/$dir
 done
 
 for exe in $executables; do
-    cp ../source/$exe bin
+    cp ../source/$exe $installdir/bin
 done
+
+for script in $scripts; do
+    cp ../scripts/$script $installdir/bin
+done
+
+cp ../scripts/weathersense.rc $installdir/rc
+
+cp ./install-weathersense.sh $basedir/install-weathersense-4.0.0.sh
+cp README $basedir
+
+echo $version > $installdir/weathersense-version.txt
+
+if [[ -d $nodedir/VantageConsole ]] && [[ -d $nodedir/VantageUploader ]]; then
+    cp -r $nodedir/VantageConsole $installdir
+    cp -r $nodedir/VantageUploader $installdir
+else
+    echo "VantageConsole or VantageUploader directory does not exist in $nodedir"  
+    rm -rf $installdir
+    exit 3
+fi
+
+cd $basedir
+
+zip -r ../weathersense-$version.zip .
+
+cd ..
+
+rm -rf $basedir
