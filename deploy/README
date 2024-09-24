@@ -1,9 +1,14 @@
 The deployment of the Vantage Pro2 Console is fairly simple. It only requires a few executables
 and scripts as well as the creation of a few run-time directories.
+There are a few prerequisites for this installation:
+    1. The user "weathersense" must exist
+    2. The directory /weathersense must exist
+    3. Node version 18 or newer must be installed
 
-<install dir>/bin
-<install dir>/log
-<install dir>/archive
+/weathersense/<version>/bin
+/weathersense/<version>/log
+/weathersense/<version>/archive
+/weathersense/<version>/node
 
 /etc/init.d/weathersense
 /etc/rc.5/S99weathersense -> /etc/init.d/weathersense
