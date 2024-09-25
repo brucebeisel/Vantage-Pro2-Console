@@ -1,9 +1,11 @@
 #!/bin/bash
 
+rootdir=/weathersense
+
 #
 # Scripts to install weathersense
 #
-if [ $# != 2 ]; then
+if [ $# != 1 ]; then
     echo "Usage: install-weathersense.sh <directory>"
     exit 1
 fi
@@ -11,58 +13,99 @@ fi
 dir=$1
 
 version=`cat $dir/weathersense-version.txt`
+echo Version: $version
+installdir=$rootdir/$version
 
+echo "Checking for weathersense user..."
 id -u weathersense &> /dev/null
 
 if [ $? == 1 ]; then
     echo "User \"weathersense\" must exist to install WeatherSense $version"
+    echo "Aborting installation"
     exit 2
+else
+    echo "User weathersense exists"
 fi
 
-if [ -d /weathersense ]; then
-    echo "Directory /weathersense must exist to install WeatherSense $version"
+echo "Checking node version..."
+oldifs="$IFS"
+IFS="."
+read -ra nodeversion <<< `node --version | sed 's/^v//'`
+
+if [[ $nodeversion < 18 ]]; then
+    echo "WeatherSense require node version 18 or later. Installed version is `node --version`"
+    echo "Aborting installation"
     exit 3
+else
+    echo "Node version $nodeversion confirmed"
 fi
 
-mkdir /weathersense/$version
+IFS="$oldifs"
 
-cp -r $dir/* /weathersense/$version
+echo "Checking that directory $rootdir already exists..."
+if  ! [ -d $rootdir ]; then
+    echo "Directory $rootdir must exist to install WeatherSense $version"
+    echo "Aborting installation"
+    exit 4
+else
+    echo "Directory $rootdir exists"
+fi
 
-chown -R weathersense /weathersense/$version
+echo Making installation directory $installdir
+mkdir $installdir
 
+if [ $? == 1 ]; then
+    echo "Failed to make directory $installdir"
+    echo "Aborting installation"
+    exit 6
+fi
+
+sourcedirs="archive bin log VantageConsole VantageUploader"
+
+echo "Copying source directories..."
+for sourcedir in $sourcedirs;
+do
+    echo "Copying source directory $sourcedir"
+    cp -r $dir/$sourcedir $installdir
+done
+
+chown -R weathersense $installdir
+
+echo "Copying files to /etc/init.d and /etc/rc5.d..."
 cp $dir/rc/weathersense.rc /etc/init.d/weathersense
 chmod +x /etc/init.d/weathersense
 
-ln -s /etc/init.d/weathersense /etc/rc5.d/S99weathersense
-ln -s /etc/init.d/weathersense /etc/rc5.d/K99weathersense
+ln -s -f /etc/init.d/weathersense /etc/rc5.d/S99weathersense
+ln -s -f /etc/init.d/weathersense /etc/rc5.d/K99weathersense
 
-archives=`ls -r /weathersense/*/archive`
+echo "Checking for old archive data..."
+#archives=`ls -r $rootdir/*/archive`
 
-numarchives=`wc -w <<< $archives`
+#numarchives=`wc -w <<< $archives`
 
-copyarchive=""
+#copyarchive=""
 
-if [ $numarchives -gt 0 ]; then
-    echo "A number of existing archives were found in the /weathersense directory"
-    echo "Would you like to copy the existing archive files to the new installation?"
-    read -p "[yes/no]: " answer
-    if [ $answer != "yes" ]; then
-        exit 4
-    fi
-    echo "The choices are (newest first): "
-    cat <<< $archives
-    echo "Choose one of the following files by entering "y" at the prompt"
+#if [[ $numarchives -gt 0 ]]; then
+#    echo "A number of existing archives were found in the $rootdir directory"
+#    echo "Would you like to copy the existing archive files to the new installation?"
+#    read -p "[yes/no]: " answer
+#    if [ $answer != "yes" ]; then
+#        exit 5
+#    fi
+#    echo "The choices are (newest first): "
+#    cat <<< $archives
+#    echo "Choose one of the following files by entering "y" at the prompt"
+#
+#    for archive in $archives
+#    do
+#        read -p "$archive " answer
+#        if [ $answer == "y" ]; then
+#            copyarchive=$archive
+#            break
+#        fi
+#    done
+#fi
 
-    for archive in $archives
-    do
-        read -p "$archive " answer
-        if [ $answer == "y" ]; then
-            copyarchive=$archive
-            break
-        fi
-    done
-fi
-
-if [ $copyarchive != "" ]; then
-    cp -r $copyarchive/* /weathersense/$version/archive
-fi
+#if [ $copyarchive != "" ]; then
+#    cp -r $copyarchive/* $installdir/archive
+#fi
