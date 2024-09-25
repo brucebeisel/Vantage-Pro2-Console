@@ -13,3 +13,6 @@ There are a few prerequisites for this installation:
 /etc/init.d/weathersense
 /etc/rc.5/S99weathersense -> /etc/init.d/weathersense
 /etc/rc.5/K01weathersense -> /etc/init.d/weathersense
+
+To install WeatherSense run:
+    sudo install-weathersense.sh

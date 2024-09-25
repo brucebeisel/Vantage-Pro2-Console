@@ -4,4 +4,4 @@ version=4.0.0
 
 cd /weathersense/$version/archive
 datestring=`date +%Y-%m-%d`
-tar cvf /mnt/weathersense-nas/backup/archive-backup-$datestring.tar loop dominant-wind-checkpoint.dat storm-archive.dat vantage-network-status.dat weather-archive.dat
+tar cvf /mnt/weathersense-nas/backup/archive-backup-$datestring.tar packets loop dominant-wind-checkpoint.dat storm-archive.dat vantage-network-status.dat weather-archive.dat
