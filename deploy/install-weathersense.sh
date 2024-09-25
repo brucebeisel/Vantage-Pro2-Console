@@ -108,4 +108,5 @@ echo "Checking for old archive data..."
 
 #if [ $copyarchive != "" ]; then
 #    cp -r $copyarchive/* $installdir/archive
+#    cp $copyarchive/../node/VantageConsole/UserData/* $installdir/node/VantageConsole/UserData
 #fi
