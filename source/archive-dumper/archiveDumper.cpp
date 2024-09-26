@@ -27,7 +27,7 @@
 using namespace std;
 using namespace vws;
 
-static const char USAGE_MESSAGE[] = "Usage: archive-dumper [-v] [-b] <filename>";
+static const char USAGE_MESSAGE[] = "Usage: archive-dumper [-v] [-b] <filename>\n    where: -v = verbose\n           -b = binary";
 
 int
 main(int argc, char *argv[]) {

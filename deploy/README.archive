@@ -1,0 +1,26 @@
+This directory contains the data for the WeatherSense suite of software.
+The contents of this directory are as follows:
+
+    1. weather-archive.dat - Contains the archive data in a single flat file. Each archive record is 52 bytes and each day will
+       add 288 records when using a 5 minute archive interval.
+    2. storm-archive.dat - An ASCII file that contains the storms detected by the Davis Vantage weather station. The file is formatted
+       as fixed length fields. Each storm has the format of <start date> <end date> <rainfall>. The dates are always 10 characters and
+       the rainfall is always 5 characters, with a zero before the decimal point, if applicable. This format can handle up to 99.99 inches
+       of rain in a single storm. As an example: "2023-10-09 2023-10-09  0.03"
+    3. weather-archive-verify.txt - About once a day WeatherSense will verify weather-archive.dat. It checks for things like missing
+       records and out-of-order records. If there are errors weather-archive.dat may need to be repaired or rebuilt.
+    4. vantage-network-status.dat - Contains the current status of the Vantage network which contains ISS, stations, repeaters and consoles.
+       The contents of this file is a work in progress.
+    5. dominant-wind-checkpoint.dat - The Vantage console displays dominant wind indicators on the wind dial. Unfortunately, these
+       indicators cannot be queried. WeatherSense builds its own dominant wind indicators using the real-time wind data. These dominant
+       wind indicators are based off the last hour of data. So if the WeatherSense software is restarted, it could take an hour
+       for the dominant wind data to catch up with the console display. This file is a checkpoint of the dominant wind data, so
+       WeatherSense can be restarted without having to start the dominant wind calculations to start from scratch.
+    6. loop (directory) - This directory contains up to the last 24 hours of "LOOP" packet data. The Vantage console sends
+       LOOP and LOOP2 packets at an interval of about 2 seconds. Each clock hour of data is stored in an hour file. This
+       data can be queried in support of strip chart and other future web pages.
+    7. backup (directory) - The directory contains backups of the weather-archive.dat file. The backups are created in order
+       to aid in the repair a corrupted weather-archive.dat file.
+    8. packets (directory) - This directory contains each archive packet received in a separate file. Each file is in a 
+       directory base on the date of the packet. The path to an individual file would be packets/yyyy/mm/dd/ap-hh-mm.dat.
+       As an example a packet with a time stamp of 2024-9-10 13:00 would be in the file packets/2024/09/10/ap-13-00.dat.

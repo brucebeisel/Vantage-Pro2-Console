@@ -1,18 +1,21 @@
 The deployment of the Vantage Pro2 Console is fairly simple. It only requires a few executables
 and scripts as well as the creation of a few run-time directories.
 There are a few prerequisites for this installation:
-    1. The user "weathersense" must exist
+    1. The user "weathersense" must exist. It will be added to the dialout group if it does not already belong.
     2. The directory /weathersense must exist
     3. Node version 18 or newer must be installed
 
-/weathersense/<version>/bin
-/weathersense/<version>/log
-/weathersense/<version>/archive
-/weathersense/<version>/node
+The directories that will exist after the installation:
+    1. /weathersense/<version>/bin - Will contain the vws executable, various maintenance executables and start scripts.
+    2. /weathersense/<version>/log - The output from the vws executable will be store in a number of log files.
+    3. /weathersense/<version>/archive - This is where all of the data for weathersense is stored (with the exception of user data for Node server)
+    4. /weathersense/<version>/node/VantageConsole - The web server data and user data that is saved 
+    5. /weathersense/<version>/node/VantageUploader - The javascript that uploads weather data to weather underground
 
+The following files will exist after installation is complete. These files are for starting WeatherSense on boot
 /etc/init.d/weathersense
 /etc/rc.5/S99weathersense -> /etc/init.d/weathersense
 /etc/rc.5/K01weathersense -> /etc/init.d/weathersense
 
 To install WeatherSense run:
-    sudo install-weathersense.sh
+    sudo ./install-weathersense.sh

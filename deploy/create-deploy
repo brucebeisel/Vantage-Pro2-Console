@@ -4,7 +4,7 @@
 # This script must be run in the deploy directory
 #
 
-dirs="log bin archive rc"
+dirs="log bin archive rc node"
 executables="archive-dumper/archive-dumper \
              archive-fixer/archive-fixer \
              archive-rebuilder/archive-rebuilder \
@@ -44,34 +44,42 @@ installdir=$basedir/weathersense-$version
 
 mkdir $installdir
 
+echo "Creating installation directories..."
 for dir in $dirs; do
     mkdir $installdir/$dir
 done
 
+echo "Copying executables to $installdir/bin..."
 for exe in $executables; do
     cp ../source/$exe $installdir/bin
 done
 
+echo "Copying scripts to $installdir/bin..."
 for script in $scripts; do
     cp ../scripts/$script $installdir/bin
 done
 
+echo "Copying start and installation scripts..."
 cp ../scripts/weathersense.rc $installdir/rc
 
 cp ./install-weathersense.sh $basedir/install-weathersense-4.0.0.sh
 cp README $basedir
 
+cp README.archive $installdir/archive/README
+
 echo $version > $installdir/weathersense-version.txt
 
+echo "Copying VantageConsole and VantageUpload to $installdir/node..."
 if [[ -d $nodedir/VantageConsole ]] && [[ -d $nodedir/VantageUploader ]]; then
-    cp -r $nodedir/VantageConsole $installdir
-    cp -r $nodedir/VantageUploader $installdir
+    cp -r $nodedir/VantageConsole $installdir/node
+    cp -r $nodedir/VantageUploader $installdir/node
 else
     echo "VantageConsole or VantageUploader directory does not exist in $nodedir"  
     rm -rf $installdir
     exit 3
 fi
 
+echo "Zipping it all up..."
 cd $basedir
 
 zip -r ../weathersense-$version.zip .
@@ -79,3 +87,5 @@ zip -r ../weathersense-$version.zip .
 cd ..
 
 rm -rf $basedir
+
+echo "Installation file created!"

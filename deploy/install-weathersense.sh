@@ -27,6 +27,15 @@ else
     echo "User weathersense exists"
 fi
 
+echo "Ensuring user \"weathersense\" is in group \"dialout\"..."
+adduser -q weathersense dialout
+
+if [ $? != 0 ]; then
+    echo "Adding user weathersense to group dialout failed"
+    echo "Aborting installation"
+    exit 3
+fi
+
 echo "Checking node version..."
 oldifs="$IFS"
 IFS="."
@@ -35,7 +44,7 @@ read -ra nodeversion <<< `node --version | sed 's/^v//'`
 if [[ $nodeversion < 18 ]]; then
     echo "WeatherSense require node version 18 or later. Installed version is `node --version`"
     echo "Aborting installation"
-    exit 3
+    exit 4
 else
     echo "Node version $nodeversion confirmed"
 fi
@@ -46,7 +55,7 @@ echo "Checking that directory $rootdir already exists..."
 if  ! [ -d $rootdir ]; then
     echo "Directory $rootdir must exist to install WeatherSense $version"
     echo "Aborting installation"
-    exit 4
+    exit 5
 else
     echo "Directory $rootdir exists"
 fi
@@ -60,7 +69,7 @@ if [ $? == 1 ]; then
     exit 6
 fi
 
-sourcedirs="archive bin log VantageConsole VantageUploader"
+sourcedirs="archive bin log node"
 
 echo "Copying source directories..."
 for sourcedir in $sourcedirs;
