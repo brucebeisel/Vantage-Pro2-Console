@@ -28,6 +28,29 @@
 #include "Weather.h"
 
 using namespace std;
+/*
+ * TODO Bug report
+ *
+ * There was a time on 9/25/2024 near midnight when the wind data became invalid.
+ * Values were sent with the JSON, when they should not have. Check to make sure
+ * the invalid values are correct. The windDirection of 32767, the gustSpeed of 255 and the gustDirection of -1 should have
+ * been trapped. Notice there is no windSpeed.
+ * After the missing data was discovered, the battery in the ISS was replaced and that seems to have fixed the problem
+ *
+ * CurrentWeatherSocket: 2024-09-25 23:56:33 --- INFO    --- Published current weather:
+ * {"time" : "2024-09-25 23:56:33", "insideTemperature" : 75, "insideHumidity" : 63, "outsideTemperature" : 70.7,
+ * "outsideHumidity" : 95, "dewPoint" : 69, "windChill" : 71, "heatIndex" : 73, "thsw" : 72, "windDirection" : 32767,
+ * "gustSpeed" : 255, "gustDirection" : -1,
+ * "dominantWindDirections" : ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"],
+ * "barometricPressure" : 30.09, "atmosphericPressure" : 30.021, "barometerTrend" : "Steady", "rainRate" : 0,
+ * "rainToday" : 0.03, "rain15Minute" : 0, "rainHour" : 0, "rain24Hour" : 0.03, "rainMonth" : 0.62,
+ * "rainWeatherYear" : 34.21, "solarRadiation" : 0, "dayET" : 0.043, "monthET" : 3.02, "yearET" : 33.03,
+ * "uvIndex" : 0, "stormStart" : "2024-09-25", "stormRain" : 0.03,
+ * "forecastRule" : "Increasing clouds with little temperature change. Precipitation possible within 24 to 48 hours.",
+ * "forecast" : "Partly cloudy", "sunrise" : "06:53", "sunset" : "18:52",
+ * "extraTemperatures" : [  ], "extraHumidities" : [  ], "soilTemperatures" : [  ], "soilMoistures" : [  ], "leafTemperatures" : [  ], "leafWetnesses" : [  ] }
+ *
+ */
 
 namespace vws {
 
