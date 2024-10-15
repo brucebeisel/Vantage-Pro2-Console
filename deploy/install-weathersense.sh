@@ -87,6 +87,9 @@ chmod +x /etc/init.d/weathersense
 ln -s -f /etc/init.d/weathersense /etc/rc5.d/S99weathersense
 ln -s -f /etc/init.d/weathersense /etc/rc5.d/K99weathersense
 
+echo "Creating cron entry for data backup..."
+crontab -u weathersense -e $dir/weathersense.cron
+
 echo "Checking for old archive data..."
 #archives=`ls -r $rootdir/*/archive`
 

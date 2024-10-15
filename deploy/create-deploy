@@ -67,6 +67,8 @@ cp README $basedir
 
 cp README.archive $installdir/archive/README
 
+cp weathersense.cron $installdir
+
 echo $version > $installdir/weathersense-version.txt
 
 echo "Copying VantageConsole and VantageUpload to $installdir/node..."
