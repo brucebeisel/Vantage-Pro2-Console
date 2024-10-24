@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <thread>
 #include <atomic>
 #include <fstream>
+#include <getopt.h>
 #include "AlarmManager.h"
 #include "ArchiveManager.h"
 #include "CommandSocket.h"
@@ -136,6 +137,8 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+const char * usage = "Usage: vws -p <weather station serial port> -d <data directory> [-v <debug verbosity (0-3)>] [-l <log file prefix>]";
+
 int
 main(int argc, char *argv[]) {
 #ifndef _WIN32
@@ -144,20 +147,83 @@ main(int argc, char *argv[]) {
     signal(SIGTERM, sigHandler);
 #endif
 
-    if (argc < 3 || argc > 4) {
-        cerr << "Usage: vws <weather station serial port> <data directory> [log file prefix]" << endl;
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
+
+    string serialPortName;
+    string dataDirectory;
+    string logFilePrefix;
+    VantageLogger::Level debugLevel;
+    int debugLevelOption;
+
+    bool errorFound = false;
+    int opt;
+    while ((opt = getopt(argc, argv, "d:l:p:v:h")) != -1) {
+        switch (opt) {
+            case 'd':
+                dataDirectory = optarg;
+                break;
+
+            case 'l':
+                logFilePrefix = optarg;
+                VantageLogger::setLogFileParameters(logFilePrefix, 20, 25); // 20 25 MB files
+                break;
+
+            case 'p':
+                cout << "Serial port: " << optarg << endl;
+                serialPortName = optarg;
+                break;
+
+            case 'v':
+                debugLevelOption = atoi(optarg);
+                if (debugLevelOption < 0 || debugLevelOption > 3) {
+                    cerr << "Invalid debug verbosity. Must be between 0 and 3" << endl;
+                    errorFound = true;
+                }
+                else {
+                    switch (debugLevelOption) {
+                        case 0:
+                            debugLevel = VantageLogger::VANTAGE_INFO;
+                            break;
+
+                        case 1:
+                            debugLevel = VantageLogger::VANTAGE_DEBUG1;
+                            break;
+
+                        case 2:
+                            debugLevel = VantageLogger::VANTAGE_DEBUG2;
+                            break;
+
+                        case 3:
+                            debugLevel = VantageLogger::VANTAGE_DEBUG3;
+                            break;
+                    }
+
+                    VantageLogger::setLogLevel(debugLevel);
+                }
+                break;
+
+            case 'h':
+            default:
+                errorFound = true;
+                break;
+        }
+    }
+
+    if (serialPortName == "") {
+        cerr << "Serial port not specified!" << endl;
+        errorFound = true;
+    }
+
+    if (dataDirectory == "") {
+        cerr << "Data directory not specified!" << endl;
+        errorFound = true;
+    }
+
+    if (errorFound) {
+        cerr << usage << endl;
         exit(1);
     }
 
-    const string serialPortName(argv[1]);
-    const string dataDirectory(argv[2]);
-
-    if (argc == 4) {
-        const string logFilePrefix(argv[3]);
-        VantageLogger::setLogFileParameters(logFilePrefix, 20, 25); // 20 25 MB files
-    }
-
-    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     thread consoleThread(consoleThreadEntry, dataDirectory, serialPortName, 19200);
 
     consoleThread.join();
