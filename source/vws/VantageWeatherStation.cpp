@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,11 +102,15 @@ VantageWeatherStation::closeStation() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::wakeupStation() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Attempting to wake up console" << endl;
     bool awake = false;
 
     for (int i = 0; i < WAKEUP_TRIES && !awake; i++) {
-        logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Attempting to wakeup console" << endl;
-        serialPort.write(WAKEUP_COMMAND);
+        logger.log(VantageLogger::VantageLogger::VANTAGE_DEBUG1) << "Wake up console attempt " << (i + 1) << " of " << WAKEUP_TRIES << endl;
+        if (!serialPort.write(WAKEUP_COMMAND)) {
+            logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "Write to console failed while waking up the console, aborting wake up sequence" << endl;
+            return false;
+        }
       
         //
         // After sending the wakeup command the console will respond with <LF><CR>
@@ -132,8 +136,17 @@ VantageWeatherStation::wakeupStation() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::sendTestCommand() {
-    serialPort.write(TEST_CMD);
-    serialPort.write(COMMAND_TERMINATOR);
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending TEST command" << endl;
+
+    if (!serialPort.write(TEST_CMD)) {
+        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "sendTestCommand() failed to write the test command" << endl;
+        return false;
+    }
+
+    if (!serialPort.write(COMMAND_TERMINATOR)) {
+        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "sendTestCommand() failed to write the test command terminator" << endl;
+        return false;
+    }
 
     if (serialPort.readBytes(buffer, TEST_RESPONSE.length())) {
         logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "sendTestCommand() read failed while waiting for test response" << endl;
@@ -152,6 +165,7 @@ VantageWeatherStation::sendTestCommand() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport & report) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending RXCHECK command" << endl;
     string response;
 
     if (!sendStringValueCommand(RECEIVE_CHECK_CMD, response))
@@ -173,6 +187,8 @@ VantageWeatherStation::retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport 
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveConsoleType(string * consoleTypeString) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending WRD (Console Type) command" << endl;
+
     const char command[] = {STATION_TYPE_CMD[0], STATION_TYPE_CMD[1], STATION_TYPE_CMD[2], WRD_BYTE1, WRD_BYTE2, '\0'};
 
     if (!sendAckedCommand(command))
@@ -200,13 +216,22 @@ VantageWeatherStation::retrieveConsoleType(string * consoleTypeString) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::performReceiveTest() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending RXCHECK command" << endl;
+
     //
     // There is no documentation in the serial protocol document regarding this
     // command. It does not state if a command terminator must be added or if
     // there is any response.
     //
-    serialPort.write(RXTEST_CMD);
-    serialPort.write(COMMAND_TERMINATOR);
+    if (!serialPort.write(RXTEST_CMD)) {
+        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "performReceiverTest() failed to write the receiver test command" << endl;
+        return false;
+    }
+
+    if (!serialPort.write(COMMAND_TERMINATOR)) {
+        logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "performReceiverTest() failed to write the receiver test command terminator" << endl;
+        return false;
+    }
 
     return true;
 }
@@ -215,7 +240,8 @@ VantageWeatherStation::performReceiveTest() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveFirmwareVersion(std::string & firmwareVersion) {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving firmware version" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending NVER (Firmware version) command" << endl;
+
     return sendStringValueCommand(FIRMWARE_VERSION_CMD, firmwareVersion);
 }
 
@@ -223,6 +249,7 @@ VantageWeatherStation::retrieveFirmwareVersion(std::string & firmwareVersion) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveReceiverList(std::vector<StationId> & sensorStations) {
+    logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Sending RECEIVERS (Receiver List) command" << endl;
 
     if (!sendOKedCommand(RECEIVER_LIST_CMD))
        return false;
@@ -245,7 +272,7 @@ VantageWeatherStation::retrieveReceiverList(std::vector<StationId> & sensorStati
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveFirmwareDate(std::string & firmwareDate) {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving firmware date" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending VER (Firmware Date) command" << endl;
 
     return sendStringValueCommand(FIRMWARE_DATE_CMD, firmwareDate);
 }
@@ -268,6 +295,7 @@ VantageWeatherStation::currentValuesLoop(int records) {
     bool resetNeeded = false;
 
     ostringstream command;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending LPS (LOOP packet) command" << endl;
     command << LPS_CMD << " " << (records * 2);
 
     if (!sendAckedCommand(command.str()))
@@ -334,7 +362,7 @@ VantageWeatherStation::retrieveLoopPacket(LoopPacket & loopPacket) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveHiLowValues(HiLowPacket & packet) {
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Retrieving Hi/Low packet" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending HILOWS (Request High/Low packet) command" << endl;
 
     if (!sendAckedCommand(HIGH_LOW_CMD))
         return false;
@@ -352,6 +380,7 @@ VantageWeatherStation::retrieveHiLowValues(HiLowPacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::putYearlyRain(Rainfall rain) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending PUTRAIN (Put Yearly Rain) command" << endl;
     ostringstream ss;
 
     int argument = round(rain * 100.0);
@@ -365,6 +394,7 @@ VantageWeatherStation::putYearlyRain(Rainfall rain) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::putYearlyET(Evapotranspiration et) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending PUTET (Put Yearly ET) command" << endl;
     ostringstream ss;
 
     int argument = round(et * MONTH_YEAR_ET_SCALE);
@@ -385,7 +415,7 @@ VantageWeatherStation::putYearlyET(Evapotranspiration et) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageWeatherStation::dump(vector<ArchivePacket> & list) {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Dumping archive..." << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending DMP (Dump Archive) command" << endl;
     list.clear();
     list.reserve(NUM_ARCHIVE_RECORDS);
 
@@ -394,6 +424,7 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
         for (int i = 0; i < NUM_ARCHIVE_PAGES; i++) {
             readNextArchivePage(list, 0, zeroTime);
             if (!serialPort.write(DMP_SEND_NEXT_PAGE)) {
+                logger.log(VantageLogger::VANTAGE_WARNING) << "Canceling DMP command due to error writing send-next-page command" << endl;
                 break;
             }
         }
@@ -426,6 +457,7 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
     }
 
 
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending DMPAFT (Dump After) command" << endl;
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << time << endl;
     list.clear();
 
@@ -467,16 +499,19 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
     // dumped and which record in the first page is valid for the date specified
     //
     if (!serialPort.readBytes(buffer, DUMP_AFTER_RESPONSE_LENGTH + CRC_BYTES)) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read response to DMPAFT time data command" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Canceling DMPAFT due to read failure of time data response" << endl;
         return false;
     }
 
     if (!VantageCRC::checkCRC(buffer, DUMP_AFTER_RESPONSE_LENGTH)) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "DMPAFT response to time data failed CRC check" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Canceling DMPAFT due to CRC failure of time data response" << endl;
         return false;
     }
 
-    serialPort.write(string(1, ProtocolConstants::ACK));
+    if (!serialPort.write(string(1, ProtocolConstants::ACK))) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Canceling DMPAFT due to failure to write ACK to start dump sequence" << endl;
+        return false;
+    }
 
     int numPages = BitConverter::toInt16(buffer, 0);
     int firstRecord = BitConverter::toInt16(buffer, 2);
@@ -496,6 +531,8 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::eepromReadDataBlock(byte buffer[]) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending GETEE (Get EEPROM) command" << endl;
+
     if (!sendAckedCommand(DUMP_EEPROM_CMD))
         return false;
 
@@ -509,6 +546,8 @@ VantageWeatherStation::eepromReadDataBlock(byte buffer[]) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::eepromRead(unsigned address, unsigned count) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending EERD (EEPROM Read) command" << endl;
+
     ostringstream command;
     command << READ_EEPROM_CMD << " " << uppercase << hex << address << " " << count << nouppercase;
     if (!sendOKedCommand(command.str()))
@@ -536,6 +575,8 @@ VantageWeatherStation::eepromRead(unsigned address, unsigned count) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::eepromBinaryRead(unsigned address, unsigned count, char * output) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending EEBRD (EEPROM Binary Read) command" << endl;
+
     ostringstream command;
     command << READ_EEPROM_AS_BINARY_CMD << " " << uppercase << hex << address << " " << count << nouppercase;
 
@@ -555,6 +596,8 @@ VantageWeatherStation::eepromBinaryRead(unsigned address, unsigned count, char *
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::eepromWriteByte(unsigned address, byte value) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending EEWR (EEPROM Write) command" << endl;
+
     for (int i = 0; i < NUM_PROTECTED_EEPROM_BYTES; i++) {
         if (protectedEepromBytes[i] == address) {
             logger.log(VantageLogger::VANTAGE_ERROR) << "Skipping write to EEPROM address " << address << " because it is a protected byte" << endl;
@@ -571,6 +614,8 @@ VantageWeatherStation::eepromWriteByte(unsigned address, byte value) {
 ////////////////////////////////////////////////////////////////////////////////
 bool 
 VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], unsigned count) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending EEBWR (EEPROM Binary Write) command" << endl;
+
     //
     // Check the address range against the protected bytes
     //
@@ -638,6 +683,8 @@ VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustments
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateBarometerReadingAndElevation(Pressure baroReadingInHg, int elevationFeet) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending BAR (Barometer Reading and Elevation) command" << endl;
+
     ostringstream command;
     command << SET_BAROMETRIC_DATA_CMD << static_cast<int>(baroReadingInHg * BAROMETER_SCALE) << " " << elevationFeet;
 
@@ -654,6 +701,7 @@ VantageWeatherStation::updateBarometerReadingAndElevation(Pressure baroReadingIn
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveBarometerCalibrationParameters(BarometerCalibrationParameters & baroCalParams) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending BARDATA (Barometric Calibration Data) command" << endl;
     static constexpr int NUM_LINES = 9;
 
     if (!sendOKedCommand(GET_BAROMETRIC_CAL_DATA_CMD))
@@ -748,6 +796,8 @@ VantageWeatherStation::retrieveBarometerCalibrationParameters(BarometerCalibrati
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearArchive() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRLOG (Clear Archive) command" << endl;
+
     return sendAckedCommand(CLEAR_ARCHIVE_CMD);
 }
 
@@ -755,6 +805,8 @@ VantageWeatherStation::clearArchive() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearAlarmThresholds() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRALM (Clear Alarm Thresholds) command" << endl;
+
     return sendOKedWithDoneCommand(CLEAR_ALARM_THRESHOLDS_CMD);
 }
 
@@ -762,6 +814,8 @@ VantageWeatherStation::clearAlarmThresholds() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRCAL (Clear Temperature and Humidity Calibration Data) command" << endl;
+
     // The Vantage protocol document indicates that the leading <LF><CR>
     // is not sent in response to the CLRCAL command. This needs to be tested
     // to determine if this is an error in the document or an inconsistency
@@ -775,6 +829,8 @@ VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearGraphPoints() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRGRA (Clear Graph Points) command" << endl;
+
     // See the comment in clearTemperatureHumidityCalibrationOffsets()
     return sendOKedWithDoneCommand(CLEAR_GRAPH_POINTS_CMD);
 }
@@ -783,6 +839,8 @@ VantageWeatherStation::clearGraphPoints() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearCumulativeValue(ProtocolConstants::CumulativeValue cumValue) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRVAR (Clear Cumulative Values) command" << endl;
+
     ostringstream ss;
 
     ss << CLEAR_CUMULATIVE_VALUE_CMD << " " << static_cast<int>(cumValue);
@@ -794,6 +852,8 @@ VantageWeatherStation::clearCumulativeValue(ProtocolConstants::CumulativeValue c
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearHighValues(ProtocolConstants::ExtremePeriod period) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRHIGHS (Clear High Values) command" << endl;
+
     ostringstream command;
     command << CLEAR_HIGH_VALUES_CMD << " " << static_cast<int>(period);
 
@@ -804,6 +864,8 @@ VantageWeatherStation::clearHighValues(ProtocolConstants::ExtremePeriod period) 
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearLowValues(ProtocolConstants::ExtremePeriod period) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRLOWS (Clear Low Values) command" << endl;
+
     ostringstream command;
     command << CLEAR_LOW_VALUES_CMD << " " << static_cast<int>(period);
 
@@ -814,6 +876,8 @@ VantageWeatherStation::clearLowValues(ProtocolConstants::ExtremePeriod period) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearActiveAlarms() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRBITS (Clear Active Alarms) command" << endl;
+
     return sendAckedCommand(CLEAR_ACTIVE_ALARMS_CMD);
 }
 
@@ -821,6 +885,8 @@ VantageWeatherStation::clearActiveAlarms() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::clearCurrentData() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending CLRDATA (Clear Current Data Values) command" << endl;
+
     return sendAckedCommand(CLEAR_CURRENT_DATA_VALUES_CMD);
 }
 
@@ -836,6 +902,8 @@ VantageWeatherStation::clearCurrentData() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateBaudRate(BaudRate baudRate) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending BAUD (Set Baud Rate) command" << endl;
+
     ostringstream command;
     command << SET_BAUD_RATE_CMD << " " << static_cast<int>(baudRate);
 
@@ -857,6 +925,7 @@ VantageWeatherStation::updateBaudRate(BaudRate baudRate) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateConsoleTime() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending SETTIME (Set Console Time) command" << endl;
 
     //
     // If the console time is close to the actual time, then don't set the time.
@@ -908,6 +977,8 @@ VantageWeatherStation::updateConsoleTime() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveConsoleTime(DateTimeFields & stationTime) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending GETTIME (Get Console Time) command" << endl;
+
     bool success = true;
     stationTime.resetDateTimeFields();
 
@@ -944,6 +1015,8 @@ VantageWeatherStation::retrieveConsoleTime(DateTimeFields & stationTime) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateArchivePeriod(ArchivePeriod period) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending SETPER (Set Archive Period) command" << endl;
+
     ostringstream command;
     command << SET_ARCHIVE_PERIOD_CMD << " " << static_cast<int>(period);
     logger.log(VantageLogger::VANTAGE_INFO) << "Updating archive period to: " << static_cast<int>(period) << endl;
@@ -987,6 +1060,8 @@ VantageWeatherStation::getArchivePeriod() const {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::startArchiving() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending START (Start Archiving) command" << endl;
+
     //
     // Note that the Vantage serial protocol document does specify the command sequence
     // of the START command. The OK sequence was determined by trial and error.
@@ -999,6 +1074,8 @@ VantageWeatherStation::startArchiving() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::stopArchiving() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending STOP (Stop Archiving) command" << endl;
+
     //
     // Note that the Vantage serial protocol document does specify the command sequence
     // of the STOP command. The OK sequence was determined by trial and error.
@@ -1011,6 +1088,8 @@ VantageWeatherStation::stopArchiving() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::initializeSetup() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending NEWSETUP (Initialize Console Setup) command" << endl;
+
     //
     // Note that an "R" will appear in the lower right corner of the console display to
     // indicate the console is initializing
@@ -1025,6 +1104,8 @@ VantageWeatherStation::initializeSetup() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::controlConsoleLamp(bool on) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending LAMPS (Console Lamps Control) command" << endl;
+
     ostringstream command;
     command << CONTROL_LAMP_CMD << " " << (on ? "1" : "0");
 
@@ -1094,7 +1175,7 @@ VantageWeatherStation::readAfterArchivePages(const DateTimeFields & afterTime, v
         // Process a single page. This will return 1 - 5 packets
         //
         if (!readNextArchivePage(list, firstRecordInPageToProcess, newestPacketTime)) {
-            serialPort.write(DMP_CANCEL_DOWNLOAD);
+            serialPort.write(DMP_CANCEL_DOWNLOAD); // No need to check write() return as this is an abort sequence
             success = false;
             break;
         }
@@ -1148,12 +1229,15 @@ VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int fir
             }
             else {
                 logger.log(VantageLogger::VANTAGE_WARNING) << "CRC check failed on archive page. Try # " << (i + 1) << endl;
-                serialPort.write(DMP_RESEND_PAGE);
                 success = false;
+                if (!serialPort.write(DMP_RESEND_PAGE)) {
+                    logger.log(VantageLogger::VANTAGE_WARNING) << "Aborting attempt to read the next archive page due to write error" << endl;
+                    break;
+                }
             }
         }
         else {
-            serialPort.write(DMP_CANCEL_DOWNLOAD);
+            serialPort.write(DMP_CANCEL_DOWNLOAD); // No need to check return value of write() as this is an abort path
             success = false;
             break;
         }

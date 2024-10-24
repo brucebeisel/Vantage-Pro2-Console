@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -147,7 +147,7 @@ WindRoseData::applyWindSample(const Measurement<HeadingIndex> & headingIndex, Sp
         calmSamples++;
 
     //
-    // Cnvert the speed to the units specified in the constructor. Note that it is assumed that the speed bins
+    // Convert the speed to the units specified in the constructor. Note that it is assumed that the speed bins
     // were specified in the same units
     //
     Speed convertedSpeed = 0.0;

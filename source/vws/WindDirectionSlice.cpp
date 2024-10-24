@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,6 +123,14 @@ WindDirectionSlice::getSampleCount() const {
 void
 WindDirectionSlice::setSampleCount(int count) {
     sampleCount = count;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+WindDirectionSlice::clearData() {
+    sampleCount = 0;
+    last10MinuteDominantTime = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

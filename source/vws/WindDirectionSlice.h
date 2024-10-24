@@ -109,6 +109,11 @@ public:
     void setSampleCount(int count);
 
     /**
+     * Clear the data (sample count and dominant time).
+     */
+    void clearData();
+
+    /**
      * Set the last time this heading was the 10 minute dominant wind direction.
      *
      * @param The time this heading was the 10 minute dominant wind direction

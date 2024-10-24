@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -140,6 +140,11 @@ private:
      * Restore the dominant wind data from the checkpoint file, ensuring the data is not too old.
      */
     void restoreCheckpoint();
+
+    /**
+     * Clear all of the wind slice data.
+     */
+    void clearWindSliceData();
 
     static constexpr Heading MAX_HEADING = 360.0;
 

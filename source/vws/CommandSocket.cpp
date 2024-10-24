@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -307,7 +307,11 @@ CommandSocket::acceptConnection() {
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 250000;
-    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        int en = errno;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "setsockopt() failed. Error: " << strerror(en) << endl;
+    }
 
     socketFdList.push_back(fd);
     std::sort(socketFdList.begin(), socketFdList.end());

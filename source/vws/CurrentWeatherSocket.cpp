@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,23 +79,23 @@ CurrentWeatherSocket::getLocalIpAddress(struct sockaddr_in & saddr)
 {
     bool rv = false;
     struct ifaddrs *addrs;
-    struct ifaddrs *tmp;
+    struct ifaddrs *addr;
 
     getifaddrs(&addrs);
-    tmp = addrs;
+    addr = addrs;
 
-    while (tmp) {
-        if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET) {
-            struct sockaddr_in *pAddr = reinterpret_cast<struct sockaddr_in *>(tmp->ifa_addr);
-            if (strncmp(tmp->ifa_name, "lo", 2) != 0) {
-                printf("%s: %s\n", tmp->ifa_name, inet_ntoa(pAddr->sin_addr));
+    while (addr) {
+        if (addr->ifa_addr && addr->ifa_addr->sa_family == AF_INET) {
+            struct sockaddr_in *pAddr = reinterpret_cast<struct sockaddr_in *>(addr->ifa_addr);
+            if (strncmp(addr->ifa_name, "lo", 2) != 0) {
+                logger.log(VantageLogger::VANTAGE_DEBUG1) << "Using " << addr->ifa_name << " (" << inet_ntoa(pAddr->sin_addr) << ") as local IP address" << endl;
                 saddr = *pAddr;
                 rv = true;
                 break;
             }
         }
 
-        tmp = tmp->ifa_next;
+        addr = addr->ifa_next;
     }
 
     freeifaddrs(addrs);

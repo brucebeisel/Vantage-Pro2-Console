@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -148,10 +148,10 @@ ArchiveManager::queryArchiveRecords(const DateTimeFields & startTime, const Date
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
+void
 ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool afterTime) {
     if (archivePacketCount < 2)
-        return true;
+        return;
 
     //
     // Use high resolution clock to track performance of positioning the stream
@@ -245,7 +245,7 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
                                               << " and required " << forwardReadsPerformed << " forward reads and "
                                               << backwardReadsPerformed << " backward reads" << endl;
 
-    return true;
+    return;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -329,7 +329,7 @@ ArchiveManager::trimBackupDirectory() {
             }
             else {
                 string errorString(strerror(errno));
-                logger.log(VantageLogger::VANTAGE_WARNING) << "Called to stat() failed for file " << path << ". Error: " << errorString << endl;
+                logger.log(VantageLogger::VANTAGE_WARNING) << "Call to stat() failed for file " << path << ". Error: " << errorString << endl;
             }
         }
 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,15 +60,17 @@ VantageLogger &
 VantageLogger::getLogger(const std::string & name) {
     LoggerMap::iterator loggerIterator = loggers.find(name);
 
+    VantageLogger * logger = NULL;
+
     if (loggerIterator != loggers.end()) {
-        VantageLogger * logger = loggerIterator->second;
-        return *logger;
+        logger = loggerIterator->second;
+    }
+    else {
+        logger = new VantageLogger(name);
+        loggers.insert(std::pair<string,VantageLogger *>(name, logger));
     }
 
-    VantageLogger * newLogger = new VantageLogger(name);
-    loggers.insert(std::pair<string,VantageLogger *>(name, newLogger));
-
-    return *newLogger;
+    return *logger;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +103,7 @@ VantageLogger::buildLogFilename(int sequenceNumber) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantageLogger::setLogFileParameters(const std::string& prefix, int maximumFiles, int maxFileSizeMb) {
+VantageLogger::setLogFileParameters(const std::string & prefix, int maximumFiles, int maxFileSizeMb) {
     int digits = int(log10(maximumFiles) + 1);
     logFilePattern = prefix + "_%0" + std::to_string(digits) + "d.log";
     maxFiles = maximumFiles;

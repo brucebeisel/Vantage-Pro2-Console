@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,8 +176,14 @@ SerialPort::write(const void * buffer, int nbytes) {
 
     ssize_t bytesWritten = ::write(commPort, buffer, nbytes);
 
+    if (bytesWritten == -1) {
+        int error = errno;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Write to console failed (" << strerror(error) << ")" << endl;
+        return false;
+    }
+
     if (bytesWritten != nbytes) {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Write to station failed. Expected=" << nbytes << " Actual=" << bytesWritten << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Write to console failed. Expected=" << nbytes << " Actual=" << bytesWritten << endl;
         return false;
     }
     else

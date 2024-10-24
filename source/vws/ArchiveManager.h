@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -190,9 +190,8 @@ private:
      * @param is         The stream that has the archive open
      * @param searchTime The time to search within the archive
      * @param afterTime  Whether the stream will be position on or after the search time
-     * @return True if the stream was positioned successfully
      */
-    bool positionStream(std::istream & is, DateTime searchTime, bool afterTime);
+    void positionStream(std::istream & is, DateTime searchTime, bool afterTime);
 
     /**
      * Add a single packet to the archive.

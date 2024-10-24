@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,16 @@ class StormData;
 
 class GraphDataRetriever {
 public:
+    /**
+     * Constructor.
+     *
+     * @param station The weather station from which to retrieve the graph data
+     */
     GraphDataRetriever(VantageWeatherStation & station);
+
+    /**
+     * Destructor.
+     */
     virtual ~GraphDataRetriever();
 
     /**

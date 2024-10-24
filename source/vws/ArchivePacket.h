@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -213,8 +213,6 @@ private:
     void decodeDateTimeValues();
 
     static constexpr DateTime EMPTY_ARCHIVE_PACKET_TIME = 0;
-    static constexpr int UNKNOWN_ET = 0;
-    static constexpr int UNKNOWN_SOLAR_RADIATION = 0;
     static constexpr int YEAR_OFFSET = 2000;
 
     //

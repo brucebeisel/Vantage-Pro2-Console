@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,14 @@ class VantageLogger;
  */
 class HiLowPacket {
 public:
+    /**
+     * Constructor.
+     */
     HiLowPacket();
+
+    /**
+     * Destructor.
+     */
     ~HiLowPacket();
 
     /**
@@ -42,6 +49,11 @@ public:
      */
     void decodeHiLowPacket(byte buffer[]);
 
+    /**
+     * Format the Hi/Low packet using JSON.
+     *
+     * @return The JSON string
+     */
     std::string formatJSON() const;
 
     //

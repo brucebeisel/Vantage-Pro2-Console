@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,10 +98,7 @@ private:
      * Private constructor to prevent object from being created.
      */
     UnitConverter() = delete;
-
-    /**
-     * Private destructor which should never be called.
-     */
+    UnitConverter(const UnitConverter &) = delete;
     ~UnitConverter() = delete;
 };
 }

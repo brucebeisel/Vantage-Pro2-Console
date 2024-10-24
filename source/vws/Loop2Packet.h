@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ public:
      *
      * @return The internal buffer
      */
-    const byte *                     getPacketData() const;
+    const byte * getPacketData() const;
 
     /**
      * Get the type of this packet.
@@ -64,7 +64,7 @@ public:
      *
      * @return The LOOP2 packet type
      */
-    int                              getPacketType() const;
+    int getPacketType() const;
 
     /**
      * Get various values from the LOOP2 packet.

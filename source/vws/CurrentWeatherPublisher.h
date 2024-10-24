@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,24 @@
 namespace vws {
 class CurrentWeather;
 
+/**
+ * Interface class that will publish current wather JSON.
+ */
 class CurrentWeatherPublisher {
 public:
+    /**
+     * Virtual destructor.
+     */
     virtual ~CurrentWeatherPublisher() {}
+
+    /**
+     * Publish a current weather record.
+     *
+     * @param currentWeather The current weather record to be published
+     */
     virtual void publishCurrentWeather(const CurrentWeather & currentWeather) = 0;
 };
 
 }
-
 
 #endif /* CURRENT_WEATHER_PUBLISHER_H */

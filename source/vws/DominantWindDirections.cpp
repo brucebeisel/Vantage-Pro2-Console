@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,10 @@ const std::string DominantWindDirections::SLICE_NAMES[NUM_SLICES] = {
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
 };
 
-static char dateBuffer[100];
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+static char dateBuffer[100];
 static const char *
 dateFormat(time_t t) {
     struct tm tm;
@@ -241,7 +243,10 @@ DominantWindDirections::saveCheckpoint() const {
         struct tm tm;
         Weather::localtime(dtime, tm);
         strftime(buffer, sizeof(buffer), "%H:%M:%S", &tm);
-        ofs << heading << " " << dtime << " " << count << " " << buffer << endl;
+
+        ofs << setw(5) << fixed << setprecision(1) << heading << " "
+                   << setfill(' ') << setw(10) << dtime << " "
+                   << setw(5) << count << " " << buffer << endl;
     }
 
     ofs.close();
@@ -266,10 +271,32 @@ DominantWindDirections::restoreCheckpoint() {
     DateTime newestTime = 0;
     DateTime now = time(0);
 
+    clearWindSliceData();
+
+    //
+    // TODO There was some issue where the dominant time (dtime) was an invalid time (140733193388032) for all headings. This caused
+    // all headings to be dominant. Need to add a sanity check of the data and discard any data that is considered out of range.
+    // More information: The dtime is equivalent to 32766 shifted left, so max 16 bit integer - 1, shifted. I have no idea if
+    // this has any meaning, but it seems coincidental. The second time this was noticed was after VWS had a error communicating
+    // with the console due to the console's port changing spontaneously from /dev/ttyUSB0 to /dev/ttyUSB1
+    //
     while (std::getline(ifs, line)) {
-        sscanf(line.c_str(), "%f %d %d", &heading, &dtime, &count);
+        if (sscanf(line.c_str(), "%f %d %d", &heading, &dtime, &count) != 3) {
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid line of data in dominant wind checkpoint file. Ignoring entire file (" << line << ")" << endl;
+            clearWindSliceData();
+            return;
+        }
 
         newestTime = ::max(newestTime, dtime);
+
+        //
+        // Make sure the data is valid
+        //
+        if (dtime > now) {
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid time in dominant wind checkpoint file. Ignoring entire file (" << Weather::formatDateTime(dtime) << ")" << endl;
+            clearWindSliceData();
+            return;
+        }
 
         //
         // Only save the dominant time if it's less than an hour old
@@ -310,6 +337,14 @@ DominantWindDirections::restoreCheckpoint() {
         }
     }
     ifs.close();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DominantWindDirections::clearWindSliceData() {
+    for (int i = 0; i < NUM_SLICES; i++)
+        windSlices[i].clearData();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
