@@ -45,7 +45,7 @@ class VantageLogger;
  * is detected. The start of the period will be moved back to the beginning of the current minute
  * so that all 10 minute periods start on a even minute boundary.
  */
-static const std::string CHECKPOINT_FILE = "dominant-wind-checkpoint.dat";
+static const std::string DEFAULT_CHECKPOINT_FILE = "dominant-wind-checkpoint.dat";
 class DominantWindDirections {
 public:
     /**
@@ -54,6 +54,14 @@ public:
      * @param checkpointDir The directory into which the checkpoint file will be written
      */
     DominantWindDirections(const std::string & checkpointDir);
+
+    /**
+     * Constructor.
+     *
+     * @param checkpointDir  The directory into which the checkpoint file will be written
+     * @param checkpointFile The name of the file into which the check data will be written
+     */
+    DominantWindDirections(const std::string & checkpointDir, const std::string & checkpointFile);
 
     /**
      * Destructor.
@@ -181,7 +189,7 @@ private:
     time_t                   startOf10MinuteTimeWindow;
     time_t                   endOf10MinuteTimeWindow;
     std::vector<std::string> dominantWindDirectionList;
-    std::string              checkpointDirectory;
+    std::string              checkpointFilePath;
 };
 }
 

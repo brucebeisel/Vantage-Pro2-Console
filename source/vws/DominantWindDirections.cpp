@@ -50,9 +50,14 @@ dateFormat(time_t t) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DominantWindDirections::DominantWindDirections(const std::string & cpd) : startOf10MinuteTimeWindow(0),
+DominantWindDirections::DominantWindDirections(const std::string & cpd) : DominantWindDirections(cpd, DEFAULT_CHECKPOINT_FILE) {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+DominantWindDirections::DominantWindDirections(const std::string & dir, const std::string & file) : startOf10MinuteTimeWindow(0),
                                                                           endOf10MinuteTimeWindow(0),
-                                                                          checkpointDirectory(cpd),
+                                                                          checkpointFilePath(dir + "/" + file),
                                                                           logger(VantageLogger::getLogger("DominantWindDirections")) {
     Heading heading = -HALF_SLICE;
     for (int i = 0; i < NUM_SLICES; i++) {
@@ -224,11 +229,10 @@ DominantWindDirections::getDominantDirectionsCount() const {
 ////////////////////////////////////////////////////////////////////////////////
 void
 DominantWindDirections::saveCheckpoint() const {
-    string path = checkpointDirectory + "/" + CHECKPOINT_FILE;
-    ofstream ofs(path.c_str(), ios::trunc);
+    ofstream ofs(checkpointFilePath.c_str(), ios::trunc);
 
     if (!ofs.is_open()) {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open Dominant Wind Direction checkpoint file for writing" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open Dominant Wind Direction checkpoint file '" << checkpointFilePath << "' for writing" << endl;
         return;
     }
 
@@ -256,11 +260,10 @@ DominantWindDirections::saveCheckpoint() const {
 ////////////////////////////////////////////////////////////////////////////////
 void
 DominantWindDirections::restoreCheckpoint() {
-    string path = checkpointDirectory + "/" + CHECKPOINT_FILE;
-    ifstream ifs(path.c_str());
+    ifstream ifs(checkpointFilePath.c_str());
 
     if (!ifs.is_open()) {
-        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to open Dominant Wind Direction checkpoint file for reading" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open Dominant Wind Direction checkpoint file '" << checkpointFilePath << "' for reading" << endl;
         return;
     }
 

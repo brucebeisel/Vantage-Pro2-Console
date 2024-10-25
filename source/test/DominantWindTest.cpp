@@ -30,7 +30,7 @@ main(int argc, char * argv[]) {
     struct tm tm;
 
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
-    DominantWindDirections dominantWinds("foo.dat");
+    DominantWindDirections dominantWinds(".");
 
     memset(&tm, 0, sizeof(tm));
     tm.tm_year = 122;
@@ -133,6 +133,16 @@ main(int argc, char * argv[]) {
 
     for (int i = 0; i < 1000; i++) {
         h = (i % 4) * 22;
+        s = 1;
+        dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
+        dominantWinds.dumpData();
+        t += 7;
+    }
+
+    t = time(0) - 3600;
+
+    for (int i = 0; i < 1000; i++) {
+        h = 32767;
         s = 1;
         dominantWinds.processWindSample(t, h, s); // @suppress("Ambiguous problem")
         dominantWinds.dumpData();
