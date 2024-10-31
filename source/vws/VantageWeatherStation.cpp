@@ -74,14 +74,10 @@ VantageWeatherStation::addLoopPacketListener(LoopPacketListener & listener) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageWeatherStation::removeLoopPacketListener(LoopPacketListener & listener) {
-    for (LoopPacketListenerList::iterator it = loopPacketListenerList.begin();
-         it != loopPacketListenerList.end();
-         ++it) {
-        if (*it == &listener) {
-            loopPacketListenerList.erase(it);
-            break;
-        }
-    }
+    LoopPacketListenerList::iterator item = std::find(loopPacketListenerList.begin(), loopPacketListenerList.end(), &listener);
+
+    if (item != loopPacketListenerList.end())
+        loopPacketListenerList.erase(item);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -310,20 +306,16 @@ VantageWeatherStation::currentValuesLoop(int records) {
             //
             // Send the LOOP packet to each listener
             //
-            for (LoopPacketListenerList::iterator it = loopPacketListenerList.begin();
-                                                  it != loopPacketListenerList.end();
-                                                ++it) {
-                terminateLoop = terminateLoop || !(*it)->processLoopPacket(loopPacket);
+             for (auto listener : loopPacketListenerList) {
+                terminateLoop = terminateLoop || !listener->processLoopPacket(loopPacket);
             }
 
             if (!terminateLoop && readLoop2Packet(loop2Packet)) {
                 //
                 // Send the LOOP2 packet to each listener
                 //
-                for (LoopPacketListenerList::iterator it = loopPacketListenerList.begin();
-                                                      it != loopPacketListenerList.end();
-                                                    ++it) {
-                    terminateLoop = terminateLoop || !(*it)->processLoop2Packet(loop2Packet);
+                for (auto listener : loopPacketListenerList) {
+                    terminateLoop = terminateLoop || !listener->processLoop2Packet(loop2Packet);
                 }
             }
             else

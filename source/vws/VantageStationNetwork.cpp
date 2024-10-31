@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -299,14 +299,14 @@ VantageStationNetwork::createRepeaterChains() {
     // Repeater A. Note that a chain has a maximum of 4 repeaters in a chain. This is
     // due to communication/delay concerns.
     //
-    for (RepeaterMap::iterator it = repeaters.begin(); it != repeaters.end(); ++it) {
+    for (auto repeater : repeaters) {
         RepeaterChain chain;
-        chain.name = repeaterIdEnum.valueToString(it->first);
-        chain.endPoint = it->first;
+        chain.name = repeaterIdEnum.valueToString(repeater.first);
+        chain.endPoint = repeater.first;
         chain.hasRepeater = true;
-        chain.repeaters.push_back(it->first);
+        chain.repeaters.push_back(repeater.first);
 
-        RepeaterId previousRepeaterId = it->first;
+        RepeaterId previousRepeaterId = repeater.first;
         do {
             previousRepeaterId = repeaterIdEnum.previousValue(previousRepeaterId);
             if (previousRepeaterId != RepeaterId::NO_REPEATER && repeaters.find(previousRepeaterId) == repeaters.end()) {
@@ -321,10 +321,10 @@ VantageStationNetwork::createRepeaterChains() {
     //
     // Now create the repeater nodes that were implicitly identified
     //
-    for (RepeaterChainMap::iterator it = chains.begin(); it != chains.end(); ++it) {
-        for (int i = 1; i < it->second.repeaters.size(); i++) {
+    for (auto chain : chains) {
+        for (int i = 1; i < chain.second.repeaters.size(); i++) {
             Repeater repeater;
-            repeater.repeaterId = it->second.repeaters[i];
+            repeater.repeaterId = chain.second.repeaters[i];
             repeater.endPoint = false;
             repeater.impliedExistance = true;
             repeaters[repeater.repeaterId] = repeater;

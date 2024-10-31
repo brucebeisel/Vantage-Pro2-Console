@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -180,8 +180,8 @@ AlarmManager::retrieveThresholds() {
         return false;
     }
 
-    for (vector<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
-        AlarmProperties props = it->getAlarmProperties();
+    for (auto alarm : alarms) {
+        AlarmProperties props = alarm.getAlarmProperties();
         int offset = props.eepromThresholdByte;
         int thresholdValue = 0;
 
@@ -190,7 +190,7 @@ AlarmManager::retrieveThresholds() {
         else
             thresholdValue = BitConverter::toUint16(buffer, offset);
 
-        it->setThreshold(thresholdValue);
+        alarm.setThreshold(thresholdValue);
     }
 
     return true;
@@ -202,9 +202,9 @@ bool
 AlarmManager::updateThresholds() {
     byte buffer[EE_ALARM_THRESHOLDS_SIZE];
 
-    for (vector<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
-        const AlarmProperties props = it->getAlarmProperties();
-        BitConverter::getBytes(it->getEepromThreshold(), buffer, props.eepromThresholdByte, props.eepromThresholdSize);
+    for (auto alarm : alarms) {
+        const AlarmProperties props = alarm.getAlarmProperties();
+        BitConverter::getBytes(alarm.getEepromThreshold(), buffer, props.eepromThresholdByte, props.eepromThresholdSize);
     }
 
     if (!station.eepromBinaryWrite(EE_ALARM_THRESHOLDS_ADDRESS, buffer, EE_ALARM_THRESHOLDS_SIZE)) {
@@ -219,10 +219,10 @@ AlarmManager::updateThresholds() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 AlarmManager::setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits) {
-    for (vector<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
-        AlarmProperties props = it->getAlarmProperties();
+    for (auto alarm : alarms) {
+        AlarmProperties props = alarm.getAlarmProperties();
         if (props.alarmBit >= 0)
-            it->setTriggered(alarmBits[props.alarmBit] == 1);
+            alarm.setTriggered(alarmBits[props.alarmBit] == 1);
     }
 }
 
