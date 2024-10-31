@@ -37,7 +37,7 @@ public:
      *
      * @param The properties of this alarm
      */
-    Alarm(const AlarmProperties & properties);
+    explicit Alarm(const AlarmProperties & properties);
 
     /**
      * Get the name of this alarm.

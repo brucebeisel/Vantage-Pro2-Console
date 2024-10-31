@@ -71,7 +71,7 @@ public:
      *
      * @param filename The file to load as the buffer
      */
-    ArchivePacket(const std::string & filename);
+    explicit ArchivePacket(const std::string & filename);
 
     /**
      * Destructor.

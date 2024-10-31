@@ -47,7 +47,7 @@ public:
      *
      * @param dateTimeString The date and or time in yyyy-mm-dd[ hh:mm[:ss]] format
      */
-    DateTimeFields(const std::string & dateTimeString);
+    explicit DateTimeFields(const std::string & dateTimeString);
 
     /**
      * Constructor that sets the date fields only.
@@ -75,7 +75,7 @@ public:
      *
      * @param tm The POSIX time structure
      */
-    DateTimeFields(const struct tm & tm);
+    explicit DateTimeFields(const struct tm & tm);
 
 
     /**
@@ -83,7 +83,7 @@ public:
      *
      * @param timeFromEpoch The POSIX time
      */
-    DateTimeFields(DateTime timeFromEpoch);
+    explicit DateTimeFields(DateTime timeFromEpoch);
 
     /**
      * Reset the date/time fields to the defaults, which are not valid.

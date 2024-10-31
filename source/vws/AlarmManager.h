@@ -37,7 +37,7 @@ public:
      *
      * @param station The weather station object used to read and write from the EEPROM
      */
-    AlarmManager(VantageWeatherStation & station);
+    explicit AlarmManager(VantageWeatherStation & station);
 
     /**
      * Initialize the alarm manager.

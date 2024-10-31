@@ -29,8 +29,6 @@ public:
     static constexpr int BITS_PER_BYTE = 8;
     static constexpr char SIGN_BIT = 0x80;
 
-    virtual ~BitConverter();
-
     /**
      * Convert one byte to a signed or unsigned integer.
      * 
@@ -98,7 +96,8 @@ private:
     /**
      * Constructor for which there is no implementation.
      */
-    BitConverter();
+    BitConverter() = delete;
+    ~BitConverter() = delete;
 
     /**
      * Utility template function to convert bytes in a buffer to any form of integer.
