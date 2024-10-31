@@ -28,8 +28,8 @@ namespace vws {
 class VantageWeatherStation;
 class VantageLogger;
 
-static const std::string ARCHIVE_FILE = "/weather-archive.dat";
-static const std::string ARCHIVE_BACKUP_FILE = "weather-archive-backup.dat";
+static const std::string DEFAULT_ARCHIVE_FILE = "weather-archive.dat";
+static const std::string ARCHIVE_BACKUP_FILENAME_TAIL = "weather-archive-backup.dat";
 static const std::string ARCHIVE_BACKUP_DIR = "/backup";
 static const std::string ARCHIVE_SAVE_FILE_PREFIX = "save_";
 static const std::string ARCHIVE_VERIFY_LOG = "/weather-archive-verify.log";
@@ -159,10 +159,11 @@ public:
     /**
      * Verify that the specified archive file is good.
      *
-     * @param archiveFilePath The path to the archive file to be verified
+     * @param archiveFilePath   The path to the archive file to be verified
+     * @param verifyLogFilePath The path to the log file containing verification messages
      * @return True if the archive file is good
      */
-    bool verifyArchiveFile(const std::string & archiveFilePath) const;
+    bool verifyArchiveFile(const std::string & archiveFilePath, bool logResults = false) const;
 
     /**
      * Set the state of archiving.
