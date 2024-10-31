@@ -667,6 +667,18 @@ std::string
 SummaryStatistics::formatJSON() const {
     ostringstream ss;
 
+    //
+    // The date and time for rainfall is N/A if no rain has fallen in the given time period
+    //
+    string highDayRainfallDateString = "N/A";
+    string highDayRainfallRateTimeString = "N/A";
+
+    if (highDayRainfall > 0.0)
+        highDayRainfallDateString = Weather::formatDate(highDayRainfallDate);
+
+    if (highDayRainfallRateTime > 0.0)
+        highDayRainfallRateTimeString = Weather::formatDateTime(highDayRainfallRateTime);
+
     ss << "\"statistics\" : { " << endl
        << " \"totalDays\" : " << totalDays << ", " << endl;
     ss << outsideTemperature.formatJSON() << ", " << endl;
@@ -682,8 +694,8 @@ SummaryStatistics::formatJSON() const {
     ss << "\"rain\" : {" << endl;
     ss << "\"rainDays\" : " << rainDays << ", " << endl
        << "\"totalRain\" : " << totalRainfall << ", " << endl
-       << "\"highDayRain\" : { \"value\" : "  << highDayRainfall << ", \"date\" : \"" << Weather::formatDate(highDayRainfallDate) << "\" }, " << endl
-       << "\"highDayRainRate\" : { \"value\" : "  << highDayRainfallRate << ", \"time\" : \"" << Weather::formatDateTime(highDayRainfallRateTime) << "\" } " << endl;
+       << "\"highDayRain\" : { \"value\" : "  << highDayRainfall << ", \"date\" : \"" << highDayRainfallDateString << "\" }, " << endl
+       << "\"highDayRainRate\" : { \"value\" : "  << highDayRainfallRate << ", \"time\" : \"" << highDayRainfallRateTimeString << "\" } " << endl;
     ss << " } " << endl;
     ss << "} ";
     return ss.str();
