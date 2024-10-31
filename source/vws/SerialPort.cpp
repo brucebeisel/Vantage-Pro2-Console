@@ -24,9 +24,9 @@
 static const int INVALID_HANDLE_VALUE = -1;
 #else
 #include <winsock2.h>
-#include <string.h>
 #endif
 #include <iostream>
+#include <string.h>
 #include "VantageLogger.h"
 #include "Weather.h"
 
