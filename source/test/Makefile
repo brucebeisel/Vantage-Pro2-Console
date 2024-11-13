@@ -28,6 +28,18 @@ DOMWINDOBJS=\
 	$(VWSTESTOBJDIR)/WindDirectionSlice.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/Weather.o 
+
+DOMWINDINJOBJS=\
+	$(VWSTESTOBJDIR)/DominantWindDirections.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
+	$(VWSTESTOBJDIR)/WindDirectionSlice.o \
+	$(VWSTESTOBJDIR)/LoopPacket.o \
+	$(VWSTESTOBJDIR)/Loop2Packet.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageCRC.o \
+	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/Weather.o 
 	
 ENUMOBJS=\
 	$(VWSTESTOBJDIR)/Weather.o 
@@ -107,6 +119,7 @@ all: ArchiveManagerTest \
 	BitConverterTest \
 	DateTimeFieldsTest \
 	DominantWindTest \
+	DominantWindInjectionTest \
 	EnumTest \
 	LoggerTest \
 	StormArchiveManagerTest \
@@ -128,6 +141,9 @@ DateTimeFieldsTest: $(DATETIMEFIELDSOBJS) $(OBJDIR)/DateTimeFieldsTest.o
 
 DominantWindTest: $(DOMWINDOBJS) $(OBJDIR)/DominantWindTest.o
 	$(CC) -g -o DominantWindTest $(OBJDIR)/DominantWindTest.o $(DOMWINDOBJS)
+	
+DominantWindInjectionTest: $(DOMWINDINJOBJS) $(OBJDIR)/DominantWindInjectionTest.o
+	$(CC) -g -o DominantWindInjectionTest $(OBJDIR)/DominantWindInjectionTest.o $(DOMWINDINJOBJS)
 	
 EnumTest: $(ENUMOBJS) $(OBJDIR)/EnumTest.o
 	$(CC) -g -o EnumTest $(OBJDIR)/EnumTest.o $(ENUMOBJS)
