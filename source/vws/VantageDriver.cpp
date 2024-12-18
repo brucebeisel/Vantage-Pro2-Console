@@ -61,6 +61,9 @@ VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfigurati
     // has not had a chance to synchronize its time with the Internet. This is most important with
     // computers like the Raspberry Pi.
     //
+    // TODO This equation seems wrong. I would think that the time could be set after just a few minutes.
+    // So perhaps consoleTimeSetTime = time(0) - TIME_SET_INTERVAL + 120; would be better?
+    //
     consoleTimeSetTime = time(0) - TIME_SET_INTERVAL + (1 * Weather::SECONDS_PER_HOUR);
 }
 
@@ -190,15 +193,15 @@ VantageDriver::mainLoop() {
             }
 
             //
-            // If it has been a while since the time was set, set the time
+            // If it has been a while since the time was set, set the time. Note that the time will not be changed
+            // if the console time is close to the actual clock time.
+            // The return value from station.updateConsoleTime() is not checked and the delay until the next
+            // possible console time update will be consistent regardless of the success of setting the console time.
             //
             DateTime now = time(0);
             if (consoleTimeSetTime + TIME_SET_INTERVAL < now) {
-                if (station.updateConsoleTime())
-                    consoleTimeSetTime = now;
-                else
-                    logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to set station time " << endl;
-
+                station.updateConsoleTime();
+                consoleTimeSetTime = now;
             }
 
             //
@@ -257,13 +260,13 @@ bool
 VantageDriver::processLoopPacket(const LoopPacket & packet) {
     nextRecord = packet.getNextRecord();
 
-    bool sc = signalCaught.load();
-    bool em = eventManager.isEventAvailable();
-    bool nr = previousNextRecord != nextRecord;
-    bool continueLoopPacketProcessing = !sc && !em && !nr;
+    bool signalCaughtFlag = signalCaught.load();
+    bool eventReceivedFlag = eventManager.isEventAvailable();
+    bool newArchiveRecordFlag = previousNextRecord != nextRecord;
+    bool continueLoopPacketProcessing = !signalCaughtFlag && !eventReceivedFlag && !newArchiveRecordFlag;
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop (LOOP): " << std::boolalpha << continueLoopPacketProcessing
-                                              << " Signal: " << sc << " Event: " << em << " Next Record: " << nr << endl;
+                                              << " (Signal Caught: " << signalCaughtFlag << " Event Received: " << eventReceivedFlag << " New Archive Record: " << newArchiveRecordFlag << ")" << endl;
 
     return continueLoopPacketProcessing;
 }
@@ -272,12 +275,12 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageDriver::processLoop2Packet(const Loop2Packet & packet) {
-    bool sc = signalCaught.load();
-    bool em = eventManager.isEventAvailable();
-    bool continueLoopPacketProcessing = !sc && !em;
+    bool signalCaughtFlag = signalCaught.load();
+    bool eventReceivedFlag = eventManager.isEventAvailable();
+    bool continueLoopPacketProcessing = !signalCaughtFlag && !eventReceivedFlag;
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop (LOOP2): " << std::boolalpha << continueLoopPacketProcessing
-                                              << " Signal: " << sc << " Event: " << em << endl;
+                                              << " (Signal Caught: " << signalCaughtFlag << " Event Received: " << eventReceivedFlag << ")" << endl;
 
     return continueLoopPacketProcessing;
 }
