@@ -235,7 +235,7 @@ VantageDecoder::decodeWindDirection(const byte buffer[], int offset) {
     Measurement<Heading> measurement;
     int16 value16 = BitConverter::toInt16(buffer, offset);
 
-    if (value16 != INVALID_WIND_DIRECTION) {
+    if (value16 != INVALID_WIND_DIRECTION1 && value16 != INVALID_WIND_DIRECTION2) {
         Heading heading;
         if (value16 == NORTH_HEADING_VALUE)
             heading = 0.0;
