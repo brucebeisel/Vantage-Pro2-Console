@@ -356,7 +356,12 @@ static constexpr int INVALID_16BIT_TEMPERATURE_NEGATIVE = -32768; // Sometimes t
 static constexpr int INVALID_8BIT_TEMPERATURE = 255;
 static constexpr int INVALID_HUMIDITY = 255;
 static constexpr int INVALID_WIND_DIRECTION_INDEX = 255;
-static constexpr int INVALID_WIND_DIRECTION = 0;
+//
+// According to the protocol document, the invalid wind direction value is 0, but tests have revealed that it
+// comes in as 32767 at times. So we will leave both invalid values here.
+//
+static constexpr int INVALID_WIND_DIRECTION1 = 0;
+static constexpr int INVALID_WIND_DIRECTION2 = 32767;
 static constexpr int INVALID_WIND_SPEED = 255;
 static constexpr int INVALID_16BIT_AVG_WIND_SPEED = 32767;
 static constexpr int INVALID_UV_INDEX = 255;
