@@ -920,10 +920,47 @@ VantageWeatherStation::updateConsoleTime() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Sending SETTIME (Set Console Time) command" << endl;
 
     //
+    // TODO This check did not work when DST ended. The time returned during the second 1 AM hour was
+    // still adjusted for DST, therefore it was off by one hour (3600 seconds) causing the console time
+    // to be set and triggering strange behavior in the archiving.
+    //
+    /*
+     * In this case the console time was set to 2024-11-03 01:14:01 EST, possibly causing a 20 minute
+     * gap in the archive between 1:55:00 EDT and 2:20:00 EST. Due to limitations of the console a
+     * 1 hour gap was expected. It is still not clear if setting the time was the cause of this gap
+     * or it is the nature of the console. We will not know for sure until a fix for this situation is
+     * deployed and DST ends in 2025. Almost a year from now (2024/11/12).
+    175690 - 2024-11-03 01:00 2024-11-03 01:00:00
+    175691 - 2024-11-03 01:05 2024-11-03 01:05:00
+    175692 - 2024-11-03 01:10 2024-11-03 01:10:00
+    175693 - 2024-11-03 01:15 2024-11-03 01:15:00
+    175694 - 2024-11-03 01:20 2024-11-03 01:20:00
+    175695 - 2024-11-03 01:25 2024-11-03 01:25:00
+    175696 - 2024-11-03 01:30 2024-11-03 01:30:00
+    175697 - 2024-11-03 01:35 2024-11-03 01:35:00
+    175698 - 2024-11-03 01:40 2024-11-03 01:40:00
+    175699 - 2024-11-03 01:45 2024-11-03 01:45:00
+    175700 - 2024-11-03 01:50 2024-11-03 01:50:00
+    175701 - 2024-11-03 01:55 2024-11-03 01:55:00
+    175702 - 2024-11-03 02:20 2024-11-03 02:20:00
+    175703 - 2024-11-03 02:25 2024-11-03 02:25:00
+    175704 - 2024-11-03 02:30 2024-11-03 02:30:00
+    175705 - 2024-11-03 02:35 2024-11-03 02:35:00
+    175706 - 2024-11-03 02:40 2024-11-03 02:40:00
+    175707 - 2024-11-03 02:45 2024-11-03 02:45:00
+    175708 - 2024-11-03 02:50 2024-11-03 02:50:00
+    175709 - 2024-11-03 02:55 2024-11-03 02:55:00
+    */
+
+
+    //
     // If the console time is close to the actual time, then don't set the time.
     // Note that the console has an undocumented feature, where setting the console's time
     // will reset the diagnostics counters. So the time delta check is meant to keep the
     // diagnostics counters from being reset.
+    // Setting the time may also cause issues with the archive during the transition from daylight saving time
+    // to standard time. As a result the console time will never be set during the 1 AM hour to avoid possible
+    // archive issues during the DST transition.
     //
     time_t now = time(0);
     DateTimeFields currentStationTime;
@@ -934,6 +971,14 @@ VantageWeatherStation::updateConsoleTime() {
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "Not setting console time because it is close to actual time" << endl;
             return true;
         }
+        else if (currentStationTime.getHour() == 1) {
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Not setting console time during the 1 AM hour due to possible DST issues. The console time will be checked during the next hour" << endl;
+            return true;
+        }
+    }
+    else {
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Not setting console time due to error retrieving the current console time" << endl;
+        return false;
     }
 
     struct tm tm;
@@ -1433,7 +1478,7 @@ VantageWeatherStation::consumeAck() {
         rv = false;
     }
     else if (b != ProtocolConstants::ACK) {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "consumeACK() read 0x" << hex << static_cast<int>(b) << dec << " not an ACK" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "consumeACK() read 0x" << hex << static_cast<int>(b) << dec << " not an ACK" << endl;
         rv = false;
     }
 
