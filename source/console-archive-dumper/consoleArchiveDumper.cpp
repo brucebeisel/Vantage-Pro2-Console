@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,22 +81,6 @@ main(int argc, char *argv[]) {
         exit(2);
     }
 
-    vws::byte beforeValue = 0;
-    bool results = ws.eepromBinaryRead(VantageEepromConstants::EE_USED_TRANSMITTERS_ADDRESS, 1, &beforeValue);
-    cout << "Result 1: " << std::boolalpha << results << endl;
-
-    vws::byte value = 1;
-    results = ws.eepromWriteByte(VantageEepromConstants::EE_STATION_LIST_ADDRESS, value);
-    //results = ws.eepromBinaryWrite(VantageEepromConstants::EE_USED_TRANSMITTERS_ADDRESS, &value, 1);
-    cout << "Result 2: " << std::boolalpha << results << endl;
-
-    vws::byte afterValue = 0;
-    results = ws.eepromBinaryRead(VantageEepromConstants::EE_USED_TRANSMITTERS_ADDRESS, 1, &afterValue);
-    cout << "Result 3: " << std::boolalpha << results << endl;
-
-    cout << "Before: " << (int)beforeValue << " After: " << (int)afterValue << endl;
-
-    exit(1);
     vector<ArchivePacket> packets;
 
     ws.dump(packets);
