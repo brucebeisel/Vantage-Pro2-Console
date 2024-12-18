@@ -1,6 +1,7 @@
 #!/bin/bash
 
 version=4.0.0
+device=/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
 
 echo Arg count $#
 
@@ -16,4 +17,4 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-./vws /dev/ttyUSB0 ../archive/ ../log/vws_log
+./vws $device ../archive/ ../log/vws_log

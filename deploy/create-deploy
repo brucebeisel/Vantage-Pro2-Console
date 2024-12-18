@@ -88,6 +88,6 @@ zip -r ../weathersense-$version.zip .
 
 cd ..
 
-rm -rf $basedir
+#rm -rf $basedir
 
 echo "Installation file created!"
