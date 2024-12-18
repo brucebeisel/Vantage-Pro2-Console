@@ -121,6 +121,18 @@ public:
     void setLast10MinuteDominantTime(time_t time);
 
     /**
+     * Check if this wind direction slice has a current dominant time.
+     *
+     * @return True if this slice has a current dominant time
+     */
+    bool has10MinuteDominantTime() const;
+
+    /**
+     * Clear the dominant time.
+     */
+    void clear10MinuteDominantTime();
+
+    /**
      * Get the time this heading was the 10 minute dominant wind direction.
      *
      * @return The time this heading was the 10 minute dominant wind direction
@@ -133,6 +145,8 @@ public:
     friend std::ostream & operator<<(std::ostream &, const WindDirectionSlice &);
 
 private:
+    static constexpr time_t NO_DOMINANT_TIME = 0;
+
     int         slice;
     std::string name;
     Heading     lowHeading;

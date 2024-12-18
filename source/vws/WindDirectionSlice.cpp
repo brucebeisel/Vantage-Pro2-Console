@@ -24,18 +24,20 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindDirectionSlice::WindDirectionSlice() : slice(0), name(""), lowHeading(0.0), sampleCount(0),
-                         highHeading(0.0), last10MinuteDominantTime(0) {
+WindDirectionSlice::WindDirectionSlice() : slice(0), name(""),
+                                           lowHeading(0.0), highHeading(0.0),
+                                           sampleCount(0), last10MinuteDominantTime(NO_DOMINANT_TIME) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-WindDirectionSlice::WindDirectionSlice(int slice, const std::string & name, Heading low, Heading high) : slice(slice),
+WindDirectionSlice::WindDirectionSlice(int slice, const std::string & name, Heading low, Heading high) :
+                                                                                       slice(slice),
                                                                                        name(name),
                                                                                        lowHeading(low),
                                                                                        highHeading(high),
                                                                                        sampleCount(0),
-                                                                                       last10MinuteDominantTime(0) {
+                                                                                       last10MinuteDominantTime(NO_DOMINANT_TIME) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +132,7 @@ WindDirectionSlice::setSampleCount(int count) {
 void
 WindDirectionSlice::clearData() {
     sampleCount = 0;
-    last10MinuteDominantTime = 0;
+    last10MinuteDominantTime = NO_DOMINANT_TIME;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,6 +140,20 @@ WindDirectionSlice::clearData() {
 void
 WindDirectionSlice::setLast10MinuteDominantTime(time_t time) {
     last10MinuteDominantTime = time;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+WindDirectionSlice::has10MinuteDominantTime() const {
+    return last10MinuteDominantTime != NO_DOMINANT_TIME;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+WindDirectionSlice::clear10MinuteDominantTime() {
+    last10MinuteDominantTime = NO_DOMINANT_TIME;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -145,7 +145,7 @@ DominantWindDirections::endWindow(DateTime time) {
     for (int i = 0; i < NUM_SLICES; i++) {
         windSlices[i].clearSamples();
         if (windSlices[i].getLast10MinuteDominantTime() + DOMINANT_DIR_DURATION < time) {
-            windSlices[i].setLast10MinuteDominantTime(0);
+            windSlices[i].clear10MinuteDominantTime();
         }
     }
 
@@ -159,7 +159,7 @@ DominantWindDirections::endWindow(DateTime time) {
 
     dominantWindDirectionList.clear();
     for (int i = 0; i < NUM_SLICES; i++) {
-        if (windSlices[i].getLast10MinuteDominantTime() != 0)
+        if (windSlices[i].has10MinuteDominantTime())
             dominantWindDirectionList.push_back(windSlices[i].getName());
     }
 }
@@ -218,7 +218,7 @@ int
 DominantWindDirections::getDominantDirectionsCount() const {
     int count = 0;
     for (int i = 0; i < NUM_SLICES; i++) {
-        if (windSlices[i].getLast10MinuteDominantTime() != 0)
+        if (windSlices[i].has10MinuteDominantTime())
             count++;
     }
 
@@ -317,6 +317,8 @@ DominantWindDirections::restoreCheckpoint() {
         //
         // If the latest dominant time is more than 10 minutes old, then
         // clear out the sample counts.
+        // TODO Check this if statement. It seems wrong that the samples should be cleared if any of the checkpoint
+        // times is more than 10 minutes old. This check seems like it should be after the while loop.
         //
         if (now - newestTime > AGE_SPAN) {
             for (int i = 0; i < NUM_SLICES; i++) {
