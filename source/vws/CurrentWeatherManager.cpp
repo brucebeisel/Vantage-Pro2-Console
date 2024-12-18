@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Bruce Beisel
+ * Copyright (C) 2025 Bruce Beisel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ CurrentWeatherManager::initialize() {
     cleanupArchive();
     initialized = true;
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 /**
@@ -118,8 +119,10 @@ CurrentWeatherManager::processLoopPacket(const LoopPacket & packet) {
     // Build a list of past wind directions. This is to mimic what is shown on the
     // console
     //
-    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue());
-    currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
+    if (packet.getWindSpeed().isValid()) {
+        dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue());
+        currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
+    }
 
     if (firstLoop2PacketReceived)
         currentWeatherPublisher.publishCurrentWeather(currentWeather);
@@ -139,8 +142,10 @@ CurrentWeatherManager::processLoop2Packet(const Loop2Packet & packet) {
     // Build a list of past wind directions. This is to mimic what is shown on the
     // console
     //
-    dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue());
-    currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
+    if (packet.getWindSpeed().isValid()) {
+        dominantWindDirections.processWindSample(packetTime, packet.getWindDirection().getValue(), packet.getWindSpeed().getValue());
+        currentWeather.setDominantWindDirectionData(dominantWindDirections.dominantDirectionsForPastHour());
+    }
     currentWeatherPublisher.publishCurrentWeather(currentWeather);
     dominantWindDirections.dumpData();
 
@@ -200,7 +205,7 @@ CurrentWeatherManager::readArchiveFile(std::ifstream & ifs, vector<CurrentWeathe
                 // Ignore the LOOP2 packet if it is the first in the file or there was an error processing the LOOP packet.
                 // If the first packet in the the file is a LOOP2 packet, then one LOOP/LOOP2 packet pair will be discarded
                 // as the last packet in the previous file should have been a LOOP packet. Given the circular buffer technique
-                // used for the Current Weather Archive, loosing a single packet is not significant loss.
+                // used for the Current Weather Archive, loosing a single packet is not a significant loss.
                 //
                 if (loopPacketProcessed) {
                     list.push_back(cw);
