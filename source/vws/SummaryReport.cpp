@@ -449,11 +449,11 @@ SummaryReport::loadData() {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Loading data for summary report..." << endl;
 
     vector<ArchivePacket> packets;
-    DateTimeFields sd;
-    DateTimeFields ed;
-    sd.setFromEpoch(startDate);
-    ed.setFromEpoch(endDate);
-    DateTimeFields lastRecordDate = archiveManager.queryArchiveRecords(sd, ed, packets);
+    DateTimeFields startDateTime;
+    DateTimeFields endDateTime;
+    startDateTime.setFromEpoch(startDate);
+    endDateTime.setFromEpoch(endDate);
+    DateTimeFields lastRecordDate = archiveManager.queryArchiveRecords(startDateTime, endDateTime, packets);
 
     if (!lastRecordDate.isDateTimeValid()) {
         logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read archive for summary report" << endl;
