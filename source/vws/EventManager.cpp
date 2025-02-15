@@ -65,7 +65,8 @@ EventManager::processNextEvent() {
     if (consumeEvent(event)) {
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event with command '" << event.command << "'" << endl;
         commandHandler.handleCommand(event.command, response);
-        event.responseHandler->handleCommandResponse(event, response);
+        event.response = response;
+        event.responseHandler->handleCommandResponse(event);
     }
 }
 ////////////////////////////////////////////////////////////////////////////////

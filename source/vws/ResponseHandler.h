@@ -29,6 +29,7 @@ struct CommandData {
     ResponseHandler * responseHandler;  // The response handler that will process the response
     int               fd;               // The file descriptor on which the command was received, so the response can be sent on the same file descriptor
     std::string       command;          // The command that was processed
+    std::string       response;         // The response to the command
 };
 
 /**
@@ -47,7 +48,7 @@ public:
      * @param commandData The data that described the command and the source of the command
      * @param response    The response to be sent back to the commanding client
      */
-    virtual void handleCommandResponse(const CommandData & commandData, const std::string & response) = 0;
+    virtual void handleCommandResponse(const CommandData & commandData) = 0;
 };
 }
 #endif

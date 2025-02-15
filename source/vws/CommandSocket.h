@@ -16,9 +16,12 @@
  */
 #ifndef COMMAND_SOCKET_H_
 #define COMMAND_SOCKET_H_
+
 #include <string>
 #include <thread>
 #include <vector>
+#include <mutex>
+#include <queue>
 
 #include "ResponseHandler.h"
 
@@ -58,7 +61,7 @@ public:
      * @param commandData The data that was the command
      * @param response    The response to be sent back to the client
      */
-    virtual void handleCommandResponse(const CommandData & commandData, const std::string & response);
+    virtual void handleCommandResponse(const CommandData & commandData);
 
     /**
      * Initialize the object; creating the listen socket and spawning the reader thread.
@@ -111,13 +114,21 @@ private:
      */
     void closeSocket(int fd);
 
-    int              port;            // The port on which the console will listen for client connections
-    int              listenFd;        // The file description on which this thread is listening
-    std::vector<int> socketFdList;    // The list of client file descriptors currently open
-    EventManager &   eventManager;    // The event manager to which commands are forwarded for processing
-    bool             terminating;     // True if this thread's main loop should exit
-    std::thread *    commandThread;   // The thread that reads the commands
-    VantageLogger &  logger;
+    /**
+     * Send any pending responses.
+     */
+    void sendCommandResponse();
+
+    int              port       ;            // The port on which the console will listen for client connections
+    int                     listenFd;        // The file description on which this thread is listening
+    std::vector<int>        socketFdList;    // The list of client file descriptors currently open
+    EventManager &          eventManager;    // The event manager to which commands are forwarded for processing
+    bool                    terminating;     // True if this thread's main loop should exit
+    int                     responseEventFd; // The file descriptor used to receive indications of an available response
+    std::queue<CommandData> responseQueue;   // The queue on which to store events
+    mutable std::mutex      mutex;           // The mutex to protect the queue against multi-threaded contention
+    std::thread *           commandThread;   // The thread that reads the commands
+    VantageLogger &         logger;
 };
 
 } /* namespace vws */

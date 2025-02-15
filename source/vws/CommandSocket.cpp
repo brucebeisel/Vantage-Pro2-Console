@@ -45,6 +45,7 @@ commandThreadEntry(CommandSocket * cs) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 CommandSocket::CommandSocket(int port, EventManager & evtMgr) : port(port),
+                                                                responseEventFd(-1),
                                                                 terminating(false),
                                                                 commandThread(NULL),
                                                                 listenFd(-1),
@@ -73,7 +74,7 @@ CommandSocket::mainLoop() {
     struct timeval tv;
     while (!terminating) {
         fd_set fd_read;
-        int nfds = listenFd;
+        int nfds = max(listenFd, responseEventFd);
 
         tv.tv_sec = 1;
         tv.tv_usec = 0;
@@ -90,7 +91,7 @@ CommandSocket::mainLoop() {
         // This single if statement works because socketFdList is sorted
         //
         if (socketFdList.size() > 0)
-            nfds = std::max(socketFdList[socketFdList.size() - 1], listenFd);
+            nfds = std::max(socketFdList[socketFdList.size() - 1], nfds);
 
         nfds++;
 
@@ -100,6 +101,9 @@ CommandSocket::mainLoop() {
 
         if (FD_ISSET(listenFd, &fd_read))
             acceptConnection();
+
+        if (FD_ISSET(responseEventFd, &fd_read))
+            sendCommandResponse();
 
         for (int fd : socketFdList) {
             if (FD_ISSET(fd, &fd_read)) {
@@ -135,6 +139,10 @@ bool
 CommandSocket::initialize() {
     if (!createListenSocket())
         return false;
+
+#ifndef __CYGWIN__
+    responseEventFd = eventfd(0, 0);
+#endif
 
     commandThread = new thread(commandThreadEntry, this);
 
@@ -239,17 +247,37 @@ CommandSocket::readCommand(int fd) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandSocket::handleCommandResponse(const CommandData & commandData, const std::string & responseArg) {
-    const char * responseTerminator = "\n\n";
-    string response(responseArg);
-    response.append(responseTerminator);
+CommandSocket::handleCommandResponse(const CommandData & commandData) {
+    std::lock_guard<std::mutex> guard(mutex);
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Queuing response" << endl;
+    responseQueue.push(commandData);
+    uint64_t eventId = 1;
+    write(responseEventFd, &eventId, sizeof(eventId));
+}
 
-    const char * responseBuffer = response.c_str();
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandSocket::sendCommandResponse() {
+    uint64_t eventId = 0;
+    read(responseEventFd, &eventId, sizeof(eventId));
+    std::lock_guard<std::mutex> guard(mutex);
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response '" << response << "' on fd " << commandData.fd << endl;
+    while (!responseQueue.empty()) {
+        CommandData commandData = responseQueue.front();
+        responseQueue.pop();
 
-    if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
+        const char * responseTerminator = "\n\n";
+        string response(commandData.response);
+        response.append(responseTerminator);
+
+        const char * responseBuffer = response.c_str();
+
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response '" << response << "' on fd " << commandData.fd << endl;
+
+        if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
+        }
     }
 }
 
