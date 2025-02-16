@@ -19,6 +19,7 @@
 
 #include <signal.h>
 
+#include "CommandData.h"
 #include "CommandHandler.h"
 #include "ResponseHandler.h"
 #include "VantageLogger.h"
@@ -47,6 +48,20 @@ EventManager::isEventAvailable() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+bool
+EventManager::offerEvent(const CommandData & event) {
+    bool eventAccepted = false;
+
+    if (commandHandler.isCommandNameForHandler(event.commandName)) {
+        queueEvent(event);
+        eventAccepted = true;
+    }
+
+    return eventAccepted;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
 EventManager::queueEvent(const CommandData & event) {
 
@@ -63,8 +78,8 @@ EventManager::processNextEvent() {
     CommandData event;
     std::string response;
     if (consumeEvent(event)) {
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event with command '" << event.command << "'" << endl;
-        commandHandler.handleCommand(event.command, response);
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event with command '" << event.commandName << "'" << endl;
+        commandHandler.handleCommand(event);
         event.response = response;
         event.responseHandler->handleCommandResponse(event);
     }

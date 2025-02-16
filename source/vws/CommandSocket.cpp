@@ -28,6 +28,7 @@
 
 #include "EventManager.h"
 #include "ResponseHandler.h"
+#include "CommandData.h"
 #include "VantageLogger.h"
 
 using json = nlohmann::json;
@@ -49,7 +50,7 @@ CommandSocket::CommandSocket(int port, EventManager & evtMgr) : port(port),
                                                                 terminating(false),
                                                                 commandThread(NULL),
                                                                 listenFd(-1),
-                                                                eventManager(evtMgr),
+                                                                consoleEventManager(evtMgr),
                                                                 logger(VantageLogger::getLogger("CommandSocket")) {
 
 }
@@ -103,7 +104,7 @@ CommandSocket::mainLoop() {
             acceptConnection();
 
         if (FD_ISSET(responseEventFd, &fd_read))
-            sendCommandResponse();
+            sendCommandResponses();
 
         for (int fd : socketFdList) {
             if (FD_ISSET(fd, &fd_read)) {
@@ -235,13 +236,11 @@ CommandSocket::readCommand(int fd) {
     //
     // At this point the command is in buffer. Use auto-conversion to get it into the required std::string
     //
-    CommandData cd;
-    cd.fd = fd;
-    cd.command = buffer;
-    cd.responseHandler = this;
+    CommandData commandData(*this, fd);
+    commandData.setCommandFromJson(string(buffer));
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Queuing command " << cd.command << " that was received on fd " << cd.fd << endl;
-    eventManager.queueEvent(cd);
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Queuing command " << commandData.commandName << " that was received on fd " << commandData.fd << endl;
+    consoleEventManager.offerEvent(commandData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -258,7 +257,24 @@ CommandSocket::handleCommandResponse(const CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandSocket::sendCommandResponse() {
+CommandSocket::sendCommandResponse(const CommandData & commandData) {
+    const char * responseTerminator = "\n\n";
+    string response(commandData.response);
+    response.append(responseTerminator);
+
+    const char * responseBuffer = response.c_str();
+
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response '" << response << "' on fd " << commandData.fd << endl;
+
+    if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandSocket::sendCommandResponses() {
     uint64_t eventId = 0;
     read(responseEventFd, &eventId, sizeof(eventId));
     std::lock_guard<std::mutex> guard(mutex);
@@ -266,18 +282,7 @@ CommandSocket::sendCommandResponse() {
     while (!responseQueue.empty()) {
         CommandData commandData = responseQueue.front();
         responseQueue.pop();
-
-        const char * responseTerminator = "\n\n";
-        string response(commandData.response);
-        response.append(responseTerminator);
-
-        const char * responseBuffer = response.c_str();
-
-        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response '" << response << "' on fd " << commandData.fd << endl;
-
-        if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
-            logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
-        }
+        sendCommandResponse(commandData);
     }
 }
 

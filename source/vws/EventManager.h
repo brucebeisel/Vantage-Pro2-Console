@@ -53,6 +53,14 @@ public:
     bool isEventAvailable() const;
 
     /**
+     * Offer an event to the underlying command handler, then queue if accepted
+     *
+     * @param event The event being offered
+     * @return True if event has been queued for the command handler
+     */
+    bool offerEvent(const CommandData & event);
+
+    /**
      * Queue an event.
      *
      * @param event The event to be queued

@@ -10,7 +10,8 @@ SRCS=\
 	ArchivePacket.cpp \
 	BitConverter.cpp \
     CalibrationAdjustmentsPacket.cpp \
-	CommandHandler.cpp \
+	CommandData.cpp \
+	ConsoleCommandHandler.cpp \
 	CommandSocket.cpp \
 	CurrentWeather.cpp \
 	CurrentWeatherManager.cpp \

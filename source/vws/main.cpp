@@ -1,3 +1,4 @@
+
 /* 
  * Copyright (C) 2025 Bruce Beisel
  *
@@ -28,7 +29,7 @@
 #include "AlarmManager.h"
 #include "ArchiveManager.h"
 #include "CommandSocket.h"
-#include "CommandHandler.h"
+#include "ConsoleCommandHandler.h"
 #include "CurrentWeatherManager.h"
 #include "CurrentWeatherSocket.h"
 #include "EventManager.h"
@@ -77,10 +78,10 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         AlarmManager alarmManager(station);
         GraphDataRetriever graphDataRetriever(station);
         StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
-        CommandHandler commandHandler(station, configuration, archiveManager, network, alarmManager, stormArchiveManager, currentWeatherManager);
-        EventManager eventManager(commandHandler);
-        CommandSocket commandSocket(11462, eventManager);
-        VantageDriver driver(station, configuration, archiveManager, eventManager, stormArchiveManager);
+        ConsoleCommandHandler consoleCommandHandler(station, configuration, archiveManager, network, alarmManager, stormArchiveManager, currentWeatherManager);
+        EventManager consoleEventManager(consoleCommandHandler);
+        CommandSocket commandSocket(11462, consoleEventManager);
+        VantageDriver driver(station, configuration, archiveManager, consoleEventManager, stormArchiveManager);
 
         //
         // Perform configuration

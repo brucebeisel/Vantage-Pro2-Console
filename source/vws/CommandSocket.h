@@ -63,6 +63,8 @@ public:
      */
     virtual void handleCommandResponse(const CommandData & commandData);
 
+    void sendCommandResponse(const CommandData & commandData);
+
     /**
      * Initialize the object; creating the listen socket and spawning the reader thread.
      */
@@ -117,17 +119,17 @@ private:
     /**
      * Send any pending responses.
      */
-    void sendCommandResponse();
+    void sendCommandResponses();
 
-    int              port       ;            // The port on which the console will listen for client connections
-    int                     listenFd;        // The file description on which this thread is listening
-    std::vector<int>        socketFdList;    // The list of client file descriptors currently open
-    EventManager &          eventManager;    // The event manager to which commands are forwarded for processing
-    bool                    terminating;     // True if this thread's main loop should exit
-    int                     responseEventFd; // The file descriptor used to receive indications of an available response
-    std::queue<CommandData> responseQueue;   // The queue on which to store events
-    mutable std::mutex      mutex;           // The mutex to protect the queue against multi-threaded contention
-    std::thread *           commandThread;   // The thread that reads the commands
+    int                     port;                // The port on which the console will listen for client connections
+    int                     listenFd;            // The file description on which this thread is listening
+    std::vector<int>        socketFdList;        // The list of client file descriptors currently open
+    EventManager &          consoleEventManager; // The event manager to which commands are forwarded for processing
+    bool                    terminating;         // True if this thread's main loop should exit
+    int                     responseEventFd;     // The file descriptor used to receive indications of an available response
+    std::queue<CommandData> responseQueue;       // The queue on which to store event responses
+    mutable std::mutex      mutex;               // The mutex to protect the queue against multi-threaded contention
+    std::thread *           commandThread;       // The thread that reads the commands
     VantageLogger &         logger;
 };
 
