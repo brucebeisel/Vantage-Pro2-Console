@@ -24,6 +24,7 @@
 #include <string>
 #include "WeatherTypes.h"
 #include "VantageWeatherStation.h"
+#include "CommandHandler.h"
 
 namespace vws {
 class ArchiveManager;
@@ -45,10 +46,10 @@ public:
      * @param station             The object that handles the command protocols with the Vantage console
      * @param configuration       The object that handles configuration changes and retrievals with the console
      * @param archiveManager      The archive manager that will maintain the file containing the raw archive packets
-     * @param eventManager        The event manager that will provide commands coming in from clients
+     * @param commandHandler      The command handler that will provide commands coming in from clients
      * @param stormArchiveManager The manager of the storm archive
      */
-    VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager, EventManager & eventManager, StormArchiveManager & stormArchiveManager);
+    VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager, CommandHandler & commandHandler, StormArchiveManager & stormArchiveManager);
 
     /**
      * Destructor.
@@ -122,7 +123,7 @@ private:
     VantageWeatherStation &   station;
     VantageConfiguration &    configuration;
     ArchiveManager &          archiveManager;
-    EventManager &            eventManager;
+    CommandHandler &          commandHandler;
     StormArchiveManager &     stormArchiveManager;
     bool                      exitLoop;
     int                       nextRecord;

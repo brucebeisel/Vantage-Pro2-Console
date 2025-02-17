@@ -30,6 +30,7 @@
 #include "ArchiveManager.h"
 #include "CommandSocket.h"
 #include "ConsoleCommandHandler.h"
+#include "DataCommandHandler.h"
 #include "CurrentWeatherManager.h"
 #include "CurrentWeatherSocket.h"
 #include "EventManager.h"
@@ -78,10 +79,10 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         AlarmManager alarmManager(station);
         GraphDataRetriever graphDataRetriever(station);
         StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
-        ConsoleCommandHandler consoleCommandHandler(station, configuration, archiveManager, network, alarmManager, stormArchiveManager, currentWeatherManager);
-        EventManager consoleEventManager(consoleCommandHandler);
-        CommandSocket commandSocket(11462, consoleEventManager);
-        VantageDriver driver(station, configuration, archiveManager, consoleEventManager, stormArchiveManager);
+        ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);
+        DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager);
+        VantageDriver driver(station, configuration, archiveManager, consoleCommandHandler, stormArchiveManager);
+        CommandSocket commandSocket(11462);
 
         //
         // Perform configuration
@@ -92,12 +93,17 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
         station.addLoopPacketListener(network);
         station.addLoopPacketListener(driver);
 
+        commandSocket.addCommandHandler(dataCommandHandler);
+        commandSocket.addCommandHandler(consoleCommandHandler);
+
         //
         // Initialize objects that require it before entering the main loop
         //
         logger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
 
         currentWeatherManager.initialize();
+
+        dataCommandHandler.initialize();
 
         //
         // The driver must be initialized before any communication is performed with the console

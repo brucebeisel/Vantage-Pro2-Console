@@ -11,11 +11,13 @@ SRCS=\
 	BitConverter.cpp \
     CalibrationAdjustmentsPacket.cpp \
 	CommandData.cpp \
+	CommandHandler.cpp \
 	ConsoleCommandHandler.cpp \
 	CommandSocket.cpp \
 	CurrentWeather.cpp \
 	CurrentWeatherManager.cpp \
 	CurrentWeatherSocket.cpp \
+	DataCommandHandler.cpp \
 	DateTimeFields.cpp \
 	DominantWindDirections.cpp \
 	EventManager.cpp \

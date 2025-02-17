@@ -17,8 +17,6 @@
 
 #include "EventManager.h"
 
-#include <signal.h>
-
 #include "CommandData.h"
 #include "CommandHandler.h"
 #include "ResponseHandler.h"
@@ -30,7 +28,7 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-EventManager::EventManager(CommandHandler & ch) : commandHandler(ch), logger(VantageLogger::getLogger("EventManager")) {
+EventManager::EventManager(/*CommandHandler & ch*/) : /*commandHandler(ch),*/ logger(VantageLogger::getLogger("EventManager")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,7 +40,7 @@ EventManager::~EventManager() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 EventManager::isEventAvailable() const {
-    std::lock_guard<std::mutex> guard(mutex);
+    std::scoped_lock<std::mutex> guard(mutex);
     return !commandQueue.empty();
 }
 
@@ -52,10 +50,12 @@ bool
 EventManager::offerEvent(const CommandData & event) {
     bool eventAccepted = false;
 
+    /*
     if (commandHandler.isCommandNameForHandler(event.commandName)) {
         queueEvent(event);
         eventAccepted = true;
     }
+    */
 
     return eventAccepted;
 }
@@ -64,10 +64,13 @@ EventManager::offerEvent(const CommandData & event) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 EventManager::queueEvent(const CommandData & event) {
+    {
+        std::scoped_lock<std::mutex> guard(mutex);
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Queuing event" << endl;
+        commandQueue.push(event);
+    }
 
-    std::lock_guard<std::mutex> guard(mutex);
-    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Queuing event" << endl;
-    commandQueue.push(event);
+    cv.notify_all();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,18 +80,26 @@ EventManager::processNextEvent() {
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Checking for event" << endl;
     CommandData event;
     std::string response;
-    if (consumeEvent(event)) {
+    if (lockAndConsumeEvent(event)) {
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event with command '" << event.commandName << "'" << endl;
-        commandHandler.handleCommand(event);
+        //commandHandler.handleCommand(event);
         event.response = response;
         event.responseHandler->handleCommandResponse(event);
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+EventManager::lockAndConsumeEvent(CommandData & event) {
+    std::scoped_lock<std::mutex> guard(mutex);
+    return consumeEvent(event);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
 EventManager::consumeEvent(CommandData & event) {
-    std::lock_guard<std::mutex> guard(mutex);
     if (commandQueue.empty())
         return false;
 
@@ -96,6 +107,24 @@ EventManager::consumeEvent(CommandData & event) {
     commandQueue.pop();
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+EventManager::waitForEvent(CommandData & event) {
+    std::unique_lock<std::mutex> guard(mutex);
+
+    cv.wait(guard);
+
+    return consumeEvent(event);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+EventManager::interrupt() {
+    cv.notify_all();
 }
 
 }

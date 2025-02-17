@@ -20,11 +20,11 @@
 #include <queue>
 #include <string>
 #include <mutex>
+#include <condition_variable>
 
 #include "ResponseHandler.h"
 
 namespace vws {
-class CommandHandler;
 class VantageLogger;
 
 /**
@@ -37,7 +37,7 @@ public:
      *
      * @param commandHandler The handler to which to send the events
      */
-    EventManager(CommandHandler & commandHandler);
+    EventManager();
 
     /**
      * Destructor.
@@ -81,6 +81,12 @@ public:
      */
     bool consumeEvent(CommandData & event);
 
+    bool lockAndConsumeEvent(CommandData & event);
+
+    bool waitForEvent(CommandData & event);
+
+    void interrupt();
+
     //
     // Prevent all copying and moving
     //
@@ -90,7 +96,8 @@ public:
 private:
     std::queue<CommandData> commandQueue;   // The queue on which to store events
     mutable std::mutex      mutex;          // The mutex to protect the queue against multi-threaded contention
-    CommandHandler &        commandHandler; // The command handler that will execute the command
+    mutable std::condition_variable cv;          // The mutex to protect the queue against multi-threaded contention
+    //CommandHandler &        commandHandler; // The command handler that will execute the command
     VantageLogger &         logger;
 };
 

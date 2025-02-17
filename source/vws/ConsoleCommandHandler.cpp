@@ -71,18 +71,12 @@ using namespace ProtocolConstants;
 ////////////////////////////////////////////////////////////////////////////////
 ConsoleCommandHandler::ConsoleCommandHandler(VantageWeatherStation & station,
                                VantageConfiguration & configurator,
-                               ArchiveManager & archiveManager,
                                VantageStationNetwork & stationNetwork,
-                               AlarmManager & alarmManager,
-                               StormArchiveManager & stormArchiveManager,
-                               CurrentWeatherManager & cwManager) : station(station),
-                                                                    logger(VantageLogger::getLogger("CommandHandler")),
-                                                                    configurator(configurator),
-                                                                    network(stationNetwork),
-                                                                    alarmManager(alarmManager),
-                                                                    currentWeatherManager(cwManager),
-                                                                    stormArchiveManager(stormArchiveManager),
-                                                                    archiveManager(archiveManager) {
+                               AlarmManager & alarmManager) : station(station),
+                                                              logger(VantageLogger::getLogger("CommandHandler")),
+                                                              configurator(configurator),
+                                                              network(stationNetwork),
+                                                              alarmManager(alarmManager) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -144,6 +138,7 @@ ConsoleCommandHandler::handleCommand(CommandData & commandData) {
     else if (commandName == "clear-console-archive") {
         handleNoArgCommand(&VantageWeatherStation::clearArchive, commandName, response);
     }
+    /*
     else if (commandName == "clear-extended-archive") {
         bool success = false;
         if (archiveManager.backupArchiveFile())
@@ -154,6 +149,7 @@ ConsoleCommandHandler::handleCommand(CommandData & commandData) {
         else
             response.append(CONSOLE_COMMAND_FAILURE_STRING);
     }
+    */
     else if (commandName == "clear-calibration-offsets") {
         handleNoArgCommand(&VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets, commandName, response);
     }
@@ -185,6 +181,7 @@ ConsoleCommandHandler::handleCommand(CommandData & commandData) {
         response.append(SUCCESS_TOKEN).append(", ").append(DATA_TOKEN).append(" : ");
         response.append(alarmManager.formatActiveAlarmsJSON());
     }
+    /*
     else if (commandName == "query-archive-statistics") {
         handleQueryArchiveStatistics(commandName, response);
     }
@@ -197,6 +194,7 @@ ConsoleCommandHandler::handleCommand(CommandData & commandData) {
     else if (commandName == "query-storm-archive") {
         handleQueryStormArchive(commandName, argumentList, response);
     }
+    */
     else if (commandName == "query-archive-period") {
         handleQueryArchivePeriod(commandName, response);
     }
@@ -215,9 +213,11 @@ ConsoleCommandHandler::handleCommand(CommandData & commandData) {
     else if (commandName == "query-console-type") {
         handleQueryConsoleType(commandName, response);
     }
+    /*
     else if (commandName == "query-current-weather") {
         handleQueryLoopArchive(commandName, argumentList, response);
     }
+    */
     else if (commandName == "query-firmware") {
         handleQueryFirmware(commandName, response);
     }
@@ -703,6 +703,7 @@ ConsoleCommandHandler::handleQueryArchivePeriod(const std::string & commandName,
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+/*
 void
 ConsoleCommandHandler::handleQueryStormArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response) {
     DateTimeFields startDate;
@@ -730,6 +731,7 @@ ConsoleCommandHandler::handleQueryStormArchive(const std::string & commandName, 
         response.append(oss.str());
     }
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -858,6 +860,7 @@ ConsoleCommandHandler::handleUpdateConfigurationData(const std::string & command
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+/*
 void
 ConsoleCommandHandler::handleQueryArchiveStatistics(const std::string & commandName, std::string & response) {
     DateTimeFields oldestRecordTime;
@@ -876,9 +879,11 @@ ConsoleCommandHandler::handleQueryArchiveStatistics(const std::string & commandN
 
     response.append(oss.str());
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+/*
 void
 ConsoleCommandHandler::handleQueryArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response) {
     DateTimeFields startTime;
@@ -914,9 +919,11 @@ ConsoleCommandHandler::handleQueryArchive(const std::string & commandName, const
         response.append(oss.str());
     }
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+/*
 void
 ConsoleCommandHandler::handleQueryArchiveSummary(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response) {
     DateTimeFields startTime;
@@ -973,9 +980,11 @@ ConsoleCommandHandler::handleQueryArchiveSummary(const std::string & commandName
         response.append(buildFailureString("Invalid summary period or wind speed unit"));
     }
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+/*
 void
 ConsoleCommandHandler::handleQueryLoopArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response) {
     int hours = 1;
@@ -1000,6 +1009,7 @@ ConsoleCommandHandler::handleQueryLoopArchive(const std::string & commandName, c
 
     response.append(oss.str());
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

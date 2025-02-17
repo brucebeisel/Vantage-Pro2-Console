@@ -25,12 +25,9 @@
 namespace vws {
 class VantageWeatherStation;
 class VantageConfiguration;
-class ArchiveManager;
 class VantageLogger;
 class VantageStationNetwork;
 class AlarmManager;
-class CurrentWeatherManager;
-class StormArchiveManager;
 
 /**
  * Handle the commands that arrive on the command socket.
@@ -42,19 +39,13 @@ public:
      *
      * @param station               The weather station object that is used to send commands to the console
      * @param configurator          The object that manages many EEPROM related commands
-     * @param archiveManager        The object that is used to retrieve historical data from the archive
      * @param network               The object that is used to read and write the weather station network data
      * @param alarmManager          The object that manages the alarm thresholds and alarm triggered states
-     * @param stormArchiveManager   The object that manages the archive containing the storm data
-     * @param currentWeatherManager The object that is used to retrieve historical current weather data
      */
     ConsoleCommandHandler(VantageWeatherStation & station,
-                   VantageConfiguration & configurator,
-                   ArchiveManager & archiveManager,
-                   VantageStationNetwork & network,
-                   AlarmManager & alarmManager,
-                   StormArchiveManager & stormArchiveManager,
-                   CurrentWeatherManager & currentWeatherManager);
+                          VantageConfiguration & configurator,
+                          VantageStationNetwork & network,
+                          AlarmManager & alarmManager);
 
     /**
      * Destructor.
@@ -213,15 +204,15 @@ private:
     //
     // Data query commands
     //
-    void handleQueryArchiveStatistics(const std::string & commandName, std::string & response);
+    //void handleQueryArchiveStatistics(const std::string & commandName, std::string & response);
 
-    void handleQueryArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    //void handleQueryArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
 
-    void handleQueryArchiveSummary(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    //void handleQueryArchiveSummary(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
 
-    void handleQueryLoopArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    //void handleQueryLoopArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
 
-    void handleQueryStormArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    //void handleQueryStormArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
 
     //
     // Other Commands
@@ -249,11 +240,8 @@ private:
 
     VantageWeatherStation & station;
     VantageConfiguration &  configurator;
-    ArchiveManager &        archiveManager;
     VantageStationNetwork & network;
     AlarmManager &          alarmManager;
-    CurrentWeatherManager & currentWeatherManager;
-    StormArchiveManager &   stormArchiveManager;
     VantageLogger &         logger;
 };
 

@@ -43,11 +43,11 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager,  EventManager & evtMgr, StormArchiveManager & stormArchiveManager) :
+VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager,  CommandHandler & cmdHandler, StormArchiveManager & stormArchiveManager) :
                                                                 station(station),
                                                                 configuration(configuration),
                                                                 archiveManager(archiveManager),
-                                                                eventManager(evtMgr),
+                                                                commandHandler(cmdHandler),
                                                                 stormArchiveManager(stormArchiveManager),
                                                                 exitLoop(false),
                                                                 nextRecord(-1),
@@ -230,7 +230,7 @@ VantageDriver::mainLoop() {
             // Note that the events are expected to come in slowly as the
             // events are typically human driven.
             //
-            eventManager.processNextEvent();
+            commandHandler.processNextCommand();
 
             //
             // If the LOOP packet data indicates that a new archive packet is available
@@ -261,12 +261,12 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
     nextRecord = packet.getNextRecord();
 
     bool signalCaughtFlag = signalCaught.load();
-    bool eventReceivedFlag = eventManager.isEventAvailable();
+    bool commandReceivedFlag = commandHandler.isCommandAvailable();
     bool newArchiveRecordFlag = previousNextRecord != nextRecord;
-    bool continueLoopPacketProcessing = !signalCaughtFlag && !eventReceivedFlag && !newArchiveRecordFlag;
+    bool continueLoopPacketProcessing = !signalCaughtFlag && !commandReceivedFlag && !newArchiveRecordFlag;
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop (LOOP): " << std::boolalpha << continueLoopPacketProcessing
-                                              << " (Signal Caught: " << signalCaughtFlag << " Event Received: " << eventReceivedFlag << " New Archive Record: " << newArchiveRecordFlag << ")" << endl;
+                                              << " (Signal Caught: " << signalCaughtFlag << " Command Received: " << commandReceivedFlag << " New Archive Record: " << newArchiveRecordFlag << ")" << endl;
 
     return continueLoopPacketProcessing;
 }
@@ -276,11 +276,11 @@ VantageDriver::processLoopPacket(const LoopPacket & packet) {
 bool
 VantageDriver::processLoop2Packet(const Loop2Packet & packet) {
     bool signalCaughtFlag = signalCaught.load();
-    bool eventReceivedFlag = eventManager.isEventAvailable();
-    bool continueLoopPacketProcessing = !signalCaughtFlag && !eventReceivedFlag;
+    bool commandReceivedFlag = commandHandler.isCommandAvailable();
+    bool continueLoopPacketProcessing = !signalCaughtFlag && !commandReceivedFlag;
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Continue current weather loop (LOOP2): " << std::boolalpha << continueLoopPacketProcessing
-                                              << " (Signal Caught: " << signalCaughtFlag << " Event Received: " << eventReceivedFlag << ")" << endl;
+                                              << " (Signal Caught: " << signalCaughtFlag << " Command Received: " << commandReceivedFlag << ")" << endl;
 
     return continueLoopPacketProcessing;
 }

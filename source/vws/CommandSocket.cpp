@@ -17,6 +17,9 @@
 
 #include "CommandSocket.h"
 
+#ifndef __CYGWIN__
+#include <sys/eventfd.h>
+#endif
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <netinet/in.h>
@@ -45,13 +48,12 @@ commandThreadEntry(CommandSocket * cs) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CommandSocket::CommandSocket(int port, EventManager & evtMgr) : port(port),
-                                                                responseEventFd(-1),
-                                                                terminating(false),
-                                                                commandThread(NULL),
-                                                                listenFd(-1),
-                                                                consoleEventManager(evtMgr),
-                                                                logger(VantageLogger::getLogger("CommandSocket")) {
+CommandSocket::CommandSocket(int port) : port(port),
+                                         responseEventFd(-1),
+                                         terminating(false),
+                                         commandThread(NULL),
+                                         listenFd(-1),
+                                         logger(VantageLogger::getLogger("CommandSocket")) {
 
 }
 
@@ -65,6 +67,13 @@ CommandSocket::~CommandSocket() {
 
     for (int fd : socketFdList)
         close(fd);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandSocket::addCommandHandler(CommandHandler & handler) {
+    commandHandlers.push_back(&handler);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +151,7 @@ CommandSocket::initialize() {
         return false;
 
 #ifndef __CYGWIN__
-    responseEventFd = eventfd(0, 0);
+    responseEventFd = eventfd(0, EFD_NONBLOCK);
 #endif
 
     commandThread = new thread(commandThreadEntry, this);
@@ -240,7 +249,7 @@ CommandSocket::readCommand(int fd) {
     commandData.setCommandFromJson(string(buffer));
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Queuing command " << commandData.commandName << " that was received on fd " << commandData.fd << endl;
-    consoleEventManager.offerEvent(commandData);
+    //consoleEventManager.offerEvent(commandData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef COMMAND_HANDLER_H
-#define COMMAND_HANDLER_H
+#ifndef COMMAND_HANDLER_H_
+#define COMMAND_HANDLER_H_
+
+#include "EventManager.h"
 
 namespace vws {
 
@@ -26,10 +28,22 @@ class CommandData;
  */
 class CommandHandler {
 public:
+    CommandHandler();
+
     /**
      * Destructor.
      */
-    virtual ~CommandHandler() {};
+    virtual ~CommandHandler();
+
+    /**
+     * Check if there is an command on the queue. Note that in a multi-threaded environment
+     * the return value may no longer be valid when the consumeEvent() method is called.
+     *
+     * @return True if the queue is not empty at the moment
+     */
+    bool isCommandAvailable() const;
+
+    void processNextCommand();
 
     /**
      * Handle a command and write the response to the provided object.
@@ -45,6 +59,9 @@ public:
      * @return True if this command handler recognizes this command name
      */
     virtual bool isCommandNameForHandler(const std::string & commandName) const = 0;
+
+protected:
+    EventManager eventManager;
 };
 
 }
