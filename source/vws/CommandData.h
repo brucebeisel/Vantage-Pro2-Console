@@ -45,6 +45,7 @@ struct CommandData {
     CommandData(ResponseHandler & handler, int fd);
 
     bool setCommandFromJson(const std::string  & commandJson);
+    static std::string buildFailureString(const std::string & errorString);
 
     ResponseHandler *   responseHandler;  // The response handler that will process the response
     int                 fd;               // The file descriptor on which the command was received, so the response can be sent on the same file descriptor

@@ -24,7 +24,7 @@
 
 namespace vws {
 class VantageLogger;
-class EventManager;
+class CommandQueue;
 class ArchiveManager;
 class StormArchiveManager;
 class CurrentWeatherManager;
@@ -52,13 +52,28 @@ public:
      * @param commandName The name of the command
      * @return True if this command handler recognizes this command name
      */
-    virtual bool isCommandNameForHandler(const std::string & commandName) const;
+    virtual bool offerCommand(const CommandData & commandData);
 
     void initialize();
 
     void terminate();
 
     void mainLoop();
+
+    //
+    // Data query commands
+    //
+    void handleQueryArchiveStatistics(CommandData & commandData);
+
+    void handleQueryArchive(CommandData & commandData);
+
+    void handleQueryArchiveSummary(CommandData & commandData);
+
+    void handleQueryLoopArchive(CommandData & commandData);
+
+    void handleQueryStormArchive(CommandData & commandData);
+
+    void handleClearExtendedArchive(CommandData & commandData);
 
 private:
     ArchiveManager &        archiveManager;

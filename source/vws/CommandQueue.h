@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef EVENT_MANAGER_H_
-#define EVENT_MANAGER_H_
+#ifndef COMMAND_QUEUE_H_
+#define COMMAND_QUEUE_H_
 
 #include <queue>
 #include <string>
@@ -30,19 +30,19 @@ class VantageLogger;
 /**
  * Class to handle events from the HTTP threads.
  */
-class EventManager {
+class CommandQueue {
 public:
     /**
      * Constructor.
      *
      * @param commandHandler The handler to which to send the events
      */
-    EventManager();
+    CommandQueue();
 
     /**
      * Destructor.
      */
-    virtual ~EventManager();
+    virtual ~CommandQueue();
 
     /**
      * Check if there is an event on the queue. Note that in a multi-threaded environment
@@ -51,14 +51,6 @@ public:
      * @return True if the queue is not empty at the moment
      */
     bool isEventAvailable() const;
-
-    /**
-     * Offer an event to the underlying command handler, then queue if accepted
-     *
-     * @param event The event being offered
-     * @return True if event has been queued for the command handler
-     */
-    bool offerEvent(const CommandData & event);
 
     /**
      * Queue an event.
@@ -70,7 +62,7 @@ public:
     /**
      * Process the event at the head of the queue.
      */
-    void processNextEvent();
+    //void processNextEvent();
 
     /**
      * Consume the event at the head of the queue.
@@ -90,14 +82,13 @@ public:
     //
     // Prevent all copying and moving
     //
-    EventManager(const EventManager &) = delete;
-    EventManager & operator=(const EventManager &) = delete;
+    CommandQueue(const CommandQueue &) = delete;
+    CommandQueue & operator=(const CommandQueue &) = delete;
 
 private:
     std::queue<CommandData> commandQueue;   // The queue on which to store events
     mutable std::mutex      mutex;          // The mutex to protect the queue against multi-threaded contention
-    mutable std::condition_variable cv;          // The mutex to protect the queue against multi-threaded contention
-    //CommandHandler &        commandHandler; // The command handler that will execute the command
+    std::condition_variable cv;             // The mutex to protect the queue against multi-threaded contention
     VantageLogger &         logger;
 };
 

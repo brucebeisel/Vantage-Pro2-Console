@@ -29,9 +29,10 @@
 #include <vector>
 #include "json.hpp"
 
-#include "EventManager.h"
+#include "CommandQueue.h"
 #include "ResponseHandler.h"
 #include "CommandData.h"
+#include "CommandHandler.h"
 #include "VantageLogger.h"
 
 using json = nlohmann::json;
@@ -248,8 +249,16 @@ CommandSocket::readCommand(int fd) {
     CommandData commandData(*this, fd);
     commandData.setCommandFromJson(string(buffer));
 
+    bool consumed = false;
+    for (auto handler : commandHandlers) {
+        consumed = consumed || handler->offerCommand(commandData);
+    }
+
+    if (!consumed) {
+        // TODO: build and send error response
+    }
+
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Queuing command " << commandData.commandName << " that was received on fd " << commandData.fd << endl;
-    //consoleEventManager.offerEvent(commandData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

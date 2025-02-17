@@ -17,7 +17,7 @@
 #ifndef COMMAND_HANDLER_H_
 #define COMMAND_HANDLER_H_
 
-#include "EventManager.h"
+#include "CommandQueue.h"
 
 namespace vws {
 
@@ -45,6 +45,8 @@ public:
 
     void processNextCommand();
 
+    void processCommand(CommandData & commandData);
+
     /**
      * Handle a command and write the response to the provided object.
      *
@@ -58,10 +60,10 @@ public:
      * @param commandName The name of the command
      * @return True if this command handler recognizes this command name
      */
-    virtual bool isCommandNameForHandler(const std::string & commandName) const = 0;
+    virtual bool offerCommand(const CommandData & commandData) = 0;
 
 protected:
-    EventManager eventManager;
+    CommandQueue commandQueue;
 };
 
 }

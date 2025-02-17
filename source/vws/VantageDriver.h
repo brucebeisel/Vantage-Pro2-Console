@@ -28,7 +28,7 @@
 
 namespace vws {
 class ArchiveManager;
-class EventManager;
+class CommandQueue;
 class VantageLogger;
 class CurrentWeather;
 class CurrentWeatherSocket;

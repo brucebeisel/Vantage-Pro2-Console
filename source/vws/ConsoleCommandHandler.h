@@ -66,43 +66,35 @@ public:
      * @param commandName The name of the command
      * @return True if this command handler recognizes this command name
      */
-    virtual bool isCommandNameForHandler(const std::string & commandName) const;
+    virtual bool offerCommand(const CommandData & commandData);
 
-private:
 
     /**
      * Generic handler that calls the provided member function and builds the response JSON
      *
-     * @param handler         Pointer to the VantageWeatherStation member function that executes the command on the console
-     * @param commandName     The name of the command from the JSON string
-     * @param [out] response  The string into which the response will be written
+     * @param handler     Pointer to the VantageWeatherStation member function that executes the command on the console
+     * @param commandData The command data including the response data
      */
-    void handleNoArgCommand(bool (VantageWeatherStation::*handler)(), const std::string & commandName, std::string & response);
+    void handleNoArgCommand(bool (VantageWeatherStation::*handler)(), CommandData & commandData);
 
     //
     // The following handler methods process commands received on the interface socket. Each method has a preceding comment
     // that indicates which console command is being processed by the handler. There are also comment blocks that
     // identify the sections of the Vantage Serial Protocol that document the command.
-    // The methods have one of two signatures:
+    // The methods all have the same signatures:
     //
-    // void methodName(commandName, response)
-    // @param commandName The name of the command to be processed
-    // @param [out]       The response to the command
-    //
-    // void methodName(commandName, arguments, response)
-    // @param commandName The name of the command to be processed
-    // @param arguments   The arguments to the command
-    // @param [out]       The response to the command
+    // void methodName(commandData);
+    // @param [in/out] commandData The command data including the response data
     //
     ///////////////////////
     // Testing commands  //
     ///////////////////////
 
     // WRD<0x12><0x4d>
-    void handleQueryConsoleType(const std::string & commandName, std::string & response);
+    void handleQueryConsoleType(CommandData & commandData);
 
     // NVER and VER
-    void handleQueryFirmware(const std::string & commandName, std::string & response);
+    void handleQueryFirmware(CommandData & commandData);
 
     // RECEIVERS
     // Note that this command will have inconsistent results. For a period of time after the console exits
@@ -110,54 +102,54 @@ private:
     // the receiver list will be empty. Only putting the console back on the "Receiving From..." screen will
     // the receiver list populate with data again.
     //
-    void handleQueryReceiverList(const std::string & commandName, std::string & response);
+    void handleQueryReceiverList(CommandData & commandData);
 
     // RXCHECK
-    void handleQueryConsoleDiagnostics(const std::string & commandName, std::string & response);
+    void handleQueryConsoleDiagnostics(CommandData & commandData);
 
     ///////////////////////////
     // Current Data Commands //
     ///////////////////////////
 
     // HILOWS
-    void handleQueryHighLows(const std::string & commandName, std::string & response);
+    void handleQueryHighLows(CommandData & commandData);
 
     // PUTRAIN
-    void handlePutYearRain(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handlePutYearRain(CommandData & commandData);
 
     // PUTET
-    void handlePutYearET(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handlePutYearET(CommandData & commandData);
 
     /////////////////////
     // EEPROM Commands //
     /////////////////////
 
     // EEBWR
-    void handleUpdateUnits(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateUnits(CommandData & commandData);
 
 
     // EEBRD
-    void handleQueryUnits(const std::string & commandName, std::string & response);
+    void handleQueryUnits(CommandData & commandData);
 
     // EEBRD
-    void handleQuerySensorStations(const std::string & commandName, std::string & response);
+    void handleQuerySensorStations(CommandData & commandData);
 
-    void handleRequestSensorStationsStatus(const std::string & commandName, std::string & response);
+    void handleRequestSensorStationsStatus(CommandData & commandData);
 
     // EEBRD
-    void handleQueryCalibrationAdjustments(const std::string & commandName, std::string & response);
+    void handleQueryCalibrationAdjustments(CommandData & commandData);
 
-    void handleUpdateCalibrationAdjustments(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateCalibrationAdjustments(CommandData & commandData);
 
     //////////////////////////
     // Calibration Commands //
     //////////////////////////
 
     // BAR=
-    void handleUpdateBarometerReadingAndElevation(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateBarometerReadingAndElevation(CommandData & commandData);
 
     // BARDATA
-    void handleQueryBarometerCalibrationParameters(const std::string & commandName, std::string & response);
+    void handleQueryBarometerCalibrationParameters(CommandData & commandData);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Clearing Commands.                                                                                 //
@@ -171,16 +163,16 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // CLRVAR
-    void handleClearCumulativeValue(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleClearCumulativeValue(CommandData & commandData);
 
     // CLRHIGHS
-    void handleClearHighValues(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleClearHighValues(CommandData & commandData);
 
     // CLRLOWS
-    void handleClearLowValues(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleClearLowValues(CommandData & commandData);
 
     // EEBRD
-    void handleQueryArchivePeriod(const std::string & commandName, std::string & response);
+    void handleQueryArchivePeriod(CommandData & commandData);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Configuration Commands                                                                             //
@@ -190,54 +182,41 @@ private:
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // GETTIME
-    void handleQueryConsoleTime(const std::string & commandName, std::string & response);
+    void handleQueryConsoleTime(CommandData & commandData);
 
     // SETPER
-    void handleUpdateArchivePeriod(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateArchivePeriod(CommandData & commandData);
 
     // NEWSETUP
-    void handleInitialization(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleInitialization(CommandData & commandData);
 
     // LAMPS
-    void handleBacklight(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
-
-    //
-    // Data query commands
-    //
-    //void handleQueryArchiveStatistics(const std::string & commandName, std::string & response);
-
-    //void handleQueryArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
-
-    //void handleQueryArchiveSummary(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
-
-    //void handleQueryLoopArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
-
-    //void handleQueryStormArchive(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleBacklight(CommandData & commandData);
 
     //
     // Other Commands
     //
-    void handleQueryConfigurationData(const std::string & commandName, std::string & response);
+    void handleQueryConfigurationData(CommandData & commandData);
 
-    void handleUpdateConfigurationData(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateConfigurationData(CommandData & commandData);
 
-    void handleGetTimezones(const std::string & commandName, std::string & response);
+    void handleGetTimezones(CommandData & commandData);
 
-    void handleQueryNetworkConfiguration(const std::string & commandName, std::string & response);
+    void handleQueryNetworkConfiguration(CommandData & commandData);
 
-    void handleUpdateNetworkConfiguration(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateNetworkConfiguration(CommandData & commandData);
 
-    void handleQueryAlarmThresholds(const std::string & commandName, std::string & response);
+    void handleQueryAlarmThresholds(CommandData & commandData);
 
-    void handleUpdateAlarmThresholds(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleUpdateAlarmThresholds(CommandData & commandData);
 
-    void handleQueryNetworkStatus(const std::string & commandName, const CommandData::CommandArgumentList & argumentList, std::string & response);
+    void handleQueryActiveAlarms(CommandData & commandData);
 
-    void handleQueryTodayNetworkStatus(const std::string & commandName, std::string & response);
+    void handleQueryNetworkStatus(CommandData & commandData);
 
-    std::string buildFailureString(const std::string & errorString);
+    void handleQueryTodayNetworkStatus(CommandData & commandData);
 
-
+private:
     VantageWeatherStation & station;
     VantageConfiguration &  configurator;
     VantageStationNetwork & network;

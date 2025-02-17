@@ -15,10 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EventManager.h"
-
 #include "CommandData.h"
 #include "CommandHandler.h"
+#include "CommandQueue.h"
 #include "ResponseHandler.h"
 #include "VantageLogger.h"
 
@@ -28,42 +27,26 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-EventManager::EventManager(/*CommandHandler & ch*/) : /*commandHandler(ch),*/ logger(VantageLogger::getLogger("EventManager")) {
+CommandQueue::CommandQueue(/*CommandHandler & ch*/) : /*commandHandler(ch),*/ logger(VantageLogger::getLogger("EventManager")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-EventManager::~EventManager() {
+CommandQueue::~CommandQueue() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-EventManager::isEventAvailable() const {
+CommandQueue::isEventAvailable() const {
     std::scoped_lock<std::mutex> guard(mutex);
     return !commandQueue.empty();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
-EventManager::offerEvent(const CommandData & event) {
-    bool eventAccepted = false;
-
-    /*
-    if (commandHandler.isCommandNameForHandler(event.commandName)) {
-        queueEvent(event);
-        eventAccepted = true;
-    }
-    */
-
-    return eventAccepted;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 void
-EventManager::queueEvent(const CommandData & event) {
+CommandQueue::queueEvent(const CommandData & event) {
     {
         std::scoped_lock<std::mutex> guard(mutex);
         logger.log(VantageLogger::VANTAGE_DEBUG2) << "Queuing event" << endl;
@@ -75,23 +58,8 @@ EventManager::queueEvent(const CommandData & event) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
-EventManager::processNextEvent() {
-    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Checking for event" << endl;
-    CommandData event;
-    std::string response;
-    if (lockAndConsumeEvent(event)) {
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Handling event with command '" << event.commandName << "'" << endl;
-        //commandHandler.handleCommand(event);
-        event.response = response;
-        event.responseHandler->handleCommandResponse(event);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 bool
-EventManager::lockAndConsumeEvent(CommandData & event) {
+CommandQueue::lockAndConsumeEvent(CommandData & event) {
     std::scoped_lock<std::mutex> guard(mutex);
     return consumeEvent(event);
 }
@@ -99,7 +67,7 @@ EventManager::lockAndConsumeEvent(CommandData & event) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-EventManager::consumeEvent(CommandData & event) {
+CommandQueue::consumeEvent(CommandData & event) {
     if (commandQueue.empty())
         return false;
 
@@ -112,7 +80,7 @@ EventManager::consumeEvent(CommandData & event) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-EventManager::waitForEvent(CommandData & event) {
+CommandQueue::waitForEvent(CommandData & event) {
     std::unique_lock<std::mutex> guard(mutex);
 
     cv.wait(guard);
@@ -123,7 +91,7 @@ EventManager::waitForEvent(CommandData & event) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-EventManager::interrupt() {
+CommandQueue::interrupt() {
     cv.notify_all();
 }
 

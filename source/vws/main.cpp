@@ -33,7 +33,7 @@
 #include "DataCommandHandler.h"
 #include "CurrentWeatherManager.h"
 #include "CurrentWeatherSocket.h"
-#include "EventManager.h"
+#include "CommandQueue.h"
 #include "SerialPort.h"
 #include "VantageDriver.h"
 #include "VantageConfiguration.h"

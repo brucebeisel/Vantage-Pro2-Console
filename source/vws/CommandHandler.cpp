@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "CommandHandler.h"
-
+#include "CommandData.h"
 
 namespace vws {
 
@@ -34,13 +33,30 @@ CommandHandler::~CommandHandler() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandHandler::processNextCommand() {
+    CommandData commandData;
+
+    if (commandQueue.consumeEvent(commandData)) {
+        processCommand(commandData);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandHandler::processCommand(CommandData & commandData) {
+    handleCommand(commandData);
+    //
+    // Terminate the JSON element
+    //
+    commandData.response.append(" }");
+    commandData.responseHandler->handleCommandResponse(commandData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CommandHandler::isCommandAvailable() const {
-    return eventManager.isEventAvailable();
+    return commandQueue.isEventAvailable();
 }
 
 }

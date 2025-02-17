@@ -13,6 +13,7 @@ SRCS=\
 	CommandData.cpp \
 	CommandHandler.cpp \
 	ConsoleCommandHandler.cpp \
+	CommandQueue.cpp \
 	CommandSocket.cpp \
 	CurrentWeather.cpp \
 	CurrentWeatherManager.cpp \
@@ -20,7 +21,6 @@ SRCS=\
 	DataCommandHandler.cpp \
 	DateTimeFields.cpp \
 	DominantWindDirections.cpp \
-	EventManager.cpp \
 	ForecastRule.cpp \
 	GraphDataRetriever.cpp \
 	HiLowPacket.cpp \

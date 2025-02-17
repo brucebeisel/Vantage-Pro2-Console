@@ -26,7 +26,7 @@
 
 #include "Alarm.h"
 #include "ArchiveManager.h"
-#include "EventManager.h"
+#include "CommandQueue.h"
 #include "StormArchiveManager.h"
 #include "CurrentWeather.h"
 #include "HiLowPacket.h"

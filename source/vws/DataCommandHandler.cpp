@@ -17,13 +17,36 @@
 
 #include "DataCommandHandler.h"
 
+#include <vector>
 #include "VantageLogger.h"
 #include "CommandData.h"
-#include "EventManager.h"
+#include "DateTimeFields.h"
+#include "StormArchiveManager.h"
+#include "ArchiveManager.h"
+#include "CommandQueue.h"
+#include "SummaryReport.h"
+#include "SummaryEnums.h"
+#include "CurrentWeather.h"
+#include "CurrentWeatherManager.h"
+#include "WindRoseData.h"
+#include "VantageEnums.h"
 
 using namespace std;
 
 namespace vws {
+struct CommandEntry {
+    std::string commandName;
+    void (DataCommandHandler::*handler)(CommandData &);
+};
+
+static CommandEntry commandList[] = {
+        "query-archive-statistics", &DataCommandHandler::handleQueryArchiveStatistics,
+        "query-archive",            &DataCommandHandler::handleQueryArchive,
+        "query-archive-summary",    &DataCommandHandler::handleQueryArchiveSummary,
+        "query-storm-archive",      &DataCommandHandler::handleQueryStormArchive,
+        "clear-extended-archive",   &DataCommandHandler::handleClearExtendedArchive,
+        "query-current-weather",    &DataCommandHandler::handleQueryLoopArchive
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,15 +81,66 @@ DataCommandHandler::initialize() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-DataCommandHandler::handleCommand(CommandData & command) {
+DataCommandHandler::handleCommand(CommandData & commandData) {
+    for (CommandEntry & commandEntry : commandList) {
+        if (commandData.commandName == commandEntry.commandName) {
+            (this->*commandEntry.handler)(commandData);
+            return;
+        }
+    }
 
+    logger.log(VantageLogger::VANTAGE_WARNING) << "handleCommand() received unexpected command named '" << commandData.commandName << "'" << endl;
+
+    /*
+    if (commandData.commandName == "query-archive-statistics") {
+        handleQueryArchiveStatistics(commandData);
+    }
+    else if (commandData.commandName == "query-archive") {
+        handleQueryArchive(commandData);
+    }
+    else if (commandData.commandName == "query-archive-summary") {
+        handleQueryArchiveSummary(commandData);
+    }
+    else if (commandData.commandName == "query-storm-archive") {
+        handleQueryStormArchive(commandData);
+    }
+    else if (commandData.commandName == "clear-extended-archive") {
+        handleClearExtendedArchive(commandData);
+    }
+    else if (commandData.commandName == "query-current-weather") {
+        handleQueryLoopArchive(commandData);
+    }
+    else {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "handleCommand() received unexpected command named '" << commandData.commandName << "'" << endl;
+    }
+    */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-DataCommandHandler::isCommandNameForHandler(const std::string & commandName) const {
-    return true;
+DataCommandHandler::offerCommand(const CommandData & commandData) {
+    for (auto entry : commandList) {
+        if (commandData.commandName == entry.commandName) {
+            commandQueue.queueEvent(commandData);
+            return true;
+        }
+    }
+
+    return false;
+    /*
+    if (commandData.commandName == "query-archive-statistics" ||
+        commandData.commandName == "query-archive" ||
+        commandData.commandName == "query-archive-summary" ||
+        commandData.commandName == "query-storm-archive" ||
+        commandData.commandName == "query-current-weather" ||
+        commandData.commandName == "clear-extended-archive") {
+        eventManager.queueEvent(commandData);
+        return true;
+    }
+    else
+        return false;
+        */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +148,7 @@ DataCommandHandler::isCommandNameForHandler(const std::string & commandName) con
 void
 DataCommandHandler::terminate() {
     terminating = true;
-    eventManager.interrupt();
+    commandQueue.interrupt();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,11 +158,201 @@ DataCommandHandler::mainLoop() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Entering Data Command Handler thread" << endl;
     while (!terminating) {
         CommandData commandData;
-        if (eventManager.waitForEvent(commandData)) {
-            handleCommand(commandData);
+        if (commandQueue.waitForEvent(commandData)) {
+            processCommand(commandData);
         }
 
     }
     logger.log(VantageLogger::VANTAGE_INFO) << "Exiting Data Command Handler thread" << endl;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::handleQueryArchiveStatistics(CommandData & commandData) {
+    DateTimeFields oldestRecordTime;
+    DateTimeFields newestRecordTime;
+    int            archiveRecordCount;
+
+    archiveManager.getArchiveRange(oldestRecordTime, newestRecordTime, archiveRecordCount);
+
+    ostringstream oss;
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { "
+        << "\"oldestRecordTime\" : \"" << oldestRecordTime.formatDateTime() << "\", "
+        << "\"newestRecordTime\" : \"" << newestRecordTime.formatDateTime() << "\", "
+        << "\"recordCount\" : " << archiveRecordCount << ", "
+        << "\"archivingActive\" : " << boolalpha << archiveManager.getArchivingState() << noboolalpha
+        << "}";
+
+    commandData.response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::handleQueryArchive(CommandData & commandData) {
+    DateTimeFields startTime;
+    DateTimeFields endTime;
+
+    for (CommandData::CommandArgument arg : commandData.arguments) {
+        if (arg.first == "start-time") {
+            startTime.parseDateTime(arg.second);
+        }
+        else if (arg.first == "end-time") {
+            endTime.parseDateTime(arg.second);
+        }
+    }
+
+    if (!startTime.isDateTimeValid() || !endTime.isDateTimeValid()) {
+        commandData.response.append(CommandData::buildFailureString("Missing argument"));
+    }
+    else {
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query the archive with times: " << startTime.formatDateTime() << " - " << endTime.formatDateTime() << endl;
+        vector<ArchivePacket> packets;
+        archiveManager.queryArchiveRecords(startTime, endTime, packets);
+
+        ostringstream oss;
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : [ ";
+
+        bool first = true;
+        for (ArchivePacket packet : packets) {
+            if (!first) oss << ", "; else first = false;
+            oss << packet.formatJSON();
+        }
+
+        oss << "]";
+        commandData.response.append(oss.str());
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::handleQueryArchiveSummary(CommandData & commandData) {
+    DateTimeFields startTime;
+    DateTimeFields endTime;
+    SummaryPeriod summaryPeriod;
+    int speedBinCount = 0;
+    Speed speedBinIncrement = 0.0;
+    bool foundSummaryPeriodArgument = false;
+    ProtocolConstants::WindUnits windUnits;
+    bool foundWindUnits = false;
+
+    try {
+        for (CommandData::CommandArgument arg : commandData.arguments) {
+            if (arg.first == "start-time") {
+                startTime.parseDateTime(arg.second);
+            }
+            else if (arg.first == "end-time") {
+                endTime.parseDateTime(arg.second);
+            }
+            else if (arg.first == "summary-period") {
+                summaryPeriod = summaryPeriodEnum.stringToValue(arg.second);
+                foundSummaryPeriodArgument = true;
+            }
+            else if (arg.first == "speed-bin-count") {
+                speedBinCount = atoi(arg.second.c_str());
+            }
+            else if (arg.first == "speed-bin-increment") {
+                speedBinIncrement = atof(arg.second.c_str());
+            }
+            else if (arg.first == "speed-units") {
+                windUnits = windUnitsEnum.stringToValue(arg.second);
+                foundWindUnits = true;
+            }
+        }
+
+        if (!startTime.isDateTimeValid() || !endTime.isDateTimeValid() ||
+            speedBinCount == 0 || speedBinIncrement == 0.0 ||
+            !foundWindUnits ||
+            !foundSummaryPeriodArgument)
+            commandData.response.append(CommandData::buildFailureString("Missing argument"));
+        else {
+            logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query summaries from the archive with times: " << startTime << " - " << endTime << endl;
+            WindRoseData windRoseData(windUnits, speedBinIncrement, speedBinCount);
+            SummaryReport report(summaryPeriod, startTime, endTime, archiveManager, windRoseData);
+            report.loadData();
+
+            ostringstream oss;
+            oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+            oss << report.formatJSON();
+            commandData.response.append(oss.str());
+        }
+    }
+    catch (const std::exception & e) {
+        commandData.response.append(CommandData::buildFailureString("Invalid summary period or wind speed unit"));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::handleQueryLoopArchive(CommandData & commandData) {
+    int hours = 1;
+    for (CommandData::CommandArgument arg : commandData.arguments) {
+        if (arg.first == "hours") {
+            hours = atoi(arg.second.c_str());
+        }
+    }
+
+    vector<CurrentWeather> list;
+    currentWeatherManager.queryCurrentWeatherArchive(hours, list);
+    ostringstream oss;
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : [ ";
+
+    bool first = true;
+    for (CurrentWeather cw : list) {
+        if (!first) oss << ", "; else first = false;
+        oss << cw.formatJSON();
+    }
+
+    oss << " ]";
+
+    commandData.response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::handleQueryStormArchive(CommandData & commandData) {
+    DateTimeFields startDate;
+    DateTimeFields endDate;
+
+    for (CommandData::CommandArgument arg : commandData.arguments) {
+        int year, month, monthDay;
+        if (arg.first == "start-time") {
+            startDate.parseDate(arg.second);
+        }
+        else if (arg.first == "end-time") {
+            endDate.parseDate(arg.second);
+        }
+    }
+
+    if (!startDate.isDateTimeValid() || !endDate.isDateTimeValid()) {
+        commandData.response.append(CommandData::buildFailureString("Missing argument"));
+    }
+    else {
+        vector<StormData> storms;
+        stormArchiveManager.queryStorms(startDate, endDate, storms);
+        ostringstream oss;
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+        oss << StormArchiveManager::formatStormJSON(storms);
+        commandData.response.append(oss.str());
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::handleClearExtendedArchive(CommandData & commandData) {
+    bool success = false;
+    if (archiveManager.backupArchiveFile())
+        success = archiveManager.clearArchiveFile();
+
+    if (success)
+        commandData.response.append(SUCCESS_TOKEN);
+    else
+        commandData.response.append(CONSOLE_COMMAND_FAILURE_STRING);
+}
+
 }
