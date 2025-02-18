@@ -39,6 +39,9 @@ struct CommandEntry {
     void (DataCommandHandler::*handler)(CommandData &);
 };
 
+/**
+ * Table used to map the command name to the handler function.
+ */
 static CommandEntry commandList[] = {
         "query-archive-statistics", &DataCommandHandler::handleQueryArchiveStatistics,
         "query-archive",            &DataCommandHandler::handleQueryArchive,
@@ -61,8 +64,8 @@ DataCommandHandler::DataCommandHandler(ArchiveManager & am, StormArchiveManager 
                                                                                                                       stormArchiveManager(sam),
                                                                                                                       currentWeatherManager(cwm),
                                                                                                                       terminating(false),
-                                                                                                                      logger(VantageLogger::getLogger("DataCommandHandler")),
-                                                                                                                      commandThread(NULL) {
+                                                                                                                      commandThread(NULL),
+                                                                                                                      logger(VantageLogger::getLogger("DataCommandHandler")) {
 
 }
 
@@ -82,6 +85,7 @@ DataCommandHandler::initialize() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 DataCommandHandler::handleCommand(CommandData & commandData) {
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Processing command " << commandData << endl;
     for (CommandEntry & commandEntry : commandList) {
         if (commandData.commandName == commandEntry.commandName) {
             (this->*commandEntry.handler)(commandData);
@@ -90,57 +94,23 @@ DataCommandHandler::handleCommand(CommandData & commandData) {
     }
 
     logger.log(VantageLogger::VANTAGE_WARNING) << "handleCommand() received unexpected command named '" << commandData.commandName << "'" << endl;
-
-    /*
-    if (commandData.commandName == "query-archive-statistics") {
-        handleQueryArchiveStatistics(commandData);
-    }
-    else if (commandData.commandName == "query-archive") {
-        handleQueryArchive(commandData);
-    }
-    else if (commandData.commandName == "query-archive-summary") {
-        handleQueryArchiveSummary(commandData);
-    }
-    else if (commandData.commandName == "query-storm-archive") {
-        handleQueryStormArchive(commandData);
-    }
-    else if (commandData.commandName == "clear-extended-archive") {
-        handleClearExtendedArchive(commandData);
-    }
-    else if (commandData.commandName == "query-current-weather") {
-        handleQueryLoopArchive(commandData);
-    }
-    else {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "handleCommand() received unexpected command named '" << commandData.commandName << "'" << endl;
-    }
-    */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
 DataCommandHandler::offerCommand(const CommandData & commandData) {
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Being offered command " << commandData.commandName << endl;
     for (auto entry : commandList) {
         if (commandData.commandName == entry.commandName) {
-            commandQueue.queueEvent(commandData);
+            commandQueue.queueCommand(commandData);
+            logger.log(VantageLogger::VANTAGE_DEBUG3) << "Offer of command " << commandData.commandName << " accepted" << endl;
             return true;
         }
     }
 
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Offer of command " << commandData.commandName << " rejected" << endl;
     return false;
-    /*
-    if (commandData.commandName == "query-archive-statistics" ||
-        commandData.commandName == "query-archive" ||
-        commandData.commandName == "query-archive-summary" ||
-        commandData.commandName == "query-storm-archive" ||
-        commandData.commandName == "query-current-weather" ||
-        commandData.commandName == "clear-extended-archive") {
-        eventManager.queueEvent(commandData);
-        return true;
-    }
-    else
-        return false;
-        */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,12 +128,24 @@ DataCommandHandler::mainLoop() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Entering Data Command Handler thread" << endl;
     while (!terminating) {
         CommandData commandData;
-        if (commandQueue.waitForEvent(commandData)) {
+        if (commandQueue.waitForCommand(commandData)) {
             processCommand(commandData);
         }
 
     }
     logger.log(VantageLogger::VANTAGE_INFO) << "Exiting Data Command Handler thread" << endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::join() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Joining the thread" << endl;
+    if (commandThread != NULL) {
+        commandThread->join();
+        delete commandThread;
+        commandThread = NULL;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

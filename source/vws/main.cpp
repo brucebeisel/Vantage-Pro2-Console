@@ -128,9 +128,11 @@ consoleThreadEntry(const string & dataDirectory, const string & serialPortName, 
 
         logger.log(VantageLogger::VANTAGE_INFO) << "Entering driver's main loop" << endl;
         driver.mainLoop();
-        logger.log(VantageLogger::VANTAGE_INFO) << "Driver's main loop returned. Joining CommandSocket" << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Driver's main loop returned. Joining CommandSocket and Data Command Handler" << endl;
         commandSocket.terminate();
         commandSocket.join();
+        dataCommandHandler.terminate();
+        dataCommandHandler.join();
     }
     catch (std::exception & e) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Caught exception from driver's main loop " << e.what() << endl;

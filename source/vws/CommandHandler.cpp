@@ -15,7 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "CommandHandler.h"
+
 #include "CommandData.h"
+#include "ResponseHandler.h"
 
 namespace vws {
 
@@ -35,7 +37,7 @@ void
 CommandHandler::processNextCommand() {
     CommandData commandData;
 
-    if (commandQueue.consumeEvent(commandData)) {
+    if (commandQueue.consumeCommand(commandData)) {
         processCommand(commandData);
     }
 }
@@ -56,7 +58,7 @@ CommandHandler::processCommand(CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CommandHandler::isCommandAvailable() const {
-    return commandQueue.isEventAvailable();
+    return commandQueue.isCommandAvailable();
 }
 
 }

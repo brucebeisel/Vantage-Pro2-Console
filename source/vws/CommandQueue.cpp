@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "CommandQueue.h"
 
 #include "CommandData.h"
-#include "CommandHandler.h"
-#include "CommandQueue.h"
-#include "ResponseHandler.h"
 #include "VantageLogger.h"
 
 using namespace std;
@@ -27,7 +25,7 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CommandQueue::CommandQueue(/*CommandHandler & ch*/) : /*commandHandler(ch),*/ logger(VantageLogger::getLogger("EventManager")) {
+CommandQueue::CommandQueue() : logger(VantageLogger::getLogger("CommandQueue")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +36,7 @@ CommandQueue::~CommandQueue() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CommandQueue::isEventAvailable() const {
+CommandQueue::isCommandAvailable() const {
     std::scoped_lock<std::mutex> guard(mutex);
     return !commandQueue.empty();
 }
@@ -46,11 +44,11 @@ CommandQueue::isEventAvailable() const {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandQueue::queueEvent(const CommandData & event) {
+CommandQueue::queueCommand(const CommandData & command) {
     {
         std::scoped_lock<std::mutex> guard(mutex);
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Queuing event" << endl;
-        commandQueue.push(event);
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "Queuing command " << command.commandName << endl;
+        commandQueue.push(command);
     }
 
     cv.notify_all();
@@ -59,20 +57,23 @@ CommandQueue::queueEvent(const CommandData & event) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CommandQueue::lockAndConsumeEvent(CommandData & event) {
+CommandQueue::lockAndConsumeCommand(CommandData & command) {
     std::scoped_lock<std::mutex> guard(mutex);
-    return consumeEvent(event);
+    return consumeCommand(command);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CommandQueue::consumeEvent(CommandData & event) {
+CommandQueue::consumeCommand(CommandData & command) {
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Attempting to consume command" << endl;
     if (commandQueue.empty())
         return false;
 
-    event = commandQueue.front();
+    command = commandQueue.front();
     commandQueue.pop();
+
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Consumed command " << command.commandName << endl;
 
     return true;
 }
@@ -80,18 +81,20 @@ CommandQueue::consumeEvent(CommandData & event) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CommandQueue::waitForEvent(CommandData & event) {
+CommandQueue::waitForCommand(CommandData & command) {
     std::unique_lock<std::mutex> guard(mutex);
 
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Waiting for command" << endl;
     cv.wait(guard);
 
-    return consumeEvent(event);
+    return consumeCommand(command);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandQueue::interrupt() {
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Interrupting threads waiting for commands" << endl;
     cv.notify_all();
 }
 

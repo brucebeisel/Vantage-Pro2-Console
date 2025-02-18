@@ -29,14 +29,30 @@ class ArchiveManager;
 class StormArchiveManager;
 class CurrentWeatherManager;
 
+/**
+ * Command handler that will process command that do not need to talk to the Vantage Pro2 console, but can
+ * retrieve all the necessary data from local storage.
+ */
 class DataCommandHandler : public CommandHandler {
 public:
+    /**
+     * Constructor.
+     *
+     * @param archiveManager        The manager used to query the weather data archive
+     * @param stormArchiveManager   The manager to query past storms
+     * @param currentWeatherManager The manager to query the loop packets that make up the current weather
+     */
     DataCommandHandler(ArchiveManager & archiveManager, StormArchiveManager & stormArchiveManager, CurrentWeatherManager & currentWeatherManager);
 
     /**
      * Destructor.
      */
     virtual ~DataCommandHandler();
+
+    /**
+     * Initialize this object, starting the command loop thread.
+     */
+    void initialize();
 
     /**
      * Handle a command and write the response to the provided object.
@@ -54,11 +70,20 @@ public:
      */
     virtual bool offerCommand(const CommandData & commandData);
 
-    void initialize();
+    /**
+     * The main loop of the thread.
+     */
+    void mainLoop();
 
+    /**
+     * Trigger the thread to return.
+     */
     void terminate();
 
-    void mainLoop();
+    /**
+     * Join the thread.
+     */
+    void join();
 
     //
     // Data query commands

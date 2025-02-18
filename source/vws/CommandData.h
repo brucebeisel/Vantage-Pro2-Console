@@ -34,23 +34,61 @@ static const std::string FAILURE_STRING = FAILURE_TOKEN + "," + DATA_TOKEN + " :
 static const std::string CONSOLE_COMMAND_FAILURE_STRING = FAILURE_STRING + "\"Console command error\" }";
 
 /**
- * The data needed to respond to a command.
+ * The data needed to process and respond to a command.
  */
 struct CommandData {
-    typedef std::pair<std::string,std::string> CommandArgument;
-    typedef std::vector<CommandArgument> CommandArgumentList;
+    typedef std::pair<std::string,std::string> CommandArgument; // Each argument is a name/value pair
+    typedef std::vector<CommandArgument> CommandArgumentList;   // The arguments are a list of name/value pairs
 
+    /**
+     * Constructor.
+     */
     CommandData();
+
+    /**
+     * Constructor.
+     *
+     * @param handler The response handler that will be called after the command has been processed
+     */
     explicit CommandData(ResponseHandler & handler);
+
+    /**
+     * Constructor.
+     *
+     * @param handler The response handler that will be called after the command has been processed
+     * @param fd      The file descriptor on which to write the response
+     *
+     */
     CommandData(ResponseHandler & handler, int fd);
 
+    /**
+     * Set the command name and arguments from the provided JSON.
+     * This will also create a partial response string based on the command name.
+     *
+     * @param commandJson The command in JSON format
+     * @return True if the JSON is valid
+     */
     bool setCommandFromJson(const std::string  & commandJson);
+
+    /**
+     * Utility to build a JSON error string that can be appended onto the response.
+     *
+     * @param errorString The error to be embedded into the error portion of the response
+     */
     static std::string buildFailureString(const std::string & errorString);
+
+    /**
+     * ostream operator.
+     *
+     * @param os          The ostream
+     * @param commandData The data to be formatted for output
+     */
+    friend std::ostream & operator<<(std::ostream & os, const CommandData & commandData);
 
     ResponseHandler *   responseHandler;  // The response handler that will process the response
     int                 fd;               // The file descriptor on which the command was received, so the response can be sent on the same file descriptor
     std::string         commandName;      // The command that was processed
-    CommandArgumentList arguments;
+    CommandArgumentList arguments;        // The arguments as a list of name/value pairs
     std::string         response;         // The response to the command
 };
 

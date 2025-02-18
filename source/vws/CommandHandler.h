@@ -28,6 +28,9 @@ class CommandData;
  */
 class CommandHandler {
 public:
+    /**
+     * Constructor.
+     */
     CommandHandler();
 
     /**
@@ -43,8 +46,16 @@ public:
      */
     bool isCommandAvailable() const;
 
+    /**
+     * Retrieve the next command and process it.
+     */
     void processNextCommand();
 
+    /**
+     * Process a command.
+     *
+     * @param commandData The command to be processed
+     */
     void processCommand(CommandData & commandData);
 
     /**
@@ -55,9 +66,9 @@ public:
     virtual void handleCommand(CommandData & command) = 0;
 
     /**
-     * Check if the command name can be processed by this command handler.
+     * Offer a command for processing.
      *
-     * @param commandName The name of the command
+     * @param commandData The command being offered
      * @return True if this command handler recognizes this command name
      */
     virtual bool offerCommand(const CommandData & commandData) = 0;

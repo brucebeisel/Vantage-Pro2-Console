@@ -54,6 +54,11 @@ public:
      */
     virtual ~CommandSocket();
 
+    /**
+     * Add a command handler to the list of handlers that will be offered commands received on the socket.
+     *
+     * @param handler The handler to be added
+     */
     void addCommandHandler(CommandHandler & handler);
 
     /**
@@ -65,6 +70,9 @@ public:
      */
     virtual void handleCommandResponse(const CommandData & commandData);
 
+    /**
+     * Actually send the response on the provided file descriptor.
+     */
     void sendCommandResponse(const CommandData & commandData);
 
     /**
@@ -123,16 +131,16 @@ private:
      */
     void sendCommandResponses();
 
-    int                     port;                // The port on which the console will listen for client connections
-    int                     listenFd;            // The file description on which this thread is listening
-    std::vector<int>        socketFdList;        // The list of client file descriptors currently open
-    std::vector<CommandHandler *> commandHandlers;
-    bool                    terminating;         // True if this thread's main loop should exit
-    int                     responseEventFd;     // The file descriptor used to receive indications of an available response
-    std::queue<CommandData> responseQueue;       // The queue on which to store event responses
-    mutable std::mutex      mutex;               // The mutex to protect the queue against multi-threaded contention
-    std::thread *           commandThread;       // The thread that reads the commands
-    VantageLogger &         logger;
+    int                           port;                // The port on which the console will listen for client connections
+    int                           listenFd;            // The file description on which this thread is listening
+    std::vector<int>              socketFdList;        // The list of client file descriptors currently open
+    std::vector<CommandHandler *> commandHandlers;     // The handlers that will be offered commands
+    bool                          terminating;         // True if this thread's main loop should exit
+    int                           responseEventFd;     // The file descriptor used to receive indications of an available response
+    std::queue<CommandData>       responseQueue;       // The queue on which to store event responses
+    mutable std::mutex            mutex;               // The mutex to protect the queue against multi-threaded contention
+    std::thread *                 commandThread;       // The thread that reads the commands
+    VantageLogger &               logger;
 };
 
 } /* namespace vws */

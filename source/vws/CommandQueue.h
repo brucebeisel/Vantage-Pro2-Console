@@ -22,10 +22,9 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "ResponseHandler.h"
-
 namespace vws {
 class VantageLogger;
+class CommandData;
 
 /**
  * Class to handle events from the HTTP threads.
@@ -50,33 +49,42 @@ public:
      *
      * @return True if the queue is not empty at the moment
      */
-    bool isEventAvailable() const;
+    bool isCommandAvailable() const;
 
     /**
      * Queue an event.
      *
      * @param event The event to be queued
      */
-    void queueEvent(const CommandData & event);
+    void queueCommand(const CommandData & command);
 
     /**
-     * Process the event at the head of the queue.
-     */
-    //void processNextEvent();
-
-    /**
-     * Consume the event at the head of the queue.
+     * Consume the event at the head of the queue without locking.
      *
      * @param event The event that was copied from the head of the queue
-     *
      * @return True if an event was actually copied. If false, the parameter event is not changed.
      */
-    bool consumeEvent(CommandData & event);
+    bool consumeCommand(CommandData & command);
 
-    bool lockAndConsumeEvent(CommandData & event);
+    /**
+     * Consume the event at the head of the queue with locking.
+     *
+     * @param event The event that was copied from the head of the queue
+     * @return True if an event was actually copied. If false, the parameter event is not changed.
+     */
+    bool lockAndConsumeCommand(CommandData & command);
 
-    bool waitForEvent(CommandData & event);
+    /**
+     * Wait for a command to appear on the queue.
+     *
+     * @param event The event that was copied from the head of the queue
+     * @return True if an event was actually copied. If false, the parameter event is not changed.
+     */
+    bool waitForCommand(CommandData & command);
 
+    /**
+     * Interrupt a thread that is waiting for a command.
+     */
     void interrupt();
 
     //

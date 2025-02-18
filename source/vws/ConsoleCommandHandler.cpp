@@ -109,7 +109,7 @@ bool
 ConsoleCommandHandler::offerCommand(const CommandData & commandData) {
     for (auto entry : commandList) {
         if (commandData.commandName == entry.commandName) {
-            commandQueue.queueEvent(commandData);
+            commandQueue.queueCommand(commandData);
             return true;
         }
     }

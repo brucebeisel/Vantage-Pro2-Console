@@ -18,20 +18,19 @@
 
 #include "json.hpp"
 
-//#include "VantageLogger.h"
-
 using namespace std;
 using json = nlohmann::json;
 
 namespace vws {
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 static void
 jsonKeyValue(json object, std::string & key, std::string & value) {
     auto iterator = object.begin();
     key = iterator.key();
     value = iterator.value();
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -68,19 +67,10 @@ CommandData::setCommandFromJson(const std::string  & commandJson) {
 
         response = "{ " + RESPONSE_TOKEN + " : \"" + commandName + "\", " + RESULT_TOKEN + " : ";
 
-        /*
-         * TODO Figure out what to do with this debug
-        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Handling command: " << commandName << " with arguments:" << endl;
-        for (int i = 0; i < argumentList.size(); i++) {
-            logger.log(VantageLogger::VANTAGE_DEBUG1) << "    [" << i << "]: " << argumentList[i].first << "=" << argumentList[i].second << endl;
-        }
-        */
-
         return true;
     }
     catch (const std::exception & e) {
         response.append(buildFailureString(string("Console processing error: ") + e.what()));
-        //logger.log(VantageLogger::VANTAGE_WARNING) << "Caught exception while processing command: " << commandName << " Error: " << e.what() << endl;
         return false;
     }
 }
@@ -93,5 +83,15 @@ CommandData::buildFailureString(const std::string & errorString) {
     return failure;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::ostream &
+operator<<(std::ostream & os, const CommandData & commandData) {
+    os << "Command Name: " << commandData.commandName << " Arguments:";
+    for (auto arg : commandData.arguments)
+        os << " [" << arg.first << "=" << arg.second << "], ";
+
+    return os;
+}
 
 }
