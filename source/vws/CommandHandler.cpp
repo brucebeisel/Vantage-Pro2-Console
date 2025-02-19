@@ -47,10 +47,6 @@ CommandHandler::processNextCommand() {
 void
 CommandHandler::processCommand(CommandData & commandData) {
     handleCommand(commandData);
-    //
-    // Terminate the JSON element
-    //
-    commandData.response.append(" }");
     commandData.responseHandler->handleCommandResponse(commandData);
 }
 

@@ -27,14 +27,12 @@ class VantageLogger;
 class CommandData;
 
 /**
- * Class to handle events from the HTTP threads.
+ * Class to queue commands for a thread.
  */
 class CommandQueue {
 public:
     /**
      * Constructor.
-     *
-     * @param commandHandler The handler to which to send the events
      */
     CommandQueue();
 
@@ -44,41 +42,33 @@ public:
     virtual ~CommandQueue();
 
     /**
-     * Check if there is an event on the queue. Note that in a multi-threaded environment
-     * the return value may no longer be valid when the consumeEvent() method is called.
+     * Check if there is a command on the queue. Note that in a multi-threaded environment
+     * the return value may no longer be valid when the consumeCommand() method is called.
      *
      * @return True if the queue is not empty at the moment
      */
     bool isCommandAvailable() const;
 
     /**
-     * Queue an event.
+     * Queue a command.
      *
-     * @param event The event to be queued
+     * @param command The command to be queued
      */
     void queueCommand(const CommandData & command);
 
     /**
-     * Consume the event at the head of the queue without locking.
+     * Consume the command at the head of the queue with locking.
      *
-     * @param event The event that was copied from the head of the queue
-     * @return True if an event was actually copied. If false, the parameter event is not changed.
+     * @param command The command that was copied from the head of the queue
+     * @return True if an command was actually copied. If false, the parameter command is not changed.
      */
     bool consumeCommand(CommandData & command);
 
     /**
-     * Consume the event at the head of the queue with locking.
-     *
-     * @param event The event that was copied from the head of the queue
-     * @return True if an event was actually copied. If false, the parameter event is not changed.
-     */
-    bool lockAndConsumeCommand(CommandData & command);
-
-    /**
      * Wait for a command to appear on the queue.
      *
-     * @param event The event that was copied from the head of the queue
-     * @return True if an event was actually copied. If false, the parameter event is not changed.
+     * @param command The command that was copied from the head of the queue
+     * @return True if a command was actually copied. If false, the parameter command is not changed.
      */
     bool waitForCommand(CommandData & command);
 
@@ -94,12 +84,20 @@ public:
     CommandQueue & operator=(const CommandQueue &) = delete;
 
 private:
-    std::queue<CommandData> commandQueue;   // The queue on which to store events
+    /**
+     * Get and pop the command at the head of the queue without locking.
+     *
+     * @param command The command that was copied from the head of the queue
+     * @return True if an command was actually copied. If false, the parameter command is not changed.
+     */
+    bool retrieveNextCommand(CommandData & command);
+
+    std::queue<CommandData> commandQueue;   // The queue on which to store commands
     mutable std::mutex      mutex;          // The mutex to protect the queue against multi-threaded contention
-    std::condition_variable cv;             // The mutex to protect the queue against multi-threaded contention
+    std::condition_variable cv;             // The condition variable used for notifying a thread that a command is available
     VantageLogger &         logger;
 };
 
 }
 
-#endif /* EVENT_MANAGER_H_ */
+#endif /* COMMAND_QUEUE_H_ */

@@ -31,7 +31,7 @@ class CommandHandler;
 
 /**
  * The CommandSocket is a class that uses a thread to read commands from a TCP socket
- * and pass them onto the the event manager. This class will accept and manage multiple
+ * and offer them onto the registered command handlers. This class will accept and manage multiple
  * connections.
  * The command must be formatted as follows:
  * VANTAGE ######\n
@@ -76,12 +76,12 @@ public:
     void sendCommandResponse(const CommandData & commandData);
 
     /**
-     * Initialize the object; creating the listen socket and spawning the reader thread.
+     * Initialize the object; creating the listen socket and spawning the socket read/write thread.
      */
     bool initialize();
 
     /**
-     * The main loop that read the commands from the socket.
+     * The main loop that read the commands from the socket and write the responses.
      * This is also the thread entry point.
      */
     void mainLoop();
@@ -93,7 +93,7 @@ public:
     void terminate();
 
     /**
-     * Join (in the pthread sense), the reader thread.
+     * Join (in the pthread sense), the socket thread.
      */
     void join();
 

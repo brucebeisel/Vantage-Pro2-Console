@@ -91,6 +91,12 @@ ARCHIVEPACKETOBJS= \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o
 	
+COMMANDQUEUEOBJS= \
+	$(VWSTESTOBJDIR)/CommandQueue.o \
+	$(VWSTESTOBJDIR)/CommandData.o \
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o
+
 LOGGEROBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o
 
@@ -135,6 +141,9 @@ ArchivePacketTest: $(ARCHIVEPACKETOBJS) $(OBJDIR)/ArchivePacketTest.o
 
 BitConverterTest: $(BITCONVERTEROBJS) $(OBJDIR)/BitConverterTest.o
 	$(CC) -g -o BitConverterTest $(OBJDIR)/BitConverterTest.o $(BITCONVERTEROBJS)
+
+CommandQueueTest: $(COMMANDQUEUEOBJS) $(OBJDIR)/CommandQueueTest.o
+	$(CC) -g -o CommandQueueTest $(OBJDIR)/CommandQueueTest.o $(COMMANDQUEUEOBJS)
 
 DateTimeFieldsTest: $(DATETIMEFIELDSOBJS) $(OBJDIR)/DateTimeFieldsTest.o
 	$(CC) -g -o DateTimeFieldsTest $(OBJDIR)/DateTimeFieldsTest.o $(DATETIMEFIELDSOBJS)

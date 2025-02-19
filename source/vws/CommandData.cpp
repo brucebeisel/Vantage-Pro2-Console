@@ -87,7 +87,7 @@ CommandData::buildFailureString(const std::string & errorString) {
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream &
 operator<<(std::ostream & os, const CommandData & commandData) {
-    os << "Command Name: " << commandData.commandName << " Arguments:";
+    os << "Command Name: " << commandData.commandName << " fd: " << commandData.commandName << " Arguments:";
     for (auto arg : commandData.arguments)
         os << " [" << arg.first << "=" << arg.second << "], ";
 

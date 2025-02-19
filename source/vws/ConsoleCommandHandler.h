@@ -68,7 +68,6 @@ public:
      */
     virtual bool offerCommand(const CommandData & commandData);
 
-
     /**
      * Generic handler that calls the provided member function and builds the response JSON
      *

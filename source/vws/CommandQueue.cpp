@@ -57,15 +57,15 @@ CommandQueue::queueCommand(const CommandData & command) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CommandQueue::lockAndConsumeCommand(CommandData & command) {
+CommandQueue::consumeCommand(CommandData & command) {
     std::scoped_lock<std::mutex> guard(mutex);
-    return consumeCommand(command);
+    return retrieveNextCommand(command);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CommandQueue::consumeCommand(CommandData & command) {
+CommandQueue::retrieveNextCommand(CommandData & command) {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Attempting to consume command" << endl;
     if (commandQueue.empty())
         return false;
@@ -87,7 +87,7 @@ CommandQueue::waitForCommand(CommandData & command) {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Waiting for command" << endl;
     cv.wait(guard);
 
-    return consumeCommand(command);
+    return retrieveNextCommand(command);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

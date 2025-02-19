@@ -107,12 +107,16 @@ ConsoleCommandHandler::~ConsoleCommandHandler() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 ConsoleCommandHandler::offerCommand(const CommandData & commandData) {
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Being offered command " << commandData.commandName << endl;
     for (auto entry : commandList) {
         if (commandData.commandName == entry.commandName) {
             commandQueue.queueCommand(commandData);
+            logger.log(VantageLogger::VANTAGE_DEBUG3) << "Offer of command " << commandData.commandName << " accepted" << endl;
             return true;
         }
     }
+
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Offer of command " << commandData.commandName << " rejected" << endl;
 
     return false;
 }
@@ -121,6 +125,7 @@ ConsoleCommandHandler::offerCommand(const CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 ConsoleCommandHandler::handleCommand(CommandData & commandData) {
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Processing command " << commandData << endl;
     for (auto entry : commandList) {
         if (commandData.commandName == entry.commandName) {
             if (entry.consoleHandler != NULL) {

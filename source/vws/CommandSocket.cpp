@@ -118,7 +118,6 @@ CommandSocket::mainLoop() {
 
         for (int fd : socketFdList) {
             if (FD_ISSET(fd, &fd_read)) {
-                logger.log(VantageLogger::VANTAGE_DEBUG3) << "Received data on fd " << fd << endl;
                 readCommand(fd);
             }
         }
@@ -176,6 +175,8 @@ CommandSocket::closeSocket(int fd) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::readCommand(int fd) {
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Reading data on fd " << fd << endl;
+
     char buffer[10240];
     int readPosition = 0;
 
@@ -254,8 +255,13 @@ CommandSocket::readCommand(int fd) {
         consumed = consumed || handler->offerCommand(commandData);
     }
 
+    //
+    // If none of the command handlers consumed the command, then immediately send a failure response.
+    // There is no need to queue the response as this is running on the socket thread.
+    //
     if (!consumed) {
-        // TODO: build and send error response
+        commandData.response.append(CommandData::buildFailureString("Unrecognized command"));
+        sendCommandResponse(commandData);
     }
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Queuing command " << commandData.commandName << " that was received on fd " << commandData.fd << endl;
@@ -276,7 +282,10 @@ CommandSocket::handleCommandResponse(const CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::sendCommandResponse(const CommandData & commandData) {
-    const char * responseTerminator = "\n\n";
+    //
+    // Terminate the JSON element
+    //
+    const char * responseTerminator = "}\n\n";
     string response(commandData.response);
     response.append(responseTerminator);
 
@@ -336,6 +345,8 @@ CommandSocket::createListenSocket() {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to listen on command server socket" << endl;
         return false;
     }
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Listening for connections on fd " << listenFd << endl;
 
     return true;
 }

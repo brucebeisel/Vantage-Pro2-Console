@@ -172,7 +172,7 @@ VantageDriver::reopenStation() {
 void
 VantageDriver::mainLoop() {
     //
-    // Synchronize the historical archive data from the console to disk
+    // Synchronize the historical archive data from the console to local storage
     //
     if (!archiveManager.synchronizeArchive()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read the archive during initialization" << endl;
@@ -226,7 +226,7 @@ VantageDriver::mainLoop() {
             }
 
             //
-            // Process the next event that the event manager has received.
+            // Process the next event that the command handler has received (if any).
             // Note that the events are expected to come in slowly as the
             // events are typically human driven.
             //
