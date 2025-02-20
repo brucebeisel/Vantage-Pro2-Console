@@ -66,6 +66,11 @@ CommandSocket::~CommandSocket() {
         listenFd = -1;
     }
 
+    if (responseEventFd != -1) {
+        close(responseEventFd);
+        responseEventFd = -1;
+    }
+
     for (int fd : socketFdList)
         close(fd);
 }
@@ -81,7 +86,7 @@ CommandSocket::addCommandHandler(CommandHandler & handler) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::mainLoop() {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Entering command socket thread" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Entering command socket thread with listen fd of " << listenFd << " and eventfd of " << responseEventFd << endl;
     struct timeval tv;
     while (!terminating) {
         fd_set readFdSet;
@@ -289,6 +294,7 @@ CommandSocket::handleCommandResponse(const CommandData & commandData) {
 
     if (responseEventFd != -1) {
         uint64_t eventId = 1;
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Triggering eventfd" << endl;
         if (write(responseEventFd, &eventId, sizeof(eventId)) < 0) {
             logger.log(VantageLogger::VANTAGE_WARNING) << "Could not write to eventfd" <<  endl;
         }
@@ -308,7 +314,7 @@ CommandSocket::sendCommandResponse(const CommandData & commandData) {
 
     const char * responseBuffer = response.c_str();
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response '" << response << "' on fd " << commandData.fd << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response on fd " << commandData.fd << " Response: '" << response << "'" << endl;
 
     if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;

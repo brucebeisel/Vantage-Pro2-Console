@@ -30,7 +30,8 @@
 using namespace std;
 using namespace vws;
 
-VantageLogger logger(VantageLogger::getLogger("CommandSocketTest"));
+VantageLogger * glogger;
+
 
 class TestCommandHandler : public CommandHandler {
 public:
@@ -40,7 +41,7 @@ public:
     }
 
     virtual bool offerCommand(const CommandData & commandData) {
-        logger.log(VantageLogger::VANTAGE_INFO) << "Being offered command: " << commandData << endl;
+        glogger->log(VantageLogger::VANTAGE_INFO) << "Being offered command: " << commandData << endl;
         CommandData data = commandData;
         handleCommand(data);
         return true;
@@ -49,6 +50,8 @@ public:
 
 int
 main(int argc, char *argv[]) {
+    VantageLogger logger(VantageLogger::getLogger("CommandSocketTest"));
+    glogger = & logger;
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     TestCommandHandler handler;
     CommandSocket commandSocket(11463);

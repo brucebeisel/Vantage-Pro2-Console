@@ -5,6 +5,7 @@ SRCS=\
 	ArchiveManagerTest.cpp \
 	ArchivePacketTest.cpp \
 	BitConverterTest.cpp \
+	CommandSocketTest.cpp \
 	DataCommandHandlerTest.cpp \
 	DateTimeFieldsTest.cpp \
 	DominantWindTest.cpp \
@@ -164,6 +165,7 @@ STORMARCHIVEMANAGEROBJS= \
 all: ArchiveManagerTest \
 	ArchivePacketTest \
 	BitConverterTest \
+	CommandSocketTest \
 	DateTimeFieldsTest \
 	DominantWindTest \
 	DominantWindInjectionTest \
@@ -187,7 +189,7 @@ CommandQueueTest: $(COMMANDQUEUEOBJS) $(OBJDIR)/CommandQueueTest.o
 	$(CC) -g -o CommandQueueTest $(OBJDIR)/CommandQueueTest.o $(COMMANDQUEUEOBJS)
 
 CommandSocketTest: $(COMMANDSOCKETOBJS) $(OBJDIR)/CommandSocketTest.o
-	$(CC) -g -o CommandSocketTest $(OBJDIR)/CommandSocketTest.o $(COMMANDSOCKETOBJS)
+	$(CC) -g -o CommandSocketTest $(OBJDIR)/CommandSocketTest.o $(COMMANDSOCKETOBJS) -lpthread
 
 DataCommandHandlerTest: $(DATACOMMANDHANDLEROBJS) $(OBJDIR)/DataCommandHandlerTest.o
 	$(CC) -g -o DataCommandHandlerTest $(OBJDIR)/DataCommandHandlerTest.o $(DATACOMMANDHANDLEROBJS)
