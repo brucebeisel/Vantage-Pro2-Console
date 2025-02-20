@@ -47,6 +47,7 @@ CommandHandler::processNextCommand() {
 void
 CommandHandler::processCommand(CommandData & commandData) {
     handleCommand(commandData);
+    commandData.response.append("}");
     commandData.responseHandler->handleCommandResponse(commandData);
 }
 

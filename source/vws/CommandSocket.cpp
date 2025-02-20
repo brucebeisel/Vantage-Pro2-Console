@@ -285,7 +285,7 @@ CommandSocket::sendCommandResponse(const CommandData & commandData) {
     //
     // Terminate the JSON element
     //
-    const char * responseTerminator = "}\n\n";
+    const char * responseTerminator = "\n\n";
     string response(commandData.response);
     response.append(responseTerminator);
 

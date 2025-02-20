@@ -5,6 +5,7 @@ SRCS=\
 	ArchiveManagerTest.cpp \
 	ArchivePacketTest.cpp \
 	BitConverterTest.cpp \
+	DataCommandHandlerTest.cpp \
 	DateTimeFieldsTest.cpp \
 	DominantWindTest.cpp \
 	EnumTest.cpp \
@@ -97,6 +98,38 @@ COMMANDQUEUEOBJS= \
 	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o
 
+DATACOMMANDHANDLEROBJS= \
+	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/DataCommandHandler.o \
+	$(VWSTESTOBJDIR)/CommandHandler.o \
+	$(VWSTESTOBJDIR)/CommandData.o \
+	$(VWSTESTOBJDIR)/DominantWindDirections.o \
+	$(VWSTESTOBJDIR)/WindDirectionSlice.o \
+	$(VWSTESTOBJDIR)/StormArchiveManager.o \
+	$(VWSTESTOBJDIR)/ArchiveManager.o \
+	$(VWSTESTOBJDIR)/CurrentWeatherManager.o \
+	$(VWSTESTOBJDIR)/CurrentWeather.o \
+	$(VWSTESTOBJDIR)/CommandQueue.o \
+	$(VWSTESTOBJDIR)/ArchivePacket.o \
+	$(VWSTESTOBJDIR)/LoopPacket.o \
+	$(VWSTESTOBJDIR)/Loop2Packet.o \
+	$(VWSTESTOBJDIR)/StormData.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageCRC.o \
+	$(VWSTESTOBJDIR)/UnitConverter.o \
+	$(VWSTESTOBJDIR)/SummaryReport.o \
+	$(VWSTESTOBJDIR)/WindRoseData.o \
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/GraphDataRetriever.o \
+	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
+	$(VWSTESTOBJDIR)/ForecastRule.o \
+	$(VWSTESTOBJDIR)/SerialPort.o \
+	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
+	$(VWSTESTOBJDIR)/HiLowPacket.o \
+	$(VWSTESTOBJDIR)/CurrentWeatherSocket.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o
+
 LOGGEROBJS= $(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o
 
@@ -144,6 +177,9 @@ BitConverterTest: $(BITCONVERTEROBJS) $(OBJDIR)/BitConverterTest.o
 
 CommandQueueTest: $(COMMANDQUEUEOBJS) $(OBJDIR)/CommandQueueTest.o
 	$(CC) -g -o CommandQueueTest $(OBJDIR)/CommandQueueTest.o $(COMMANDQUEUEOBJS)
+
+DataCommandHandlerTest: $(DATACOMMANDHANDLEROBJS) $(OBJDIR)/DataCommandHandlerTest.o
+	$(CC) -g -o DataCommandHandlerTest $(OBJDIR)/DataCommandHandlerTest.o $(DATACOMMANDHANDLEROBJS)
 
 DateTimeFieldsTest: $(DATETIMEFIELDSOBJS) $(OBJDIR)/DateTimeFieldsTest.o
 	$(CC) -g -o DateTimeFieldsTest $(OBJDIR)/DateTimeFieldsTest.o $(DATETIMEFIELDSOBJS)

@@ -65,7 +65,7 @@ CommandData::setCommandFromJson(const std::string  & commandJson) {
             arguments.push_back(argument);
         }
 
-        response = "{ " + RESPONSE_TOKEN + " : \"" + commandName + "\", " + RESULT_TOKEN + " : ";
+        loadResponseTemplate();
 
         return true;
     }
@@ -73,6 +73,13 @@ CommandData::setCommandFromJson(const std::string  & commandJson) {
         response.append(buildFailureString(string("Console processing error: ") + e.what()));
         return false;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+CommandData::loadResponseTemplate() {
+    response = "{ " + RESPONSE_TOKEN + " : \"" + commandName + "\", " + RESULT_TOKEN + " : ";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,9 +94,11 @@ CommandData::buildFailureString(const std::string & errorString) {
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream &
 operator<<(std::ostream & os, const CommandData & commandData) {
-    os << "Command Name: " << commandData.commandName << " fd: " << commandData.commandName << " Arguments:";
+    os << "Command Name: " << commandData.commandName << " fd: " << commandData.fd << " Arguments: ( ";
     for (auto arg : commandData.arguments)
         os << " [" << arg.first << "=" << arg.second << "], ";
+
+    os << " )";
 
     return os;
 }

@@ -71,6 +71,11 @@ struct CommandData {
     bool setCommandFromJson(const std::string  & commandJson);
 
     /**
+     * Load the response template using the existing command name.
+     */
+    void loadResponseTemplate();
+
+    /**
      * Utility to build a JSON error string that can be appended onto the response.
      *
      * @param errorString The error to be embedded into the error portion of the response
