@@ -84,19 +84,22 @@ CommandSocket::mainLoop() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Entering command socket thread" << endl;
     struct timeval tv;
     while (!terminating) {
-        fd_set fd_read;
+        fd_set readFdSet;
         int nfds = max(listenFd, responseEventFd);
 
         tv.tv_sec = 1;
         tv.tv_usec = 0;
 
-        FD_ZERO(&fd_read); // @suppress("Symbol is not resolved") @suppress("Statement has no effect")
-        FD_SET(listenFd, &fd_read);
+        FD_ZERO(&readFdSet); // @suppress("Symbol is not resolved") @suppress("Statement has no effect")
+        FD_SET(listenFd, &readFdSet);
 
-        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Adding " << socketFdList.size() << " to fd mask" << endl;
+        if (responseEventFd != -1)
+            FD_SET(responseEventFd, &readFdSet);
+
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Adding " << socketFdList.size() << " file descriptors to read mask" << endl;
 
         for (int fd : socketFdList)
-            FD_SET(fd, &fd_read);
+            FD_SET(fd, &readFdSet);
 
         //
         // This single if statement works because socketFdList is sorted
@@ -107,17 +110,26 @@ CommandSocket::mainLoop() {
         nfds++;
 
         logger.log(VantageLogger::VANTAGE_DEBUG3) << "Entering select()  nfds = " << nfds << endl;
-        int n = select(nfds, &fd_read, NULL, NULL, &tv);
+        int n = select(nfds, &readFdSet, NULL, NULL, &tv);
         logger.log(VantageLogger::VANTAGE_DEBUG3) << "select()  returned  " << n << endl;
 
-        if (FD_ISSET(listenFd, &fd_read))
+        if (FD_ISSET(listenFd, &readFdSet))
             acceptConnection();
 
-        if (FD_ISSET(responseEventFd, &fd_read))
+        //
+        // Windows does not support eventfd, so just poll for responses to be processed.
+        // This might mean a response will sit in the queue for one second or so, until
+        // the select() call times out
+        //
+        if (responseEventFd != -1) {
+            if (FD_ISSET(responseEventFd, &readFdSet))
+                sendCommandResponses();
+        }
+        else
             sendCommandResponses();
 
         for (int fd : socketFdList) {
-            if (FD_ISSET(fd, &fd_read)) {
+            if (FD_ISSET(fd, &readFdSet)) {
                 readCommand(fd);
             }
         }
@@ -274,8 +286,13 @@ CommandSocket::handleCommandResponse(const CommandData & commandData) {
     std::lock_guard<std::mutex> guard(mutex);
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Queuing response" << endl;
     responseQueue.push(commandData);
-    uint64_t eventId = 1;
-    write(responseEventFd, &eventId, sizeof(eventId));
+
+    if (responseEventFd != -1) {
+        uint64_t eventId = 1;
+        if (write(responseEventFd, &eventId, sizeof(eventId)) < 0) {
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Could not write to eventfd" <<  endl;
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -302,8 +319,12 @@ CommandSocket::sendCommandResponse(const CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::sendCommandResponses() {
-    uint64_t eventId = 0;
-    read(responseEventFd, &eventId, sizeof(eventId));
+    if (responseEventFd != -1) {
+        uint64_t eventId = 0;
+        read(responseEventFd, &eventId, sizeof(eventId));
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Read " << eventId << " from eventfd" << endl;
+    }
+
     std::lock_guard<std::mutex> guard(mutex);
 
     while (!responseQueue.empty()) {

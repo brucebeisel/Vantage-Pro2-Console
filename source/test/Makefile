@@ -98,6 +98,14 @@ COMMANDQUEUEOBJS= \
 	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o
 
+COMMANDSOCKETOBJS= \
+	$(VWSTESTOBJDIR)/CommandSocket.o \
+	$(VWSTESTOBJDIR)/CommandData.o \
+	$(VWSTESTOBJDIR)/CommandHandler.o \
+	$(VWSTESTOBJDIR)/CommandQueue.o \
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o
+
 DATACOMMANDHANDLEROBJS= \
 	$(VWSTESTOBJDIR)/BitConverter.o \
 	$(VWSTESTOBJDIR)/DataCommandHandler.o \
@@ -177,6 +185,9 @@ BitConverterTest: $(BITCONVERTEROBJS) $(OBJDIR)/BitConverterTest.o
 
 CommandQueueTest: $(COMMANDQUEUEOBJS) $(OBJDIR)/CommandQueueTest.o
 	$(CC) -g -o CommandQueueTest $(OBJDIR)/CommandQueueTest.o $(COMMANDQUEUEOBJS)
+
+CommandSocketTest: $(COMMANDSOCKETOBJS) $(OBJDIR)/CommandSocketTest.o
+	$(CC) -g -o CommandSocketTest $(OBJDIR)/CommandSocketTest.o $(COMMANDSOCKETOBJS)
 
 DataCommandHandlerTest: $(DATACOMMANDHANDLEROBJS) $(OBJDIR)/DataCommandHandlerTest.o
 	$(CC) -g -o DataCommandHandlerTest $(OBJDIR)/DataCommandHandlerTest.o $(DATACOMMANDHANDLEROBJS)
