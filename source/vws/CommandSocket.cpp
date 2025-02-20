@@ -267,6 +267,7 @@ CommandSocket::readCommand(int fd) {
     CommandData commandData(*this, fd);
     commandData.setCommandFromJson(string(buffer));
 
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Offering command " << commandData.commandName << " that was received on fd " << commandData.fd << endl;
     bool consumed = false;
     for (auto handler : commandHandlers) {
         consumed = consumed || handler->offerCommand(commandData);
@@ -277,11 +278,11 @@ CommandSocket::readCommand(int fd) {
     // There is no need to queue the response as this is running on the socket thread.
     //
     if (!consumed) {
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Command " << commandData.commandName << " was not consumed by any command handlers. Command is being ignored as an unrecognized command." << endl;
         commandData.response.append(CommandData::buildFailureString("Unrecognized command"));
         sendCommandResponse(commandData);
     }
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Queuing command " << commandData.commandName << " that was received on fd " << commandData.fd << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

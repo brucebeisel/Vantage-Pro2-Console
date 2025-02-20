@@ -36,7 +36,7 @@ VantageLogger * glogger;
 class TestCommandHandler : public CommandHandler {
 public:
     virtual void handleCommand(CommandData & command) {
-        command.response.append("success");
+        command.response.append("\"success\"}");
         command.responseHandler->handleCommandResponse(command);
     }
 
