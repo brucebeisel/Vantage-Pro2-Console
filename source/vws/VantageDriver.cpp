@@ -54,6 +54,7 @@ VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfigurati
                                                                 previousNextRecord(-1),
                                                                 lastArchivePacketTime(0),
                                                                 lastStormArchiveUpdateTime(0),
+                                                                lastArchiveVerifyTime(0),
                                                                 logger(VantageLogger::getLogger("VantageDriver")) {
     //
     // Indicate the the console time needs to be set in the near future. 
@@ -64,7 +65,14 @@ VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfigurati
     // TODO This equation seems wrong. I would think that the time could be set after just a few minutes.
     // So perhaps consoleTimeSetTime = time(0) - TIME_SET_INTERVAL + 120; would be better?
     //
-    consoleTimeSetTime = time(0) - TIME_SET_INTERVAL + (1 * Weather::SECONDS_PER_HOUR);
+    DateTime now = time(0);
+    consoleTimeSetTime = now - TIME_SET_INTERVAL + (1 * Weather::SECONDS_PER_HOUR);
+
+    //
+    // We don't want to verify the archive every time the service starts, so pretend
+    // that it was just verified
+    //
+    lastArchiveVerifyTime = now;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -210,6 +218,14 @@ VantageDriver::mainLoop() {
             if (lastStormArchiveUpdateTime + STORM_ARCHIVE_UPDATE_INTERVAL < now) {
                 stormArchiveManager.updateArchive();
                 lastStormArchiveUpdateTime = now;
+            }
+
+            //
+            // Verify the archive and store the results
+            //
+            if (lastArchiveVerifyTime + ARCHIVE_VERIFY_INTERVAL < now) {
+                archiveManager.verifyCurrentArchiveFile();
+                lastArchiveVerifyTime = now;
             }
 
             //

@@ -61,6 +61,11 @@ public:
      * @param dataDirctory The directory into which the archive will be written
      * @param station      The weather station object used to communicate with the console
      */
+    //
+    // TODO Analyze the dependency of a VantageWeatherStation. Currently it is needed to
+    // synchronize with the console archive and to query the archive interval. Could these
+    // functions be moved elsewhere to allow ArchiveManager to be more of a stand alone class?
+    //
     ArchiveManager(const std::string & dataDirectory, VantageWeatherStation & station);
 
     /**

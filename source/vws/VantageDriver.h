@@ -104,10 +104,14 @@ public:
 private:
     /**
      * The number of LOOP/LOOP2 packet pairs that are received in succession. Note that if a new archive record is available
-     * the loop packet cycle will be interrupted early.
+     * or a command is received, the loop packet cycle will be interrupted early.
      */
     static const int LOOP_PACKET_CYCLES = 60;
 
+    /**
+     * A single LOOP packet is used to retrieve some of the Vantage station configuration parameters.
+     * This is the number of times it will try to get that LOOP packet before giving up.
+     */
     static const int INITIAL_LOOP_PACKET_RETRIES = 5;
 
     /**
@@ -120,6 +124,11 @@ private:
      */
     static const int STORM_ARCHIVE_UPDATE_INTERVAL = 3600 * 2;
 
+    /**
+     * How often to verify the archive.
+     */
+    static constexpr int ARCHIVE_VERIFY_INTERVAL = 86400;
+
     VantageWeatherStation &   station;
     VantageConfiguration &    configuration;
     ArchiveManager &          archiveManager;
@@ -131,6 +140,7 @@ private:
     DateTime                  lastArchivePacketTime;
     DateTime                  consoleTimeSetTime;
     DateTime                  lastStormArchiveUpdateTime;
+    DateTime                  lastArchiveVerifyTime;
     VantageLogger &           logger;
 };
 
