@@ -92,7 +92,7 @@ ConsoleCommandHandler::ConsoleCommandHandler(VantageWeatherStation & station,
                                              VantageConfiguration & configurator,
                                              VantageStationNetwork & stationNetwork,
                                              AlarmManager & alarmManager) : station(station),
-                                                                            logger(VantageLogger::getLogger("CommandHandler")),
+                                                                            logger(VantageLogger::getLogger("ConsoleCommandHandler")),
                                                                             configurator(configurator),
                                                                             network(stationNetwork),
                                                                             alarmManager(alarmManager) {
@@ -128,7 +128,7 @@ ConsoleCommandHandler::handleCommand(CommandData & commandData) {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Processing command " << commandData << endl;
     for (auto & entry : consoleCommandList) {
         if (commandData.commandName == entry.commandName) {
-            if (entry.consoleHandler != NULL) {
+            if (entry.handler != NULL) {
                 (this->*entry.handler)(commandData);
             }
             else if (entry.consoleHandler != NULL)  {
@@ -136,6 +136,7 @@ ConsoleCommandHandler::handleCommand(CommandData & commandData) {
             }
             else {
                 logger.log(VantageLogger::VANTAGE_WARNING) << "handleCommand() command named '" << commandData.commandName << "' has no handler registered" << endl;
+                commandData.response.append("\"Internal logic error\"");
             }
 
             return;
