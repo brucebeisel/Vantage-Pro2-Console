@@ -89,56 +89,65 @@ CommandSocket::mainLoop() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Entering command socket thread with listen fd of " << listenFd << " and eventfd of " << responseEventFd << endl;
     struct timeval tv;
     while (!terminating) {
-        fd_set readFdSet;
-        int nfds = max(listenFd, responseEventFd);
+        try {
+            fd_set readFdSet;
+            int nfds = max(listenFd, responseEventFd);
 
-        tv.tv_sec = 1;
-        tv.tv_usec = 0;
+            tv.tv_sec = 1;
+            tv.tv_usec = 0;
 
-        FD_ZERO(&readFdSet); // @suppress("Symbol is not resolved") @suppress("Statement has no effect")
-        FD_SET(listenFd, &readFdSet);
+            FD_ZERO(&readFdSet); // @suppress("Symbol is not resolved") @suppress("Statement has no effect")
+            FD_SET(listenFd, &readFdSet);
 
-        if (responseEventFd != -1)
-            FD_SET(responseEventFd, &readFdSet);
+            if (responseEventFd != -1)
+                FD_SET(responseEventFd, &readFdSet);
 
-        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Adding " << socketFdList.size() << " file descriptors to read mask" << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG3) << "Adding " << socketFdList.size() << " file descriptors to read mask" << endl;
 
-        for (int fd : socketFdList)
-            FD_SET(fd, &readFdSet);
+            for (int fd : socketFdList)
+                FD_SET(fd, &readFdSet);
 
-        //
-        // This single if statement works because socketFdList is sorted
-        //
-        if (socketFdList.size() > 0)
-            nfds = std::max(socketFdList[socketFdList.size() - 1], nfds);
+            //
+            // This single if statement works because socketFdList is sorted
+            //
+            if (socketFdList.size() > 0)
+                nfds = std::max(socketFdList[socketFdList.size() - 1], nfds);
 
-        nfds++;
+            nfds++;
 
-        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Entering select()  nfds = " << nfds << endl;
-        int n = select(nfds, &readFdSet, NULL, NULL, &tv);
-        logger.log(VantageLogger::VANTAGE_DEBUG3) << "select()  returned  " << n << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG3) << "Entering select()  nfds = " << nfds << endl;
+            int n = select(nfds, &readFdSet, NULL, NULL, &tv);
+            logger.log(VantageLogger::VANTAGE_DEBUG3) << "select()  returned  " << n << endl;
 
-        if (FD_ISSET(listenFd, &readFdSet))
-            acceptConnection();
+            if (FD_ISSET(listenFd, &readFdSet))
+                acceptConnection();
 
-        //
-        // Windows does not support eventfd, so just poll for responses to be processed.
-        // This might mean a response will sit in the queue for one second or so, until
-        // the select() call times out
-        //
-        if (responseEventFd != -1) {
-            if (FD_ISSET(responseEventFd, &readFdSet))
+            //
+            // Windows does not support eventfd, so just poll for responses to be processed.
+            // This might mean a response will sit in the queue for one second or so, until
+            // the select() call times out
+            //
+            if (responseEventFd != -1) {
+                if (FD_ISSET(responseEventFd, &readFdSet))
+                    sendCommandResponses();
+            }
+            else
                 sendCommandResponses();
-        }
-        else
-            sendCommandResponses();
 
-        for (int fd : socketFdList) {
-            if (FD_ISSET(fd, &readFdSet)) {
-                readCommand(fd);
+            for (int fd : socketFdList) {
+                if (FD_ISSET(fd, &readFdSet)) {
+                    readCommand(fd);
+                }
             }
         }
+        catch (const std::exception & e) {
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Caught exception in CommandSocket::mainLoop. " << e.what() << endl;
+        }
+        catch (...) {
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Caught unknown exception from CommandSocket::mainLoop" << endl;
+        }
     }
+
     logger.log(VantageLogger::VANTAGE_INFO) << "Exiting command socket thread" << endl;
 }
 

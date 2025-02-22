@@ -34,7 +34,7 @@
 using namespace std;
 
 namespace vws {
-struct CommandEntry {
+struct DataCommandEntry {
     std::string commandName;
     void (DataCommandHandler::*handler)(CommandData &);
 };
@@ -42,7 +42,7 @@ struct CommandEntry {
 /**
  * Table used to map the command name to the handler function.
  */
-static CommandEntry commandList[] = {
+static const DataCommandEntry dataCommandList[] = {
         "query-archive-statistics", &DataCommandHandler::handleQueryArchiveStatistics,
         "query-archive",            &DataCommandHandler::handleQueryArchive,
         "query-archive-summary",    &DataCommandHandler::handleQueryArchiveSummary,
@@ -86,7 +86,7 @@ DataCommandHandler::initialize() {
 void
 DataCommandHandler::handleCommand(CommandData & commandData) {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Processing command " << commandData << endl;
-    for (CommandEntry & commandEntry : commandList) {
+    for (auto & commandEntry : dataCommandList) {
         if (commandData.commandName == commandEntry.commandName) {
             (this->*commandEntry.handler)(commandData);
             return;
@@ -101,7 +101,7 @@ DataCommandHandler::handleCommand(CommandData & commandData) {
 bool
 DataCommandHandler::offerCommand(const CommandData & commandData) {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Being offered command " << commandData.commandName << endl;
-    for (auto entry : commandList) {
+    for (auto & entry : dataCommandList) {
         if (commandData.commandName == entry.commandName) {
             commandQueue.queueCommand(commandData);
             logger.log(VantageLogger::VANTAGE_DEBUG3) << "Offer of command " << commandData.commandName << " accepted" << endl;
@@ -127,11 +127,18 @@ void
 DataCommandHandler::mainLoop() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Entering Data Command Handler thread" << endl;
     while (!terminating) {
-        CommandData commandData;
-        if (commandQueue.waitForCommand(commandData)) {
-            processCommand(commandData);
+        try {
+            CommandData commandData;
+            if (commandQueue.waitForCommand(commandData)) {
+                processCommand(commandData);
+            }
         }
-
+        catch (const std::exception & e) {
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Caught exception in DataCommandHandler::mainLoop. " << e.what() << endl;
+        }
+        catch (...) {
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Caught unknown exception in DataCommandHandler::mainLoop." << endl;
+        }
     }
     logger.log(VantageLogger::VANTAGE_INFO) << "Exiting Data Command Handler thread" << endl;
 }

@@ -39,13 +39,13 @@ using namespace std;
 namespace vws {
 using namespace ProtocolConstants;
 
-struct CommandEntry {
+struct ConsoleCommandEntry {
     std::string commandName;
     void (ConsoleCommandHandler::*handler)(CommandData &);
     bool (VantageWeatherStation::*consoleHandler)();
 };
 
-static CommandEntry commandList[] = {
+static const ConsoleCommandEntry consoleCommandList[] = {
     "backlight",                     &ConsoleCommandHandler::handleBacklight,                           NULL,
     "clear-active-alarms",           NULL,                                                              &VantageWeatherStation::clearActiveAlarms,
     "clear-alarm-thresholds",        NULL,                                                              &VantageWeatherStation::clearAlarmThresholds,
@@ -108,7 +108,7 @@ ConsoleCommandHandler::~ConsoleCommandHandler() {
 bool
 ConsoleCommandHandler::offerCommand(const CommandData & commandData) {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Being offered command " << commandData.commandName << endl;
-    for (auto entry : commandList) {
+    for (auto & entry : consoleCommandList) {
         if (commandData.commandName == entry.commandName) {
             commandQueue.queueCommand(commandData);
             logger.log(VantageLogger::VANTAGE_DEBUG3) << "Offer of command " << commandData.commandName << " accepted" << endl;
@@ -126,7 +126,7 @@ ConsoleCommandHandler::offerCommand(const CommandData & commandData) {
 void
 ConsoleCommandHandler::handleCommand(CommandData & commandData) {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Processing command " << commandData << endl;
-    for (auto entry : commandList) {
+    for (auto & entry : consoleCommandList) {
         if (commandData.commandName == entry.commandName) {
             if (entry.consoleHandler != NULL) {
                 (this->*entry.handler)(commandData);
