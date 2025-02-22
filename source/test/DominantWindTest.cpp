@@ -29,7 +29,14 @@ main(int argc, char * argv[]) {
     vector<std::string> headings;
     struct tm tm;
 
+    cout << "Testing bad checkpoint data" << endl;
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
+    DominantWindDirections dw(".", "dominant-wind-checkpoint-bad.dat");
+    dw.dumpData();
+
+    cout << "Dominant wind data should be all zeros" << endl;
+    cout << "--------------------------------------" << endl;
+
     DominantWindDirections dominantWinds(".");
 
     memset(&tm, 0, sizeof(tm));

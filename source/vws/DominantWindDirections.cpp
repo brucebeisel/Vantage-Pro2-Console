@@ -229,6 +229,7 @@ DominantWindDirections::getDominantDirectionsCount() const {
 ////////////////////////////////////////////////////////////////////////////////
 void
 DominantWindDirections::saveCheckpoint() const {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Saving dominant wind checkpoint file '" << checkpointFilePath << "'" << endl;
     ofstream ofs(checkpointFilePath.c_str(), ios::trunc);
 
     if (!ofs.is_open()) {
@@ -260,6 +261,7 @@ DominantWindDirections::saveCheckpoint() const {
 ////////////////////////////////////////////////////////////////////////////////
 void
 DominantWindDirections::restoreCheckpoint() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Restoring dominant wind data from checkpoint file '" << checkpointFilePath << "'" << endl;
     ifstream ifs(checkpointFilePath.c_str());
 
     if (!ifs.is_open()) {
@@ -284,11 +286,13 @@ DominantWindDirections::restoreCheckpoint() {
     // with the console due to the console's port changing spontaneously from /dev/ttyUSB0 to /dev/ttyUSB1
     //
     while (std::getline(ifs, line)) {
-        if (sscanf(line.c_str(), "%f %d %d", &heading, &dtime, &count) != 3) {
+        if (sscanf(line.c_str(), "%f %ld %d", &heading, &dtime, &count) != 3) {
             logger.log(VantageLogger::VANTAGE_ERROR) << "Invalid line of data in dominant wind checkpoint file. Ignoring entire file (" << line << ")" << endl;
             clearWindSliceData();
             return;
         }
+
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Read checkpoint file line with Heading: " << heading << " Time: " << dtime << " Count: " << count << endl;
 
         newestTime = ::max(newestTime, dtime);
 
