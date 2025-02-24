@@ -279,11 +279,7 @@ DominantWindDirections::restoreCheckpoint() {
     clearWindSliceData();
 
     //
-    // TODO There was some issue where the dominant time (dtime) was an invalid time (140733193388032) for all headings. This caused
-    // all headings to be dominant. Need to add a sanity check of the data and discard any data that is considered out of range.
-    // More information: The dtime is equivalent to 32766 shifted left, so max 16 bit integer - 1, shifted. I have no idea if
-    // this has any meaning, but it seems coincidental. The second time this was noticed was after VWS had a error communicating
-    // with the console due to the console's port changing spontaneously from /dev/ttyUSB0 to /dev/ttyUSB1
+    // Read the checkpoint file one line at a time
     //
     while (std::getline(ifs, line)) {
         if (sscanf(line.c_str(), "%f %ld %d", &heading, &dtime, &count) != 3) {
