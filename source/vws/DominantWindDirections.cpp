@@ -290,8 +290,6 @@ DominantWindDirections::restoreCheckpoint() {
 
         logger.log(VantageLogger::VANTAGE_DEBUG3) << "Read checkpoint file line with Heading: " << heading << " Time: " << dtime << " Count: " << count << endl;
 
-        newestTime = ::max(newestTime, dtime);
-
         //
         // Make sure the data is valid
         //
@@ -304,43 +302,45 @@ DominantWindDirections::restoreCheckpoint() {
         //
         // Only save the dominant time if it's less than an hour old
         //
-        if (now - dtime <= DOMINANT_DIR_DURATION) {
-            for (int i = 0; i < NUM_SLICES; i++) {
-                if (windSlices[i].isInSlice(heading)) {
+        for (int i = 0; i < NUM_SLICES; i++) {
+            if (windSlices[i].isInSlice(heading)) {
+                if (now - dtime <= DOMINANT_DIR_DURATION) {
                     windSlices[i].setLast10MinuteDominantTime(dtime);
-                    windSlices[i].setSampleCount(count);
                     dominantWindDirectionList.push_back(windSlices[i].getName());
+                    newestTime = ::max(newestTime, dtime);
                 }
-            }
-        }
 
-        //
-        // If the latest dominant time is more than 10 minutes old, then
-        // clear out the sample counts.
-        // TODO Check this if statement. It seems wrong that the samples should be cleared if any of the checkpoint
-        // times is more than 10 minutes old. This check seems like it should be after the while loop.
-        //
-        if (now - newestTime > AGE_SPAN) {
-            for (int i = 0; i < NUM_SLICES; i++) {
-                windSlices[i].clearSamples();
+                windSlices[i].setSampleCount(count);
             }
-        }
-
-        //
-        // Set the time window based on the newest dominant time, if there is one.
-        // Use the newest time, then add 10 minutes to the start and end window times
-        // until the end window time is in the future.
-        //
-        if (newestTime != 0) {
-            startOf10MinuteTimeWindow = newestTime;
-            endOf10MinuteTimeWindow = newestTime + AGE_SPAN;
-            while (endOf10MinuteTimeWindow <= now) {
-                startOf10MinuteTimeWindow += AGE_SPAN;
-                endOf10MinuteTimeWindow += AGE_SPAN;
-            }
-
         }
     }
+
+    //
+    // If the latest dominant time is more than 10 minutes old, then
+    // clear out the sample counts.
+    //
+    if (now - newestTime > AGE_SPAN) {
+        for (int i = 0; i < NUM_SLICES; i++) {
+            windSlices[i].clearSamples();
+        }
+    }
+
+    //
+    // Set the time window based on the newest dominant time, if there is one.
+    // Use the newest time, then add 10 minutes to the start and end window times
+    // until the end window time is in the future.
+    //
+    if (newestTime != 0) {
+        startOf10MinuteTimeWindow = newestTime;
+        endOf10MinuteTimeWindow = newestTime + AGE_SPAN;
+        while (endOf10MinuteTimeWindow <= now) {
+            startOf10MinuteTimeWindow += AGE_SPAN;
+            endOf10MinuteTimeWindow += AGE_SPAN;
+        }
+    }
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "After loading checkpoint file 10 minute window is: " << dateFormat(startOf10MinuteTimeWindow) << " - " << dateFormat(endOf10MinuteTimeWindow) << endl;
+
     ifs.close();
 }
 

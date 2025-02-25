@@ -16,6 +16,7 @@
  */
 #include <string.h>
 #include <vector>
+#include <fstream>
 
 #include "DominantWindDirections.h"
 #include "VantageLogger.h"
@@ -155,6 +156,57 @@ main(int argc, char * argv[]) {
         dominantWinds.dumpData();
         t += 7;
     }
+
+    //
+    // Create a checkpoint file to load
+    //
+    ofstream of("./checkpoint-test.dat", std::ofstream::out | std::ofstream::trunc);
+
+    time_t now = time(0);
+    now -= now % 60;
+    now -= 4200;
+    float heading = 0.0;
+    for (int i = 0; i < 16; i++) {
+        heading = (float)i * 22.5;
+        if (now < time(0)) {
+            of << fixed << setprecision(1) << heading << " " << now << " " << i + 1 << endl;
+            cout << fixed << setprecision(1) << heading << " " << now << " " << i + 1 << endl;
+        }
+        else {
+            of << fixed << setprecision(1) << heading << " " << 0 << " " << i + 1 << endl;
+            cout << fixed << setprecision(1) << heading << " " << 0 << " " << i + 1 << endl;
+        }
+        now += 10 * 60;
+    }
+
+    of.close();
+
+    DominantWindDirections dwd(".", "checkpoint-test.dat");
+    dwd.dumpData();
+
+    ofstream of2("./checkpoint-test2.dat", std::ofstream::out | std::ofstream::trunc);
+
+    now = time(0);
+    now -= now % 60;
+    now -= 7200;
+    heading = 0.0;
+    for (int i = 0; i < 16; i++) {
+        heading = (float)i * 22.5;
+        if (now < time(0) - 3660) {
+            of2 << fixed << setprecision(1) << heading << " " << now << " " << i + 1 << endl;
+            cout << fixed << setprecision(1) << heading << " " << now << " " << i + 1 << endl;
+        }
+        else {
+            of2 << fixed << setprecision(1) << heading << " " << 0 << " " << i + 1 << endl;
+            cout << fixed << setprecision(1) << heading << " " << 0 << " " << i + 1 << endl;
+        }
+        now += 10 * 60;
+    }
+
+    of.close();
+
+    DominantWindDirections dwd2(".", "checkpoint-test2.dat");
+    dwd2.dumpData();
 
     return 0;
 }
