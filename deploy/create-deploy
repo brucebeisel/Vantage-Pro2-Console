@@ -62,7 +62,7 @@ done
 echo "Copying start and installation scripts..."
 cp ../scripts/weathersense.rc $installdir/rc
 
-cp ./install-weathersense.sh $basedir/install-weathersense-4.0.0.sh
+cp ./install-weathersense.sh $basedir/install-weathersense-$version.sh
 cp README $basedir
 
 cp README.archive $installdir/archive/README

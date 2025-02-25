@@ -25,4 +25,4 @@
 # 
 # m h  dom mon dow   command
 #
-0 2 * * * /weathersense/4.0.0/bin/backup_archive
+0 2 * * * /weathersense/4.1.0/bin/backup_archive

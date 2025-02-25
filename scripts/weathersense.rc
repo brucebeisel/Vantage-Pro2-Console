@@ -16,7 +16,7 @@
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 WEATHERSENSE_DIR=/weathersense
-WEATHERSENSE_VERSION=4.0.0
+WEATHERSENSE_VERSION=4.1.0
 WEATHERSENSE_USER=weathersense
 DESC="weathersense suite"
 NAME=weathersense
