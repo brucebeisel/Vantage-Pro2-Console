@@ -60,8 +60,14 @@ else
     echo "Directory $rootdir exists"
 fi
 
+#
+# Save the list of existing archives before we start creating the new directory
+#
+archives=`ls -rd $rootdir/*/archive`
+
 echo Making installation directory $installdir
 mkdir $installdir
+echo
 
 if [ $? == 1 ]; then
     echo "Failed to make directory $installdir"
@@ -69,7 +75,7 @@ if [ $? == 1 ]; then
     exit 6
 fi
 
-sourcedirs="archive bin log node"
+sourcedirs="archive log bin node"
 
 echo "Copying source directories..."
 for sourcedir in $sourcedirs;
@@ -77,8 +83,8 @@ do
     echo "Copying source directory $sourcedir"
     cp -r $dir/$sourcedir $installdir
 done
+echo
 
-chown -R weathersense $installdir
 
 echo "Copying files to /etc/init.d and /etc/rc5.d..."
 cp $dir/rc/weathersense.rc /etc/init.d/weathersense
@@ -86,39 +92,51 @@ chmod +x /etc/init.d/weathersense
 
 ln -s -f /etc/init.d/weathersense /etc/rc5.d/S99weathersense
 ln -s -f /etc/init.d/weathersense /etc/rc5.d/K99weathersense
+echo
 
 echo "Creating cron entry for data backup..."
-crontab -u weathersense -e $dir/weathersense.cron
+crontab -u weathersense $dir/weathersense.cron
 
+echo
+echo
 echo "Checking for old archive data..."
-#archives=`ls -r $rootdir/*/archive`
 
-#numarchives=`wc -w <<< $archives`
+numarchives=`wc -w <<< $archives`
 
-#copyarchive=""
+copyarchive=""
 
-#if [[ $numarchives -gt 0 ]]; then
-#    echo "A number of existing archives were found in the $rootdir directory"
-#    echo "Would you like to copy the existing archive files to the new installation?"
-#    read -p "[yes/no]: " answer
-#    if [ $answer != "yes" ]; then
-#        exit 5
-#    fi
-#    echo "The choices are (newest first): "
-#    cat <<< $archives
-#    echo "Choose one of the following files by entering "y" at the prompt"
-#
-#    for archive in $archives
-#    do
-#        read -p "$archive " answer
-#        if [ $answer == "y" ]; then
-#            copyarchive=$archive
-#            break
-#        fi
-#    done
-#fi
+if [[ $numarchives -gt 0 ]]; then
+    echo "A number of existing archives were found in the $rootdir directory"
+    echo "Would you like to copy the existing archive files to the new installation?"
+    read -p "[yes/no]: " answer
+    if [ $answer != "yes" ]; then
+        exit 5
+    fi
+    echo
+    echo "The choices are (newest first): "
+    cat <<< $archives
+    echo
+    echo "Choose one of the following files by entering "y" at the prompt"
 
-#if [ $copyarchive != "" ]; then
-#    cp -r $copyarchive/* $installdir/archive
-#    cp $copyarchive/../node/VantageConsole/UserData/* $installdir/node/VantageConsole/UserData
-#fi
+    for archive in $archives
+    do
+        read -p "$archive? " answer
+        if [ $answer == "y" ]; then
+            copyarchive=$archive
+            break
+        fi
+    done
+fi
+
+echo Copying archive $copyarchive
+
+if [ "$copyarchive" != "" ]; then
+    echo "Copying archive from $copyarchive"
+    cp -r $copyarchive/* $installdir/archive
+    echo "Copying user files from  $copyarchive/../node/VantageConsole/UserData"
+    cp $copyarchive/../node/VantageConsole/UserData/* $installdir/node/VantageConsole/UserData
+    echo "Copying log files from  $copyarchive/../log"
+    cp $copyarchive/../log/* $installdir/log
+fi
+
+chown -R weathersense $installdir
