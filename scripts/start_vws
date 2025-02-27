@@ -17,4 +17,4 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-./vws $device ../archive/ ../log/vws_log
+./vws -p $device -d ../archive/ -l ../log/vws_log -v 3
