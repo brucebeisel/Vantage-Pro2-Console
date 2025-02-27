@@ -42,7 +42,7 @@ static const std::string PACKET_SAVE_DIR = "/packets";
  * it will also keep backups that will enable the archive to be restored in case of an error.
  *
  * Note that the Vantage archive has a limitation with daylight savings time. When daylight savings time starts in the spring,
- * it behaves are you would expect. Assuming a 5 minute archive interval, you will find a record at 1:55 AM followed by a record
+ * it behaves as you would expect. Assuming a 5 minute archive interval, you will find a record at 1:55 AM followed by a record
  * at 3:00 AM. Per Bruce Johnson at Davis Instruments, the logger will ignore any records for which it already has a record.
  * When DST ends, the clock is turned backward. The time of the final record during DST will be 1:55 AM. The next record that
  * the logger attempts to save is 1:00 AM. Since this record already exists, the logger will ignore the data. This behavior

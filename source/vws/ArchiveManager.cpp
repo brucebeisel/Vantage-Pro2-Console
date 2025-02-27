@@ -595,8 +595,7 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
         return;
     }
 
-    //for (vector<ArchivePacket>::const_iterator it = packets.begin(); it != packets.end(); ++it) {
-    for (auto packet : packets) {
+    for (const auto & packet : packets) {
         //
         // Only save the packet to the archive if it is newer than the newest packet in the archive
         //

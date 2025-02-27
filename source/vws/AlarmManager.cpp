@@ -72,7 +72,7 @@ AlarmManager::formatAlarmThresholdsJSON() {
 
     oss << "{ \"alarmThresholds\" : [ ";
     bool first = true;
-    for (auto alarm : alarms) {
+    for (const auto & alarm : alarms) {
         if (alarm.getAlarmProperties().fieldValid) {
             if (!first) oss << ", "; else first = false;
             double minValue = alarm.calculateActualValue(alarm.getAlarmProperties().minimumValue);
@@ -101,7 +101,7 @@ AlarmManager::formatActiveAlarmsJSON() const {
     ostringstream oss;
     oss << "{ \"activeAlarms\" : [ ";
     bool first = true;
-    for (auto alarm : alarms) {
+    for (const auto & alarm : alarms) {
         if (alarm.isTriggered()) {
             if (first) first = false; else oss << ", ";
             oss << "{ "
@@ -180,7 +180,7 @@ AlarmManager::retrieveThresholds() {
         return false;
     }
 
-    for (auto alarm : alarms) {
+    for (auto & alarm : alarms) {
         AlarmProperties props = alarm.getAlarmProperties();
         int offset = props.eepromThresholdByte;
         int thresholdValue = 0;
@@ -202,7 +202,7 @@ bool
 AlarmManager::updateThresholds() {
     byte buffer[EE_ALARM_THRESHOLDS_SIZE];
 
-    for (auto alarm : alarms) {
+    for (const auto & alarm : alarms) {
         const AlarmProperties props = alarm.getAlarmProperties();
         BitConverter::getBytes(alarm.getEepromThreshold(), buffer, props.eepromThresholdByte, props.eepromThresholdSize);
     }
@@ -219,7 +219,7 @@ AlarmManager::updateThresholds() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 AlarmManager::setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits) {
-    for (auto alarm : alarms) {
+    for (auto & alarm : alarms) {
         AlarmProperties props = alarm.getAlarmProperties();
         if (props.alarmBit >= 0)
             alarm.setTriggered(alarmBits[props.alarmBit] == 1);

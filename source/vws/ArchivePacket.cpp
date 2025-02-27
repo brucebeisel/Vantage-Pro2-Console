@@ -240,10 +240,6 @@ std::string
 ArchivePacket::getPacketDateTimeString() const {
     ostringstream oss;
     oss << packetDateTimeFields.formatDateTime();
-    //oss << setfill('0')
-    //    << packetDateTimeFields.year << "-" << setw(2) << packetDateTimeFields.month << "-" << setw(2) << packetDateTimeFields.monthDay
-    //    << " " << setw(2) << packetDateTimeFields.hour << ":" << setw(2) << packetDateTimeFields.minute;
-
     return oss.str();
 }
 
