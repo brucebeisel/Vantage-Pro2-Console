@@ -5,7 +5,7 @@ if [ $# != 2 ]; then
     exit 1
 fi
 
-sleep 5
+sleep 2
 
 logdir=../log
 logfile=$logdir/weathersense.log
@@ -35,11 +35,13 @@ echo `date` "Starting Vantage Web Server" |& tee $logfile
 su -l $weathersense_user -c $bindir/start_web_server $weathersense_version &>> $logdir/ws_web.log &
 echo "Vantage Web Server Started" |& tee $logfile
 
-if [ `pgrep -c vws` != 1 ]; then
+sleep 2
+
+if [ `pidof vws | wc -w` != 1 ]; then
     echo "Warning, Vantage Console (vws) did not start"
 fi
 
-if [ `pgrep -c node` != 2 ]; then
+if [ `pidof node | wc -w` != 2 ]; then
     echo "Warning, Weather Underground Uploader and/or Vantage Web Server did not start"
 fi
 echo "WeatherSense version $weathersense_version started" |& tee $logfile
