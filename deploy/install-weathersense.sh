@@ -134,9 +134,7 @@ if [ "$copyarchive" != "" ]; then
     echo "Copying archive from $copyarchive"
     cp -r $copyarchive/* $installdir/archive
     echo "Copying user files from  $copyarchive/../node/VantageConsole/UserData"
-    cp $copyarchive/../node/VantageConsole/UserData/* $installdir/node/VantageConsole/UserData
-    echo "Copying log files from  $copyarchive/../log"
-    cp $copyarchive/../log/* $installdir/log
+    cp -r $copyarchive/../node/VantageConsole/UserData $installdir/node/VantageConsole
 fi
 
 chown -R weathersense $installdir
