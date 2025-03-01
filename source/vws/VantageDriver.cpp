@@ -43,7 +43,16 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+void
+consoleThreadEntry(VantageDriver * driver) {
+    driver->mainLoop();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager,  CommandHandler & cmdHandler, StormArchiveManager & stormArchiveManager) :
+                                                                isConsoleConnected(false),
                                                                 station(station),
                                                                 configuration(configuration),
                                                                 archiveManager(archiveManager),
@@ -55,6 +64,7 @@ VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfigurati
                                                                 lastArchivePacketTime(0),
                                                                 lastStormArchiveUpdateTime(0),
                                                                 lastArchiveVerifyTime(0),
+                                                                consoleThread(NULL),
                                                                 logger(VantageLogger::getLogger("VantageDriver")) {
     //
     // Indicate the the console time needs to be set in the near future. 
@@ -84,7 +94,18 @@ VantageDriver::~VantageDriver() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageDriver::initialize() {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Initializing..." << endl;
+    consoleThread = new thread(consoleThreadEntry, this);
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageDriver::connectToConsole() {
+    if (isConsoleConnected)
+        return true;
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Connecting to console..." << endl;
 
     if (!station.openStation()) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open weather station" << endl;
@@ -112,9 +133,23 @@ VantageDriver::initialize() {
     if (!retrieveConfiguration())
         return false;
 
-    logger.log(VantageLogger::VANTAGE_INFO) << "Initialization complete." << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Console connected." << endl;
+
+    isConsoleConnected = true;
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageDriver::disconnectFromConsole() {
+    station.closeStation();
+    nextRecord = -1;
+    previousNextRecord = -1;
+    lastArchivePacketTime = 0;
+    lastStormArchiveUpdateTime = 0;
+    lastArchiveVerifyTime = time(0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,32 +198,22 @@ VantageDriver::stop() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
-VantageDriver::reopenStation() {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Reopening weather station" << endl;
-    station.closeStation();
-    bool success = station.openStation();
-
-    if (!success)
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to reopen weather station" << endl;
-
-    return success;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 void
 VantageDriver::mainLoop() {
-    //
-    // Synchronize the historical archive data from the console to local storage
-    //
-    if (!archiveManager.synchronizeArchive()) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read the archive during initialization" << endl;
-        return;
-    }
+    logger.log(VantageLogger::VANTAGE_INFO) << "Entering main loop" << endl;
 
     while (!exitLoop) {
         try {
+            //
+            // Try to connect to the console on each loop. Process any commands so that the user interface
+            // gets a response even if we cannot talk to the console.
+            //
+            if (!connectToConsole()) {
+                logger.log(VantageLogger::VANTAGE_ERROR) << "Not connected to console, trying again" << endl;
+                commandHandler.processNextCommand();
+                continue;
+            }
+
             //
             // If the weather station could not be woken, then close and open
             // the console. It has been observed that on a rare occasion the console
@@ -196,7 +221,7 @@ VantageDriver::mainLoop() {
             // the serial port will hopefully fix this issue.
             //
             if (!station.wakeupStation()) {
-                exitLoop = !reopenStation();
+                disconnectFromConsole();
                 continue;
             }
 
@@ -222,6 +247,7 @@ VantageDriver::mainLoop() {
 
             //
             // Verify the archive and store the results
+            // TODO This should probably move to the DataCommand thread
             //
             if (lastArchiveVerifyTime + ARCHIVE_VERIFY_INTERVAL < now) {
                 archiveManager.verifyCurrentArchiveFile();
@@ -268,6 +294,15 @@ VantageDriver::mainLoop() {
             logger.log(VantageLogger::VANTAGE_ERROR) << "Caught exception: " << e.what() << endl;     
         } 
     }
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Exiting main loop" << endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageDriver::join() {
+    consoleThread->join();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

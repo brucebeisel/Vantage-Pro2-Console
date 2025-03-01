@@ -102,6 +102,13 @@ public:
     bool openStation();
 
     /**
+     * Checks if the console is open.
+     *
+     * @return True if the console is open
+     */
+    bool isOpen();
+
+    /**
      * Close the Vantage console.
      */
     void closeStation();

@@ -46,8 +46,8 @@ using namespace std;
 using namespace vws;
 
 atomic<bool> signalCaught(false);
+static VantageLogger & mainLogger = VantageLogger::getLogger("VWS Main");
 
-//#ifndef WIN32
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
@@ -55,93 +55,84 @@ sigHandler(int sig) {
     if (sig == SIGINT || sig == SIGTERM)
         signalCaught.store(true);
 }
-//#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-consoleThreadEntry(const string & dataDirectory, const string & serialPortName, int baudRate) {
-    VantageLogger & logger = VantageLogger::getLogger("Vantage Main");
-    logger.log(VantageLogger::VANTAGE_INFO) << "Starting console thread" << endl;
+startVWS(const string & dataDirectory, const string & serialPortName, int baudRate) {
 
-    try {
-        logger.log(VantageLogger::VANTAGE_INFO) << "Creating runtime objects" << endl;
-        //
-        // Create all of the runtime object that never get destroyed
-        //
-        CurrentWeatherSocket currentWeatherPublisher;
-        CurrentWeatherManager currentWeatherManager(dataDirectory, currentWeatherPublisher);
-        SerialPort serialPort(serialPortName, baudRate);
-        VantageWeatherStation station(serialPort);
-        ArchiveManager archiveManager(dataDirectory, station);
-        VantageConfiguration configuration(station);
-        VantageStationNetwork network(dataDirectory, station, archiveManager);
-        AlarmManager alarmManager(station);
-        GraphDataRetriever graphDataRetriever(station);
-        StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
-        ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);
-        DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager);
-        VantageDriver driver(station, configuration, archiveManager, consoleCommandHandler, stormArchiveManager);
-        CommandSocket commandSocket(11462);
+    mainLogger.log(VantageLogger::VANTAGE_INFO) << "Creating runtime objects" << endl;
 
-        //
-        // Perform configuration
-        //
-        logger.log(VantageLogger::VANTAGE_INFO) << "Configuring runtime objects" << endl;
-        station.addLoopPacketListener(currentWeatherManager);
-        station.addLoopPacketListener(alarmManager);
-        station.addLoopPacketListener(network);
-        station.addLoopPacketListener(driver);
+    //
+    // Create all of the runtime object that never get destroyed
+    //
+    CurrentWeatherSocket currentWeatherPublisher;
+    CurrentWeatherManager currentWeatherManager(dataDirectory, currentWeatherPublisher);
+    SerialPort serialPort(serialPortName, baudRate);
+    VantageWeatherStation station(serialPort);
+    ArchiveManager archiveManager(dataDirectory, station);
+    VantageConfiguration configuration(station);
+    VantageStationNetwork network(dataDirectory, station, archiveManager);
+    AlarmManager alarmManager(station);
+    GraphDataRetriever graphDataRetriever(station);
+    StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
+    ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);
+    DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager);
+    VantageDriver consoleDriver(station, configuration, archiveManager, consoleCommandHandler, stormArchiveManager);
+    CommandSocket commandSocket(11462);
 
-        commandSocket.addCommandHandler(dataCommandHandler);
-        commandSocket.addCommandHandler(consoleCommandHandler);
+    //
+    // Perform configuration
+    //
+    mainLogger.log(VantageLogger::VANTAGE_INFO) << "Configuring runtime objects" << endl;
+    station.addLoopPacketListener(currentWeatherManager);
+    station.addLoopPacketListener(alarmManager);
+    station.addLoopPacketListener(network);
+    station.addLoopPacketListener(consoleDriver);
 
-        //
-        // Initialize objects that require it before entering the main loop
-        //
-        logger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
+    commandSocket.addCommandHandler(dataCommandHandler);
+    commandSocket.addCommandHandler(consoleCommandHandler);
 
-        currentWeatherManager.initialize();
+    //
+    // Initialize objects that require it before entering the main loop
+    //
+    mainLogger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
 
-        dataCommandHandler.initialize();
+    currentWeatherManager.initialize();
 
-        //
-        // The driver must be initialized before any communication is performed with the console
-        //
-        if (!driver.initialize())
-            return;
+    dataCommandHandler.initialize();
 
-        if (!currentWeatherPublisher.initialize())
-            return;
+    //
+    // The driver must be initialized before any communication is performed with the console
+    //
+    if (!consoleDriver.initialize())
+        return;
 
-        if (!network.initializeNetwork())
-            return;
+    if (!currentWeatherPublisher.initialize())
+        return;
 
-        if (!alarmManager.initialize())
-            return;
+    if (!network.initializeNetwork())
+        return;
 
-        //
-        // Initialize the command socket last so that all other's are initialized before any commands are received
-        //
-        if (!commandSocket.initialize())
-            return;
+    if (!alarmManager.initialize())
+        return;
 
-        logger.log(VantageLogger::VANTAGE_INFO) << "Entering driver's main loop" << endl;
-        driver.mainLoop();
-        logger.log(VantageLogger::VANTAGE_INFO) << "Driver's main loop returned. Joining CommandSocket and Data Command Handler" << endl;
-        commandSocket.terminate();
-        commandSocket.join();
-        dataCommandHandler.terminate();
-        dataCommandHandler.join();
-    }
-    catch (std::exception & e) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Caught exception from driver's main loop " << e.what() << endl;
-    }
-    catch (...) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Caught unknown exception from driver's main loop" << endl;
-    }
+    //
+    // Initialize the command socket last so that all other's are initialized before any commands are received
+    //
+    if (!commandSocket.initialize())
+        return;
 
-    logger.log(VantageLogger::VANTAGE_INFO) << "Ending console thread" << endl;
+    //
+    // This call will block until the console driver thread ends
+    //
+    consoleDriver.join();
+
+    commandSocket.terminate();
+    dataCommandHandler.terminate();
+
+    commandSocket.join();
+    dataCommandHandler.join();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -233,7 +224,5 @@ main(int argc, char *argv[]) {
         exit(1);
     }
 
-    thread consoleThread(consoleThreadEntry, dataDirectory, serialPortName, 19200);
-
-    consoleThread.join();
+    startVWS(dataDirectory, serialPortName, 19200);
 }

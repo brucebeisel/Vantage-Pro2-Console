@@ -22,6 +22,7 @@
 #endif
 
 #include <string>
+#include <thread>
 #include "WeatherTypes.h"
 #include "VantageWeatherStation.h"
 #include "CommandHandler.h"
@@ -71,11 +72,6 @@ public:
      bool retrieveConfiguration();
 
     /**
-     * Close and open the station.
-     */
-    bool reopenStation();
-
-    /**
      * Request that the main loop exits.
      */
     void stop();
@@ -100,6 +96,11 @@ public:
      * @return True if the loop packet processing loop should continue
      */
     bool processLoop2Packet(const Loop2Packet & packet);
+
+    /**
+     * Join the console driver thread.
+     */
+    void join();
 
 private:
     /**
@@ -129,6 +130,19 @@ private:
      */
     static constexpr int ARCHIVE_VERIFY_INTERVAL = 86400;
 
+    /**
+     * Open console and retrieve configuration data.
+     *
+     * @return True if connected to the console
+     */
+    bool connectToConsole();
+
+    /**
+     * Disconnect from the console and initialize state members.
+     */
+    void disconnectFromConsole();
+
+    bool                      isConsoleConnected;
     VantageWeatherStation &   station;
     VantageConfiguration &    configuration;
     ArchiveManager &          archiveManager;
@@ -141,6 +155,7 @@ private:
     DateTime                  consoleTimeSetTime;
     DateTime                  lastStormArchiveUpdateTime;
     DateTime                  lastArchiveVerifyTime;
+    std::thread *             consoleThread;
     VantageLogger &           logger;
 };
 

@@ -126,6 +126,16 @@ ConsoleCommandHandler::offerCommand(const CommandData & commandData) {
 void
 ConsoleCommandHandler::handleCommand(CommandData & commandData) {
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Processing command " << commandData << endl;
+
+    //
+    // If the station has not been opened and configured just ignore the command
+    //
+    if (!station.isOpen()) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Ignoring command " << commandData << " because the weather station console is not open" << endl;
+        commandData.response.append("\"Console not open\"");
+        return;
+    }
+
     for (auto & entry : consoleCommandList) {
         if (commandData.commandName == entry.commandName) {
             if (entry.handler != NULL) {
