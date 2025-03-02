@@ -235,6 +235,14 @@ VantageDriver::mainLoop() {
     while (!exitLoop) {
         try {
             //
+            // If an asynchronous signal was caught, then exit the loop
+            //
+            if (signalCaught.load()) {
+                exitLoop = true;
+                continue;
+            }
+
+            //
             // Try to connect to the console on each loop. Process any commands so that the user interface
             // gets a response even if we cannot talk to the console.
             //
@@ -289,14 +297,6 @@ VantageDriver::mainLoop() {
             // Get the current weather values for about a minute or until an event occurs that requires the end of the loop
             //
             station.currentValuesLoop(LOOP_PACKET_CYCLES);
-
-            //
-            // If an asynchronous signal was caught, then exit the loop
-            //
-            if (signalCaught.load()) {
-                exitLoop = true;
-                continue;
-            }
 
             //
             // Process the next event that the command handler has received (if any).
