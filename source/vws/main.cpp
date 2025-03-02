@@ -15,6 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * This is the main routine for VWS (Vantage Weather Station) software.
+ * The basic design is as follows. There are three threads that make up the processing structure:
+ *     1. Command Socket Thread - This thread receives commands from outside sources, routes the commands
+ *        to the appropriate processing thread and sends the responses. As the name implies this thread reads
+ *        and writes on a TCP socket. The command structure is documented elsewhere.
+ *     2. Console Command Thread - This thread processes all commands that must communicate with the Vantage
+ *        Pro 2 console as well as providing the continuous processing loop to receive the current weather data from
+ *        the console. This thread will continuously read "LOOP" packets from the console, pausing only when another
+ *        task is required. Other tasks include: terminating the program, processing an external command, and the
+ *        availability of a new archive packet.
+ *     3. Data Command Thread - The VWS keeps its own store of data due to the limited size of the buffers in the
+ *        Vantage Pro 2 console. This thread processes commands the retrieve the requested data and send it back
+ *        to the requester. It reads the following: 1) Archive packets which are created by the console at a
+ *        configurable rate, 2) Loop packets which are read approximately every 2 seconds, 3) Storm data, which is
+ *        updated very slowly as new storms start or current storms end.
+ *        As part of the archive packet retrieval capability, this thread will also generate summary reports based
+ *        on daily, weekly, monthly and yearly periods.
+ *        Note that this thread does not write any of this data, that is handled by the Console Command Thread.
+ *        Of course mutexes are used to protect the integrity of the data across the two threads.
+ *
+ * This process almost always transmits data in the native units of the Vantage Pro 2 console (Fahrenheit (F), Mile per hour (MPH),
+ * inches of mercury (inHg), inches (in)). It is up to the client to convert to the units preferred by the viewer
+ * of the data. The only exception is the wind speed in the summary reports. That unit can be specified in the command.
+ */
 #ifdef _WIN32
 #pragma warning(disable : 4100)
 #else
@@ -102,40 +128,57 @@ startVWS(const string & dataDirectory, const string & serialPortName, int baudRa
     //
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
 
+    //
+    // Create and/or clean up the loop packet archive
+    //
     currentWeatherManager.initialize();
 
-    dataCommandHandler.initialize();
-
+    //
+    // Create the current weather broadcast UDP socket
+    //
     if (!currentWeatherSocket.initialize())
         return;
 
     //
-    // The driver must be initialized before any communication is performed with the console
+    // Start the thread that handles data commands.
     //
-    if (!consoleDriver.initialize())
-        return;
+    dataCommandHandler.start();
 
     //
-    // Initialize the command socket last so that all others are initialized before any commands are received
+    // The driver must be initialized before any communication is performed with the console.
+    // Note that any external commands will be ignored until the connection with the console is successful.
     //
-    if (!commandSocket.initialize())
-        return;
+    consoleDriver.start();
+
+    //
+    // Initialize the command socket last so that all others are initialized before any commands are received.
+    // If the command socket could not be started, terminate the console driver thread.
+    //
+    if (!commandSocket.start())
+        consoleDriver.terminate();
 
     //
     // This call will block until the console driver thread ends
     //
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for console driver thread to terminate" << endl;
     consoleDriver.join();
+
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Console driver thread has terminated. Terminating other threads." << endl;
 
     commandSocket.terminate();
     dataCommandHandler.terminate();
 
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for command socket thread to terminate" << endl;
     commandSocket.join();
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Command socket thread has terminated" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for data command thread to terminate" << endl;
     dataCommandHandler.join();
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Data command thread has terminated" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const char * usage = "Usage: vws -p <weather station serial port> -d <data directory> [-v <debug verbosity (0-3)>] [-l <log file prefix>]";
+const char * usage = "Usage: vws -p <weather station serial port> -d <data directory> [-v <debug verbosity (0-3, 0 = INFO)>] [-l <log file prefix>]";
 
 int
 main(int argc, char *argv[]) {
@@ -146,7 +189,7 @@ main(int argc, char *argv[]) {
 #endif
 
     mainLogger = &VantageLogger::getLogger("VWS Main");
-    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_INFO);
 
     string serialPortName;
     string dataDirectory;
@@ -180,7 +223,7 @@ main(int argc, char *argv[]) {
             case 'v':
                 debugLevelOption = atoi(optarg);
                 if (debugLevelOption < 0 || debugLevelOption > 3) {
-                    cerr << "Invalid debug verbosity. Must be between 0 and 3" << endl;
+                    cerr << "Invalid debug verbosity. Must be from 0 to 3" << endl;
                     errorFound = true;
                 }
                 else {

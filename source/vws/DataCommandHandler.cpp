@@ -77,7 +77,7 @@ DataCommandHandler::~DataCommandHandler() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-DataCommandHandler::initialize() {
+DataCommandHandler::start() {
     commandThread = new thread(dataCommandThreadEntry, this);
 }
 
@@ -147,12 +147,14 @@ DataCommandHandler::mainLoop() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 DataCommandHandler::join() {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Joining the thread" << endl;
-    if (commandThread != NULL) {
+    if (commandThread != NULL && commandThread->joinable()) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "Joining the thread" << endl;
         commandThread->join();
         delete commandThread;
         commandThread = NULL;
     }
+    else
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Ignoring join request. Thread was not created or is not running." << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

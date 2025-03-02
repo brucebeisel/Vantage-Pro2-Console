@@ -162,17 +162,20 @@ CommandSocket::terminate() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 CommandSocket::join() {
-    if (commandThread != NULL) {
+    if (commandThread != NULL && commandThread->joinable()) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "Joining the thread" << endl;
         commandThread->join();
         delete commandThread;
         commandThread = NULL;
     }
+    else
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Ignoring join request. Thread was not created or is not running." << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-CommandSocket::initialize() {
+CommandSocket::start() {
     if (!createListenSocket())
         return false;
 

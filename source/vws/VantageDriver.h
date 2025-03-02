@@ -59,11 +59,9 @@ public:
     virtual ~VantageDriver();
 
     /**
-     * Initialize the driver.
-     * 
-     * @return True on success
+     * Start the console driver thread.
      */
-    bool initialize();
+    void start();
 
     /**
      * Retrieve the configuration data from the console.
@@ -75,7 +73,7 @@ public:
     /**
      * Request that the main loop exits.
      */
-    void stop();
+    void terminate();
 
     /**
      * The main loop that is the main "thread" of the driver.
@@ -103,6 +101,10 @@ public:
      */
     void join();
 
+    /**
+     * Add a connection monitor to the list of objects that will be notified when the state of the console
+     * connected changes.
+     */
     void addConnectionMonitor(ConsoleConnectionMonitor & monitor);
 
     /**

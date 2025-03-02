@@ -97,10 +97,9 @@ VantageDriver::~VantageDriver() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
-VantageDriver::initialize() {
+void
+VantageDriver::start() {
     consoleThread = new thread(consoleThreadEntry, this);
-    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -221,9 +220,8 @@ VantageDriver::retrieveConfiguration() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantageDriver::stop() {
+VantageDriver::terminate() {
     exitLoop = true;
-    station.closeStation();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -326,6 +324,7 @@ VantageDriver::mainLoop() {
         } 
     }
 
+    station.closeStation();
     logger.log(VantageLogger::VANTAGE_INFO) << "Exiting main loop" << endl;
 }
 
@@ -333,7 +332,14 @@ VantageDriver::mainLoop() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageDriver::join() {
-    consoleThread->join();
+
+    if (consoleThread != NULL && consoleThread->joinable()) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "Joining the thread" << endl;
+        consoleThread->join();
+        consoleThread = NULL;
+    }
+    else
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Ignoring join request. Thread was not created or is not running." << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

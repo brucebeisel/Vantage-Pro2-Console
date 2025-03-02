@@ -78,7 +78,7 @@ public:
     /**
      * Initialize the object; creating the listen socket and spawning the socket read/write thread.
      */
-    bool initialize();
+    bool start();
 
     /**
      * The main loop that read the commands from the socket and write the responses.

@@ -50,9 +50,9 @@ public:
     virtual ~DataCommandHandler();
 
     /**
-     * Initialize this object, starting the command loop thread.
+     * Start the command loop thread.
      */
-    void initialize();
+    void start();
 
     /**
      * Handle a command and write the response to the provided object.
