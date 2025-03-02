@@ -105,18 +105,23 @@ VantageStationNetwork::~VantageStationNetwork() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
-VantageStationNetwork::initializeNetwork() {
+void
+VantageStationNetwork::consoleConnected() {
     //
     // See if the saved file exists
     //
     if (std::filesystem::exists(networkConfigFile))
-        return initializeNetworkFromFile();
+        initializeNetworkFromFile();
     else
-        return initializeNetworkFromConsole();
+        initializeNetworkFromConsole();
+}
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageStationNetwork::consoleDisconnected() {
+    // TODO Do we need to initial any members on disconnect?
 
-    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@
 #include "VantageWeatherStation.h"
 #include "LoopPacket.h"
 #include "Alarm.h"
+#include "ConsoleConnectionMonitor.h"
 
 namespace vws {
 class VantageLogger;
@@ -27,7 +28,7 @@ class VantageLogger;
 /**
  * Class to manage all of the alarms of the console.
  */
-class AlarmManager : public VantageWeatherStation::LoopPacketListener {
+class AlarmManager : public VantageWeatherStation::LoopPacketListener, public ConsoleConnectionMonitor {
 public:
     static const int NUM_ALARMS = 86;
     typedef std::pair<std::string,double> Threshold;
@@ -38,13 +39,6 @@ public:
      * @param station The weather station object used to read and write from the EEPROM
      */
     explicit AlarmManager(VantageWeatherStation & station);
-
-    /**
-     * Initialize the alarm manager.
-     *
-     * @return True if initialization is successful
-     */
-    bool initialize();
 
     /**
      * Process a LOOP packets as part of the LoopPacketListener interface.
@@ -100,6 +94,16 @@ public:
      * @return True if the alarm name exists
      */
     bool clearAlarmThreshold(const std::string & alarmName);
+
+    /**
+     * Called when a connection is established with the console.
+     */
+    virtual void consoleConnected();
+
+    /**
+     * Called when the connection with the console is lost.
+     */
+    virtual void consoleDisconnected();
 
 private:
     /**

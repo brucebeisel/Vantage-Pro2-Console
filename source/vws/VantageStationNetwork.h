@@ -25,6 +25,7 @@
 #include "VantageProtocolConstants.h"
 #include "VantageEepromConstants.h"
 #include "VantageWeatherStation.h"
+#include "ConsoleConnectionMonitor.h"
 
 namespace vws {
 class VantageLogger;
@@ -163,7 +164,7 @@ typedef std::map<StationId,std::vector<Sensor>> stationSensors;
 static const std::string NETWORK_CONFIG_FILE = "vantage-network-configuration.dat";
 static const std::string NETWORK_STATUS_FILE = "vantage-network-status.dat";
 
-class VantageStationNetwork : public VantageWeatherStation::LoopPacketListener {
+class VantageStationNetwork : public VantageWeatherStation::LoopPacketListener, public ConsoleConnectionMonitor {
 public:
     /**
      * Constructor.
@@ -178,13 +179,6 @@ public:
      * Destructor.
      */
     virtual ~VantageStationNetwork();
-
-    /**
-     * Initialize the network data from the file or the console.
-     *
-     * @return True if successful
-     */
-    bool initializeNetwork();
 
     /**
      * Format the JSON message containing the network configuration data.
@@ -227,6 +221,16 @@ public:
      * @return True if the LOOP packets loop should continue
      */
     virtual bool processLoop2Packet(const Loop2Packet & packet);
+
+    /**
+     * Called when the console is connected.
+     */
+    virtual void consoleConnected();
+
+    /**
+     * Called when the console is disconnected.
+     */
+    virtual void consoleDisconnected();
 
 private:
     //

@@ -45,8 +45,9 @@
 using namespace std;
 using namespace vws;
 
+static constexpr int DEFAULT_SOCKET_PORT = 11462;
 atomic<bool> signalCaught(false);
-static VantageLogger & mainLogger = VantageLogger::getLogger("VWS Main");
+static VantageLogger * mainLogger = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,15 +60,15 @@ sigHandler(int sig) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-startVWS(const string & dataDirectory, const string & serialPortName, int baudRate) {
+startVWS(const string & dataDirectory, const string & serialPortName, int baudRate, int socketPort) {
 
-    mainLogger.log(VantageLogger::VANTAGE_INFO) << "Creating runtime objects" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Creating runtime objects" << endl;
 
     //
     // Create all of the runtime object that never get destroyed
     //
-    CurrentWeatherSocket currentWeatherPublisher;
-    CurrentWeatherManager currentWeatherManager(dataDirectory, currentWeatherPublisher);
+    CurrentWeatherSocket currentWeatherSocket;
+    CurrentWeatherManager currentWeatherManager(dataDirectory, currentWeatherSocket);
     SerialPort serialPort(serialPortName, baudRate);
     VantageWeatherStation station(serialPort);
     ArchiveManager archiveManager(dataDirectory, station);
@@ -79,12 +80,12 @@ startVWS(const string & dataDirectory, const string & serialPortName, int baudRa
     ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);
     DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager);
     VantageDriver consoleDriver(station, configuration, archiveManager, consoleCommandHandler, stormArchiveManager);
-    CommandSocket commandSocket(11462);
+    CommandSocket commandSocket(socketPort);
 
     //
     // Perform configuration
     //
-    mainLogger.log(VantageLogger::VANTAGE_INFO) << "Configuring runtime objects" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Configuring runtime objects" << endl;
     station.addLoopPacketListener(currentWeatherManager);
     station.addLoopPacketListener(alarmManager);
     station.addLoopPacketListener(network);
@@ -93,14 +94,20 @@ startVWS(const string & dataDirectory, const string & serialPortName, int baudRa
     commandSocket.addCommandHandler(dataCommandHandler);
     commandSocket.addCommandHandler(consoleCommandHandler);
 
+    consoleDriver.addConnectionMonitor(network);
+    consoleDriver.addConnectionMonitor(alarmManager);
+
     //
     // Initialize objects that require it before entering the main loop
     //
-    mainLogger.log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
 
     currentWeatherManager.initialize();
 
     dataCommandHandler.initialize();
+
+    if (!currentWeatherSocket.initialize())
+        return;
 
     //
     // The driver must be initialized before any communication is performed with the console
@@ -108,17 +115,8 @@ startVWS(const string & dataDirectory, const string & serialPortName, int baudRa
     if (!consoleDriver.initialize())
         return;
 
-    if (!currentWeatherPublisher.initialize())
-        return;
-
-    if (!network.initializeNetwork())
-        return;
-
-    if (!alarmManager.initialize())
-        return;
-
     //
-    // Initialize the command socket last so that all other's are initialized before any commands are received
+    // Initialize the command socket last so that all others are initialized before any commands are received
     //
     if (!commandSocket.initialize())
         return;
@@ -147,6 +145,7 @@ main(int argc, char *argv[]) {
     signal(SIGTERM, sigHandler);
 #endif
 
+    mainLogger = &VantageLogger::getLogger("VWS Main");
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
 
     string serialPortName;
@@ -154,10 +153,11 @@ main(int argc, char *argv[]) {
     string logFilePrefix;
     VantageLogger::Level debugLevel;
     int debugLevelOption;
+    int socketPort = DEFAULT_SOCKET_PORT;
 
     bool errorFound = false;
     int opt;
-    while ((opt = getopt(argc, argv, "d:l:p:v:h")) != -1) {
+    while ((opt = getopt(argc, argv, "d:l:p:s:v:h")) != -1) {
         switch (opt) {
             case 'd':
                 dataDirectory = optarg;
@@ -171,6 +171,10 @@ main(int argc, char *argv[]) {
             case 'p':
                 cout << "Serial port: " << optarg << endl;
                 serialPortName = optarg;
+                break;
+
+            case 's':
+                socketPort = atoi(optarg);
                 break;
 
             case 'v':
@@ -224,5 +228,6 @@ main(int argc, char *argv[]) {
         exit(1);
     }
 
-    startVWS(dataDirectory, serialPortName, 19200);
+    startVWS(dataDirectory, serialPortName, 19200, socketPort);
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "main() is ending" << endl;
 }

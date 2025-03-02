@@ -83,6 +83,11 @@ VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfigurati
     // that it was just verified
     //
     lastArchiveVerifyTime = now;
+
+    //
+    // Add ourselves to be notified when the console connection status changes
+    //
+    addConnectionMonitor(*this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,20 +127,12 @@ VantageDriver::connectToConsole() {
         logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station is awake" << endl;
     }
 
-    string consoleTypeString;
-    if (!station.retrieveConsoleType(&consoleTypeString)) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve station type for weather station" << endl;
-        return false;
-    }
-
-    logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << consoleTypeString << endl;
-
-    if (!retrieveConfiguration())
-        return false;
-
     logger.log(VantageLogger::VANTAGE_INFO) << "Console connected." << endl;
 
     isConsoleConnected = true;
+
+    for (auto monitor : connectionMonitors)
+        monitor->consoleConnected();
 
     return true;
 }
@@ -143,13 +140,46 @@ VantageDriver::connectToConsole() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-VantageDriver::disconnectFromConsole() {
-    station.closeStation();
+VantageDriver::addConnectionMonitor(ConsoleConnectionMonitor & monitor) {
+    connectionMonitors.push_back(&monitor);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageDriver::consoleConnected() {
+    string consoleTypeString;
+    if (!station.retrieveConsoleType(&consoleTypeString)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve station type for weather station" << endl;
+        return;
+    }
+
+    logger.log(VantageLogger::VANTAGE_INFO) << "Weather Station Type: " << consoleTypeString << endl;
+
+    if (!retrieveConfiguration())
+        return;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageDriver::consoleDisconnected() {
     nextRecord = -1;
     previousNextRecord = -1;
     lastArchivePacketTime = 0;
     lastStormArchiveUpdateTime = 0;
     lastArchiveVerifyTime = time(0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageDriver::disconnectFromConsole() {
+    station.closeStation();
+
+    for (auto monitor : connectionMonitors)
+        monitor->consoleDisconnected();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -211,6 +241,7 @@ VantageDriver::mainLoop() {
             if (!connectToConsole()) {
                 logger.log(VantageLogger::VANTAGE_ERROR) << "Not connected to console, trying again" << endl;
                 commandHandler.processNextCommand();
+                sleep(1);
                 continue;
             }
 

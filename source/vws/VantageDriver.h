@@ -26,6 +26,7 @@
 #include "WeatherTypes.h"
 #include "VantageWeatherStation.h"
 #include "CommandHandler.h"
+#include "ConsoleConnectionMonitor.h"
 
 namespace vws {
 class ArchiveManager;
@@ -39,7 +40,7 @@ class StormArchiveManager;
 /**
  * Class that coordinates the communications with the Vantage console.
  */
-class VantageDriver : public VantageWeatherStation::LoopPacketListener {
+class VantageDriver : public VantageWeatherStation::LoopPacketListener, public ConsoleConnectionMonitor {
 public:
     /**
      * Constructor.
@@ -102,6 +103,18 @@ public:
      */
     void join();
 
+    void addConnectionMonitor(ConsoleConnectionMonitor & monitor);
+
+    /**
+     * Called when a connection with the console is established.
+     */
+    virtual void consoleConnected();
+
+    /**
+     * Called when the connection with the console is lost.
+     */
+    virtual void consoleDisconnected();
+
 private:
     /**
      * The number of LOOP/LOOP2 packet pairs that are received in succession. Note that if a new archive record is available
@@ -142,21 +155,22 @@ private:
      */
     void disconnectFromConsole();
 
-    bool                      isConsoleConnected;
-    VantageWeatherStation &   station;
-    VantageConfiguration &    configuration;
-    ArchiveManager &          archiveManager;
-    CommandHandler &          commandHandler;
-    StormArchiveManager &     stormArchiveManager;
-    bool                      exitLoop;
-    int                       nextRecord;
-    int                       previousNextRecord;
-    DateTime                  lastArchivePacketTime;
-    DateTime                  consoleTimeSetTime;
-    DateTime                  lastStormArchiveUpdateTime;
-    DateTime                  lastArchiveVerifyTime;
-    std::thread *             consoleThread;
-    VantageLogger &           logger;
+    bool                                    isConsoleConnected;
+    VantageWeatherStation &                 station;
+    VantageConfiguration &                  configuration;
+    ArchiveManager &                        archiveManager;
+    CommandHandler &                        commandHandler;
+    StormArchiveManager &                   stormArchiveManager;
+    std::vector<ConsoleConnectionMonitor *> connectionMonitors;
+    bool                                    exitLoop;
+    int                                     nextRecord;
+    int                                     previousNextRecord;
+    DateTime                                lastArchivePacketTime;
+    DateTime                                consoleTimeSetTime;
+    DateTime                                lastStormArchiveUpdateTime;
+    DateTime                                lastArchiveVerifyTime;
+    std::thread *                           consoleThread;
+    VantageLogger &                         logger;
 };
 
 }
