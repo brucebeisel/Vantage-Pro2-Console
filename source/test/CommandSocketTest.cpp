@@ -57,7 +57,7 @@ main(int argc, char *argv[]) {
     CommandSocket commandSocket(11463);
     commandSocket.addCommandHandler(handler);
 
-    commandSocket.initialize();
+    commandSocket.start();
 
     sleep(1);
 
