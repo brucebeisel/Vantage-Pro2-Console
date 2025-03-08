@@ -403,15 +403,18 @@ VantageStationNetwork::retrieveStationInfo() {
 
     logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving sensor station information" << endl;
 
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Retrieving EEPROM data for retransmit ID" << endl;
     byte retransmitValue;
     if (!station.eepromBinaryRead(EE_RETRANSMIT_ID_ADDRESS, 1, &retransmitValue))
         return false;
 
     console.retransmitId = static_cast<StationId>(retransmitValue);
 
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Retrieving EEPROM data for monitored station mask" << endl;
     if (!station.eepromBinaryRead(EE_USED_TRANSMITTERS_ADDRESS, 1, &monitoredStationMask))
         return false;
 
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Retrieving EEPROM data for station list" << endl;
     if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
         return false;
 
@@ -419,6 +422,9 @@ VantageStationNetwork::retrieveStationInfo() {
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
         stationData[i].decode(i + 1, buffer, i * 2);
 
+        //
+        // The wind station is THE anemometer station or the first ISS
+        //
         if (stationData[i].stationType == StationType::ANEMOMETER_STATION)
             windStationId = i + 1;
         else if (stationData[i].stationType == StationType::INTEGRATED_SENSOR_STATION && windStationId == UNKNOWN_STATION_ID)
@@ -744,8 +750,8 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
 
     //
     // For now we are only dealing with writing to the EEPROM and not saving the network data
-    // to a file. There are two EEPROM areas, the station list and the 16 byte table for station
-    // types, repeaters and extra temperature/humidity indices.
+    // to a file. There are two EEPROM areas, the monitored station list and the 16 byte station
+    // list table that contains the station types, repeaters and extra temperature/humidity indices.
     //
     vector<int> monitoredStationIds;
     if (!findJsonArray(networkConfig, "monitoredStationIds", monitoredStationIds))
@@ -780,7 +786,8 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
     // cause the archive data to be inconsistent, as the temperatures from ID 5 used to be in extra temperatures[0]
     // and after adding station ID 3, they are in temperatures[1]. The best approach would be to preserve the
     // extra temperature index no matter if the station changes IDs or a new station is added. That could be
-    // accomplished using unique and permanent names.
+    // accomplished using unique and permanent names. This approach would require the date/time of the change
+    // to be preserved so the mapping from index to name could be done.
     //
     int nextExtraTemperatureIndex = 0;
     int nextExtraHumidityIndex = 1;

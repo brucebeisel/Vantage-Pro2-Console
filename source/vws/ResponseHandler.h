@@ -24,16 +24,6 @@ class ResponseHandler;
 class CommandData;
 
 /**
- * The data needed to respond to a command.
-struct CommandData {
-    ResponseHandler * responseHandler;  // The response handler that will process the response
-    int               fd;               // The file descriptor on which the command was received, so the response can be sent on the same file descriptor
-    std::string       command;          // The command that was processed
-    std::string       response;         // The response to the command
-};
- */
-
-/**
  * Interface class that handles the command response.
  */
 class ResponseHandler {

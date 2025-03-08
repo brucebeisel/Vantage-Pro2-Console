@@ -23,8 +23,8 @@
 namespace vws {
 
 /**
-  * Class to hold a measurement value and the state of its validity.
-  */
+ * Class to hold a measurement value and the state of its validity.
+ */
 template<typename T>
 class Measurement {
 public:
@@ -106,6 +106,7 @@ public:
      * Assignment operator to set the measurement value to a valid value.
      *
      * @param value The value of the measurement that is assumed to be in a valid range
+     * @return The Measurement being assigned to
      */
     Measurement & operator=(const T & value) {
         this->value = value;
