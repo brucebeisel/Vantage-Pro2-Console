@@ -20,6 +20,7 @@
 #include "BitConverter.h"
 #include "VantageLogger.h"
 #include "VantageEepromConstants.h"
+#include "JsonUtils.h"
 #include "json.hpp"
 
 using namespace std;
@@ -178,6 +179,7 @@ CalibrationAdjustmentsPacket::formatJSON() const {
 
 }
 
+/*
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
@@ -216,6 +218,7 @@ CalibrationAdjustmentsPacket::findJsonArray(json root, const string & name, T & 
 
     return success;
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -224,31 +227,31 @@ CalibrationAdjustmentsPacket::parseJSON(const std::string & s) {
 
     json adjustments = json::parse(s.begin(), s.end());
 
-    if (!findJsonValue(adjustments, "insideTemperatureAdjustment", this->insideTemperatureAdjustment))
+    if (!JsonUtils::findJsonValue(adjustments, "insideTemperatureAdjustment", this->insideTemperatureAdjustment))
         return false;
 
-    if (!findJsonValue(adjustments, "outsideTemperatureAdjustment", this->outsideTemperatureAdjustment))
+    if (!JsonUtils::findJsonValue(adjustments, "outsideTemperatureAdjustment", this->outsideTemperatureAdjustment))
         return false;
 
-    if (!findJsonValue(adjustments, "insideHumidityAdjustment", this->insideHumidityAdjustment))
+    if (!JsonUtils::findJsonValue(adjustments, "insideHumidityAdjustment", this->insideHumidityAdjustment))
         return false;
 
-    if (!findJsonValue(adjustments, "outsideHumidityAdjustment", this->outsideHumidityAdjustment))
+    if (!JsonUtils::findJsonValue(adjustments, "outsideHumidityAdjustment", this->outsideHumidityAdjustment))
         return false;
 
-    if (!findJsonArray(adjustments, "extraTemperatureAdjustments", this->extraTemperatureAdjustments, MAX_EXTRA_TEMPERATURES))
+    if (!JsonUtils::findJsonArray(adjustments, "extraTemperatureAdjustments", this->extraTemperatureAdjustments, MAX_EXTRA_TEMPERATURES))
         return false;
 
-    if (!findJsonArray(adjustments, "soilTemperatureAdjustments", this->soilTemperatureAdjustments, MAX_SOIL_TEMPERATURES))
+    if (!JsonUtils::findJsonArray(adjustments, "soilTemperatureAdjustments", this->soilTemperatureAdjustments, MAX_SOIL_TEMPERATURES))
         return false;
 
-    if (!findJsonArray(adjustments, "leafTemperatureAdjustments", this->leafTemperatureAdjustments, MAX_LEAF_TEMPERATURES))
+    if (!JsonUtils::findJsonArray(adjustments, "leafTemperatureAdjustments", this->leafTemperatureAdjustments, MAX_LEAF_TEMPERATURES))
         return false;
 
-    if (!findJsonArray(adjustments, "extraHumidityAdjustments", this->extraHumidityAdjustments, MAX_EXTRA_HUMIDITIES))
+    if (!JsonUtils::findJsonArray(adjustments, "extraHumidityAdjustments", this->extraHumidityAdjustments, MAX_EXTRA_HUMIDITIES))
         return false;
 
-    if (!findJsonValue(adjustments, "windDirectionAdjustment", this->windDirectionAdjustment))
+    if (!JsonUtils::findJsonValue(adjustments, "windDirectionAdjustment", this->windDirectionAdjustment))
         return false;
 
     return true;

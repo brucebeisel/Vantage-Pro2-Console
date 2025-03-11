@@ -23,6 +23,7 @@
 #include <filesystem>
 #include "json.hpp"
 
+#include "JsonUtils.h"
 #include "BitConverter.h"
 #include "LoopPacket.h"
 #include "VantageDecoder.h"
@@ -67,7 +68,7 @@ StationData::StationData() : stationId(0),
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-StationData::encode(byte buffer[], int offset) {
+StationData::encode(byte buffer[], int offset) const {
     buffer[offset] = ((static_cast<int>(repeaterId) << 4) & 0xF0) | (stationType & 0xF);
     buffer[offset + 1] = ((extraTemperatureIndex << 4) & 0xF0) | (extraTemperatureIndex & 0xF);
 }
@@ -88,7 +89,6 @@ StationData::decode(StationId id, const byte buffer[], int offset) {
 VantageStationNetwork::VantageStationNetwork(const string & dataDirectory, VantageWeatherStation & station, ArchiveManager & am) : station(station),
                                                                                                                           archiveManager(am),
                                                                                                                           monitoredStationMask(0),
-                                                                                                                          networkConfigFile(dataDirectory + "/" + NETWORK_CONFIG_FILE),
                                                                                                                           networkStatusFile(dataDirectory + "/" + NETWORK_STATUS_FILE),
                                                                                                                           windStationLinkQuality(0),
                                                                                                                           windStationId(UNKNOWN_STATION_ID),
@@ -107,13 +107,7 @@ VantageStationNetwork::~VantageStationNetwork() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageStationNetwork::consoleConnected() {
-    //
-    // See if the saved file exists
-    //
-    if (std::filesystem::exists(networkConfigFile))
-        initializeNetworkFromFile();
-    else
-        initializeNetworkFromConsole();
+    initializeNetworkFromConsole();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +121,92 @@ VantageStationNetwork::consoleDisconnected() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageStationNetwork::initializeNetworkFromFile() {
+VantageStationNetwork::retrieveMonitoredStations(std::vector<StationId> & monitoredStations) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving EEPROM data for monitored station mask" << endl;
+
+    monitoredStations.clear();
+
+    if (!station.eepromBinaryRead(EE_USED_TRANSMITTERS_ADDRESS, 1, &monitoredStationMask))
+        return false;
+
+    for (int i = 0; i < MAX_STATIONS; i++) {
+        if ((monitoredStationMask & (1 << i)) != 0) {
+            StationId id = i + 1;
+            monitoredStations.push_back(id);
+        }
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageStationNetwork::updateMonitoredStations(const StationId monitoredStations[]) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Updating EEPROM data for monitored station mask" << endl;
+
+    byte monitoredStationMask = 0;
+    for (int i = 0; i < MAX_STATIONS; i++) {
+        if (monitoredStations[i] != UNKNOWN_STATION_ID)
+            monitoredStationMask |= (1 << (monitoredStations[i] - 1));
+    }
+
+    return station.eepromWriteByte(EE_USED_TRANSMITTERS_ADDRESS, monitoredStationMask);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageStationNetwork::retrieveRetransmitId(StationId & retransmitId) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving EEPROM data for retransmit ID" << endl;
+    byte retransmitValue;
+    if (!station.eepromBinaryRead(EE_RETRANSMIT_ID_ADDRESS, 1, &retransmitValue))
+        return false;
+
+    retransmitId = static_cast<StationId>(retransmitValue);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageStationNetwork::updateRetransmitId(StationId retransmitId) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Updating EEPROM data for retransmit ID" << endl;
+
+    byte retransmitIdValue = static_cast<byte>(retransmitId);
+
+    return station.eepromWriteByte(EE_RETRANSMIT_ID_ADDRESS, retransmitIdValue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageStationNetwork::retrieveStationList(StationData stationList[MAX_STATIONS]) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving EEPROM data for station list" << endl;
+
+    char buffer[EE_STATION_LIST_SIZE];
+    if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
+        return false;
+
+    for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++)
+        stationList[i].decode(i + 1, buffer, i * 2);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageStationNetwork::updateStationList(const StationData stationList[MAX_STATIONS]) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Updating EEPROM data for station list" << endl;
+
+    char buffer[EE_STATION_LIST_SIZE];
+    for (int i = 0; i < MAX_STATIONS; i++)
+        stationList[i].encode(buffer, i * 2);
+
+    //return station.eepromBinaryWrite(EE_STATION_LIST_ADDRESS, buffer, EE_STATION_LIST_SIZE);
+
     return true;
 }
 
@@ -399,29 +478,19 @@ VantageStationNetwork::initializeNetworkFromConsole() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageStationNetwork::retrieveStationInfo() {
-    char buffer[EE_STATION_LIST_SIZE];
-
     logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving sensor station information" << endl;
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Retrieving EEPROM data for retransmit ID" << endl;
-    byte retransmitValue;
-    if (!station.eepromBinaryRead(EE_RETRANSMIT_ID_ADDRESS, 1, &retransmitValue))
+    if (!retrieveRetransmitId(console.retransmitId))
         return false;
 
-    console.retransmitId = static_cast<StationId>(retransmitValue);
-
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Retrieving EEPROM data for monitored station mask" << endl;
-    if (!station.eepromBinaryRead(EE_USED_TRANSMITTERS_ADDRESS, 1, &monitoredStationMask))
+    if (!retrieveMonitoredStations(monitoredStations))
         return false;
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Retrieving EEPROM data for station list" << endl;
-    if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
+    if (!retrieveStationList(stationData))
         return false;
 
     windStationId = UNKNOWN_STATION_ID;
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
-        stationData[i].decode(i + 1, buffer, i * 2);
-
         //
         // The wind station is THE anemometer station or the first ISS
         //
@@ -709,41 +778,6 @@ VantageStationNetwork::formatConfigurationJSON() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-template<typename T>
-bool
-VantageStationNetwork::findJsonValue(json root, const string & name, T & value) {
-    bool success = false;
-    auto valuePtr = root.find(name);
-    if (valuePtr != root.end()) {
-        value = *valuePtr;
-        success = true;
-    }
-    else
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
-
-    return success;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-template<typename T>
-bool
-VantageStationNetwork::findJsonArray(json root, const string & name, T & array) {
-    array.clear();
-    bool success = false;
-    auto jlist = root.find(name);
-    if (jlist != root.end()) {
-        std::copy((*jlist).begin(), (*jlist).end(), back_inserter(array));
-        success = true;
-    }
-    else
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
-
-    return success;
-}
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 bool
 VantageStationNetwork::updateNetworkConfiguration(const std::string & networkConfigJson) {
     json networkConfig = json::parse(networkConfigJson.begin(), networkConfigJson.end());
@@ -753,17 +787,15 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
     // to a file. There are two EEPROM areas, the monitored station list and the 16 byte station
     // list table that contains the station types, repeaters and extra temperature/humidity indices.
     //
-    vector<int> monitoredStationIds;
-    if (!findJsonArray(networkConfig, "monitoredStationIds", monitoredStationIds))
+    StationId monitoredStations[MAX_STATIONS];
+    for (int i = 0; i < MAX_STATIONS; i++)
+        monitoredStations[i] = UNKNOWN_STATION_ID;
+
+    if (!JsonUtils::findJsonArray(networkConfig, "monitoredStationIds", monitoredStations))
         return false;
 
-    byte monitoredStationMask = 0;
-    for (auto id : monitoredStationIds) {
-        monitoredStationMask |= (1 << (id - 1));
-    }
 
-    if (!station.eepromWriteByte(EE_USED_TRANSMITTERS_ADDRESS, monitoredStationMask))
-        return false;
+    updateMonitoredStations(monitoredStations);
 
     StationData stationData[MAX_STATIONS];
     auto stations = networkConfig.at("stations");
@@ -803,16 +835,7 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
         }
     }
 
-    char buffer[EE_STATION_LIST_SIZE];
-    for (int i = 0; i < MAX_STATIONS; i++)
-        stationData[i].encode(buffer, i * 2);
-
-    /*
-    if (!station.eepromBinaryWrite(EE_STATION_LIST_ADDRESS, buffer, EE_STATION_LIST_SIZE))
-        return false;
-        */
-
-    return true;
+    return updateStationList(stationData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

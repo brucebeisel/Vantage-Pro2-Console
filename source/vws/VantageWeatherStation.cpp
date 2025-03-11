@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "VantageWeatherStation.h"
 
 #ifdef _WIN32
@@ -35,12 +34,14 @@
 #include "LoopPacket.h"
 #include "Loop2Packet.h"
 #include "CalibrationAdjustmentsPacket.h"
+#include "ConsoleDiagnosticReport.h"
 #include "VantageCRC.h"
 #include "BitConverter.h"
 #include "SerialPort.h"
 #include "VantageEnums.h"
 #include "VantageLogger.h"
 #include "Weather.h"
+#include "LoopPacketListener.h"
 
 using namespace std;
 
@@ -174,16 +175,7 @@ VantageWeatherStation::retrieveConsoleDiagnosticsReport(ConsoleDiagnosticReport 
     if (!sendStringValueCommand(RECEIVE_CHECK_CMD, response))
         return false;
 
-    if (sscanf(response.c_str(), "%d %d %d %d %d", &report.packetCount,
-                                                   &report.missedPacketCount,
-                                                   &report.syncCount,
-                                                   &report.maxPacketSequence,
-                                                   &report.crcErrorCount) != 5) {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Console diagnostic report did not receive 5 tokens. Response: " << response << endl;
-        return false;
-    }
-
-    return true;
+    return report.decode(response);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -297,9 +289,10 @@ VantageWeatherStation::currentValuesLoop(int records) {
     bool terminateLoop = false;
     bool resetNeeded = false;
 
+    int maxPackets = records * 2;
     ostringstream command;
-    logger.log(VantageLogger::VANTAGE_INFO) << "Sending LPS (LOOP packet) command" << endl;
-    command << LPS_CMD << " " << (records * 2);
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending LPS " << maxPackets << " (LOOP packet) command" << endl;
+    command << LPS_CMD << " " << maxPackets;
 
     if (!sendAckedCommand(command.str()))
         return;
@@ -456,8 +449,7 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
     }
 
 
-    logger.log(VantageLogger::VANTAGE_INFO) << "Sending DMPAFT (Dump After) command" << endl;
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Dumping archive after " << time << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending DMPAFT " << time << " (Dump After) command" << endl;
     list.clear();
 
     //
@@ -594,14 +586,24 @@ VantageWeatherStation::eepromBinaryRead(unsigned address, unsigned count, char *
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
+VantageWeatherStation::isEepromAddressProtected(unsigned address, unsigned count) const {
+    for (int i = 0; i < NUM_PROTECTED_EEPROM_BYTES; i++) {
+        if (protectedEepromBytes[i] >= address && protectedEepromBytes[i] < address + count)
+            return true;
+    }
+
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
 VantageWeatherStation::eepromWriteByte(unsigned address, byte value) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Sending EEWR (EEPROM Write) command" << endl;
 
-    for (int i = 0; i < NUM_PROTECTED_EEPROM_BYTES; i++) {
-        if (protectedEepromBytes[i] == address) {
-            logger.log(VantageLogger::VANTAGE_ERROR) << "Skipping write to EEPROM address " << address << " because it is a protected byte" << endl;
-            return false;
-        }
+    if (isEepromAddressProtected(address, 1)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Skipping write to EEPROM address " << address << " because it is a protected byte" << endl;
+        return false;
     }
 
     ostringstream command;
@@ -618,15 +620,10 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
     //
     // Check the address range against the protected bytes
     //
-    for (int i = 0; i < count; i++) {
-        unsigned addressToCheck = address + i;
-        for (int i = 0; i < NUM_PROTECTED_EEPROM_BYTES; i++) {
-            if (protectedEepromBytes[i] == addressToCheck) {
-                logger.log(VantageLogger::VANTAGE_ERROR) << "Skipping write to EEPROM address " << address
-                                                         << " with size " << count << " because overlaps at least one protected byte" << endl;
-                return false;
-            }
-        }
+    if (isEepromAddressProtected(address, count)) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Skipping write to EEPROM address " << address
+                                                 << " with size " << count << " because it overlaps at least one protected byte" << endl;
+        return false;
     }
 
     ostringstream command;
@@ -653,6 +650,8 @@ VantageWeatherStation::eepromBinaryWrite(unsigned address, const byte data[], un
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveCalibrationAdjustments(CalibrationAdjustmentsPacket & calibrationPacket) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving Calibration Adjustments from EEPROM" << endl;
+
     if (!eepromBinaryRead(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE, buffer))
         return false;
 
@@ -663,6 +662,8 @@ VantageWeatherStation::retrieveCalibrationAdjustments(CalibrationAdjustmentsPack
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustmentsPacket & calibrationAdjustments) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Updating Calibration Adjustments in EEPROM" << endl;
+
     byte buffer[CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE];
 
     if (!calibrationAdjustments.encodePacket(buffer, sizeof(buffer))) {
@@ -1080,6 +1081,7 @@ VantageWeatherStation::updateArchivePeriod(ArchivePeriod period) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::retrieveArchivePeriod(ArchivePeriod & period) {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving Archive Period from EEPROM" << endl;
 
     if (!eepromBinaryRead(VantageEepromConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
         return false;
@@ -1371,6 +1373,7 @@ VantageWeatherStation::sendOKedCommand(const string & command) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::sendOKedWithDoneCommand(const string & command) {
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Sending command '" << command << "' that expects an OK response followed by DONE" << endl;
     bool success = false;
 
     if (!sendOKedCommand(command))

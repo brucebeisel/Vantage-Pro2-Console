@@ -95,9 +95,6 @@ private:
      */
     static constexpr Temperature TEMPERATURE_ADJUSTMENT_SCALE = 10.0;
 
-    template<typename T> bool findJsonValue(nlohmann::json root, const std::string & name, T & value);
-    template<typename T> bool findJsonArray(nlohmann::json root, const std::string & name, T & array, int size);
-
     Temperature     insideTemperatureAdjustment;
     Temperature     outsideTemperatureAdjustment;
     Temperature     extraTemperatureAdjustments[ProtocolConstants::MAX_EXTRA_TEMPERATURES];

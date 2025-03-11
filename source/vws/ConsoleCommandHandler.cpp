@@ -25,6 +25,7 @@
 
 #include "Weather.h"
 #include "CalibrationAdjustmentsPacket.h"
+#include "ConsoleDiagnosticReport.h"
 #include "CommandData.h"
 #include "HiLowPacket.h"
 #include "VantageConfiguration.h"
@@ -232,17 +233,9 @@ void
 ConsoleCommandHandler::handleQueryConsoleDiagnostics(CommandData & commandData) {
     ostringstream oss;
 
-    VantageWeatherStation::ConsoleDiagnosticReport report;
-    if (station.retrieveConsoleDiagnosticsReport(report)) {
-        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : {"
-            << "\"consoleDiagnosticReport\" : { "
-            << "\"totalPacketsReceived\" : " << report.packetCount << ", "
-            << "\"totalPacketsMissed\" : " << report.missedPacketCount << ", "
-            << "\"resyncCount\" : " << report.syncCount << ", "
-            << "\"packetReceptionHwm\" : " << report.maxPacketSequence << ", "
-            << "\"crcErrorCount\" : " << report.crcErrorCount
-            << " } }";
-    }
+    ConsoleDiagnosticReport report;
+    if (station.retrieveConsoleDiagnosticsReport(report))
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << report.formatJSON();
     else
         oss << CONSOLE_COMMAND_FAILURE_STRING;
 
@@ -658,6 +651,7 @@ void
 ConsoleCommandHandler::handleQueryUnits(CommandData & commandData) {
     ostringstream oss;
 
+    // TODO Can the UnitsSettings formatJSON() be used here?
     UnitsSettings unitsSettings;
     if (configurator.retrieveUnitsSettings(unitsSettings)) {
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { ";

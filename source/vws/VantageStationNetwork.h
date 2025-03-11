@@ -19,13 +19,14 @@
 
 #include <time.h>
 #include <vector>
+#include <map>
 #include <bitset>
-#include "json.hpp"
 
 #include "VantageProtocolConstants.h"
 #include "VantageEepromConstants.h"
 #include "VantageWeatherStation.h"
 #include "ConsoleConnectionMonitor.h"
+#include "LoopPacketListener.h"
 
 namespace vws {
 class VantageLogger;
@@ -99,7 +100,7 @@ class StationData {
 public:
     static constexpr int NO_EXTRA_VALUE_INDEX = 0xF;
     StationData();
-    void encode(byte buffer[], int offset);
+    void encode(byte buffer[], int offset) const;
     void decode(StationId id, const byte buffer[], int offset);
     StationId   stationId;
     RepeaterId  repeaterId;
@@ -164,7 +165,7 @@ typedef std::map<StationId,std::vector<Sensor>> stationSensors;
 static const std::string NETWORK_CONFIG_FILE = "vantage-network-configuration.dat";
 static const std::string NETWORK_STATUS_FILE = "vantage-network-status.dat";
 
-class VantageStationNetwork : public VantageWeatherStation::LoopPacketListener, public ConsoleConnectionMonitor {
+class VantageStationNetwork : public LoopPacketListener, public ConsoleConnectionMonitor {
 public:
     /**
      * Constructor.
@@ -179,6 +180,25 @@ public:
      * Destructor.
      */
     virtual ~VantageStationNetwork();
+
+    /**
+     * Retrieve the monitored station list from the console after clearing the input vector.
+     *
+     * @param [out] monitoredStations The vector into which the monitored stations will be added. Note the vector will
+     *                                be cleared even in the case of an error.
+     * @return True if monitored station list was retrieved
+     */
+    bool retrieveMonitoredStations(std::vector<StationId> & monitoredStations);
+
+    bool updateMonitoredStations(const StationId monitoredStations[]);
+
+    bool retrieveRetransmitId(StationId & retransmitId);
+
+    bool updateRetransmitId(StationId retransmitId);
+
+    bool retrieveStationList(StationData stationList[MAX_STATIONS]);
+
+    bool updateStationList(const StationData stationList[MAX_STATIONS]);
 
     /**
      * Format the JSON message containing the network configuration data.
@@ -261,9 +281,6 @@ private:
     void queryArchiveForDay(DateTime day, std::vector<ArchivePacket> & list) const;
     void calculateDailyNetworkStatus();
 
-    template<typename T> bool findJsonValue(nlohmann::json root, const std::string & name, T & value);
-    template<typename T> bool findJsonArray(nlohmann::json root, const std::string & name, T & array);
-
     typedef std::map<RepeaterId,RepeaterChain> RepeaterChainMap;
     typedef std::map<RepeaterId,Repeater> RepeaterMap;
     typedef std::map<StationId,Station> StationMap;
@@ -271,9 +288,9 @@ private:
     VantageLogger &         logger;
     VantageWeatherStation & station;
     ArchiveManager &        archiveManager;
-    std::string             networkConfigFile;               // The file in which the network configuration is stored. This includes user inputs.
     std::string             networkStatusFile;               // The file in which the network status is stored.
     byte                    monitoredStationMask;            // The mask of station IDs that the console is monitoring
+    std::vector<StationId>  monitoredStations;               // The list of monitored stations extracted from the monitored station mask
 
     RepeaterChainMap        chains;                          // The chains of repeaters and their sensor stations in the network
     RepeaterMap             repeaters;                       // The repeaters in the network

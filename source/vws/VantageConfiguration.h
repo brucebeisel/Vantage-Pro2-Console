@@ -19,9 +19,11 @@
 
 #include <vector>
 #include <string>
+#include "json.hpp"
 #include "VantageProtocolConstants.h"
 #include "VantageWeatherStation.h"
 #include "WeatherTypes.h"
+#include "LoopPacketListener.h"
 
 
 namespace vws {
@@ -99,12 +101,44 @@ struct PositionData {
     int    elevation;
 };
 
+/**
+ * Structure to hold the units that are displayed by the console
+ */
 struct UnitsSettings {
-    BarometerUnits baroUnits;
+    /**
+     * Decode the units from a single byte.
+     *
+     * @param settings The units setting
+     */
+    void decodeUnits(byte settings);
+
+    /**
+     * Encode the units settings into the provided byte.
+     *
+     * @param settings The location where the units settings will be written
+     */
+    void encodeUnits(byte & settings) const;
+
+    /**
+     * Parse a JSON node and load the values.
+     *
+     * @param node The root node of the settings JSON
+     * @return true if the JSON is valid
+     */
+    bool parseJson(const nlohmann::json & node);
+
+    /**
+     * Format the units settings into JSON.
+     *
+     * @return The units settings as a JSON string
+     */
+    std::string formatJSON() const;
+
+    BarometerUnits   baroUnits;
     TemperatureUnits temperatureUnits;
-    ElevationUnits elevationUnits;
-    RainUnits rainUnits;
-    WindUnits windUnits;
+    ElevationUnits   elevationUnits;
+    RainUnits        rainUnits;
+    WindUnits        windUnits;
 };
 
 struct ConsoleConfigurationData {
@@ -125,7 +159,7 @@ struct ConsoleConfigurationData {
  * Most of these settings are changed using the EEPROM commands, but some have their own dedicated
  * commands to set the values.
  */
-class VantageConfiguration : public VantageWeatherStation::LoopPacketListener {
+class VantageConfiguration : public LoopPacketListener {
 public:
     /**
      * Constructor.
@@ -139,7 +173,20 @@ public:
      */
     virtual ~VantageConfiguration();
 
+    /**
+     * Process a LOOP packet received from the console.
+     *
+     * @param packet The LOOP packet
+     * @return True if the loop packet loop should continue
+     */
     virtual bool processLoopPacket(const LoopPacket & loopPacket);
+
+    /**
+     * Process a LOOP2 packet received from the console.
+     *
+     * @param packet The LOOP2 packet
+     * @return True if the loop packet loop should continue
+     */
     virtual bool processLoop2Packet(const Loop2Packet & loopPacket);
 
     /**
@@ -232,7 +279,6 @@ public:
 private:
     void decodePosition(byte * buffer, int offset, PositionData & positionData);
     void decodeTimeSettings(const byte * buffer, int offset, TimeSettings & timeSettings);
-    void decodeUnitsSettings(const byte * buffer, int offset, UnitsSettings & unitsSettings);
     void decodeSetupBits(const byte * buffer, int offset, SetupBits & setupBits);
 
     void saveRainBucketSize(ProtocolConstants::RainBucketSizeType rainBucketType);

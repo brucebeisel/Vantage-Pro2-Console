@@ -21,6 +21,7 @@
 #include "CurrentWeather.h"
 #include "DominantWindDirections.h"
 #include "VantageWeatherStation.h"
+#include "LoopPacketListener.h"
 
 namespace vws {
 class VantageLogger;
@@ -31,7 +32,7 @@ static const std::string LOOP_ARCHIVE_DIR = "/loop/";
 /**
  * Class to manage the current weather archive. This includes managing the rotating hour files and performing queries.
  */
-class CurrentWeatherManager : public VantageWeatherStation::LoopPacketListener {
+class CurrentWeatherManager : public LoopPacketListener {
 public:
     /**
      * Constructor.

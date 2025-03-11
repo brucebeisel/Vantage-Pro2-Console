@@ -20,6 +20,7 @@
 #include <cmath>
 
 #include "json.hpp"
+#include "JsonUtils.h"
 #include "BitConverter.h"
 #include "VantageDecoder.h"
 #include "VantageEepromConstants.h"
@@ -180,7 +181,10 @@ VantageConfiguration::retrievePosition(PositionData & position) {
 
     byte buffer[6];
 
-    if (station.eepromBinaryRead(VantageEepromConstants::EE_LATITUDE_ADDRESS, 6, buffer)) {
+    //
+    // The latitude, longitude and elevation are in sequential bytes
+    //
+    if (station.eepromBinaryRead(VantageEepromConstants::EE_LATITUDE_ADDRESS, sizeof(buffer), buffer)) {
         decodePosition(buffer, 0, position);
         success = true;
     }
@@ -269,11 +273,14 @@ bool
 VantageConfiguration::updateUnitsSettings(const UnitsSettings & unitsSettings, bool initialize) {
     bool success = false;
     byte buffer[2];
+    unitsSettings.encodeUnits(buffer[0]);
+    /*
     buffer[0] = static_cast<int>(unitsSettings.baroUnits) & 0x3;
     buffer[0] |= (static_cast<int>(unitsSettings.temperatureUnits) & 0x3) << 2;
     buffer[0] |= (static_cast<int>(unitsSettings.elevationUnits) & 0x1) << 4;
     buffer[0] |= (static_cast<int>(unitsSettings.rainUnits) & 0x1) << 5;
     buffer[0] |= (static_cast<int>(unitsSettings.windUnits) & 0x3) << 6;
+    */
 
     buffer[1] = ~buffer[0];
 
@@ -297,22 +304,11 @@ VantageConfiguration::retrieveUnitsSettings(UnitsSettings & unitsSettings) {
     bool success = false;
     byte buffer;
     if (station.eepromBinaryRead(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, 1, &buffer)) {
-        decodeUnitsSettings(&buffer, 0, unitsSettings);
+        unitsSettings.decodeUnits(buffer);
         success = true;
     }
 
     return success;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-VantageConfiguration::decodeUnitsSettings(const byte * buffer, int offset, UnitsSettings & unitsSettings) {
-    unitsSettings.baroUnits = static_cast<BarometerUnits>(buffer[offset] & 0x3);
-    unitsSettings.temperatureUnits = static_cast<TemperatureUnits>((buffer[offset] >> 2) & 0x3);
-    unitsSettings.elevationUnits = static_cast<ElevationUnits>((buffer[offset] >> 4) & 0x1);
-    unitsSettings.rainUnits = static_cast<RainUnits>((buffer[offset] >> 5) & 0x1);
-    unitsSettings.windUnits = static_cast<WindUnits>((buffer[offset] >> 6) & 0x3);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -395,7 +391,7 @@ VantageConfiguration::retrieveAllConfigurationData() {
         TimeSettings timeSettings;
         decodePosition(buffer, VantageEepromConstants::EE_LATITUDE_ADDRESS - 1, positionData);
         decodeSetupBits(buffer, VantageEepromConstants::EE_SETUP_BITS_ADDRESS - 1, setupBits);
-        decodeUnitsSettings(buffer, VantageEepromConstants::EE_UNIT_BITS_ADDRESS - 1, unitsSettings);
+        unitsSettings.decodeUnits(buffer[VantageEepromConstants::EE_UNIT_BITS_ADDRESS - 1]);
         decodeTimeSettings(buffer, VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS - 1, timeSettings);
         rainSeasonStartMonth = static_cast<ProtocolConstants::Month>(buffer[VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS - 1]);
         retransmitId = buffer[VantageEepromConstants::EE_RETRANSMIT_ID_ADDRESS - 1];
@@ -415,13 +411,18 @@ VantageConfiguration::retrieveAllConfigurationData() {
             << ", \"manualDstOn\" : " << timeSettings.manualDaylightSavingsTimeOn
             << ", \"timezoneName\" : \"" << timeSettings.timezoneName << "\""
             << ", \"useGmtOffset\" : " << timeSettings.useGmtOffset
-            << " }, \"units\" : {"
+            << " }, "
+            << unitsSettings.formatJSON() << ","
+            /*
+            \"units\" : {"
             << " \"baroUnits\" : \"" << barometerUnitsEnum.valueToString(unitsSettings.baroUnits) << "\""
             << ", \"elevationUnits\" : \"" << elevationUnitsEnum.valueToString(unitsSettings.elevationUnits) << "\""
             << ", \"rainUnits\" : \"" << rainUnitsEnum.valueToString(unitsSettings.rainUnits) << "\""
             << ", \"temperatureUnits\" : \"" << temperatureUnitsEnum.valueToString(unitsSettings.temperatureUnits) << "\""
             << ", \"windUnits\" : \"" << windUnitsEnum.valueToString(unitsSettings.windUnits) << "\""
-            << " }, \"setupBits\" : {"
+            << " }, "
+            */
+            << " \"setupBits\" : {"
             << " \"clock24hourMode\" : " << setupBits.is24HourMode
             << ", \"currentlyAm\" : " << setupBits.isCurrentlyAM
             << ", \"dayMonthDisplay\" : " << setupBits.isDayMonthDisplay
@@ -461,23 +462,6 @@ VantageConfiguration::getTimeZoneOptions(std::vector<std::string> & timezoneList
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-template<typename T>
-bool
-findJsonValue(json root, const string & name, T & value) {
-    bool success = false;
-    auto valuePtr = root.find(name);
-    if (valuePtr != root.end()) {
-        value = *valuePtr;
-        success = true;
-    }
-    //else
-        //logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
-
-    return success;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 bool
 VantageConfiguration::updateAllConfigurationData(const std::string & jsonString) {
     PositionData positionData;
@@ -489,46 +473,31 @@ VantageConfiguration::updateAllConfigurationData(const std::string & jsonString)
 
     json position = configuration.at("position");
 
-    findJsonValue(position, "latitude", positionData.latitude);
-    findJsonValue(position, "longitude", positionData.longitude);
-    findJsonValue(position, "elevation", positionData.elevation);
+    JsonUtils::findJsonValue(position, "latitude", positionData.latitude);
+    JsonUtils::findJsonValue(position, "longitude", positionData.longitude);
+    JsonUtils::findJsonValue(position, "elevation", positionData.elevation);
 
     json timeElement = configuration.at("time");
 
-    findJsonValue(timeElement, "gmtOffsetMinutes", timeSettings.gmtOffsetMinutes);
-    findJsonValue(timeElement, "timezoneName", timeSettings.timezoneName);
-    findJsonValue(timeElement, "manualDst", timeSettings.manualDaylightSavingsTime);
-    findJsonValue(timeElement, "manualDstOn", timeSettings.manualDaylightSavingsTimeOn);
-    findJsonValue(timeElement, "useGmtOffset", timeSettings.useGmtOffset);
+    JsonUtils::findJsonValue(timeElement, "gmtOffsetMinutes", timeSettings.gmtOffsetMinutes);
+    JsonUtils::findJsonValue(timeElement, "timezoneName", timeSettings.timezoneName);
+    JsonUtils::findJsonValue(timeElement, "manualDst", timeSettings.manualDaylightSavingsTime);
+    JsonUtils::findJsonValue(timeElement, "manualDstOn", timeSettings.manualDaylightSavingsTimeOn);
+    JsonUtils::findJsonValue(timeElement, "useGmtOffset", timeSettings.useGmtOffset);
 
-    json units = configuration.at("units");
+    unitsSettings.parseJson(configuration);
+
     string enumString;
-
-    findJsonValue(units, "baroUnits", enumString);
-    unitsSettings.baroUnits = barometerUnitsEnum.stringToValue(enumString);
-
-    findJsonValue(units, "elevationUnits", enumString);
-    unitsSettings.elevationUnits = elevationUnitsEnum.stringToValue(enumString);
-
-    findJsonValue(units, "rainUnits", enumString);
-    unitsSettings.rainUnits = rainUnitsEnum.stringToValue(enumString);
-
-    findJsonValue(units, "temperatureUnits", enumString);
-    unitsSettings.temperatureUnits = temperatureUnitsEnum.stringToValue(enumString);
-
-    findJsonValue(units, "windUnits", enumString);
-    unitsSettings.windUnits = windUnitsEnum.stringToValue(enumString);
-
     json setup = configuration.at("setup");
 
-    findJsonValue(setup, "clock24hourMode", setupBits.is24HourMode);
+    JsonUtils::findJsonValue(setup, "clock24hourMode", setupBits.is24HourMode);
     setupBits.isCurrentlyAM = true;
-    findJsonValue(setup, "dayMonthDisplay", setupBits.isDayMonthDisplay);
+    JsonUtils::findJsonValue(setup, "dayMonthDisplay", setupBits.isDayMonthDisplay);
     setupBits.isEastLongitude = positionData.longitude >= 0.0;
     setupBits.isNorthLatitude = positionData.latitude >= 0.0;
-    findJsonValue(setup, "windCupLarge", setupBits.isWindCupLarge);
+    JsonUtils::findJsonValue(setup, "windCupLarge", setupBits.isWindCupLarge);
 
-    findJsonValue(units, "rainBucketSize", enumString);
+    JsonUtils::findJsonValue(setup, "rainBucketSize", enumString);
     setupBits.rainBucketSizeType = rainBucketSizeTypeEnum.stringToValue(enumString);
 
     json misc = configuration.at("miscellaneous");
@@ -538,10 +507,10 @@ VantageConfiguration::updateAllConfigurationData(const std::string & jsonString)
     else
         secondaryWindCupSize = 1;
 
-    findJsonValue(misc, "rainSeasonStartMonth", enumString);
+    JsonUtils::findJsonValue(misc, "rainSeasonStartMonth", enumString);
     rainSeasonStartMonth = monthEnum.stringToValue(enumString);
-    findJsonValue(misc, "retransmitId", retransmitId);
-    findJsonValue(misc, "logFinalTemperature", logFinalTemperature);
+    JsonUtils::findJsonValue(misc, "retransmitId", retransmitId);
+    JsonUtils::findJsonValue(misc, "logFinalTemperature", logFinalTemperature);
 
     bool rv = true;
     bool results = updatePosition(positionData, false);
@@ -570,5 +539,80 @@ VantageConfiguration::updateAllConfigurationData(const std::string & jsonString)
     rv = rv && results;
 
     return rv;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+UnitsSettings::decodeUnits(byte settings) {
+    baroUnits = static_cast<BarometerUnits>(settings & 0x3);
+    temperatureUnits = static_cast<TemperatureUnits>((settings >> 2) & 0x3);
+    elevationUnits = static_cast<ElevationUnits>((settings >> 4) & 0x1);
+    rainUnits = static_cast<RainUnits>((settings >> 5) & 0x1);
+    windUnits = static_cast<WindUnits>((settings >> 6) & 0x3);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+UnitsSettings::encodeUnits(byte & settings) const {
+    settings = static_cast<int>(baroUnits) & 0x3;
+    settings |= (static_cast<int>(temperatureUnits) & 0x3) << 2;
+    settings |= (static_cast<int>(elevationUnits) & 0x1) << 4;
+    settings |= (static_cast<int>(rainUnits) & 0x1) << 5;
+    settings |= (static_cast<int>(windUnits) & 0x3) << 6;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+UnitsSettings::formatJSON() const {
+    ostringstream oss;
+
+    oss << "\"units\" : {"
+        << " \"baroUnits\" : \"" << barometerUnitsEnum.valueToString(baroUnits) << "\""
+        << ", \"elevationUnits\" : \"" << elevationUnitsEnum.valueToString(elevationUnits) << "\""
+        << ", \"rainUnits\" : \"" << rainUnitsEnum.valueToString(rainUnits) << "\""
+        << ", \"temperatureUnits\" : \"" << temperatureUnitsEnum.valueToString(temperatureUnits) << "\""
+        << ", \"windUnits\" : \"" << windUnitsEnum.valueToString(windUnits) << "\""
+        << " }";
+
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+UnitsSettings::parseJson(const nlohmann::json & node) {
+    string enumString;
+
+    json units = node.at("units");
+
+    if (!JsonUtils::findJsonValue(units, "baroUnits", enumString))
+        return false;
+
+    baroUnits = barometerUnitsEnum.stringToValue(enumString);
+
+    if (!JsonUtils::findJsonValue(units, "elevationUnits", enumString))
+        return false;
+
+    elevationUnits = elevationUnitsEnum.stringToValue(enumString);
+
+    if (!JsonUtils::findJsonValue(units, "rainUnits", enumString))
+        return false;
+
+    rainUnits = rainUnitsEnum.stringToValue(enumString);
+
+    if (!JsonUtils::findJsonValue(units, "temperatureUnits", enumString))
+        return false;
+
+    temperatureUnits = temperatureUnitsEnum.stringToValue(enumString);
+
+    if (!JsonUtils::findJsonValue(units, "windUnits", enumString))
+        return false;
+
+    windUnits = windUnitsEnum.stringToValue(enumString);
+
+    return true;
 }
 }

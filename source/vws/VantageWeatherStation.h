@@ -34,27 +34,14 @@ class Loop2Packet;
 class CalibrationAdjustmentsPacket;
 class SerialPort;
 class VantageLogger;
+class LoopPacketListener;
+class ConsoleDiagnosticReport;
 
 /**
  * Class that handles the command protocols with the Vantage console.
  */
 class VantageWeatherStation {
 public:
-    class LoopPacketListener {
-    public:
-        virtual ~LoopPacketListener() {}
-        virtual bool processLoopPacket(const LoopPacket & packet) = 0;
-        virtual bool processLoop2Packet(const Loop2Packet & packet) = 0;
-    };
-
-    struct ConsoleDiagnosticReport {
-        int packetCount;
-        int missedPacketCount;
-        int syncCount;
-        int maxPacketSequence;
-        int crcErrorCount;
-    };
-
     struct BarometerCalibrationParameters {
         int recentMeasurement;         // In 1/1000 of an inch
         int elevation;                 // In feet
@@ -307,6 +294,15 @@ public:
      * @return True if the read is successful
      */
     bool eepromBinaryRead(unsigned address, unsigned count, char * output = nullptr);
+
+    /**
+     * Check if the specified address range in the EEPROMs protected list.
+     *
+     * @param address The start of the address range to check
+     * @param count   The number of addresses to be checked
+     * @return True if any of the addresses in the range are protected
+     */
+    bool isEepromAddressProtected(unsigned address, unsigned count) const;
 
     /**
      * Write a single byte to the specified EEPROM address.

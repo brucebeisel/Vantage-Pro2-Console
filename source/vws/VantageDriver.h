@@ -27,6 +27,7 @@
 #include "VantageWeatherStation.h"
 #include "CommandHandler.h"
 #include "ConsoleConnectionMonitor.h"
+#include "LoopPacketListener.h"
 
 namespace vws {
 class ArchiveManager;
@@ -40,7 +41,7 @@ class StormArchiveManager;
 /**
  * Class that coordinates the communications with the Vantage console.
  */
-class VantageDriver : public VantageWeatherStation::LoopPacketListener, public ConsoleConnectionMonitor {
+class VantageDriver : public LoopPacketListener, public ConsoleConnectionMonitor {
 public:
     /**
      * Constructor.

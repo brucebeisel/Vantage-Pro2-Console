@@ -13,6 +13,7 @@ SRCS=\
 	CommandData.cpp \
 	CommandHandler.cpp \
 	ConsoleCommandHandler.cpp \
+	ConsoleDiagnosticReport.cpp \
 	CommandQueue.cpp \
 	CommandSocket.cpp \
 	CurrentWeather.cpp \

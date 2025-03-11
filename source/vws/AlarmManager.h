@@ -21,6 +21,7 @@
 #include "LoopPacket.h"
 #include "Alarm.h"
 #include "ConsoleConnectionMonitor.h"
+#include "LoopPacketListener.h"
 
 namespace vws {
 class VantageLogger;
@@ -28,7 +29,7 @@ class VantageLogger;
 /**
  * Class to manage all of the alarms of the console.
  */
-class AlarmManager : public VantageWeatherStation::LoopPacketListener, public ConsoleConnectionMonitor {
+class AlarmManager : public LoopPacketListener, public ConsoleConnectionMonitor {
 public:
     static const int NUM_ALARMS = 86;
     typedef std::pair<std::string,double> Threshold;
