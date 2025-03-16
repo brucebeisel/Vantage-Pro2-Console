@@ -89,6 +89,12 @@ struct TimeSettings {
 
     void encode(byte buffer[], int offset) const;
     void decode(byte buffer[], int offset);
+
+    /**
+     * Format the time settings into JSON.
+     *
+     * @return The formatted JSON
+     */
     std::string formatJSON() const;
 };
 
@@ -98,11 +104,17 @@ struct SetupBits {
     bool isDayMonthDisplay;
     bool isWindCupLarge;
     ProtocolConstants::RainBucketSizeType rainBucketSizeType;
-    bool isNorthLatitude;
-    bool isEastLongitude;
+    bool isNorthLatitude;         // Is kept synchronized with the position latitude field
+    bool isEastLongitude;         // Is kept synchronized with the position longitude field
 
     void encode(byte & buffer) const;
     void decode(byte buffer);
+
+    /**
+     * Format the setup bits into JSON.
+     *
+     * @return The formatted JSON
+     */
     std::string formatJSON() const;
 };
 
@@ -113,9 +125,25 @@ struct PositionData {
 
     /**
      * Encode only the latitude and longitude as the elevation is updated separately.
+     *
+     * @param buffer The buffer into which to encode the latitude and longitude
+     * @param offset The offset into the buffer in which to encode the data
      */
     void encodeLatLon(byte buffer[], int offset) const;
+
+    /**
+     * Decode the position data from the EEPROM.
+     *
+     * @param buffer The buffer from which to decode the position data
+     * @param offset The offset within the buffer to start decoding
+     */
     void decode(byte buffer[], int offset);
+
+    /**
+     * Format the position data into JSON.
+     *
+     * @return The formatted JSON
+     */
     std::string formatJSON() const;
 
 };
@@ -130,6 +158,11 @@ struct ConsoleConfigurationData {
     bool                     logFinalTemperature;
     EepromConstants::SecondaryWindCupSize secondaryWindCupSize;
 
+    /**
+     * Format the configuration data into JSON.
+     *
+     * @return The formatted JSON
+     */
     std::string formatJSON() const;
 };
 

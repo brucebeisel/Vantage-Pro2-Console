@@ -1,31 +1,41 @@
 CC= g++
 CXXFLAGS= -g -std=c++20 -Wno-psabi
-PROGRAM= archive-verifier
+PROGRAM= command-line-console
 
-SRCS= ArchiveVerifier.cpp
+SRCS= commandLineConsole.cpp
 
 VWSOBJDIR=../../target/vws
 OBJDIR=../../target/test
-INCDIRS=-I../vws
+INCDIRS=-I../vws -I../3rdParty
 OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
 VWSOBJS = \
-	$(VWSOBJDIR)/ArchivePacket.o \
+	$(VWSOBJDIR)/Alarm.o \
+	$(VWSOBJDIR)/AlarmManager.o \
+	$(VWSOBJDIR)/AlarmProperties.o \
 	$(VWSOBJDIR)/ArchiveManager.o \
+	$(VWSOBJDIR)/ArchivePacket.o \
+	$(VWSOBJDIR)/BitConverter.o \
+	$(VWSOBJDIR)/CalibrationAdjustmentsPacket.o \
+	$(VWSOBJDIR)/CommandData.o \
+	$(VWSOBJDIR)/CommandHandler.o \
+	$(VWSOBJDIR)/CommandQueue.o \
+	$(VWSOBJDIR)/ConsoleCommandHandler.o \
 	$(VWSOBJDIR)/ConsoleDiagnosticReport.o \
-	$(VWSOBJDIR)/Weather.o \
 	$(VWSOBJDIR)/DateTimeFields.o \
-	$(VWSOBJDIR)/VantageDecoder.o \
-	$(VWSOBJDIR)/VantageLogger.o \
-	$(VWSOBJDIR)/VantageWeatherStation.o \
+	$(VWSOBJDIR)/HiLowPacket.o \
 	$(VWSOBJDIR)/LoopPacket.o \
 	$(VWSOBJDIR)/Loop2Packet.o \
-	$(VWSOBJDIR)/CalibrationAdjustmentsPacket.o \
-	$(VWSOBJDIR)/HiLowPacket.o \
-	$(VWSOBJDIR)/VantageCRC.o \
 	$(VWSOBJDIR)/SerialPort.o \
-	$(VWSOBJDIR)/BitConverter.o
+	$(VWSOBJDIR)/UnitsSettings.o \
+	$(VWSOBJDIR)/VantageCRC.o \
+	$(VWSOBJDIR)/VantageDecoder.o \
+	$(VWSOBJDIR)/VantageLogger.o \
+	$(VWSOBJDIR)/VantageConfiguration.o \
+	$(VWSOBJDIR)/VantageStationNetwork.o \
+	$(VWSOBJDIR)/VantageWeatherStation.o \
+	$(VWSOBJDIR)/Weather.o
 
 
 $(OBJDIR)/%.o : %.cpp

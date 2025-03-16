@@ -692,6 +692,9 @@ ConsoleCommandHandler::handleUpdateConfigurationData(CommandData & commandData) 
     configurator.retrieveAllConfigurationData(configData);
     string argString;
 
+    //
+    // TODO Added argument processing for all configuration fields
+    //
     try {
         for (auto arg : commandData.arguments) {
             argString = arg.second;
@@ -717,7 +720,7 @@ ConsoleCommandHandler::handleUpdateConfigurationData(CommandData & commandData) 
                 configData.positionData.longitude = atof(arg.second.c_str());
             }
             else if (arg.first == "elevation") {
-                configData.positionData.elevation = atof(arg.second.c_str());
+                configData.positionData.elevation = atoi(arg.second.c_str());
             }
             else {
                 oss << CommandData::buildFailureString("Invalid configuration type argument " + arg.first);
