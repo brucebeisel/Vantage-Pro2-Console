@@ -24,6 +24,9 @@
 #include "VantageWeatherStation.h"
 #include "WeatherTypes.h"
 #include "LoopPacketListener.h"
+#include "ConsoleConnectionMonitor.h"
+#include "UnitsSettings.h"
+#include "VantageEepromConstants.h"
 
 
 namespace vws {
@@ -83,6 +86,10 @@ struct TimeSettings {
     int         gmtOffsetMinutes;            // Only used if useGmtOffset is true
     bool        manualDaylightSavingsTime;
     bool        manualDaylightSavingsTimeOn; // This will change twice a year, but only if manualDaylightSavingsTime is true
+
+    void encode(byte buffer[], int offset) const;
+    void decode(byte buffer[], int offset);
+    std::string formatJSON() const;
 };
 
 struct SetupBits {
@@ -93,52 +100,24 @@ struct SetupBits {
     ProtocolConstants::RainBucketSizeType rainBucketSizeType;
     bool isNorthLatitude;
     bool isEastLongitude;
+
+    void encode(byte & buffer) const;
+    void decode(byte buffer);
+    std::string formatJSON() const;
 };
 
 struct PositionData {
     double latitude;
     double longitude;
     int    elevation;
-};
-
-/**
- * Structure to hold the units that are displayed by the console
- */
-struct UnitsSettings {
-    /**
-     * Decode the units from a single byte.
-     *
-     * @param settings The units setting
-     */
-    void decodeUnits(byte settings);
 
     /**
-     * Encode the units settings into the provided byte.
-     *
-     * @param settings The location where the units settings will be written
+     * Encode only the latitude and longitude as the elevation is updated separately.
      */
-    void encodeUnits(byte & settings) const;
-
-    /**
-     * Parse a JSON node and load the values.
-     *
-     * @param node The root node of the settings JSON
-     * @return true if the JSON is valid
-     */
-    bool parseJson(const nlohmann::json & node);
-
-    /**
-     * Format the units settings into JSON.
-     *
-     * @return The units settings as a JSON string
-     */
+    void encodeLatLon(byte buffer[], int offset) const;
+    void decode(byte buffer[], int offset);
     std::string formatJSON() const;
 
-    BarometerUnits   baroUnits;
-    TemperatureUnits temperatureUnits;
-    ElevationUnits   elevationUnits;
-    RainUnits        rainUnits;
-    WindUnits        windUnits;
 };
 
 struct ConsoleConfigurationData {
@@ -146,12 +125,12 @@ struct ConsoleConfigurationData {
     SetupBits                setupBits;
     PositionData             positionData;
     UnitsSettings            unitsSettings;
-    int                      secondaryWindCupSize;
     ProtocolConstants::Month rainSeasonStartMonth;
     StationId                retransmitId;
     bool                     logFinalTemperature;
+    EepromConstants::SecondaryWindCupSize secondaryWindCupSize;
 
-    std::string formatJSON();
+    std::string formatJSON() const;
 };
 
 /**
@@ -159,7 +138,7 @@ struct ConsoleConfigurationData {
  * Most of these settings are changed using the EEPROM commands, but some have their own dedicated
  * commands to set the values.
  */
-class VantageConfiguration : public LoopPacketListener {
+class VantageConfiguration : public LoopPacketListener, public ConsoleConnectionMonitor {
 public:
     /**
      * Constructor.
@@ -190,9 +169,14 @@ public:
     virtual bool processLoop2Packet(const Loop2Packet & loopPacket);
 
     /**
-     * Read the configuration settings from the EEPROM.
+     * Retrieve any configuration data needed after the connection is established with the console.
      */
-    //bool retrieveConfigurationParameters();
+    virtual void consoleConnected();
+
+    /**
+     * This method does nothing, but is needed for the ConsoleConnectionMonitor interface.
+     */
+    virtual void consoleDisconnected();
 
     /**
      * Update the position of the console.
@@ -272,15 +256,12 @@ public:
      */
     void getTimeZoneOptions(std::vector<std::string> & timezoneList);
 
-    std::string retrieveAllConfigurationData();
+    bool updateAllConfigurationData(const ConsoleConfigurationData & configData, bool initializeConsole = true);
 
-    bool updateAllConfigurationData(const std::string & s);
+    bool retrieveAllConfigurationData(ConsoleConfigurationData & configData);
+
 
 private:
-    void decodePosition(byte * buffer, int offset, PositionData & positionData);
-    void decodeTimeSettings(const byte * buffer, int offset, TimeSettings & timeSettings);
-    void decodeSetupBits(const byte * buffer, int offset, SetupBits & setupBits);
-
     void saveRainBucketSize(ProtocolConstants::RainBucketSizeType rainBucketType);
 
     static const int EEPROM_CONFIG_SIZE = 46;
@@ -288,11 +269,6 @@ private:
     VantageWeatherStation &  station;
     VantageLogger &          logger;
     Measurement<Pressure>    lastAtmosphericPressure;
-    int                      secondaryWindCupSize;
-    ProtocolConstants::Month rainSeasonStartMonth;
-    StationId                retransmitId;
-    bool                     logFinalTemperature;  // Whether to log temperature at the end of an archive period,
-                                                   // false indicates that the average will be logged
 };
 
 }

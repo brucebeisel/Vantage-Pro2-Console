@@ -27,7 +27,7 @@ namespace vws {
  * Version 2.6.1
  * Date: 3/29/2013
  */
-namespace VantageEepromConstants {
+namespace EepromConstants {
     /**
      * Sensor station types supported by the Vantage weather station, the enum integer values are from the Vantage serial protocol.
      */
@@ -63,6 +63,13 @@ namespace VantageEepromConstants {
         REPEATER_F = 13,
         REPEATER_G = 14,
         REPEATER_H = 15
+    };
+
+    enum class SecondaryWindCupSize {
+        UNDEFINED = 0,
+        SMALL = 1,
+        LARGE = 2,
+        OTHER = 3
     };
 
     //

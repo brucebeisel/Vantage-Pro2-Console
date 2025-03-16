@@ -33,9 +33,9 @@
  VantageProtocolConstants.h ../3rdParty/json.hpp \
  ConsoleDiagnosticReport.h HiLowPacket.h VantageConfiguration.h \
  VantageWeatherStation.h ArchivePacket.h DateTimeFields.h BitConverter.h \
- LoopPacketListener.h VantageEnums.h SummaryEnums.h \
- VantageEepromConstants.h VantageLogger.h VantageStationNetwork.h \
- ConsoleConnectionMonitor.h AlarmManager.h LoopPacket.h Alarm.h \
+ LoopPacketListener.h ConsoleConnectionMonitor.h UnitsSettings.h \
+ VantageEepromConstants.h VantageEnums.h SummaryEnums.h VantageLogger.h \
+ VantageStationNetwork.h AlarmManager.h LoopPacket.h Alarm.h \
  AlarmProperties.h
 ../../target/vws/ConsoleDiagnosticReport.o: ConsoleDiagnosticReport.cpp \
  ConsoleDiagnosticReport.h VantageLogger.h
@@ -100,8 +100,9 @@
  Loop2Packet.h DominantWindDirections.h WindDirectionSlice.h \
  CurrentWeatherSocket.h CurrentWeatherPublisher.h SerialPort.h \
  VantageDriver.h VantageConfiguration.h ../3rdParty/json.hpp \
- VantageLogger.h VantageStationNetwork.h VantageEepromConstants.h \
- GraphDataRetriever.h StormArchiveManager.h Weather.h StormData.h
+ UnitsSettings.h VantageEepromConstants.h VantageLogger.h \
+ VantageStationNetwork.h GraphDataRetriever.h StormArchiveManager.h \
+ Weather.h StormData.h
 ../../target/vws/SerialPort.o: SerialPort.cpp SerialPort.h WeatherTypes.h \
  VantageLogger.h Weather.h Measurement.h
 ../../target/vws/StormArchiveManager.o: StormArchiveManager.cpp \
@@ -115,14 +116,18 @@
  ArchiveManager.h VantageEnums.h VantageEepromConstants.h VantageLogger.h
 ../../target/vws/UnitConverter.o: UnitConverter.cpp UnitConverter.h \
  WeatherTypes.h
+../../target/vws/UnitsSettings.o: UnitsSettings.cpp UnitsSettings.h \
+ ../3rdParty/json.hpp VantageProtocolConstants.h WeatherTypes.h \
+ VantageEnums.h SummaryEnums.h VantageEepromConstants.h JsonUtils.h
 ../../target/vws/VantageCRC.o: VantageCRC.cpp VantageCRC.h WeatherTypes.h \
  BitConverter.h VantageLogger.h
 ../../target/vws/VantageConfiguration.o: VantageConfiguration.cpp \
  VantageConfiguration.h ../3rdParty/json.hpp VantageProtocolConstants.h \
  WeatherTypes.h VantageWeatherStation.h ArchivePacket.h Measurement.h \
- DateTimeFields.h BitConverter.h LoopPacketListener.h JsonUtils.h \
- VantageDecoder.h VantageEepromConstants.h VantageLogger.h VantageEnums.h \
- SummaryEnums.h Loop2Packet.h
+ DateTimeFields.h BitConverter.h LoopPacketListener.h \
+ ConsoleConnectionMonitor.h UnitsSettings.h VantageEepromConstants.h \
+ VantageDecoder.h VantageLogger.h VantageEnums.h SummaryEnums.h \
+ Loop2Packet.h
 ../../target/vws/VantageDecoder.o: VantageDecoder.cpp VantageDecoder.h \
  Measurement.h VantageEepromConstants.h WeatherTypes.h VantageLogger.h \
  VantageProtocolConstants.h DateTimeFields.h BitConverter.h Weather.h
@@ -133,8 +138,7 @@
  LoopPacketListener.h Alarm.h AlarmProperties.h ArchiveManager.h \
  StormArchiveManager.h Weather.h StormData.h CurrentWeather.h \
  Loop2Packet.h LoopPacket.h HiLowPacket.h VantageDecoder.h \
- VantageEepromConstants.h VantageLogger.h VantageConfiguration.h \
- ../3rdParty/json.hpp
+ VantageEepromConstants.h VantageLogger.h
 ../../target/vws/VantageLogger.o: VantageLogger.cpp VantageLogger.h \
  Weather.h Measurement.h WeatherTypes.h
 ../../target/vws/VantageStationNetwork.o: VantageStationNetwork.cpp \

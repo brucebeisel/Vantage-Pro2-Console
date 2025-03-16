@@ -2,6 +2,7 @@
 #define JSON_UTILS_H_
 
 #include <string>
+#include <vector>
 #include "json.hpp"
 
 //using json = nlohmann::json;
@@ -32,23 +33,44 @@ public:
     /**
      * Find a JSON array by name in the tree.
      *
-     * @param root  The root of the JSON DOM in which to search
-     * @param name  The name of the element for which to search
-     * @param value The value of the array if found
-     * @return True of the element is found
+     * @param root              The root of the JSON DOM in which to search
+     * @param name              The name of the element for which to search
+     * @param value             The vector into which the array elements will be added
+     * @param requiredArraySize If not zero, the exact size of the expected array
+     * @return True of the element is found and the array size matches the required size
      */
-    template<typename T> static bool findJsonArray(nlohmann::json root, const std::string & name, T & array, int size = 0) {
+    template<typename T> static bool findJsonVector(nlohmann::json root, const std::string & name, std::vector<T> & array, int requiredArraySize = 0) {
+        array.clear();
         bool success = false;
         auto jlist = root.find(name);
 
         if (jlist != root.end()) {
-            if (size == 0 || (*jlist).size() == size) {
-                std::copy((*jlist).begin(), (*jlist).end(), array);
+            if (requiredArraySize == 0 || (*jlist).size() == requiredArraySize) {
+                std::copy((*jlist).begin(), (*jlist).end(), back_inserter(array));
                 success = true;
             }
         }
 
         return success;
+    }
+
+    /**
+     * Find a JSON array by name in the tree.
+     *
+     * @param root              The root of the JSON DOM in which to search
+     * @param name              The name of the element for which to search
+     * @param value             The vector into which the array elements will be added
+     * @param requiredArraySize If not zero, the exact size of the expected array
+     * @return True of the element is found and the array size matches the required size
+     */
+    template<typename T> static bool findJsonArray(nlohmann::json root, const std::string & name, T * array, int requiredArraySize = 0) {
+        std::vector<T> tempArray;
+        if (findJsonVector(root, name, tempArray, requiredArraySize)) {
+            std::copy(tempArray.begin(), tempArray.end(), array);
+            return true;
+        }
+        else
+            return false;
     }
 };
 

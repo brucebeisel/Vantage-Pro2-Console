@@ -39,7 +39,7 @@ using namespace std;
 using json = nlohmann::json;
 
 namespace vws {
-using namespace VantageEepromConstants;
+using namespace EepromConstants;
 using namespace ProtocolConstants;
 
 static const char *SENSOR_NAMES[] = {
@@ -142,13 +142,12 @@ VantageStationNetwork::retrieveMonitoredStations(std::vector<StationId> & monito
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageStationNetwork::updateMonitoredStations(const StationId monitoredStations[]) {
+VantageStationNetwork::updateMonitoredStations(const vector<StationId> & monitoredStations) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Updating EEPROM data for monitored station mask" << endl;
 
     byte monitoredStationMask = 0;
-    for (int i = 0; i < MAX_STATIONS; i++) {
-        if (monitoredStations[i] != UNKNOWN_STATION_ID)
-            monitoredStationMask |= (1 << (monitoredStations[i] - 1));
+    for (auto stationId : monitoredStations) {
+        monitoredStationMask |= (1 << (stationId - 1));
     }
 
     return station.eepromWriteByte(EE_USED_TRANSMITTERS_ADDRESS, monitoredStationMask);
@@ -787,15 +786,12 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
     // to a file. There are two EEPROM areas, the monitored station list and the 16 byte station
     // list table that contains the station types, repeaters and extra temperature/humidity indices.
     //
-    StationId monitoredStations[MAX_STATIONS];
-    for (int i = 0; i < MAX_STATIONS; i++)
-        monitoredStations[i] = UNKNOWN_STATION_ID;
+    vector<StationId> monitoredStationIds;
 
-    if (!JsonUtils::findJsonArray(networkConfig, "monitoredStationIds", monitoredStations))
+    if (!JsonUtils::findJsonVector(networkConfig, "monitoredStationIds", monitoredStationIds))
         return false;
 
-
-    updateMonitoredStations(monitoredStations);
+    updateMonitoredStations(monitoredStationIds);
 
     StationData stationData[MAX_STATIONS];
     auto stations = networkConfig.at("stations");

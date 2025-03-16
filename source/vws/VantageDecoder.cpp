@@ -26,7 +26,7 @@
 
 namespace vws {
 using namespace ProtocolConstants;
-using namespace VantageEepromConstants;
+using namespace EepromConstants;
 
 Rainfall VantageDecoder::rainCollectorSizeInches = static_cast<Rainfall>(0.01);
 bool VantageDecoder::rainCollectorSizeSet = false;

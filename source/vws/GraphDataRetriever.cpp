@@ -48,7 +48,7 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
 
     byte buffer[EEPROM_STORM_DATA_SIZE];
 
-    if (!station.eepromBinaryRead(VantageEepromConstants::EE_RAIN_STORM_DATA_ADDRESS, sizeof(buffer), buffer))
+    if (!station.eepromBinaryRead(EepromConstants::EE_RAIN_STORM_DATA_ADDRESS, sizeof(buffer), buffer))
         return false;
 
     //

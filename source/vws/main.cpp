@@ -105,7 +105,7 @@ startVWS(const string & dataDirectory, const string & serialPortName, int baudRa
     StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
     ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);
     DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager);
-    VantageDriver consoleDriver(station, configuration, archiveManager, consoleCommandHandler, stormArchiveManager);
+    VantageDriver consoleDriver(station, archiveManager, consoleCommandHandler, stormArchiveManager);
     CommandSocket commandSocket(socketPort);
 
     //
@@ -120,8 +120,14 @@ startVWS(const string & dataDirectory, const string & serialPortName, int baudRa
     commandSocket.addCommandHandler(dataCommandHandler);
     commandSocket.addCommandHandler(consoleCommandHandler);
 
+    //
+    // Add the console connection monitors, adding consoleDriver last so that all other
+    // configuration is complete before the driver
+    //
+    consoleDriver.addConnectionMonitor(configuration);
     consoleDriver.addConnectionMonitor(network);
     consoleDriver.addConnectionMonitor(alarmManager);
+    consoleDriver.addConnectionMonitor(consoleDriver);
 
     //
     // Initialize objects that require it before entering the main loop

@@ -19,8 +19,6 @@
 
 #include <cmath>
 
-#include "json.hpp"
-#include "JsonUtils.h"
 #include "BitConverter.h"
 #include "VantageDecoder.h"
 #include "VantageEepromConstants.h"
@@ -30,7 +28,6 @@
 #include "Loop2Packet.h"
 
 using namespace std;
-using json = nlohmann::json;
 
 namespace vws {
 using namespace ProtocolConstants;
@@ -97,11 +94,7 @@ static constexpr int NUM_TIME_ZONES = sizeof(TIME_ZONES) / sizeof(TIME_ZONES[0])
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 VantageConfiguration::VantageConfiguration(VantageWeatherStation & station) : station(station),
-                                                                              rainSeasonStartMonth(ProtocolConstants::Month::JANUARY),
-                                                                              secondaryWindCupSize(0),
                                                                               lastAtmosphericPressure(0.0),
-                                                                              retransmitId(0),
-                                                                              logFinalTemperature(false),
                                                                               logger(VantageLogger::getLogger("VantageConfiguration")) {
 
 }
@@ -130,23 +123,54 @@ VantageConfiguration::processLoop2Packet(const Loop2Packet & packet) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+void
+VantageConfiguration::consoleConnected() {
+    //
+    // Get the setup bits first so that the size of the rain bucket is saved before any LOOP packets
+    // or archive packets are received.
+    //
+    SetupBits setupBits;
+    if (retrieveSetupBits(setupBits))
+        saveRainBucketSize(setupBits.rainBucketSizeType);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageConfiguration::consoleDisconnected() {
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
 VantageConfiguration::updatePosition(const PositionData & position, bool initialize) {
     bool success = false;
 
+    //
+    // The latitude and longitude can be written straight to the EEPROM. The
+    // elevation requires using the "BAR=" command.
+    //
     char buffer[4];
-    int16 value16 = std::lround(position.latitude * LAT_LON_SCALE);
-    BitConverter::getBytes(value16, buffer, 0, 2);
+    position.encodeLatLon(buffer, 0);
 
-    value16 = std::lround(position.longitude * LAT_LON_SCALE);
-    BitConverter::getBytes(value16, buffer, 2, 2);
-
-    if (!station.eepromBinaryWrite(VantageEepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
+    if (!station.eepromBinaryWrite(EepromConstants::EE_LATITUDE_ADDRESS, buffer, 4)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to update latitude/longitude in EEPROM" << endl;
         return false;
     }
 
-    if (station.eepromBinaryRead(VantageEepromConstants::EE_BAR_CAL_ADDRESS, 2, buffer)) {
+    //
+    // Update the latitude/longitude fields in the setup bits to reflect the provided position
+    //
+    SetupBits setupBits;
+    if (retrieveSetupBits(setupBits)) {
+        setupBits.isEastLongitude = position.longitude > 0.0;
+        setupBits.isNorthLatitude = position.latitude > 0.0;
+        updateSetupBits(setupBits, false);
+    }
+
+    /*
+    if (station.eepromBinaryRead(EepromConstants::EE_BAR_CAL_ADDRESS, 2, buffer)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read BAR_CAL EEPROM value" << endl;
         return false;
     }
@@ -162,10 +186,14 @@ VantageConfiguration::updatePosition(const PositionData & position, bool initial
         trustedBarometerReading = 0.0;
 
     logger.log(VantageLogger::VANTAGE_INFO) << "Using " << trustedBarometerReading << " as trusted barometer value when updating position" << endl;
+    */
 
-    if (station.updateBarometerReadingAndElevation(trustedBarometerReading, position.elevation)) {
+    //
+    // Set the elevation using 0 as the reliable barometric reading. The console will calculate the barometer offset
+    // from the elevation alone.
+    //
+    if (station.updateBarometerReadingAndElevation(0.0, position.elevation))
         success = true;
-    }
 
     if (initialize)
         station.initializeSetup();
@@ -184,8 +212,8 @@ VantageConfiguration::retrievePosition(PositionData & position) {
     //
     // The latitude, longitude and elevation are in sequential bytes
     //
-    if (station.eepromBinaryRead(VantageEepromConstants::EE_LATITUDE_ADDRESS, sizeof(buffer), buffer)) {
-        decodePosition(buffer, 0, position);
+    if (station.eepromBinaryRead(EepromConstants::EE_LATITUDE_ADDRESS, sizeof(buffer), buffer)) {
+        position.decode(buffer, 0);
         success = true;
     }
 
@@ -194,37 +222,11 @@ VantageConfiguration::retrievePosition(PositionData & position) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
-VantageConfiguration::decodePosition(byte * buffer, int offset, PositionData & position) {
-    position.latitude = static_cast<double>(BitConverter::toInt16(buffer, offset + 0)) / LAT_LON_SCALE;
-    position.longitude = static_cast<double>(BitConverter::toInt16(buffer, offset + 2)) / LAT_LON_SCALE;
-    position.elevation = BitConverter::toInt16(buffer, offset + 4);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 bool
 VantageConfiguration::updateTimeSettings(const TimeSettings & timeSettings) {
     byte buffer[6];
-
-    int tzIndex = 18;
-
-    for (int i = 0; i < NUM_TIME_ZONES; i++) {
-        if (TIME_ZONES[i].name == timeSettings.timezoneName) {
-            tzIndex = TIME_ZONES[i].index;
-            break;
-        }
-    }
-
-    buffer[0] = tzIndex;
-    buffer[1] = timeSettings.manualDaylightSavingsTime ? 1 : 0;
-    buffer[2] = timeSettings.manualDaylightSavingsTimeOn ? 1 : 0;
-    buffer[5] = timeSettings.useGmtOffset ? 1 : 0;
-
-    int value = (timeSettings.gmtOffsetMinutes / 60 * 100) + (timeSettings.gmtOffsetMinutes % 60);
-    BitConverter::getBytes(value, buffer, 3, 2);
-
-    return station.eepromBinaryWrite(VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS, buffer, 6);
+    timeSettings.encode(buffer, 0);
+    return station.eepromBinaryWrite(EepromConstants::EE_TIME_FIELDS_START_ADDRESS, buffer, 6);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -234,8 +236,8 @@ VantageConfiguration::retrieveTimeSettings(TimeSettings & timeSettings) {
     bool success = false;
     byte buffer[6];
 
-    if (station.eepromBinaryRead(VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS, 6, buffer)) {
-        decodeTimeSettings(buffer, 0, timeSettings);
+    if (station.eepromBinaryRead(EepromConstants::EE_TIME_FIELDS_START_ADDRESS, 6, buffer)) {
+        timeSettings.decode(buffer, 0);
         success = true;
     }
 
@@ -244,47 +246,15 @@ VantageConfiguration::retrieveTimeSettings(TimeSettings & timeSettings) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
-VantageConfiguration::decodeTimeSettings(const byte * buffer, int offset, TimeSettings & timeSettings) {
-    const char * tzName = "";
-    int tzIndex = BitConverter::toUint8(buffer, offset);
-
-    for (int i = 0; i < NUM_TIME_ZONES; i++) {
-        if (TIME_ZONES[i].index == tzIndex) {
-            tzName = TIME_ZONES[i].name;
-            break;
-        }
-    }
-
-    timeSettings.timezoneName = tzName;
-    timeSettings.manualDaylightSavingsTime = BitConverter::toUint8(buffer, offset + 1) == 1;
-    timeSettings.manualDaylightSavingsTimeOn = BitConverter::toUint8(buffer, offset + 2) == 1;
-
-    int16 value16 = BitConverter::toInt16(buffer, offset + 3);
-
-    //timeSettings.gmtOffsetMinutes = ((value16 / 100) * 60) + (value16 % 100);
-    timeSettings.gmtOffsetMinutes = value16;
-    timeSettings.useGmtOffset = BitConverter::toUint8(buffer, offset + 5) == 1;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 bool
 VantageConfiguration::updateUnitsSettings(const UnitsSettings & unitsSettings, bool initialize) {
     bool success = false;
     byte buffer[2];
-    unitsSettings.encodeUnits(buffer[0]);
-    /*
-    buffer[0] = static_cast<int>(unitsSettings.baroUnits) & 0x3;
-    buffer[0] |= (static_cast<int>(unitsSettings.temperatureUnits) & 0x3) << 2;
-    buffer[0] |= (static_cast<int>(unitsSettings.elevationUnits) & 0x1) << 4;
-    buffer[0] |= (static_cast<int>(unitsSettings.rainUnits) & 0x1) << 5;
-    buffer[0] |= (static_cast<int>(unitsSettings.windUnits) & 0x3) << 6;
-    */
+    unitsSettings.encode(buffer[0]);
 
     buffer[1] = ~buffer[0];
 
-    if (!station.eepromBinaryWrite(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, buffer, sizeof(buffer)))
+    if (!station.eepromBinaryWrite(EepromConstants::EE_UNIT_BITS_ADDRESS, buffer, sizeof(buffer)))
         return false;
 
     //
@@ -303,8 +273,8 @@ bool
 VantageConfiguration::retrieveUnitsSettings(UnitsSettings & unitsSettings) {
     bool success = false;
     byte buffer;
-    if (station.eepromBinaryRead(VantageEepromConstants::EE_UNIT_BITS_ADDRESS, 1, &buffer)) {
-        unitsSettings.decodeUnits(buffer);
+    if (station.eepromBinaryRead(EepromConstants::EE_UNIT_BITS_ADDRESS, 1, &buffer)) {
+        unitsSettings.decode(buffer);
         success = true;
     }
 
@@ -318,18 +288,26 @@ VantageConfiguration::updateSetupBits(const SetupBits & setupBits, bool initiali
     bool success = false;
     byte buffer;
 
-    buffer = setupBits.is24HourMode ?  0x1 : 0;
-    buffer |= setupBits.isCurrentlyAM ? 0x2 : 0;
-    buffer |= setupBits.isDayMonthDisplay ? 0x4 : 0;
-    buffer |= setupBits.isWindCupLarge ? 0x8 : 0;
-    buffer |= setupBits.isNorthLatitude ? 0x40 : 0;
-    buffer |= setupBits.isEastLongitude ? 0x80 : 0;
-    buffer |= (static_cast<int>(setupBits.rainBucketSizeType) & 0x3) << 4;
+    setupBits.encode(buffer);
 
-    if (!station.eepromBinaryWrite(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, &buffer, 1))
+    if (!station.eepromBinaryWrite(EepromConstants::EE_SETUP_BITS_ADDRESS, &buffer, 1))
         return false;
 
     saveRainBucketSize(setupBits.rainBucketSizeType);
+
+    //
+    // On VP2 and Vantage Vue this EEPROM address must be in sync with the setup bits
+    //
+    EepromConstants::SecondaryWindCupSize secondaryWindCupSize;
+    if (setupBits.isWindCupLarge)
+        secondaryWindCupSize = EepromConstants::SecondaryWindCupSize::LARGE;
+    else
+        secondaryWindCupSize = EepromConstants::SecondaryWindCupSize::SMALL;
+
+    byte value = static_cast<int>(secondaryWindCupSize);
+
+    if (!station.eepromBinaryWrite(EepromConstants::EE_WIND_CUP_SIZE_ADDRESS, &value, 1))
+        return false;
 
     //
     // Per the serial protocol documentation, when the setup bits byte is changed, the
@@ -346,10 +324,10 @@ VantageConfiguration::updateSetupBits(const SetupBits & setupBits, bool initiali
 bool
 VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
     bool success = false;
-    char buffer;
+    byte buffer;
 
-    if (station.eepromBinaryRead(VantageEepromConstants::EE_SETUP_BITS_ADDRESS, 1, &buffer)) {
-        decodeSetupBits(&buffer, 0, setupBits);
+    if (station.eepromBinaryRead(EepromConstants::EE_SETUP_BITS_ADDRESS, 1, &buffer)) {
+        setupBits.decode(buffer);
         success = true;
     }
 
@@ -358,23 +336,48 @@ VantageConfiguration::retrieveSetupBits(SetupBits & setupBits) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
-VantageConfiguration::decodeSetupBits(const byte * buffer, int offset, SetupBits & setupBits) {
-        setupBits.is24HourMode = (buffer[offset] & 0x1) != 0;
-        setupBits.isCurrentlyAM = (buffer[offset] & 0x2) != 0;
-        setupBits.isDayMonthDisplay = (buffer[offset] & 0x4) != 0;
-        setupBits.isWindCupLarge = (buffer[offset] & 0x8) != 0;
-        setupBits.isNorthLatitude = (buffer[offset] & 0x40) != 0;
-        setupBits.isEastLongitude = (buffer[offset] & 0x80) != 0;
-        setupBits.rainBucketSizeType = static_cast<ProtocolConstants::RainBucketSizeType>((buffer[offset] >> 4) & 0x3);
-        saveRainBucketSize(setupBits.rainBucketSizeType);
+bool
+VantageConfiguration::updateAllConfigurationData(const ConsoleConfigurationData & configData, bool initializeConsole) {
+    bool success = false;
 
+    if (!updatePosition(configData.positionData, false))
+        return false;
+
+    if (!updateSetupBits(configData.setupBits, false))
+        return false;
+
+    if (!updateUnitsSettings(configData.unitsSettings, false))
+        return false;
+
+    if (!updateTimeSettings(configData.timeSettings))
+        return false;
+
+    byte value = static_cast<byte>(configData.rainSeasonStartMonth);
+    if (!station.eepromWriteByte(EepromConstants::EE_RAIN_SEASON_START_ADDRESS, value))
+        return false;
+
+    value = static_cast<byte>(configData.retransmitId);
+    if (!station.eepromWriteByte(EepromConstants::EE_RETRANSMIT_ID_ADDRESS, value))
+        return false;
+
+    value = static_cast<byte>(configData.logFinalTemperature ? 0 : 1);
+    if (!station.eepromWriteByte(EepromConstants::EE_LOG_AVG_TEMP_ADDRESS, value))
+        return false;
+
+    value = static_cast<byte>(configData.secondaryWindCupSize);
+    if (!station.eepromWriteByte(EepromConstants::EE_WIND_CUP_SIZE_ADDRESS, value))
+        return false;
+
+    if (initializeConsole && !station.initializeSetup())
+        return false;
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-string
-VantageConfiguration::retrieveAllConfigurationData() {
+bool
+VantageConfiguration::retrieveAllConfigurationData(ConsoleConfigurationData & configData) {
     byte buffer[EEPROM_CONFIG_SIZE];
     byte logFinalTemperatureValue;
     byte secondaryWindCupSizeValue;
@@ -383,63 +386,20 @@ VantageConfiguration::retrieveAllConfigurationData() {
     // Read the entire configuration section of the EEPROM
     //
     if (station.eepromBinaryRead(1U, sizeof(buffer), buffer) &&
-        station.eepromBinaryRead(VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS, 1, &secondaryWindCupSizeValue) &&
-        station.eepromBinaryRead(VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS, 1, &logFinalTemperatureValue)) {
-        PositionData positionData;
-        SetupBits setupBits;
-        UnitsSettings unitsSettings;
-        TimeSettings timeSettings;
-        decodePosition(buffer, VantageEepromConstants::EE_LATITUDE_ADDRESS - 1, positionData);
-        decodeSetupBits(buffer, VantageEepromConstants::EE_SETUP_BITS_ADDRESS - 1, setupBits);
-        unitsSettings.decodeUnits(buffer[VantageEepromConstants::EE_UNIT_BITS_ADDRESS - 1]);
-        decodeTimeSettings(buffer, VantageEepromConstants::EE_TIME_FIELDS_START_ADDRESS - 1, timeSettings);
-        rainSeasonStartMonth = static_cast<ProtocolConstants::Month>(buffer[VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS - 1]);
-        retransmitId = buffer[VantageEepromConstants::EE_RETRANSMIT_ID_ADDRESS - 1];
-        logFinalTemperature = logFinalTemperatureValue != 0;
-        secondaryWindCupSize = secondaryWindCupSizeValue & 0x3;
-
-        ostringstream oss;
-        oss << std::boolalpha
-            << "{ \"configuration\" : { "
-            << "  \"position\" : {"
-            << " \"latitude\" : " << positionData.latitude
-            << ", \"longitude\" : " << positionData.longitude
-            << ", \"elevation\" : " << positionData.elevation
-            << " }, \"time\" : {"
-            << " \"gmtOffsetMinutes\" : " << timeSettings.gmtOffsetMinutes
-            << ", \"manualDst\" : " << timeSettings.manualDaylightSavingsTime
-            << ", \"manualDstOn\" : " << timeSettings.manualDaylightSavingsTimeOn
-            << ", \"timezoneName\" : \"" << timeSettings.timezoneName << "\""
-            << ", \"useGmtOffset\" : " << timeSettings.useGmtOffset
-            << " }, "
-            << unitsSettings.formatJSON() << ","
-            /*
-            \"units\" : {"
-            << " \"baroUnits\" : \"" << barometerUnitsEnum.valueToString(unitsSettings.baroUnits) << "\""
-            << ", \"elevationUnits\" : \"" << elevationUnitsEnum.valueToString(unitsSettings.elevationUnits) << "\""
-            << ", \"rainUnits\" : \"" << rainUnitsEnum.valueToString(unitsSettings.rainUnits) << "\""
-            << ", \"temperatureUnits\" : \"" << temperatureUnitsEnum.valueToString(unitsSettings.temperatureUnits) << "\""
-            << ", \"windUnits\" : \"" << windUnitsEnum.valueToString(unitsSettings.windUnits) << "\""
-            << " }, "
-            */
-            << " \"setupBits\" : {"
-            << " \"clock24hourMode\" : " << setupBits.is24HourMode
-            << ", \"currentlyAm\" : " << setupBits.isCurrentlyAM
-            << ", \"dayMonthDisplay\" : " << setupBits.isDayMonthDisplay
-            << ", \"eastLongitude\" : " << setupBits.isEastLongitude
-            << ", \"northLatitude\" : " << setupBits.isNorthLatitude
-            << ", \"windCupLarge\" : " << setupBits.isWindCupLarge
-            << ", \"rainBucketSize\" : \"" << rainBucketSizeTypeEnum.valueToString(setupBits.rainBucketSizeType) << "\""
-            << " }, \"miscellaneous\" : {"
-            << " \"secondaryWindCupSize\" : " << secondaryWindCupSize
-            << ", \"rainSeasonStartMonth\" : \"" << monthEnum.valueToString(rainSeasonStartMonth) << "\""
-            << ", \"retransmitId\" : " << retransmitId
-            << ", \"logFinalTemperature\" : " << logFinalTemperature
-            << "} } }";
-        return oss.str();
+        station.eepromBinaryRead(EepromConstants::EE_WIND_CUP_SIZE_ADDRESS, 1, &secondaryWindCupSizeValue) &&
+        station.eepromBinaryRead(EepromConstants::EE_LOG_AVG_TEMP_ADDRESS, 1, &logFinalTemperatureValue)) {
+        configData.positionData.decode(buffer, EepromConstants::EE_LATITUDE_ADDRESS - 1);
+        configData.setupBits.decode(buffer[EepromConstants::EE_SETUP_BITS_ADDRESS - 1]);
+        configData.unitsSettings.decode(buffer[EepromConstants::EE_UNIT_BITS_ADDRESS - 1]);
+        configData.timeSettings.decode(buffer, EepromConstants::EE_TIME_FIELDS_START_ADDRESS - 1);
+        configData.rainSeasonStartMonth = static_cast<ProtocolConstants::Month>(buffer[EepromConstants::EE_RAIN_SEASON_START_ADDRESS - 1]);
+        configData.retransmitId = buffer[EepromConstants::EE_RETRANSMIT_ID_ADDRESS - 1];
+        configData.logFinalTemperature = logFinalTemperatureValue != 0;
+        configData.secondaryWindCupSize = static_cast<EepromConstants::SecondaryWindCupSize>(secondaryWindCupSizeValue & 0x3);
+        return true;
     }
     else
-        return "";
+        return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -460,159 +420,179 @@ VantageConfiguration::getTimeZoneOptions(std::vector<std::string> & timezoneList
     }
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
-VantageConfiguration::updateAllConfigurationData(const std::string & jsonString) {
-    PositionData positionData;
-    SetupBits setupBits;
-    UnitsSettings unitsSettings;
-    TimeSettings timeSettings;
-
-    json configuration = json::parse(jsonString.begin(), jsonString.end());
-
-    json position = configuration.at("position");
-
-    JsonUtils::findJsonValue(position, "latitude", positionData.latitude);
-    JsonUtils::findJsonValue(position, "longitude", positionData.longitude);
-    JsonUtils::findJsonValue(position, "elevation", positionData.elevation);
-
-    json timeElement = configuration.at("time");
-
-    JsonUtils::findJsonValue(timeElement, "gmtOffsetMinutes", timeSettings.gmtOffsetMinutes);
-    JsonUtils::findJsonValue(timeElement, "timezoneName", timeSettings.timezoneName);
-    JsonUtils::findJsonValue(timeElement, "manualDst", timeSettings.manualDaylightSavingsTime);
-    JsonUtils::findJsonValue(timeElement, "manualDstOn", timeSettings.manualDaylightSavingsTimeOn);
-    JsonUtils::findJsonValue(timeElement, "useGmtOffset", timeSettings.useGmtOffset);
-
-    unitsSettings.parseJson(configuration);
-
-    string enumString;
-    json setup = configuration.at("setup");
-
-    JsonUtils::findJsonValue(setup, "clock24hourMode", setupBits.is24HourMode);
-    setupBits.isCurrentlyAM = true;
-    JsonUtils::findJsonValue(setup, "dayMonthDisplay", setupBits.isDayMonthDisplay);
-    setupBits.isEastLongitude = positionData.longitude >= 0.0;
-    setupBits.isNorthLatitude = positionData.latitude >= 0.0;
-    JsonUtils::findJsonValue(setup, "windCupLarge", setupBits.isWindCupLarge);
-
-    JsonUtils::findJsonValue(setup, "rainBucketSize", enumString);
-    setupBits.rainBucketSizeType = rainBucketSizeTypeEnum.stringToValue(enumString);
-
-    json misc = configuration.at("miscellaneous");
-
-    if (setupBits.isWindCupLarge)
-        secondaryWindCupSize = 2;
-    else
-        secondaryWindCupSize = 1;
-
-    JsonUtils::findJsonValue(misc, "rainSeasonStartMonth", enumString);
-    rainSeasonStartMonth = monthEnum.stringToValue(enumString);
-    JsonUtils::findJsonValue(misc, "retransmitId", retransmitId);
-    JsonUtils::findJsonValue(misc, "logFinalTemperature", logFinalTemperature);
-
-    bool rv = true;
-    bool results = updatePosition(positionData, false);
-    rv = rv && results;
-    results = updateSetupBits(setupBits, false);
-    rv = rv && results;
-    results = updateTimeSettings(timeSettings);
-    rv = rv && results;
-    results = updateUnitsSettings(unitsSettings, false);
-    rv = rv && results;
-
-    byte value;
-    value = static_cast<byte>(rainSeasonStartMonth);
-    results = station.eepromBinaryWrite(VantageEepromConstants::EE_RAIN_SEASON_START_ADDRESS, &value, 1);
-    rv = rv && results;
-
-    value = secondaryWindCupSize;
-    results = station.eepromBinaryWrite(VantageEepromConstants::EE_WIND_CUP_SIZE_ADDRESS, &value, 1);
-    rv = rv && results;
-
-    value = logFinalTemperature ? 1 : 0;
-    results = station.eepromBinaryWrite(VantageEepromConstants::EE_LOG_AVG_TEMP_ADDRESS, &value, 1);
-    rv = rv && results;
-
-    results = station.initializeSetup();
-    rv = rv && results;
-
-    return rv;
+void
+SetupBits::decode(byte buffer) {
+        is24HourMode = (buffer & 0x1) != 0;
+        isCurrentlyAM = (buffer & 0x2) != 0;
+        isDayMonthDisplay = (buffer & 0x4) != 0;
+        isWindCupLarge = (buffer & 0x8) != 0;
+        isNorthLatitude = (buffer & 0x40) != 0;
+        isEastLongitude = (buffer & 0x80) != 0;
+        rainBucketSizeType = static_cast<ProtocolConstants::RainBucketSizeType>((buffer >> 4) & 0x3);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-UnitsSettings::decodeUnits(byte settings) {
-    baroUnits = static_cast<BarometerUnits>(settings & 0x3);
-    temperatureUnits = static_cast<TemperatureUnits>((settings >> 2) & 0x3);
-    elevationUnits = static_cast<ElevationUnits>((settings >> 4) & 0x1);
-    rainUnits = static_cast<RainUnits>((settings >> 5) & 0x1);
-    windUnits = static_cast<WindUnits>((settings >> 6) & 0x3);
+SetupBits::encode(byte & buffer) const {
+    buffer = is24HourMode ?  0x1 : 0;
+    buffer |= isCurrentlyAM ? 0x2 : 0;
+    buffer |= isDayMonthDisplay ? 0x4 : 0;
+    buffer |= isWindCupLarge ? 0x8 : 0;
+    buffer |= isNorthLatitude ? 0x40 : 0;
+    buffer |= isEastLongitude ? 0x80 : 0;
+    buffer |= (static_cast<int>(rainBucketSizeType) & 0x3) << 4;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
-UnitsSettings::encodeUnits(byte & settings) const {
-    settings = static_cast<int>(baroUnits) & 0x3;
-    settings |= (static_cast<int>(temperatureUnits) & 0x3) << 2;
-    settings |= (static_cast<int>(elevationUnits) & 0x1) << 4;
-    settings |= (static_cast<int>(rainUnits) & 0x1) << 5;
-    settings |= (static_cast<int>(windUnits) & 0x3) << 6;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-std::string
-UnitsSettings::formatJSON() const {
+string
+SetupBits::formatJSON() const {
     ostringstream oss;
-
-    oss << "\"units\" : {"
-        << " \"baroUnits\" : \"" << barometerUnitsEnum.valueToString(baroUnits) << "\""
-        << ", \"elevationUnits\" : \"" << elevationUnitsEnum.valueToString(elevationUnits) << "\""
-        << ", \"rainUnits\" : \"" << rainUnitsEnum.valueToString(rainUnits) << "\""
-        << ", \"temperatureUnits\" : \"" << temperatureUnitsEnum.valueToString(temperatureUnits) << "\""
-        << ", \"windUnits\" : \"" << windUnitsEnum.valueToString(windUnits) << "\""
-        << " }";
+    oss << boolalpha
+        << " \"setupBits\" : {"
+        << " \"clock24hourMode\" : "   << is24HourMode
+        << ", \"currentlyAm\" : "      << isCurrentlyAM
+        << ", \"dayMonthDisplay\" : "  << isDayMonthDisplay
+        << ", \"eastLongitude\" : "    << isEastLongitude
+        << ", \"northLatitude\" : "    << isNorthLatitude
+        << ", \"windCupLarge\" : "     << isWindCupLarge
+        << ", \"rainBucketSize\" : \"" << rainBucketSizeTypeEnum.valueToString(rainBucketSizeType) << "\""
+        << "}";
 
     return oss.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool
-UnitsSettings::parseJson(const nlohmann::json & node) {
-    string enumString;
+void
+PositionData::encodeLatLon(byte buffer[], int offset) const {
+    bool success = false;
 
-    json units = node.at("units");
+    int16 value16 = std::lround(latitude * LAT_LON_SCALE);
+    BitConverter::getBytes(value16, buffer, offset + 0, 2);
 
-    if (!JsonUtils::findJsonValue(units, "baroUnits", enumString))
-        return false;
+    value16 = std::lround(longitude * LAT_LON_SCALE);
+    BitConverter::getBytes(value16, buffer, offset + 2, 2);
+}
 
-    baroUnits = barometerUnitsEnum.stringToValue(enumString);
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+PositionData::decode(byte buffer[], int offset) {
+    latitude = static_cast<double>(BitConverter::toInt16(buffer, offset + 0)) / LAT_LON_SCALE;
+    longitude = static_cast<double>(BitConverter::toInt16(buffer, offset + 2)) / LAT_LON_SCALE;
+    elevation = BitConverter::toInt16(buffer, offset + 4);
+}
 
-    if (!JsonUtils::findJsonValue(units, "elevationUnits", enumString))
-        return false;
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+PositionData::formatJSON() const {
+    ostringstream oss;
 
-    elevationUnits = elevationUnitsEnum.stringToValue(enumString);
+    oss << " \"position\" : {"
+        << " \"latitude\" : " << latitude
+        << ", \"longitude\" : " << longitude
+        << ", \"elevation\" : " << elevation
+        << " } ";
 
-    if (!JsonUtils::findJsonValue(units, "rainUnits", enumString))
-        return false;
+    return oss.str();
+}
 
-    rainUnits = rainUnitsEnum.stringToValue(enumString);
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+TimeSettings::encode(byte buffer[], int offset) const {
+    int tzIndex = 18;
 
-    if (!JsonUtils::findJsonValue(units, "temperatureUnits", enumString))
-        return false;
+    for (int i = 0; i < NUM_TIME_ZONES; i++) {
+        if (TIME_ZONES[i].name == timezoneName) {
+            tzIndex = TIME_ZONES[i].index;
+            break;
+        }
+    }
 
-    temperatureUnits = temperatureUnitsEnum.stringToValue(enumString);
+    buffer[offset + 0] = tzIndex;
+    buffer[offset + 1] = manualDaylightSavingsTime ? 1 : 0;
+    buffer[offset + 2] = manualDaylightSavingsTimeOn ? 1 : 0;
 
-    if (!JsonUtils::findJsonValue(units, "windUnits", enumString))
-        return false;
+    //
+    // Convert from minutes into 1/100 of hours
+    //
+    int value = gmtOffsetMinutes * 100 / 60;
+    BitConverter::getBytes(value, buffer, offset + 3, 2);
 
-    windUnits = windUnitsEnum.stringToValue(enumString);
+    buffer[offset + 5] = useGmtOffset ? 1 : 0;
+}
 
-    return true;
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+TimeSettings::decode(byte buffer[], int offset) {
+    const char * tzName = "UNKNOWN";
+    int tzIndex = BitConverter::toUint8(buffer, offset);
+
+    for (int i = 0; i < NUM_TIME_ZONES; i++) {
+        if (TIME_ZONES[i].index == tzIndex) {
+            tzName = TIME_ZONES[i].name;
+            break;
+        }
+    }
+
+    timezoneName = tzName;
+    manualDaylightSavingsTime = BitConverter::toUint8(buffer, offset + 1) == 1;
+    manualDaylightSavingsTimeOn = BitConverter::toUint8(buffer, offset + 2) == 1;
+
+    int16 value16 = BitConverter::toInt16(buffer, offset + 3);
+
+    //
+    // Convert from 1/100 of hours to minutes
+    //
+    gmtOffsetMinutes = value16 * 60 / 100;
+    useGmtOffset = BitConverter::toUint8(buffer, offset + 5) == 1;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+TimeSettings::formatJSON() const {
+    ostringstream oss;
+
+    oss << boolalpha
+        << " \"time\" : {"
+        << " \"gmtOffsetMinutes\" : " << gmtOffsetMinutes
+        << ", \"manualDst\" : " << manualDaylightSavingsTime
+        << ", \"manualDstOn\" : " << manualDaylightSavingsTimeOn
+        << ", \"timezoneName\" : \"" << timezoneName << "\""
+        << ", \"useGmtOffset\" : " << useGmtOffset
+        << " } ";
+
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+ConsoleConfigurationData::formatJSON() const {
+    ostringstream oss;
+    oss << std::boolalpha
+        << "{ \"configuration\" : { "
+        << positionData.formatJSON()  << ","
+        << timeSettings.formatJSON()  << ","
+        << unitsSettings.formatJSON() << ","
+        << setupBits.formatJSON() << ","
+        << " \"miscellaneous\" : {"
+        << " \"secondaryWindCupSize\" : " << secondaryWindCupSizeEnum.valueToString(secondaryWindCupSize)
+        << ", \"rainSeasonStartMonth\" : \"" << monthEnum.valueToString(rainSeasonStartMonth) << "\""
+        << ", \"retransmitId\" : " << retransmitId
+        << ", \"logFinalTemperature\" : " << logFinalTemperature
+        << "} } }";
+
+    return oss.str();
 }
 }

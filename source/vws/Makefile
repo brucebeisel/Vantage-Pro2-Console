@@ -33,6 +33,7 @@ SRCS=\
  	StormData.cpp \
  	SummaryReport.cpp \
 	UnitConverter.cpp \
+ 	UnitsSettings.cpp \
 	VantageCRC.cpp \
 	VantageConfiguration.cpp \
 	VantageDecoder.cpp \

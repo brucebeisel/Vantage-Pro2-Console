@@ -48,7 +48,7 @@ using namespace std;
 namespace vws {
 using namespace ProtocolConstants;
 
-static constexpr int protectedEepromBytes[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0x2d};
+static constexpr int protectedEepromBytes[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xf, 0x2d};
 static constexpr int NUM_PROTECTED_EEPROM_BYTES = sizeof(protectedEepromBytes) / sizeof(protectedEepromBytes[0]);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -652,7 +652,7 @@ bool
 VantageWeatherStation::retrieveCalibrationAdjustments(CalibrationAdjustmentsPacket & calibrationPacket) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving Calibration Adjustments from EEPROM" << endl;
 
-    if (!eepromBinaryRead(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE, buffer))
+    if (!eepromBinaryRead(EepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE, buffer))
         return false;
 
     return calibrationPacket.decodePacket(buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE);
@@ -673,7 +673,7 @@ VantageWeatherStation::updateCalibrationAdjustments(const CalibrationAdjustments
 
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Calibration Adjustment buffer: " << Weather::dumpBuffer(buffer, sizeof(buffer)) << endl;
 
-    if (!eepromBinaryWrite(VantageEepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE))
+    if (!eepromBinaryWrite(EepromConstants::EE_INSIDE_TEMP_CAL_ADDRESS, buffer, CalibrationAdjustmentsPacket::CALIBRATION_DATA_BLOCK_SIZE))
         return false;
     else
         return true;
@@ -1083,7 +1083,7 @@ bool
 VantageWeatherStation::retrieveArchivePeriod(ArchivePeriod & period) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving Archive Period from EEPROM" << endl;
 
-    if (!eepromBinaryRead(VantageEepromConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
+    if (!eepromBinaryRead(EepromConstants::EE_ARCHIVE_PERIOD_ADDRESS, 1))
         return false;
 
     int archivePeriodValue = BitConverter::toUint8(buffer, 0);

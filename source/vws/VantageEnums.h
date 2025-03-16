@@ -395,26 +395,26 @@ operator<<(std::ostream & os, ProtocolConstants::Forecast value) {
 /****************************************
  * StationType Enumeration
  ****************************************/
-static const NameValuePair<VantageEepromConstants::StationType> sstMappings[] = {
-    { "Integrated Sensor Station", VantageEepromConstants::StationType::INTEGRATED_SENSOR_STATION },
-    { "Temperature Only", VantageEepromConstants::StationType::TEMPERATURE_ONLY_STATION },
-    { "Humidity Only", VantageEepromConstants::StationType::HUMIDITY_ONLY_STATION },
-    { "Temperature/Humidity", VantageEepromConstants::StationType::TEMPERATURE_HUMIDITY_STATION },
-    { "Anemometer", VantageEepromConstants::StationType::ANEMOMETER_STATION },
-    { "Rain", VantageEepromConstants::StationType::RAIN_STATION },
-    { "Leaf", VantageEepromConstants::StationType::LEAF_STATION },
-    { "Soil", VantageEepromConstants::StationType::SOIL_STATION },
-    { "Soil/Leaf", VantageEepromConstants::StationType::SOIL_LEAF_STATION },
-    { "No Station", VantageEepromConstants::StationType::NO_STATION },
-    { "Unknown Station", VantageEepromConstants::StationType::UNKNOWN_STATION }
+static const NameValuePair<EepromConstants::StationType> sstMappings[] = {
+    { "Integrated Sensor Station", EepromConstants::StationType::INTEGRATED_SENSOR_STATION },
+    { "Temperature Only", EepromConstants::StationType::TEMPERATURE_ONLY_STATION },
+    { "Humidity Only", EepromConstants::StationType::HUMIDITY_ONLY_STATION },
+    { "Temperature/Humidity", EepromConstants::StationType::TEMPERATURE_HUMIDITY_STATION },
+    { "Anemometer", EepromConstants::StationType::ANEMOMETER_STATION },
+    { "Rain", EepromConstants::StationType::RAIN_STATION },
+    { "Leaf", EepromConstants::StationType::LEAF_STATION },
+    { "Soil", EepromConstants::StationType::SOIL_STATION },
+    { "Soil/Leaf", EepromConstants::StationType::SOIL_LEAF_STATION },
+    { "No Station", EepromConstants::StationType::NO_STATION },
+    { "Unknown Station", EepromConstants::StationType::UNKNOWN_STATION }
 };
 
-class StationTypeEnum : public VantageEnum<VantageEepromConstants::StationType,sizeof(sstMappings)/sizeof(sstMappings[0])>  {
+class StationTypeEnum : public VantageEnum<EepromConstants::StationType,sizeof(sstMappings)/sizeof(sstMappings[0])>  {
 public:
     StationTypeEnum() {};
     virtual ~StationTypeEnum() {};
 
-    virtual const NameValuePair<VantageEepromConstants::StationType> * getMappings() const {
+    virtual const NameValuePair<EepromConstants::StationType> * getMappings() const {
         return sstMappings;
     }
 };
@@ -424,7 +424,7 @@ static StationTypeEnum stationTypeEnum;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
-operator<<(std::ostream & os, VantageEepromConstants::StationType value) {
+operator<<(std::ostream & os, EepromConstants::StationType value) {
     os << stationTypeEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
@@ -432,24 +432,24 @@ operator<<(std::ostream & os, VantageEepromConstants::StationType value) {
 /****************************************
  * RepeaterId Enumeration
  ****************************************/
-static const NameValuePair<VantageEepromConstants::RepeaterId> riMappings[] = {
-    { "No Repeater", VantageEepromConstants::RepeaterId::NO_REPEATER },
-    { "Repeater A", VantageEepromConstants::RepeaterId::REPEATER_A },
-    { "Repeater B", VantageEepromConstants::RepeaterId::REPEATER_B },
-    { "Repeater C", VantageEepromConstants::RepeaterId::REPEATER_C },
-    { "Repeater D", VantageEepromConstants::RepeaterId::REPEATER_D },
-    { "Repeater E", VantageEepromConstants::RepeaterId::REPEATER_E },
-    { "Repeater F", VantageEepromConstants::RepeaterId::REPEATER_F },
-    { "Repeater G", VantageEepromConstants::RepeaterId::REPEATER_G },
-    { "Repeater H", VantageEepromConstants::RepeaterId::REPEATER_H }
+static const NameValuePair<EepromConstants::RepeaterId> riMappings[] = {
+    { "No Repeater", EepromConstants::RepeaterId::NO_REPEATER },
+    { "Repeater A", EepromConstants::RepeaterId::REPEATER_A },
+    { "Repeater B", EepromConstants::RepeaterId::REPEATER_B },
+    { "Repeater C", EepromConstants::RepeaterId::REPEATER_C },
+    { "Repeater D", EepromConstants::RepeaterId::REPEATER_D },
+    { "Repeater E", EepromConstants::RepeaterId::REPEATER_E },
+    { "Repeater F", EepromConstants::RepeaterId::REPEATER_F },
+    { "Repeater G", EepromConstants::RepeaterId::REPEATER_G },
+    { "Repeater H", EepromConstants::RepeaterId::REPEATER_H }
 };
 
-class RepeaterIdEnum : public VantageEnum<VantageEepromConstants::RepeaterId,sizeof(riMappings)/sizeof(riMappings[0])>  {
+class RepeaterIdEnum : public VantageEnum<EepromConstants::RepeaterId,sizeof(riMappings)/sizeof(riMappings[0])>  {
 public:
     RepeaterIdEnum() {};
     virtual ~RepeaterIdEnum() {};
 
-    virtual const NameValuePair<VantageEepromConstants::RepeaterId> * getMappings() const {
+    virtual const NameValuePair<EepromConstants::RepeaterId> * getMappings() const {
         return riMappings;
     }
 };
@@ -459,7 +459,7 @@ static RepeaterIdEnum repeaterIdEnum;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 static std::ostream &
-operator<<(std::ostream & os, VantageEepromConstants::RepeaterId value) {
+operator<<(std::ostream & os, EepromConstants::RepeaterId value) {
     os << repeaterIdEnum.valueToString(value) << "(" << static_cast<int>(value) << ")";
     return os;
 }
@@ -694,6 +694,28 @@ public:
 };
 
 static SummaryPeriodEnum summaryPeriodEnum;
+
+/****************************************
+ * Secondary Wind Cup Size Enumeration
+ ****************************************/
+static const NameValuePair<EepromConstants::SecondaryWindCupSize> swcsMappings[] = {
+    { "Undefined", EepromConstants::SecondaryWindCupSize::UNDEFINED },
+    { "Small", EepromConstants::SecondaryWindCupSize::SMALL },
+    { "Large", EepromConstants::SecondaryWindCupSize::LARGE },
+    { "Other", EepromConstants::SecondaryWindCupSize::OTHER }
+};
+
+class SecondaryWindCupSizeEnum : public VantageEnum<EepromConstants::SecondaryWindCupSize,sizeof(swcsMappings)/sizeof(swcsMappings[0])>  {
+public:
+    SecondaryWindCupSizeEnum() {};
+    virtual ~SecondaryWindCupSizeEnum() {};
+
+    virtual const NameValuePair<EepromConstants::SecondaryWindCupSize> * getMappings() const {
+        return swcsMappings;
+    }
+};
+
+static SecondaryWindCupSizeEnum secondaryWindCupSizeEnum;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

@@ -72,7 +72,7 @@ class ArchiveManager;
  *         a dataset in a graph.
  */
 
-using namespace VantageEepromConstants;
+using namespace EepromConstants;
 using namespace ProtocolConstants;
 
 class Repeater {
@@ -190,7 +190,7 @@ public:
      */
     bool retrieveMonitoredStations(std::vector<StationId> & monitoredStations);
 
-    bool updateMonitoredStations(const StationId monitoredStations[]);
+    bool updateMonitoredStations(const std::vector<StationId> & monitoredStations);
 
     bool retrieveRetransmitId(StationId & retransmitId);
 

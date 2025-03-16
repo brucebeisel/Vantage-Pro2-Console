@@ -35,7 +35,6 @@ class CommandQueue;
 class VantageLogger;
 class CurrentWeather;
 class CurrentWeatherSocket;
-class VantageConfiguration;
 class StormArchiveManager;
 
 /**
@@ -47,12 +46,11 @@ public:
      * Constructor.
      * 
      * @param station             The object that handles the command protocols with the Vantage console
-     * @param configuration       The object that handles configuration changes and retrievals with the console
      * @param archiveManager      The archive manager that will maintain the file containing the raw archive packets
      * @param commandHandler      The command handler that will provide commands coming in from clients
      * @param stormArchiveManager The manager of the storm archive
      */
-    VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager, CommandHandler & commandHandler, StormArchiveManager & stormArchiveManager);
+    VantageDriver(VantageWeatherStation & station, ArchiveManager & archiveManager, CommandHandler & commandHandler, StormArchiveManager & stormArchiveManager);
 
     /**
      * Destructor.
@@ -160,7 +158,6 @@ private:
 
     bool                                    isConsoleConnected;
     VantageWeatherStation &                 station;
-    VantageConfiguration &                  configuration;
     ArchiveManager &                        archiveManager;
     CommandHandler &                        commandHandler;
     StormArchiveManager &                   stormArchiveManager;

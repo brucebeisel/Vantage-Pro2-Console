@@ -382,10 +382,11 @@ ConsoleCommandHandler::handleQueryBarometerCalibrationParameters(CommandData & c
 ////////////////////////////////////////////////////////////////////////////////
 void
 ConsoleCommandHandler::handleUpdateBarometerReadingAndElevation(CommandData & commandData) {
-    ostringstream oss;
+    const Pressure UNSET_PRESSURE(99.0);
+    const int      UNSET_ELEVATION = -9999;
 
-    Pressure baroReadingInHg = 99.0;
-    int elevationFeet = -9999;
+    Pressure baroReadingInHg(UNSET_PRESSURE);
+    int elevationFeet = UNSET_ELEVATION;
 
     for (auto arg : commandData.arguments) {
         if (arg.first == "elevation") {
@@ -396,7 +397,8 @@ ConsoleCommandHandler::handleUpdateBarometerReadingAndElevation(CommandData & co
         }
     }
 
-    if (baroReadingInHg == 99.0 || elevationFeet == -9999) {
+    ostringstream oss;
+    if (baroReadingInHg == UNSET_PRESSURE || elevationFeet == UNSET_ELEVATION) {
         oss << CommandData::buildFailureString("Missing argument");
     }
     else if (station.updateBarometerReadingAndElevation(baroReadingInHg, elevationFeet)) {
@@ -609,19 +611,19 @@ ConsoleCommandHandler::handleUpdateUnits(CommandData & commandData) {
         for (auto arg : commandData.arguments) {
             unitType = arg.second;
             if (arg.first == "baroUnits") {
-                unitsSettings.baroUnits = barometerUnitsEnum.stringToValue(arg.second);
+                unitsSettings.setBarometerUnits(barometerUnitsEnum.stringToValue(arg.second));
             }
             else if (arg.first == "temperatureUnits") {
-                unitsSettings.temperatureUnits = temperatureUnitsEnum.stringToValue(arg.second);
+                unitsSettings.setTemperatureUnits(temperatureUnitsEnum.stringToValue(arg.second));
             }
             else if (arg.first == "elevationUnits") {
-                unitsSettings.elevationUnits = elevationUnitsEnum.stringToValue(arg.second);
+                unitsSettings.setElevationUnits(elevationUnitsEnum.stringToValue(arg.second));
             }
             else if (arg.first == "rainUnits") {
-                unitsSettings.rainUnits = rainUnitsEnum.stringToValue(arg.second);
+                unitsSettings.setRainUnits(rainUnitsEnum.stringToValue(arg.second));
             }
             else if (arg.first == "windUnits") {
-                unitsSettings.windUnits = windUnitsEnum.stringToValue(arg.second);
+                unitsSettings.setWindUnits(windUnitsEnum.stringToValue(arg.second));
             }
             else {
                 oss << CommandData::buildFailureString("Invalid unit type argument " + arg.first);
@@ -651,15 +653,9 @@ void
 ConsoleCommandHandler::handleQueryUnits(CommandData & commandData) {
     ostringstream oss;
 
-    // TODO Can the UnitsSettings formatJSON() be used here?
     UnitsSettings unitsSettings;
     if (configurator.retrieveUnitsSettings(unitsSettings)) {
-        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { ";
-        oss << "\"baroUnits\" : \"" << barometerUnitsEnum.valueToString(unitsSettings.baroUnits) << "\", ";
-        oss << "\"temperatureUnits\" : \"" << temperatureUnitsEnum.valueToString(unitsSettings.temperatureUnits) << "\", ";
-        oss << "\"elevationUnits\" : \"" << elevationUnitsEnum.valueToString(unitsSettings.elevationUnits) << "\", ";
-        oss << "\"rainUnits\" : \"" << rainUnitsEnum.valueToString(unitsSettings.rainUnits) << "\", ";
-        oss << "\"windUnits\" : \"" << windUnitsEnum.valueToString(unitsSettings.windUnits) << "\" }";
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { " << unitsSettings.formatJSON() << " }";
     }
     else
         oss << CONSOLE_COMMAND_FAILURE_STRING;
@@ -671,10 +667,13 @@ ConsoleCommandHandler::handleQueryUnits(CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 ConsoleCommandHandler::handleQueryConfigurationData(CommandData & commandData) {
-    string data = configurator.retrieveAllConfigurationData();
+    ConsoleConfigurationData configData;
 
     ostringstream oss;
-    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << data;
+    if (configurator.retrieveAllConfigurationData(configData))
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : " << configData.formatJSON();
+    else
+        oss << CONSOLE_COMMAND_FAILURE_STRING;
 
     commandData.response.append(oss.str());
 }
@@ -683,8 +682,63 @@ ConsoleCommandHandler::handleQueryConfigurationData(CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 ConsoleCommandHandler::handleUpdateConfigurationData(CommandData & commandData) {
-    // TODO Implement this command
-    commandData.response.append(SUCCESS_TOKEN);
+    bool success = true;
+    ostringstream oss;
+
+    //
+    // First get the current configuration, then change the ones in the JSON command
+    //
+    ConsoleConfigurationData configData;
+    configurator.retrieveAllConfigurationData(configData);
+    string argString;
+
+    try {
+        for (auto arg : commandData.arguments) {
+            argString = arg.second;
+            if (arg.first == "baroUnits") {
+                configData.unitsSettings.setBarometerUnits(barometerUnitsEnum.stringToValue(arg.second));
+            }
+            else if (arg.first == "temperatureUnits") {
+                configData.unitsSettings.setTemperatureUnits(temperatureUnitsEnum.stringToValue(arg.second));
+            }
+            else if (arg.first == "elevationUnits") {
+                configData.unitsSettings.setElevationUnits(elevationUnitsEnum.stringToValue(arg.second));
+            }
+            else if (arg.first == "rainUnits") {
+                configData.unitsSettings.setRainUnits(rainUnitsEnum.stringToValue(arg.second));
+            }
+            else if (arg.first == "windUnits") {
+                configData.unitsSettings.setWindUnits(windUnitsEnum.stringToValue(arg.second));
+            }
+            else if (arg.first == "latitude") {
+                configData.positionData.latitude = atof(arg.second.c_str());
+            }
+            else if (arg.first == "longitude") {
+                configData.positionData.longitude = atof(arg.second.c_str());
+            }
+            else if (arg.first == "elevation") {
+                configData.positionData.elevation = atof(arg.second.c_str());
+            }
+            else {
+                oss << CommandData::buildFailureString("Invalid configuration type argument " + arg.first);
+                success = false;
+                break;
+            }
+        }
+    }
+    catch (const std::invalid_argument & e) {
+        success = false;
+        oss << CommandData::buildFailureString("Invalid unit value argument " + argString);
+    }
+
+    if (success) {
+        if (configurator.updateAllConfigurationData(configData))
+            oss << SUCCESS_TOKEN;
+        else
+            oss << CONSOLE_COMMAND_FAILURE_STRING;
+    }
+
+    commandData.response.append(oss.str());
 }
 
 

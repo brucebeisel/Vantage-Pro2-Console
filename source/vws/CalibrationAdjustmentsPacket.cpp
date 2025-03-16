@@ -49,7 +49,7 @@ CalibrationAdjustmentsPacket::~CalibrationAdjustmentsPacket() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CalibrationAdjustmentsPacket::decodePacket(const byte buffer[], size_t buflen) {
-    if (buflen < VantageEepromConstants::EE_CALIBRATION_DATA_SIZE)
+    if (buflen < EepromConstants::EE_CALIBRATION_DATA_SIZE)
         return false;
 
     int value8 = BitConverter::toInt8(buffer, INSIDE_TEMPERATURE_ADJUSTMENT_OFFSET);
@@ -90,7 +90,7 @@ CalibrationAdjustmentsPacket::decodePacket(const byte buffer[], size_t buflen) {
 bool
 CalibrationAdjustmentsPacket::encodePacket(byte buffer[], size_t buflen) const {
 
-    if (buflen < VantageEepromConstants::EE_CALIBRATION_DATA_SIZE)
+    if (buflen < EepromConstants::EE_CALIBRATION_DATA_SIZE)
         return false;
 
     int8 value = static_cast<int>(insideTemperatureAdjustment * TEMPERATURE_ADJUSTMENT_SCALE);
@@ -178,47 +178,6 @@ CalibrationAdjustmentsPacket::formatJSON() const {
     return oss.str();
 
 }
-
-/*
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-template<typename T>
-bool
-CalibrationAdjustmentsPacket::findJsonValue(json root, const string & name, T & value) {
-    bool success = false;
-    auto valuePtr = root.find(name);
-    if (valuePtr != root.end()) {
-        value = *valuePtr;
-        success = true;
-    }
-    else
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
-
-    return success;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-template<typename T>
-bool
-CalibrationAdjustmentsPacket::findJsonArray(json root, const string & name, T & array, int size) {
-    bool success = false;
-    auto jlist = root.find(name);
-    if (jlist != root.end()) {
-        if ((*jlist).size() == size) {
-            std::copy((*jlist).begin(), (*jlist).end(), array);
-            success = true;
-        }
-        else {
-            logger.log(VantageLogger::VANTAGE_WARNING) << "JSON array has the wrong size. Expecting " << size << " received " << (*jlist).size() << endl;
-        }
-    }
-    else
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Missing JSON element: " << name << endl;
-
-    return success;
-}
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

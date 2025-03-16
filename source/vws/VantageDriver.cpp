@@ -33,7 +33,6 @@
 #include "VantageDecoder.h"
 #include "VantageLogger.h"
 #include "VantageProtocolConstants.h"
-#include "VantageConfiguration.h"
 #include "Weather.h"
 
 using namespace std;
@@ -51,10 +50,9 @@ consoleThreadEntry(VantageDriver * driver) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfiguration & configuration, ArchiveManager & archiveManager,  CommandHandler & cmdHandler, StormArchiveManager & stormArchiveManager) :
+VantageDriver::VantageDriver(VantageWeatherStation & station, ArchiveManager & archiveManager,  CommandHandler & cmdHandler, StormArchiveManager & stormArchiveManager) :
                                                                 isConsoleConnected(false),
                                                                 station(station),
-                                                                configuration(configuration),
                                                                 archiveManager(archiveManager),
                                                                 commandHandler(cmdHandler),
                                                                 stormArchiveManager(stormArchiveManager),
@@ -83,11 +81,6 @@ VantageDriver::VantageDriver(VantageWeatherStation & station, VantageConfigurati
     // that it was just verified
     //
     lastArchiveVerifyTime = now;
-
-    //
-    // Add ourselves to be notified when the console connection status changes
-    //
-    addConnectionMonitor(*this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -185,18 +178,6 @@ VantageDriver::disconnectFromConsole() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageDriver::retrieveConfiguration() {
-
-
-    //
-    // Get the setup bits first so that the size of the rain bucket is saved before any LOOP packets
-    // or archive packets are received.
-    //
-    SetupBits setupBits;
-    if (!configuration.retrieveSetupBits(setupBits)) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to retrieve setup bits" << endl;
-        return false;
-    }
-
     ArchivePeriod period;
     station.retrieveArchivePeriod(period);
 
