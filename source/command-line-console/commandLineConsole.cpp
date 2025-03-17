@@ -90,14 +90,37 @@ main(int argc, char *argv[]) {
     while (1) {
         int commandNumber;
         cout << "Choose a command" << endl;
+        cout << "    0 - Exit" << endl;
         cout << "    1 - Query configuration" << endl;
         cout << "    2 - Query console diagnostics" << endl;
+        cout << "    3 - Query console type" << endl;
+        cout << "    4 - Query console firmware" << endl;
         cin >> commandNumber;
 
         CommandData commandData;
+        commandData.response = "";
         switch (commandNumber) {
+            case 0:
+                exit(0);
+
             case 1:
                 cmd.handleQueryConfigurationData(commandData);
+                cout << commandData.response << endl;
+                break;
+
+            case 2:
+                cmd.handleQueryConsoleDiagnostics(commandData);
+                cout << commandData.response << endl;
+                break;
+
+            case 3:
+                cmd.handleQueryConsoleType(commandData);
+                cout << commandData.response << endl;
+                break;
+
+            case 4:
+                cmd.handleQueryFirmware(commandData);
+                cout << commandData.response << endl;
                 break;
         }
     }

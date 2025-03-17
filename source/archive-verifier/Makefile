@@ -13,19 +13,19 @@ OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 VWSOBJS = \
 	$(VWSOBJDIR)/ArchivePacket.o \
 	$(VWSOBJDIR)/ArchiveManager.o \
+	$(VWSOBJDIR)/BitConverter.o \
+	$(VWSOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSOBJDIR)/ConsoleDiagnosticReport.o \
-	$(VWSOBJDIR)/Weather.o \
 	$(VWSOBJDIR)/DateTimeFields.o \
+	$(VWSOBJDIR)/HiLowPacket.o \
+	$(VWSOBJDIR)/LoopPacket.o \
+	$(VWSOBJDIR)/Loop2Packet.o \
+	$(VWSOBJDIR)/SerialPort.o \
+	$(VWSOBJDIR)/VantageCRC.o \
 	$(VWSOBJDIR)/VantageDecoder.o \
 	$(VWSOBJDIR)/VantageLogger.o \
 	$(VWSOBJDIR)/VantageWeatherStation.o \
-	$(VWSOBJDIR)/LoopPacket.o \
-	$(VWSOBJDIR)/Loop2Packet.o \
-	$(VWSOBJDIR)/CalibrationAdjustmentsPacket.o \
-	$(VWSOBJDIR)/HiLowPacket.o \
-	$(VWSOBJDIR)/VantageCRC.o \
-	$(VWSOBJDIR)/SerialPort.o \
-	$(VWSOBJDIR)/BitConverter.o
+	$(VWSOBJDIR)/Weather.o
 
 
 $(OBJDIR)/%.o : %.cpp

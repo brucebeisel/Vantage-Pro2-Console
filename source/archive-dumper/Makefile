@@ -11,12 +11,12 @@ OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
 VWSOBJS = \
+	$(VWSOBJDIR)/ArchivePacket.o \
 	$(VWSOBJDIR)/BitConverter.o \
-	$(VWSOBJDIR)/Weather.o \
-	$(VWSOBJDIR)/VantageDecoder.o \
 	$(VWSOBJDIR)/DateTimeFields.o \
+	$(VWSOBJDIR)/VantageDecoder.o \
 	$(VWSOBJDIR)/VantageLogger.o \
-	$(VWSOBJDIR)/ArchivePacket.o
+	$(VWSOBJDIR)/Weather.o
 
 
 $(OBJDIR)/%.o : %.cpp

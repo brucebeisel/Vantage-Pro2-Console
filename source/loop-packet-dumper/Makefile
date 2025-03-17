@@ -12,15 +12,15 @@ OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
 VWSOBJS = \
 	$(VWSOBJDIR)/BitConverter.o \
+	$(VWSOBJDIR)/CurrentWeather.o \
 	$(VWSOBJDIR)/DateTimeFields.o \
-	$(VWSOBJDIR)/Weather.o \
-	$(VWSOBJDIR)/VantageDecoder.o \
-	$(VWSOBJDIR)/VantageLogger.o \
+	$(VWSOBJDIR)/ForecastRule.o \
 	$(VWSOBJDIR)/LoopPacket.o \
 	$(VWSOBJDIR)/Loop2Packet.o \
-	$(VWSOBJDIR)/CurrentWeather.o \
-	$(VWSOBJDIR)/ForecastRule.o \
-	$(VWSOBJDIR)/VantageCRC.o
+	$(VWSOBJDIR)/VantageCRC.o \
+	$(VWSOBJDIR)/VantageDecoder.o \
+	$(VWSOBJDIR)/VantageLogger.o \
+	$(VWSOBJDIR)/Weather.o
 
 
 $(OBJDIR)/%.o : %.cpp

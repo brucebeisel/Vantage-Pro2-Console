@@ -32,16 +32,16 @@ DOMWINDOBJS=\
 	$(VWSTESTOBJDIR)/Weather.o 
 
 DOMWINDINJOBJS=\
-	$(VWSTESTOBJDIR)/DominantWindDirections.o \
+	$(VWSTESTOBJDIR)/BitConverter.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
-	$(VWSTESTOBJDIR)/WindDirectionSlice.o \
+	$(VWSTESTOBJDIR)/DominantWindDirections.o \
 	$(VWSTESTOBJDIR)/LoopPacket.o \
 	$(VWSTESTOBJDIR)/Loop2Packet.o \
-	$(VWSTESTOBJDIR)/VantageDecoder.o \
 	$(VWSTESTOBJDIR)/VantageCRC.o \
-	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
-	$(VWSTESTOBJDIR)/Weather.o 
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/WindDirectionSlice.o
 	
 ENUMOBJS=\
 	$(VWSTESTOBJDIR)/Weather.o 
@@ -50,117 +50,119 @@ BITCONVERTEROBJS= \
 	$(VWSTESTOBJDIR)/BitConverter.o 
 
 SUMMARYOBJS= \
-	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
+	$(VWSTESTOBJDIR)/ConsoleDiagnosticReport.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
-	$(VWSTESTOBJDIR)/VantageDecoder.o \
-	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
-	$(VWSTESTOBJDIR)/VantageCRC.o \
+	$(VWSTESTOBJDIR)/HiLowPacket.o \
 	$(VWSTESTOBJDIR)/LoopPacket.o \
 	$(VWSTESTOBJDIR)/Loop2Packet.o \
-	$(VWSTESTOBJDIR)/HiLowPacket.o \
-	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSTESTOBJDIR)/SerialPort.o \
 	$(VWSTESTOBJDIR)/SummaryReport.o \
 	$(VWSTESTOBJDIR)/UnitConverter.o \
+	$(VWSTESTOBJDIR)/VantageCRC.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
+	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/WindRoseData.o 
         
 	
 ARCHIVEMANAGEROBJS= \
-	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
-	$(VWSTESTOBJDIR)/VantageDecoder.o \
-	$(VWSTESTOBJDIR)/UnitConverter.o \
-	$(VWSTESTOBJDIR)/VantageCRC.o \
+	$(VWSTESTOBJDIR)/HiLowPacket.o \
 	$(VWSTESTOBJDIR)/LoopPacket.o \
 	$(VWSTESTOBJDIR)/Loop2Packet.o \
-	$(VWSTESTOBJDIR)/HiLowPacket.o \
-	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
-	$(VWSTESTOBJDIR)/SerialPort.o
+	$(VWSTESTOBJDIR)/UnitConverter.o \
+	$(VWSTESTOBJDIR)/VantageCRC.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/SerialPort.o \
+	$(VWSTESTOBJDIR)/Weather.o
 	
 ARCHIVEPACKETOBJS= \
-	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
-	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
-	$(VWSTESTOBJDIR)/VantageDecoder.o
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/Weather.o 
 	
 COMMANDQUEUEOBJS= \
-	$(VWSTESTOBJDIR)/CommandQueue.o \
 	$(VWSTESTOBJDIR)/CommandData.o \
-	$(VWSTESTOBJDIR)/Weather.o \
-	$(VWSTESTOBJDIR)/VantageLogger.o
+	$(VWSTESTOBJDIR)/CommandQueue.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/Weather.o 
 
 COMMANDSOCKETOBJS= \
-	$(VWSTESTOBJDIR)/CommandSocket.o \
 	$(VWSTESTOBJDIR)/CommandData.o \
+	$(VWSTESTOBJDIR)/CommandSocket.o \
 	$(VWSTESTOBJDIR)/CommandHandler.o \
 	$(VWSTESTOBJDIR)/CommandQueue.o \
-	$(VWSTESTOBJDIR)/Weather.o \
-	$(VWSTESTOBJDIR)/VantageLogger.o
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/Weather.o 
 
 DATACOMMANDHANDLEROBJS= \
-	$(VWSTESTOBJDIR)/BitConverter.o \
-	$(VWSTESTOBJDIR)/DataCommandHandler.o \
-	$(VWSTESTOBJDIR)/CommandHandler.o \
-	$(VWSTESTOBJDIR)/CommandData.o \
-	$(VWSTESTOBJDIR)/DominantWindDirections.o \
-	$(VWSTESTOBJDIR)/WindDirectionSlice.o \
-	$(VWSTESTOBJDIR)/StormArchiveManager.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
-	$(VWSTESTOBJDIR)/CurrentWeatherManager.o \
-	$(VWSTESTOBJDIR)/CurrentWeather.o \
-	$(VWSTESTOBJDIR)/CommandQueue.o \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
+	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
+	$(VWSTESTOBJDIR)/CommandData.o \
+	$(VWSTESTOBJDIR)/CommandHandler.o \
+	$(VWSTESTOBJDIR)/CommandQueue.o \
+	$(VWSTESTOBJDIR)/CurrentWeather.o \
+	$(VWSTESTOBJDIR)/CurrentWeatherManager.o \
+	$(VWSTESTOBJDIR)/CurrentWeatherSocket.o \
+	$(VWSTESTOBJDIR)/DataCommandHandler.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
+	$(VWSTESTOBJDIR)/DominantWindDirections.o \
+	$(VWSTESTOBJDIR)/ForecastRule.o \
+	$(VWSTESTOBJDIR)/GraphDataRetriever.o \
+	$(VWSTESTOBJDIR)/HiLowPacket.o \
 	$(VWSTESTOBJDIR)/LoopPacket.o \
 	$(VWSTESTOBJDIR)/Loop2Packet.o \
-	$(VWSTESTOBJDIR)/StormData.o \
-	$(VWSTESTOBJDIR)/DateTimeFields.o \
-	$(VWSTESTOBJDIR)/VantageDecoder.o \
-	$(VWSTESTOBJDIR)/VantageCRC.o \
-	$(VWSTESTOBJDIR)/UnitConverter.o \
-	$(VWSTESTOBJDIR)/SummaryReport.o \
-	$(VWSTESTOBJDIR)/WindRoseData.o \
-	$(VWSTESTOBJDIR)/Weather.o \
-	$(VWSTESTOBJDIR)/GraphDataRetriever.o \
-	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
-	$(VWSTESTOBJDIR)/ForecastRule.o \
 	$(VWSTESTOBJDIR)/SerialPort.o \
-	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
-	$(VWSTESTOBJDIR)/HiLowPacket.o \
-	$(VWSTESTOBJDIR)/CurrentWeatherSocket.o \
-	$(VWSTESTOBJDIR)/VantageLogger.o
-
-LOGGEROBJS= $(VWSTESTOBJDIR)/Weather.o \
-	$(VWSTESTOBJDIR)/VantageLogger.o
-
-DATETIMEFIELDSOBJS= \
-	$(VWSTESTOBJDIR)/Weather.o \
-	$(VWSTESTOBJDIR)/DateTimeFields.o
-	
-STORMDATAOBJS= \
-	$(VWSTESTOBJDIR)/StormData.o \
-	$(VWSTESTOBJDIR)/Weather.o \
-	$(VWSTESTOBJDIR)/DateTimeFields.o
-	
-STORMARCHIVEMANAGEROBJS= \
 	$(VWSTESTOBJDIR)/StormArchiveManager.o \
 	$(VWSTESTOBJDIR)/StormData.o \
-	$(VWSTESTOBJDIR)/SerialPort.o \
-	$(VWSTESTOBJDIR)/Weather.o \
-	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/SummaryReport.o \
+	$(VWSTESTOBJDIR)/UnitConverter.o \
+	$(VWSTESTOBJDIR)/VantageCRC.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
+	$(VWSTESTOBJDIR)/Weather.o \
+	$(VWSTESTOBJDIR)/WindDirectionSlice.o \
+	$(VWSTESTOBJDIR)/WindRoseData.o
+
+LOGGEROBJS= \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+    $(VWSTESTOBJDIR)/Weather.o
+
+DATETIMEFIELDSOBJS= \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
+	$(VWSTESTOBJDIR)/Weather.o
+	
+STORMDATAOBJS= \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
+	$(VWSTESTOBJDIR)/StormData.o \
+	$(VWSTESTOBJDIR)/Weather.o
+	
+STORMARCHIVEMANAGEROBJS= \
 	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
 	$(VWSTESTOBJDIR)/GraphDataRetriever.o \
-	$(VWSTESTOBJDIR)/DateTimeFields.o
+	$(VWSTESTOBJDIR)/SerialPort.o \
+	$(VWSTESTOBJDIR)/StormArchiveManager.o \
+	$(VWSTESTOBJDIR)/StormData.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/Weather.o
 	
 all: ArchiveManagerTest \
 	ArchivePacketTest \

@@ -1,4 +1,4 @@
-Vantage Pro2 Console project is software that creates a virtual console for a Davis Instruments Vantage Pro2 console.This project provides a command interface to the console and a data collector.
+Vantage Pro2 Console project (Git https://github.com/brucebeisel/Vantage-Pro2-Console.git) is software that creates a virtual console for a Davis Instruments Vantage Pro2 console.This project provides a command interface to the console and a data collector.
 
 The driver part has the following main functions:
     1. Publish and log the current weather data being received by the console via the LOOP and LOOP2 packets
@@ -12,4 +12,4 @@ A Davis Instruments Vantage Pro2 console with a data logger (6510USB) is require
 also include the Vantage Vue console.
     
 This software is designed to be built and run on a Raspberry Pi. A Raspberry Pi 4 Version B or 5 is recommended. This software is not very CPU
-intensive, so any configuration should be fine.
+intensive, so any configuration should be fine.This software is easily paired with the Vantage Console Node project (Git https://github.com/brucebeisel/Vantage-Console-Node.git) that providesa web interface to this software.
