@@ -587,7 +587,7 @@ ConsoleConfigurationData::formatJSON() const {
         << unitsSettings.formatJSON() << ","
         << setupBits.formatJSON() << ","
         << " \"miscellaneous\" : {"
-        << " \"secondaryWindCupSize\" : " << secondaryWindCupSizeEnum.valueToString(secondaryWindCupSize)
+        << " \"secondaryWindCupSize\" : \"" << secondaryWindCupSizeEnum.valueToString(secondaryWindCupSize) << "\""
         << ", \"rainSeasonStartMonth\" : \"" << monthEnum.valueToString(rainSeasonStartMonth) << "\""
         << ", \"retransmitId\" : " << retransmitId
         << ", \"logFinalTemperature\" : " << logFinalTemperature

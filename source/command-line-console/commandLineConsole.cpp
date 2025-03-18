@@ -131,21 +131,27 @@ main(int argc, char *argv[]) {
             continue;
         }
 
-        int cmdIndex = commandNumber - 1;
+        if (commandNumber == 0)
+            exit(0);
+
+        commandNumber--;
 
         CommandData commandData;
-        commandData.commandName = commands[cmdIndex].commandName;
+        commandData.commandName = commands[commandNumber].commandName;
         commandData.response = "";
         commandData.loadResponseTemplate();
-        if (cmdIndex < 0)
-            exit(0);
-        else
-            (cmd.*commands[cmdIndex].handler)(commandData);
 
+        (cmd.*commands[commandNumber].handler)(commandData);
+        commandData.response.append("}");
 
         if (!json::accept(commandData.response))
             cerr << "Command response is not valid JSON: '" << commandData.response << "'" << endl;
-        else
-            cout << commandData.response << endl;
+        else {
+            json dom = json::parse(commandData.response);
+            cout << "--------------------" << endl;
+            cout << setw(4) << dom << endl;
+            cout << "--------------------" << endl;
+        }
+
     }
 }
