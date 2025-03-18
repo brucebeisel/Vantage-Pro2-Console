@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "string.h"
 #include <iostream>
-#include <iomanip>
-#include <fstream>
 
+#include "json.hpp"
 #include "VantageWeatherStation.h"
 #include "SerialPort.h"
 #include "ConsoleCommandHandler.h"
@@ -30,36 +28,65 @@
 
 using namespace std;
 using namespace vws;
+using namespace nlohmann;
 
-static const char USAGE_MESSAGE[] = "Usage: command-line-console [-v] [-b] [-t]  <device name>";
+static const char USAGE_MESSAGE[] = "Usage: command-line-console <device name>";
+
+struct Command {
+    std::string commandName;
+    std::string printCommandName;
+    void (ConsoleCommandHandler::*handler)(CommandData  & cd);
+};
+
+static const Command commands[] = {
+    "Query configuration",       "query-configuration-data", &ConsoleCommandHandler::handleQueryConfigurationData,
+    "Query console diagnostics", "console-diagnostics",      &ConsoleCommandHandler::handleQueryConsoleDiagnostics,
+    "Query archive period",      "query-archive-period",     &ConsoleCommandHandler::handleQueryArchivePeriod,
+    "Query console type",        "query-console-type",       &ConsoleCommandHandler::handleQueryConsoleType,
+    "Query console firmware",    "query-firmware",           &ConsoleCommandHandler::handleQueryFirmware,
+    "Query receiver list",       "query-receiver-list",      &ConsoleCommandHandler::handleQueryReceiverList,
+    "Query units",               "query-units",              &ConsoleCommandHandler::handleQueryUnits,
+    "Query console time",        "query-console-time",       &ConsoleCommandHandler::handleQueryConsoleTime,
+    "Query Hi/Lows",             "query-highlows",           &ConsoleCommandHandler::handleQueryHighLows,
+    "Query alarm thresholds",    "query-alarm-thresholds",   &ConsoleCommandHandler::handleQueryAlarmThresholds,
+};
+
+/*
+    "backlight",                     &ConsoleCommandHandler::handleBacklight,                           NULL,
+    "clear-active-alarms",           NULL,                                                              &VantageWeatherStation::clearActiveAlarms,
+    "clear-alarm-thresholds",        NULL,                                                              &VantageWeatherStation::clearAlarmThresholds,
+    "clear-console-archive",         NULL,                                                              &VantageWeatherStation::clearArchive,
+    "clear-calibration-offsets",     NULL,                                                              &VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets,
+    "clear-cumulative-values",       &ConsoleCommandHandler::handleClearCumulativeValue,                NULL,
+    "clear-current-data",            NULL,                                                              &VantageWeatherStation::clearCurrentData,
+    "clear-graph-points",            NULL,                                                              &VantageWeatherStation::clearGraphPoints,
+    "clear-high-values",             &ConsoleCommandHandler::handleClearHighValues,                     NULL,
+    "clear-low-values",              &ConsoleCommandHandler::handleClearLowValues,                      NULL,
+    "get-timezones",                 &ConsoleCommandHandler::handleGetTimezones,                        NULL,
+    "query-active-alarms",           &ConsoleCommandHandler::handleQueryActiveAlarms,                   NULL,
+    "query-baro-cal-params",         &ConsoleCommandHandler::handleQueryBarometerCalibrationParameters, NULL,
+    "query-cal-adjustments",         &ConsoleCommandHandler::handleQueryCalibrationAdjustments,         NULL,
+    "query-network-config",          &ConsoleCommandHandler::handleQueryNetworkConfiguration,           NULL,
+    "query-network-status",          &ConsoleCommandHandler::handleQueryNetworkStatus,                  NULL,
+    "query-today-network-status",    &ConsoleCommandHandler::handleQueryTodayNetworkStatus,             NULL,
+    "put-year-rain",                 &ConsoleCommandHandler::handlePutYearRain,                         NULL,
+    "put-year-et",                   &ConsoleCommandHandler::handlePutYearET,                           NULL,
+    "start-archiving",               NULL,                                                              &VantageWeatherStation::startArchiving,
+    "stop-archiving",                NULL,                                                              &VantageWeatherStation::stopArchiving,
+    "update-alarm-thresholds",       &ConsoleCommandHandler::handleUpdateAlarmThresholds,               NULL,
+    "update-archive-period",         &ConsoleCommandHandler::handleUpdateArchivePeriod,                 NULL,
+    "update-baro-reading-elevation", &ConsoleCommandHandler::handleUpdateBarometerReadingAndElevation,  NULL,
+    "update-cal-adjustments",        &ConsoleCommandHandler::handleUpdateCalibrationAdjustments,        NULL,
+    "update-configuration-data",     &ConsoleCommandHandler::handleUpdateConfigurationData,             NULL,
+    "update-network-config",         &ConsoleCommandHandler::handleUpdateNetworkConfiguration,          NULL,
+    "update-units",                  &ConsoleCommandHandler::handleUpdateUnits,                         NULL
+    */
 
 int
 main(int argc, char *argv[]) {
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
 
-    bool verbose = false;
-    bool dumpBinary = false;
     char *device = NULL;
-    bool terse = false;
-
-    /*
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '-') {
-            if (strcmp(argv[i], "-v") == 0)
-                verbose = true;
-            else if (strcmp(argv[i], "-b") == 0)
-                dumpBinary = true;
-            else if (strcmp(argv[i], "-t") == 0)
-                terse = true;
-            else  {
-                cerr << USAGE_MESSAGE << endl;
-                exit(1);
-            }
-        }
-        else
-            device = argv[i];
-    }
-    */
 
     if (argc < 2) {
         cerr << USAGE_MESSAGE << endl;
@@ -91,38 +118,34 @@ main(int argc, char *argv[]) {
         int commandNumber;
         cout << "Choose a command" << endl;
         cout << "    0 - Exit" << endl;
-        cout << "    1 - Query configuration" << endl;
-        cout << "    2 - Query console diagnostics" << endl;
-        cout << "    3 - Query console type" << endl;
-        cout << "    4 - Query console firmware" << endl;
+        int cmdNumber = 1;
+        for (auto cmd : commands) {
+            cout << "    " << cmdNumber << " - " << cmd.printCommandName << endl;
+            cmdNumber++;
+        }
+        cout << ": ";
         cin >> commandNumber;
 
-        CommandData commandData;
-        commandData.response = "";
-        switch (commandNumber) {
-            case 0:
-                exit(0);
-
-            case 1:
-                cmd.handleQueryConfigurationData(commandData);
-                cout << commandData.response << endl;
-                break;
-
-            case 2:
-                cmd.handleQueryConsoleDiagnostics(commandData);
-                cout << commandData.response << endl;
-                break;
-
-            case 3:
-                cmd.handleQueryConsoleType(commandData);
-                cout << commandData.response << endl;
-                break;
-
-            case 4:
-                cmd.handleQueryFirmware(commandData);
-                cout << commandData.response << endl;
-                break;
+        if (commandNumber > sizeof(commands) / sizeof(commands[0])) {
+            cout << "Invalid command number" << endl;
+            continue;
         }
-    }
 
+        int cmdIndex = commandNumber - 1;
+
+        CommandData commandData;
+        commandData.commandName = commands[cmdIndex].commandName;
+        commandData.response = "";
+        commandData.loadResponseTemplate();
+        if (cmdIndex < 0)
+            exit(0);
+        else
+            (cmd.*commands[cmdIndex].handler)(commandData);
+
+
+        if (!json::accept(commandData.response))
+            cerr << "Command response is not valid JSON: '" << commandData.response << "'" << endl;
+        else
+            cout << commandData.response << endl;
+    }
 }
