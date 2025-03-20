@@ -777,6 +777,7 @@ ConsoleCommandHandler::handleQueryStationList(CommandData & commandData) {
     if (network.retrieveStationList(stationList)) {
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
         oss << stationList.formatJSON();
+        commandData.response.append(oss.str());
     }
     else
         commandData.response.append(CONSOLE_COMMAND_FAILURE_STRING);
@@ -799,6 +800,7 @@ ConsoleCommandHandler::handleQueryMonitoredStations(CommandData & commandData) {
         }
 
         oss << "] }";
+        commandData.response.append(oss.str());
     }
     else
         commandData.response.append(CONSOLE_COMMAND_FAILURE_STRING);

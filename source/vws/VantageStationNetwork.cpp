@@ -90,13 +90,13 @@ std::string
 StationData::formatJSON() const {
     ostringstream oss;
 
-    oss << "\"station\" : { "
+    oss << " { \"station\" : { "
         << "\"ID\" : " << stationId << ", "
         << "\"Type\" : \"" << stationTypeEnum.valueToString(stationType) << "\", "
-        << "\"Repeater ID\" : " << repeaterId << ", "
+        << "\"Repeater ID\" : \"" << repeaterIdEnum.valueToString(repeaterId) << "\", "
         << "\"Extra Temperature Index\" :" << extraTemperatureIndex << ", "
         << "\"Extra Humidity Index\" :" << extraHumidityIndex
-        << " }";
+        << " } }";
 
     return oss.str();
 }
@@ -108,15 +108,15 @@ StationList::StationList() : logger(VantageLogger::getLogger("StationList")) {
         stationData[i].stationId = i + 1;
         stationData[i].repeaterId = RepeaterId::NO_REPEATER;
         stationData[i].stationType = StationType::NO_STATION;
-        stationData[i].extraTemperatureIndex = 0;
-        stationData[i].extraHumidityIndex = 0;
+        stationData[i].extraTemperatureIndex = StationData::NO_EXTRA_VALUE_INDEX;
+        stationData[i].extraHumidityIndex = StationData::NO_EXTRA_VALUE_INDEX;
     }
 
     invalidStation.stationId = 0;
     invalidStation.repeaterId = RepeaterId::NO_REPEATER;
     invalidStation.stationType = StationType::NO_STATION;
-    invalidStation.extraTemperatureIndex = 0;
-    invalidStation.extraHumidityIndex = 0;
+    invalidStation.extraTemperatureIndex = StationData::NO_EXTRA_VALUE_INDEX;
+    invalidStation.extraHumidityIndex = StationData::NO_EXTRA_VALUE_INDEX;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ std::string
 StationList::formatJSON() const {
     ostringstream oss;
 
-    oss << "\"stationList\" : [ ";
+    oss << "{ \"stationList\" : [ ";
     for (int i = 0; i < MAX_STATIONS; i++) {
         if (i != 0)
             oss << ", ";
@@ -208,7 +208,7 @@ StationList::formatJSON() const {
         oss << stationData[i].formatJSON();
 
     }
-    oss << " ] ";
+    oss << " ] }";
 
     return oss.str();
 }

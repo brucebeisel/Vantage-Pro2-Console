@@ -45,6 +45,7 @@ static const Command commands[] = {
     "Query console type",          "query-console-type",       &ConsoleCommandHandler::handleQueryConsoleType,
     "Query console firmware",      "query-firmware",           &ConsoleCommandHandler::handleQueryFirmware,
     "Query monitored stations",    "query-used-transmitters",  &ConsoleCommandHandler::handleQueryMonitoredStations,
+    "Query station list",          "query-station-list",       &ConsoleCommandHandler::handleQueryStationList,
     "Query receiver list",         "query-receiver-list",      &ConsoleCommandHandler::handleQueryReceiverList,
     "Query units",                 "query-units",              &ConsoleCommandHandler::handleQueryUnits,
     "Query console time",          "query-console-time",       &ConsoleCommandHandler::handleQueryConsoleTime,
