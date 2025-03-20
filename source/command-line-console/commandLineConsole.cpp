@@ -39,16 +39,18 @@ struct Command {
 };
 
 static const Command commands[] = {
-    "Query configuration",       "query-configuration-data", &ConsoleCommandHandler::handleQueryConfigurationData,
-    "Query console diagnostics", "console-diagnostics",      &ConsoleCommandHandler::handleQueryConsoleDiagnostics,
-    "Query archive period",      "query-archive-period",     &ConsoleCommandHandler::handleQueryArchivePeriod,
-    "Query console type",        "query-console-type",       &ConsoleCommandHandler::handleQueryConsoleType,
-    "Query console firmware",    "query-firmware",           &ConsoleCommandHandler::handleQueryFirmware,
-    "Query receiver list",       "query-receiver-list",      &ConsoleCommandHandler::handleQueryReceiverList,
-    "Query units",               "query-units",              &ConsoleCommandHandler::handleQueryUnits,
-    "Query console time",        "query-console-time",       &ConsoleCommandHandler::handleQueryConsoleTime,
-    "Query Hi/Lows",             "query-highlows",           &ConsoleCommandHandler::handleQueryHighLows,
-    "Query alarm thresholds",    "query-alarm-thresholds",   &ConsoleCommandHandler::handleQueryAlarmThresholds,
+    "Query configuration",         "query-configuration-data", &ConsoleCommandHandler::handleQueryConfigurationData,
+    "Query console diagnostics",   "console-diagnostics",      &ConsoleCommandHandler::handleQueryConsoleDiagnostics,
+    "Query archive period",        "query-archive-period",     &ConsoleCommandHandler::handleQueryArchivePeriod,
+    "Query console type",          "query-console-type",       &ConsoleCommandHandler::handleQueryConsoleType,
+    "Query console firmware",      "query-firmware",           &ConsoleCommandHandler::handleQueryFirmware,
+    "Query monitored stations",    "query-used-transmitters",  &ConsoleCommandHandler::handleQueryMonitoredStations,
+    "Query receiver list",         "query-receiver-list",      &ConsoleCommandHandler::handleQueryReceiverList,
+    "Query units",                 "query-units",              &ConsoleCommandHandler::handleQueryUnits,
+    "Query console time",          "query-console-time",       &ConsoleCommandHandler::handleQueryConsoleTime,
+    "Query Hi/Lows",               "query-highlows",           &ConsoleCommandHandler::handleQueryHighLows,
+    "Query alarm thresholds",      "query-alarm-thresholds",   &ConsoleCommandHandler::handleQueryAlarmThresholds,
+    "Query network configuration", "query-network-config",     &ConsoleCommandHandler::handleQueryNetworkConfiguration,
 };
 
 /*
@@ -66,7 +68,6 @@ static const Command commands[] = {
     "query-active-alarms",           &ConsoleCommandHandler::handleQueryActiveAlarms,                   NULL,
     "query-baro-cal-params",         &ConsoleCommandHandler::handleQueryBarometerCalibrationParameters, NULL,
     "query-cal-adjustments",         &ConsoleCommandHandler::handleQueryCalibrationAdjustments,         NULL,
-    "query-network-config",          &ConsoleCommandHandler::handleQueryNetworkConfiguration,           NULL,
     "query-network-status",          &ConsoleCommandHandler::handleQueryNetworkStatus,                  NULL,
     "query-today-network-status",    &ConsoleCommandHandler::handleQueryTodayNetworkStatus,             NULL,
     "put-year-rain",                 &ConsoleCommandHandler::handlePutYearRain,                         NULL,

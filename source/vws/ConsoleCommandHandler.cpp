@@ -72,6 +72,8 @@ static const ConsoleCommandEntry consoleCommandList[] = {
     "query-network-config",          &ConsoleCommandHandler::handleQueryNetworkConfiguration,           NULL,
     "query-network-status",          &ConsoleCommandHandler::handleQueryNetworkStatus,                  NULL,
     "query-receiver-list",           &ConsoleCommandHandler::handleQueryReceiverList,                   NULL,
+    "query-station-list",            &ConsoleCommandHandler::handleQueryStationList,                    NULL,
+    "query-used-transmitters",       &ConsoleCommandHandler::handleQueryMonitoredStations,              NULL,
     "query-today-network-status",    &ConsoleCommandHandler::handleQueryTodayNetworkStatus,             NULL,
     "query-units",                   &ConsoleCommandHandler::handleQueryUnits,                          NULL,
     "put-year-rain",                 &ConsoleCommandHandler::handlePutYearRain,                         NULL,
@@ -763,6 +765,43 @@ ConsoleCommandHandler::handleGetTimezones(CommandData & commandData) {
     oss << "] }";
 
     commandData.response.append(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+ConsoleCommandHandler::handleQueryStationList(CommandData & commandData) {
+    ostringstream oss;
+    StationList stationList;
+
+    if (network.retrieveStationList(stationList)) {
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : ";
+        oss << stationList.formatJSON();
+    }
+    else
+        commandData.response.append(CONSOLE_COMMAND_FAILURE_STRING);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+ConsoleCommandHandler::handleQueryMonitoredStations(CommandData & commandData) {
+    ostringstream oss;
+    vector<StationId> monitoredStations;
+
+    if (network.retrieveMonitoredStations(monitoredStations)) {
+        oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"monitoredStations\" : [";
+
+        bool first = true;
+        for (auto id : monitoredStations) {
+            if (!first) oss << ", "; first = false;
+            oss << id;
+        }
+
+        oss << "] }";
+    }
+    else
+        commandData.response.append(CONSOLE_COMMAND_FAILURE_STRING);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

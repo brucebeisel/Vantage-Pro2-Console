@@ -86,6 +86,135 @@ StationData::decode(StationId id, const byte buffer[], int offset) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+std::string
+StationData::formatJSON() const {
+    ostringstream oss;
+
+    oss << "\"station\" : { "
+        << "\"ID\" : " << stationId << ", "
+        << "\"Type\" : \"" << stationTypeEnum.valueToString(stationType) << "\", "
+        << "\"Repeater ID\" : " << repeaterId << ", "
+        << "\"Extra Temperature Index\" :" << extraTemperatureIndex << ", "
+        << "\"Extra Humidity Index\" :" << extraHumidityIndex
+        << " }";
+
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+StationList::StationList() : logger(VantageLogger::getLogger("StationList")) {
+    for (int i = 0; i < MAX_STATIONS; i++) {
+        stationData[i].stationId = i + 1;
+        stationData[i].repeaterId = RepeaterId::NO_REPEATER;
+        stationData[i].stationType = StationType::NO_STATION;
+        stationData[i].extraTemperatureIndex = 0;
+        stationData[i].extraHumidityIndex = 0;
+    }
+
+    invalidStation.stationId = 0;
+    invalidStation.repeaterId = RepeaterId::NO_REPEATER;
+    invalidStation.stationType = StationType::NO_STATION;
+    invalidStation.extraTemperatureIndex = 0;
+    invalidStation.extraHumidityIndex = 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+StationList::~StationList() {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const StationData &
+StationList::getStationByIndex(int index) const {
+    if (index < 0 || index >= MAX_STATIONS) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to get station data at index " << index << ". Index out of range" << endl;
+        return invalidStation;
+    }
+    else
+        return stationData[index];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const StationData &
+StationList::getStationById(StationId id) const {
+    return getStationByIndex(id - 1);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+const StationData &
+StationList::operator[](int index) {
+    return getStationByIndex(index);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+StationList::setStation(const StationData & sd) {
+    if (sd.stationId >= MIN_STATION_ID && sd.stationId <= MAX_STATION_ID) {
+        stationData[sd.stationId - 1] = sd;
+        return true;
+    }
+    else {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to set station data with ID " << sd.stationId << " due to station ID being out of range" << endl;
+        return false;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+StationList::encode(byte buffer[], size_t bufferSize) const {
+    if (bufferSize != EepromConstants::EE_STATION_LIST_SIZE) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to encode station list due to incorrect buffer size of " << bufferSize << ". Expecting " << EepromConstants::EE_STATION_LIST_SIZE << endl;
+        return false;
+    }
+
+    for (unsigned i = 0; i < MAX_STATIONS; i++)
+        stationData[i].encode(buffer, i * 2);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+StationList::decode(const byte buffer[], size_t bufferSize) {
+    if (bufferSize != EepromConstants::EE_STATION_LIST_SIZE) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to decode station list due to incorrect buffer size of " << bufferSize << ". Expecting " << EepromConstants::EE_STATION_LIST_SIZE << endl;
+        return false;
+    }
+
+    for (unsigned i = 0; i < MAX_STATIONS; i++)
+        stationData[i].decode(i + 1, buffer, i * 2);
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+StationList::formatJSON() const {
+    ostringstream oss;
+
+    oss << "\"stationList\" : [ ";
+    for (int i = 0; i < MAX_STATIONS; i++) {
+        if (i != 0)
+            oss << ", ";
+
+        oss << stationData[i].formatJSON();
+
+    }
+    oss << " ] ";
+
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 VantageStationNetwork::VantageStationNetwork(const string & dataDirectory, VantageWeatherStation & station, ArchiveManager & am) : station(station),
                                                                                                                           archiveManager(am),
                                                                                                                           monitoredStationMask(0),
@@ -181,28 +310,24 @@ VantageStationNetwork::updateRetransmitId(StationId retransmitId) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageStationNetwork::retrieveStationList(StationData stationList[MAX_STATIONS]) {
+VantageStationNetwork::retrieveStationList(StationList & stationList) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Retrieving EEPROM data for station list" << endl;
 
     char buffer[EE_STATION_LIST_SIZE];
     if (!station.eepromBinaryRead(EE_STATION_LIST_ADDRESS, EE_STATION_LIST_SIZE, buffer))
         return false;
 
-    for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++)
-        stationList[i].decode(i + 1, buffer, i * 2);
-
-    return true;
+    return stationList.decode(buffer, sizeof(buffer));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageStationNetwork::updateStationList(const StationData stationList[MAX_STATIONS]) {
+VantageStationNetwork::updateStationList(const StationList & stationList) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Updating EEPROM data for station list" << endl;
 
     char buffer[EE_STATION_LIST_SIZE];
-    for (int i = 0; i < MAX_STATIONS; i++)
-        stationList[i].encode(buffer, i * 2);
+    stationList.encode(buffer, sizeof(buffer));
 
     //return station.eepromBinaryWrite(EE_STATION_LIST_ADDRESS, buffer, EE_STATION_LIST_SIZE);
 
@@ -252,8 +377,8 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
     StationId issId = UNKNOWN_STATION_ID;
 
     for (int i = 0; i < MAX_STATION_ID; i++) {
-        if (stationData[i].stationType == StationType::INTEGRATED_SENSOR_STATION)
-            issId = stationData[i].stationId;
+        if (stationList[i].stationType == StationType::INTEGRATED_SENSOR_STATION)
+            issId = stationList[i].stationId;
     }
 
     Sensor sensor;
@@ -345,10 +470,10 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
 void
 VantageStationNetwork::findRepeaters() {
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
-        if (stationData[i].repeaterId != RepeaterId::NO_REPEATER) {
-            RepeaterId repeaterId = stationData[i].repeaterId;
+        if (stationList[i].repeaterId != RepeaterId::NO_REPEATER) {
+            RepeaterId repeaterId = stationList[i].repeaterId;
             Repeater node;
-            if (repeaters.find(stationData[i].repeaterId) == repeaters.end()) {
+            if (repeaters.find(stationList[i].repeaterId) == repeaters.end()) {
                 node.repeaterId = repeaterId;
                 node.endPoint = true;
                 node.impliedExistance = false;
@@ -356,7 +481,7 @@ VantageStationNetwork::findRepeaters() {
             else
                 node = repeaters[repeaterId];
 
-            node.connectedStations.push_back(stationData[i].stationId);
+            node.connectedStations.push_back(stationList[i].stationId);
 
             repeaters[node.repeaterId] = node;
         }
@@ -431,15 +556,15 @@ VantageStationNetwork::initializeNetworkFromConsole() {
     //
     Station station;
     for (int i = 0; i < MAX_STATIONS; i++) {
-        if (stationData[i].stationType != StationType::NO_STATION) {
-            station.stationData = stationData[i];
+        if (stationList[i].stationType != StationType::NO_STATION) {
+            station.stationData = stationList[i];
             station.isBatteryGood = true;
-            if (stationData[i].stationType == StationType::INTEGRATED_SENSOR_STATION)
+            if (stationList[i].stationType == StationType::INTEGRATED_SENSOR_STATION)
                 station.name = "ISS";
             else
                 station.name = "Station " + (i + 1);
 
-            stations[stationData[i].stationId] = station;
+            stations[stationList[i].stationId] = station;
         }
     }
 
@@ -485,7 +610,7 @@ VantageStationNetwork::retrieveStationInfo() {
     if (!retrieveMonitoredStations(monitoredStations))
         return false;
 
-    if (!retrieveStationList(stationData))
+    if (!retrieveStationList(stationList))
         return false;
 
     windStationId = UNKNOWN_STATION_ID;
@@ -493,20 +618,20 @@ VantageStationNetwork::retrieveStationInfo() {
         //
         // The wind station is THE anemometer station or the first ISS
         //
-        if (stationData[i].stationType == StationType::ANEMOMETER_STATION)
+        if (stationList[i].stationType == StationType::ANEMOMETER_STATION)
             windStationId = i + 1;
-        else if (stationData[i].stationType == StationType::INTEGRATED_SENSOR_STATION && windStationId == UNKNOWN_STATION_ID)
+        else if (stationList[i].stationType == StationType::INTEGRATED_SENSOR_STATION && windStationId == UNKNOWN_STATION_ID)
             windStationId = i + 1;
     }
 
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "++++++++ STATION DATA +++++++" << endl
                                               << "Monitored Station Mask: " << static_cast<int>(monitoredStationMask) << endl;
     for (int i = 0; i < ProtocolConstants::MAX_STATIONS; i++) {
-        logger.log(VantageLogger::VANTAGE_DEBUG2) << "ID: "  << stationData[i].stationId
-                                                  << " Repeater ID: " << stationData[i].repeaterId
-                                                  << " StationType: " << stationData[i].stationType
-                                                  << " Extra Humidity: " << stationData[i].extraHumidityIndex
-                                                  << " Extra Temperature: " << stationData[i].extraTemperatureIndex << endl;
+        logger.log(VantageLogger::VANTAGE_DEBUG2) << "ID: "  << stationList[i].stationId
+                                                  << " Repeater ID: " << stationList[i].repeaterId
+                                                  << " StationType: " << stationList[i].stationType
+                                                  << " Extra Humidity: " << stationList[i].extraHumidityIndex
+                                                  << " Extra Temperature: " << stationList[i].extraTemperatureIndex << endl;
     }
 
     return true;
@@ -831,7 +956,7 @@ VantageStationNetwork::updateNetworkConfiguration(const std::string & networkCon
         }
     }
 
-    return updateStationList(stationData);
+    return updateStationList(stationList);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

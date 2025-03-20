@@ -99,14 +99,119 @@ public:
 class StationData {
 public:
     static constexpr int NO_EXTRA_VALUE_INDEX = 0xF;
+
+    /**
+     * Constructor.
+     */
     StationData();
+
+    /**
+     * Encode the station data into the provided buffer.
+     *
+     * @param buffer The buffer into which to write the station data
+     * @param offset The offset into the buffer to which to write the station data
+     */
     void encode(byte buffer[], int offset) const;
+
+    /**
+     * Decode the station data from the provided buffer.
+     *
+     * @param id     The station ID of the station being decoded
+     * @param buffer The buffer from which the station data will be decoded
+     * @param offset The offset within the buffer from which the station data will be decoded
+     */
     void decode(StationId id, const byte buffer[], int offset);
-    StationId   stationId;
-    RepeaterId  repeaterId;
-    StationType stationType;
+
+    /**
+     * Format the station data into JSON.
+     *
+     * @return The formatted JSON string
+     */
+    std::string formatJSON() const;
+
+    StationId   stationId;              // Valid IDs are 1 - 8
+    RepeaterId  repeaterId;             // NO_REPEATER or repeater A - H
+    StationType stationType;            // NO_STATION if this station is not being monitored
     int         extraHumidityIndex;     // Index 1 - 8
     int         extraTemperatureIndex;  // Index 0 - 7
+};
+
+/**
+ * Class that represents the list of stations that this console can manage.
+ */
+class StationList {
+public:
+    /**
+     * Constuctor to initialize the stations to their default values.
+     */
+    StationList();
+
+    /**
+     * Destuctor.
+     */
+    ~StationList();
+
+    /**
+     * Get the data for the station at the provided index.
+     *
+     * @param index The index of the station
+     * @return The data for the station at the index or an invalid station with an ID of 0
+     */
+    const StationData & getStationByIndex(int index) const;
+
+    /**
+     * Get the data for the station with the provided ID
+     *
+     * @param index The ID of the station
+     * @return The data for the station with the provide ID or an invalid station with an ID of 0
+     */
+    const StationData & getStationById(StationId id) const;
+
+    /**
+     * Array index operator to retrieve data for a specified station index.
+     *
+     * @param index The index of the station
+     * @return The data for the station at the index or an invalid station with an ID of 0
+     */
+    const StationData & operator[](int index);
+
+    /**
+     * Set the data for the station provided.
+     *
+     * @param stationData The station data to be set based on the ID within
+     * @return True if the station ID is valid
+     */
+    bool setStation(const StationData & stationData);
+
+    /**
+     * Encode the station list data into the provided buffer.
+     *
+     * @param buffer     The buffer into which to write the station list data
+     * @param bufferSize The size of the buffer pointed to by buffer
+     * @return True is the buffer size is correct
+     */
+    bool encode(byte buffer[], size_t bufferSize) const;
+
+    /**
+     * Decode the station list data from the provided buffer.
+     *
+     * @param buffer     The buffer from which to read the station list data
+     * @param bufferSize The size of the buffer pointed to by buffer
+     * @return True is the buffer size is correct
+     */
+    bool decode(const byte buffer[], size_t bufferSize);
+
+
+    /**
+     * Format the station list into JSON.
+     *
+     * @return The JSON formatted string
+     */
+    std::string formatJSON() const;
+private:
+    StationData     stationData[MAX_STATIONS];
+    StationData     invalidStation;            // An error return value for the get methods
+    VantageLogger & logger;
 };
 
 enum SensorType {
@@ -196,9 +301,9 @@ public:
 
     bool updateRetransmitId(StationId retransmitId);
 
-    bool retrieveStationList(StationData stationList[MAX_STATIONS]);
+    bool retrieveStationList(StationList & stationList);
 
-    bool updateStationList(const StationData stationList[MAX_STATIONS]);
+    bool updateStationList(const StationList & stationList);
 
     /**
      * Format the JSON message containing the network configuration data.
@@ -294,7 +399,7 @@ private:
 
     RepeaterChainMap        chains;                          // The chains of repeaters and their sensor stations in the network
     RepeaterMap             repeaters;                       // The repeaters in the network
-    StationData             stationData[MAX_STATIONS];       // The sensor station data as reported by the console
+    StationList             stationList;                     // The sensor station data as reported by the console
     StationMap              stations;                        // The sensor stations being monitored
     Console                 console;                         // The console with which this software is communicating
 

@@ -96,6 +96,7 @@ public:
     void handleQueryFirmware(CommandData & commandData);
 
     // RECEIVERS
+    // Return the list of receivers that the console can hear.
     // Note that this command will have inconsistent results. For a period of time after the console exits
     // the "Receiving From..." screen the receiver list will contain data. After the time period is over
     // the receiver list will be empty. Only putting the console back on the "Receiving From..." screen will
@@ -200,6 +201,10 @@ public:
     void handleUpdateConfigurationData(CommandData & commandData);
 
     void handleGetTimezones(CommandData & commandData);
+
+    void handleQueryStationList(CommandData & commandData);
+
+    void handleQueryMonitoredStations(CommandData & commandData);
 
     void handleQueryNetworkConfiguration(CommandData & commandData);
 
