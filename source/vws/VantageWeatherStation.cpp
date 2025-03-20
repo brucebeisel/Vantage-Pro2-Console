@@ -607,7 +607,7 @@ VantageWeatherStation::eepromWriteByte(unsigned address, byte value) {
     }
 
     ostringstream command;
-    command << WRITE_EEPROM_CMD << " " << hex << address << " " << value;
+    command << WRITE_EEPROM_CMD << " " << hex << address << " " << static_cast<int>(value);
     return sendOKedCommand(command.str());
 }
 

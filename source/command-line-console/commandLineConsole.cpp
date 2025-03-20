@@ -130,7 +130,7 @@ main(int argc, char *argv[]) {
         cout << ": ";
         cin >> commandNumber;
 
-        if (commandNumber > sizeof(commands) / sizeof(commands[0])) {
+        if (commandNumber > sizeof(commands) / sizeof(commands[0]) && commandNumber != 99 && commandNumber != 999) {
             cout << "Invalid command number" << endl;
             continue;
         }
