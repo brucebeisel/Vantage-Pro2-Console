@@ -120,9 +120,11 @@ main(int argc, char *argv[]) {
         int commandNumber;
         cout << "Choose a command" << endl;
         cout << "    0 - Exit" << endl;
+        cout << "   99 - Set monitored stations" << endl;
+        cout << "  999 - run NEWSETUP" << endl;
         int cmdNumber = 1;
         for (auto cmd : commands) {
-            cout << "    " << cmdNumber << " - " << cmd.printCommandName << endl;
+            cout << "   " << setw(2) << cmdNumber << " - " << cmd.printCommandName << endl;
             cmdNumber++;
         }
         cout << ": ";
@@ -136,11 +138,24 @@ main(int argc, char *argv[]) {
         if (commandNumber == 0)
             exit(0);
 
+        if (commandNumber == 99) {
+            vector<StationId> monitoredStations;
+            monitoredStations.push_back(1);
+            network.updateMonitoredStations(monitoredStations);
+            continue;
+        }
+
+        if (commandNumber == 999) {
+            station.initializeSetup();
+            continue;
+        }
+
         commandNumber--;
 
         CommandData commandData;
-        commandData.commandName = commands[commandNumber].commandName;
+        commandData.commandName = commands[commandNumber].printCommandName;
         commandData.response = "";
+        commandData.responseHandler = NULL;
         commandData.loadResponseTemplate();
 
         (cmd.*commands[commandNumber].handler)(commandData);
