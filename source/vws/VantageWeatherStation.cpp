@@ -56,6 +56,7 @@ static constexpr int NUM_PROTECTED_EEPROM_BYTES = sizeof(protectedEepromBytes) /
 VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
                                                                         archivePeriodMinutes(0),
                                                                         consoleType(VANTAGE_PRO_2),
+                                                                        rainCollectorSize(0.0),
                                                                         logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
 
@@ -79,6 +80,14 @@ VantageWeatherStation::removeLoopPacketListener(LoopPacketListener & listener) {
 
     if (item != loopPacketListenerList.end())
         loopPacketListenerList.erase(item);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageWeatherStation::processRainCollectorSizeChange(Rainfall bucketSize) {
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Received new rain bucket size of " << bucketSize << " inches" << endl;
+    rainCollectorSize = bucketSize;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -373,13 +382,17 @@ VantageWeatherStation::retrieveHiLowValues(HiLowPacket & packet) {
 bool
 VantageWeatherStation::putYearlyRain(Rainfall rain) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Sending PUTRAIN (Put Yearly Rain) command" << endl;
-    ostringstream ss;
 
-    int argument = round(rain * 100.0);
-
-    ss << PUT_YEARLY_RAIN_CMD << " " << argument;
-
-    return sendAckedCommand(ss.str());
+    if (rainCollectorSize != 0.0) {
+        long argument = lround(rain / rainCollectorSize);
+        ostringstream ss;
+        ss << PUT_YEARLY_RAIN_CMD << " " << argument;
+        return sendAckedCommand(ss.str());
+    }
+    else {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "PUTRAIN not being sent because the rain collector size has not been set" << endl;
+        return false;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

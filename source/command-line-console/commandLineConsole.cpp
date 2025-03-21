@@ -37,51 +37,55 @@ static const char USAGE_MESSAGE[] = "Usage: command-line-console -p <device name
 void backlightArgumentPrompter(CommandData & commandData);
 void cumulativeValuePrompter(CommandData & commandData);
 void extremePeriodPrompter(CommandData & commandData);
+void confirmPrompter(CommandData & commandData);
 
 struct Command {
     std::string commandName;
     std::string printCommandName;
-    void (ConsoleCommandHandler::*handler)(CommandData  & cd);
+    void (ConsoleCommandHandler::*commandHandler)(CommandData  & cd);
+    bool (VantageWeatherStation::*consoleHandler)();
     void (*argumentPrompter)(CommandData & cd);
 };
 
 static const Command commands[] = {
-    "Query configuration",                    "query-configuration-data", &ConsoleCommandHandler::handleQueryConfigurationData,              NULL,
-    "Query console diagnostics",              "console-diagnostics",      &ConsoleCommandHandler::handleQueryConsoleDiagnostics,             NULL,
-    "Query archive period",                   "query-archive-period",     &ConsoleCommandHandler::handleQueryArchivePeriod,                  NULL,
-    "Query console type",                     "query-console-type",       &ConsoleCommandHandler::handleQueryConsoleType,                    NULL,
-    "Query console firmware",                 "query-firmware",           &ConsoleCommandHandler::handleQueryFirmware,                       NULL,
-    "Query monitored stations",               "query-used-transmitters",  &ConsoleCommandHandler::handleQueryMonitoredStations,              NULL,
-    "Query station list",                     "query-station-list",       &ConsoleCommandHandler::handleQueryStationList,                    NULL,
-    "Query receiver list",                    "query-receiver-list",      &ConsoleCommandHandler::handleQueryReceiverList,                   NULL,
-    "Query units",                            "query-units",              &ConsoleCommandHandler::handleQueryUnits,                          NULL,
-    "Query console time",                     "query-console-time",       &ConsoleCommandHandler::handleQueryConsoleTime,                    NULL,
-    "Query Hi/Lows",                          "query-highlows",           &ConsoleCommandHandler::handleQueryHighLows,                       NULL,
-    "Query alarm thresholds",                 "query-alarm-thresholds",   &ConsoleCommandHandler::handleQueryAlarmThresholds,                NULL,
-    "Query network configuration",            "query-network-config",     &ConsoleCommandHandler::handleQueryNetworkConfiguration,           NULL,
-    "Query calibration adjustments",          "query-cal-adjustments",    &ConsoleCommandHandler::handleQueryCalibrationAdjustments,         NULL,
-    "Query active alarms",                    "query-active-alarms",      &ConsoleCommandHandler::handleQueryActiveAlarms,                   NULL,
-    "Query barometer calibration parameters", "query-baro-cal-params",    &ConsoleCommandHandler::handleQueryBarometerCalibrationParameters, NULL,
-    "Set back light state",                   "backlight",                &ConsoleCommandHandler::handleBacklight,                           backlightArgumentPrompter,
-    "List supported time zones",              "get-timezones",            &ConsoleCommandHandler::handleGetTimezones,                        NULL,
-    "Clear cumulative values",                "clear-cumulative-values",  &ConsoleCommandHandler::handleClearCumulativeValue,                cumulativeValuePrompter,
-    "Clear high values",                      "clear-high-values",        &ConsoleCommandHandler::handleClearHighValues,                     extremePeriodPrompter,
-    "Clear low values",                       "clear-low-values",         &ConsoleCommandHandler::handleClearLowValues,                      extremePeriodPrompter,
+    "Query configuration",                    "query-configuration-data",  &ConsoleCommandHandler::handleQueryConfigurationData,              NULL,                                                               NULL,
+    "Query console diagnostics",              "console-diagnostics",       &ConsoleCommandHandler::handleQueryConsoleDiagnostics,             NULL,                                                               NULL,
+    "Query archive period",                   "query-archive-period",      &ConsoleCommandHandler::handleQueryArchivePeriod,                  NULL,                                                               NULL,
+    "Query console type",                     "query-console-type",        &ConsoleCommandHandler::handleQueryConsoleType,                    NULL,                                                               NULL,
+    "Query console firmware",                 "query-firmware",            &ConsoleCommandHandler::handleQueryFirmware,                       NULL,                                                               NULL,
+    "Query monitored stations",               "query-used-transmitters",   &ConsoleCommandHandler::handleQueryMonitoredStations,              NULL,                                                               NULL,
+    "Query station list",                     "query-station-list",        &ConsoleCommandHandler::handleQueryStationList,                    NULL,                                                               NULL,
+    "Query receiver list",                    "query-receiver-list",       &ConsoleCommandHandler::handleQueryReceiverList,                   NULL,                                                               NULL,
+    "Query units",                            "query-units",               &ConsoleCommandHandler::handleQueryUnits,                          NULL,                                                               NULL,
+    "Query console time",                     "query-console-time",        &ConsoleCommandHandler::handleQueryConsoleTime,                    NULL,                                                               NULL,
+    "Query Hi/Lows",                          "query-highlows",            &ConsoleCommandHandler::handleQueryHighLows,                       NULL,                                                               NULL,
+    "Query alarm thresholds",                 "query-alarm-thresholds",    &ConsoleCommandHandler::handleQueryAlarmThresholds,                NULL,                                                               NULL,
+    "Query network configuration",            "query-network-config",      &ConsoleCommandHandler::handleQueryNetworkConfiguration,           NULL,                                                               NULL,
+    "Query calibration adjustments",          "query-cal-adjustments",     &ConsoleCommandHandler::handleQueryCalibrationAdjustments,         NULL,                                                               NULL,
+    "Query active alarms",                    "query-active-alarms",       &ConsoleCommandHandler::handleQueryActiveAlarms,                   NULL,                                                               NULL,
+    "Query barometer calibration parameters", "query-baro-cal-params",     &ConsoleCommandHandler::handleQueryBarometerCalibrationParameters, NULL,                                                               NULL,
+    "Set back light state",                   "backlight",                 &ConsoleCommandHandler::handleBacklight,                           NULL,                                                               backlightArgumentPrompter,
+    "List supported time zones",              "get-timezones",             &ConsoleCommandHandler::handleGetTimezones,                        NULL,                                                               NULL,
+    "Clear cumulative values",                "clear-cumulative-values",   &ConsoleCommandHandler::handleClearCumulativeValue,                NULL,                                                               cumulativeValuePrompter,
+    "Clear high values",                      "clear-high-values",         &ConsoleCommandHandler::handleClearHighValues,                     NULL,                                                               extremePeriodPrompter,
+    "Clear low values",                       "clear-low-values",          &ConsoleCommandHandler::handleClearLowValues,                      NULL,                                                               extremePeriodPrompter,
+    "Start archiving",                        "start-archiving",           NULL,                                                              &VantageWeatherStation::startArchiving,                             NULL,
+    "Stop archiving",                         "stop-archiving",            NULL,                                                              &VantageWeatherStation::stopArchiving,                              NULL,
+    "Clear active alarms",                    "clear-active-alarms",       NULL,                                                              &VantageWeatherStation::clearActiveAlarms,                          NULL,
+    "Clear alarm thresholds",                 "clear-alarm-thresholds",    NULL,                                                              &VantageWeatherStation::clearAlarmThresholds,                       NULL,
+    "Clear console's archive",                "clear-console-archive",     NULL,                                                              &VantageWeatherStation::clearArchive,                               confirmPrompter,
+    "Clear calibration offsets",              "clear-calibration-offsets", NULL,                                                              &VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets, NULL,
+    "Clear current data",                     "clear-current-data",        NULL,                                                              &VantageWeatherStation::clearCurrentData,                           NULL,
+    "Clear graph points",                     "clear-graph-points",        NULL,                                                              &VantageWeatherStation::clearGraphPoints,                           NULL,
 };
 
 /*
-    "clear-active-alarms",           NULL,                                                              &VantageWeatherStation::clearActiveAlarms,
-    "clear-alarm-thresholds",        NULL,                                                              &VantageWeatherStation::clearAlarmThresholds,
-    "clear-console-archive",         NULL,                                                              &VantageWeatherStation::clearArchive,
-    "clear-calibration-offsets",     NULL,                                                              &VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets,
-    "clear-current-data",            NULL,                                                              &VantageWeatherStation::clearCurrentData,
-    "clear-graph-points",            NULL,                                                              &VantageWeatherStation::clearGraphPoints,
     "query-network-status",          &ConsoleCommandHandler::handleQueryNetworkStatus,                  NULL,
     "query-today-network-status",    &ConsoleCommandHandler::handleQueryTodayNetworkStatus,             NULL,
-    "put-year-rain",                 &ConsoleCommandHandler::handlePutYearRain,                         NULL,
+
+    "put-year-rain",                 &ConsoleCommandHandler::handlePutYearRain,                         NULL, //
     "put-year-et",                   &ConsoleCommandHandler::handlePutYearET,                           NULL,
-    "start-archiving",               NULL,                                                              &VantageWeatherStation::startArchiving,
-    "stop-archiving",                NULL,                                                              &VantageWeatherStation::stopArchiving,
+
     "update-alarm-thresholds",       &ConsoleCommandHandler::handleUpdateAlarmThresholds,               NULL,
     "update-archive-period",         &ConsoleCommandHandler::handleUpdateArchivePeriod,                 NULL,
     "update-baro-reading-elevation", &ConsoleCommandHandler::handleUpdateBarometerReadingAndElevation,  NULL,
@@ -155,6 +159,9 @@ main(int argc, char *argv[]) {
     VantageStationNetwork network("./", station, archive);
     AlarmManager alarm(station);
 
+    config.addRainCollectorSizeListener(alarm);
+    config.addRainCollectorSizeListener(station);
+
     ConsoleCommandHandler cmd(station, config, network, alarm);
 
     if (!station.openStation()) {
@@ -207,10 +214,16 @@ main(int argc, char *argv[]) {
         commandData.responseHandler = NULL;
         commandData.loadResponseTemplate();
 
-        if (commands[commandNumber].argumentPrompter != NULL)
-            (*commands[commandNumber].argumentPrompter)(commandData);
+        const Command & command = commands[commandNumber];
 
-        (cmd.*commands[commandNumber].handler)(commandData);
+        if (command.argumentPrompter != NULL)
+            (*command.argumentPrompter)(commandData);
+
+        if (command.commandHandler != NULL)
+            (cmd.*command.commandHandler)(commandData);
+        else if (command.consoleHandler != NULL)
+            (station.*command.consoleHandler)();
+
         commandData.response.append("}");
 
         if (!json::accept(commandData.response))
@@ -281,4 +294,20 @@ void
 extremePeriodPrompter(CommandData & commandData) {
     cout << "Choose period for which to clear high values" << endl;
     promptForEnum(extremePeriodEnum, commandData, "period");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+confirmPrompter(CommandData & commandData) {
+    cout << "Command " << commandData.commandName << " is destructive to the data on the console" << endl;
+    string answer;
+
+    while (answer != "Yes" && answer != "No") {
+        cout << "Proceed (Yes or No)? ";
+        cin >> answer;
+    }
+
+    if (answer != "Yes")
+        exit(2);
 }

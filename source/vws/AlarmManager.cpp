@@ -29,7 +29,7 @@ using namespace EepromConstants;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-AlarmManager::AlarmManager(VantageWeatherStation & station) : station(station), logger(VantageLogger::getLogger("AlarmManager")) {
+AlarmManager::AlarmManager(VantageWeatherStation & station) : station(station), logger(VantageLogger::getLogger("AlarmManager")), rainCollectorSize(0.0) {
     int numProperties;
     const AlarmProperties * alarmProperties = AlarmProperties::getAlarmProperties(numProperties);
     for (int i = 0; i < numProperties; i++) {
@@ -52,6 +52,14 @@ bool
 AlarmManager::processLoop2Packet(const Loop2Packet & packet) {
     // LOOP2 packet is of no concern to this class
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+AlarmManager::processRainCollectorSizeChange(Rainfall bucketSize) {
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Received new rain bucket size of " << bucketSize << " inches" << endl;
+    rainCollectorSize = bucketSize;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

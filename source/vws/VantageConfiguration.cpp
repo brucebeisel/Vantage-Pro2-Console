@@ -106,6 +106,13 @@ VantageConfiguration::~VantageConfiguration() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+void
+VantageConfiguration::addRainCollectorSizeListener(RainCollectorSizeListener & listener) {
+    listeners.push_back(&listener);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
 VantageConfiguration::processLoopPacket(const LoopPacket & packet) {
     // This class does not have interest in any fields in the LOOP packet
@@ -409,6 +416,9 @@ VantageConfiguration::saveRainBucketSize(RainBucketSizeType rainBucketType) {
 
     Rainfall rainBucketSize = rainBucketEnumValueToRain(rainBucketType);
     VantageDecoder::setRainCollectorSize(rainBucketSize);
+
+    for (auto listener : listeners)
+        listener->processRainCollectorSizeChange(rainBucketSize);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

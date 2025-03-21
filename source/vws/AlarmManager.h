@@ -21,6 +21,7 @@
 #include "LoopPacket.h"
 #include "Alarm.h"
 #include "ConsoleConnectionMonitor.h"
+#include "RainCollectorSizeListener.h"
 #include "LoopPacketListener.h"
 
 namespace vws {
@@ -29,7 +30,7 @@ class VantageLogger;
 /**
  * Class to manage all of the alarms of the console.
  */
-class AlarmManager : public LoopPacketListener, public ConsoleConnectionMonitor {
+class AlarmManager : public LoopPacketListener, public ConsoleConnectionMonitor, public RainCollectorSizeListener {
 public:
     static const int NUM_ALARMS = 86;
     typedef std::pair<std::string,double> Threshold;
@@ -56,6 +57,13 @@ public:
      * @return True if the LOOP packet processing loop should continue
      */
     virtual bool processLoop2Packet(const Loop2Packet & packet);
+
+    /**
+     * Called when the rain collector size changes or at startup.
+     *
+     * @param bucketSize The size of the rain collector bucket
+     */
+    virtual void processRainCollectorSizeChange(Rainfall bucketSize);
 
     /**
      * Format the JSON message that contains all the alarms and their current thresholds.
@@ -133,9 +141,10 @@ private:
      */
     void setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits);
 
-    VantageLogger &         logger;
     std::vector<Alarm>      alarms;
     VantageWeatherStation & station;
+    Rainfall                rainCollectorSize;
+    VantageLogger &         logger;
 };
 
 }

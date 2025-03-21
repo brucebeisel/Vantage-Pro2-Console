@@ -33,6 +33,7 @@ namespace vws {
 class VantageLogger;
 class LoopPacket;
 class Loop2Packet;
+class RainCollectorSizeListener;
 
 /**
  * This file will be use to evaluate the different types of data that the console contains so that
@@ -186,6 +187,13 @@ public:
     virtual ~VantageConfiguration();
 
     /**
+     * Add a rain collector size listener.
+     *
+     * @param listener The listener that will be notified when the rain collector size changes
+     */
+    void addRainCollectorSizeListener(RainCollectorSizeListener & listener);
+
+    /**
      * Process a LOOP packet received from the console.
      *
      * @param packet The LOOP packet
@@ -299,9 +307,10 @@ private:
 
     static const int EEPROM_CONFIG_SIZE = 46;
 
-    VantageWeatherStation &  station;
-    VantageLogger &          logger;
-    Measurement<Pressure>    lastAtmosphericPressure;
+    VantageWeatherStation &                  station;
+    Measurement<Pressure>                    lastAtmosphericPressure;
+    std::vector<RainCollectorSizeListener *> listeners;
+    VantageLogger &                          logger;
 };
 
 }

@@ -24,6 +24,7 @@
 #include "ArchivePacket.h"
 #include "BitConverter.h"
 #include "VantageProtocolConstants.h"
+#include "RainCollectorSizeListener.h"
 
 using namespace vws::ProtocolConstants;
 
@@ -40,7 +41,7 @@ class ConsoleDiagnosticReport;
 /**
  * Class that handles the command protocols with the Vantage console.
  */
-class VantageWeatherStation {
+class VantageWeatherStation : public RainCollectorSizeListener {
 public:
     struct BarometerCalibrationParameters {
         int recentMeasurement;         // In 1/1000 of an inch
@@ -80,6 +81,13 @@ public:
      * @param listener The listener to be removed
      */
     void removeLoopPacketListener(LoopPacketListener & listener);
+
+    /**
+     * Called when the rain collector size changes or at startup.
+     *
+     * @param bucketSize The size of the rain collector bucket
+     */
+    virtual void processRainCollectorSizeChange(Rainfall bucketSize);
 
     /**
      * Open the Vantage console.
@@ -636,6 +644,7 @@ private:
     LoopPacketListenerList     loopPacketListenerList;   // The list of Loop Packet listeners
     ConsoleType                consoleType;              // The type of Davis Vantage console this is
     int                        archivePeriodMinutes;     // The number of minutes between archive records
+    Rainfall                   rainCollectorSize;        // The amount of rain for each rain bucket tip
     VantageLogger &            logger;
 
 };

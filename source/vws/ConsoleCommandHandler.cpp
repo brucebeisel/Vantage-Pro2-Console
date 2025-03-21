@@ -277,7 +277,7 @@ ConsoleCommandHandler::handlePutYearRain(CommandData & commandData) {
             yearRain = strtod(arg.second.c_str(), NULL);
     }
 
-    if (yearRain > 0 && station.putYearlyRain(yearRain))
+    if (yearRain >= 0 && station.putYearlyRain(yearRain))
         oss << SUCCESS_TOKEN;
     else
         oss << CommandData::buildFailureString("Invalid argument or command error");
@@ -298,7 +298,7 @@ ConsoleCommandHandler::handlePutYearET(CommandData & commandData) {
             yearET = strtod(arg.second.c_str(), NULL);
     }
 
-    if (yearET > 0 && station.putYearlyET(yearET))
+    if (yearET >= 0 && station.putYearlyET(yearET))
         oss << SUCCESS_TOKEN;
     else
         oss << CommandData::buildFailureString("Invalid argument or command error");

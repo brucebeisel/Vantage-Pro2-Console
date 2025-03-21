@@ -120,6 +120,9 @@ startVWS(const string & dataDirectory, const string & serialPortName, int baudRa
     commandSocket.addCommandHandler(dataCommandHandler);
     commandSocket.addCommandHandler(consoleCommandHandler);
 
+    configuration.addRainCollectorSizeListener(station);
+    configuration.addRainCollectorSizeListener(alarmManager);
+
     //
     // Add the console connection monitors, adding consoleDriver last so that all other
     // configuration is complete before the driver
