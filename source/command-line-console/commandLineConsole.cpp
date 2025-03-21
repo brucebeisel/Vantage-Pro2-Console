@@ -25,6 +25,7 @@
 #include "AlarmManager.h"
 #include "ArchiveManager.h"
 #include "VantageLogger.h"
+#include "VantageEnums.h"
 
 using namespace std;
 using namespace vws;
@@ -32,43 +33,48 @@ using namespace nlohmann;
 
 static const char USAGE_MESSAGE[] = "Usage: command-line-console <device name>";
 
+void backlightArgumentPrompter(CommandData & commandData);
+void cumulativeValuePrompter(CommandData & commandData);
+void extremePeriodPrompter(CommandData & commandData);
+
 struct Command {
     std::string commandName;
     std::string printCommandName;
     void (ConsoleCommandHandler::*handler)(CommandData  & cd);
+    void (*argumentPrompter)(CommandData & cd);
 };
 
 static const Command commands[] = {
-    "Query configuration",         "query-configuration-data", &ConsoleCommandHandler::handleQueryConfigurationData,
-    "Query console diagnostics",   "console-diagnostics",      &ConsoleCommandHandler::handleQueryConsoleDiagnostics,
-    "Query archive period",        "query-archive-period",     &ConsoleCommandHandler::handleQueryArchivePeriod,
-    "Query console type",          "query-console-type",       &ConsoleCommandHandler::handleQueryConsoleType,
-    "Query console firmware",      "query-firmware",           &ConsoleCommandHandler::handleQueryFirmware,
-    "Query monitored stations",    "query-used-transmitters",  &ConsoleCommandHandler::handleQueryMonitoredStations,
-    "Query station list",          "query-station-list",       &ConsoleCommandHandler::handleQueryStationList,
-    "Query receiver list",         "query-receiver-list",      &ConsoleCommandHandler::handleQueryReceiverList,
-    "Query units",                 "query-units",              &ConsoleCommandHandler::handleQueryUnits,
-    "Query console time",          "query-console-time",       &ConsoleCommandHandler::handleQueryConsoleTime,
-    "Query Hi/Lows",               "query-highlows",           &ConsoleCommandHandler::handleQueryHighLows,
-    "Query alarm thresholds",      "query-alarm-thresholds",   &ConsoleCommandHandler::handleQueryAlarmThresholds,
-    "Query network configuration", "query-network-config",     &ConsoleCommandHandler::handleQueryNetworkConfiguration,
+    "Query configuration",                    "query-configuration-data", &ConsoleCommandHandler::handleQueryConfigurationData,              NULL,
+    "Query console diagnostics",              "console-diagnostics",      &ConsoleCommandHandler::handleQueryConsoleDiagnostics,             NULL,
+    "Query archive period",                   "query-archive-period",     &ConsoleCommandHandler::handleQueryArchivePeriod,                  NULL,
+    "Query console type",                     "query-console-type",       &ConsoleCommandHandler::handleQueryConsoleType,                    NULL,
+    "Query console firmware",                 "query-firmware",           &ConsoleCommandHandler::handleQueryFirmware,                       NULL,
+    "Query monitored stations",               "query-used-transmitters",  &ConsoleCommandHandler::handleQueryMonitoredStations,              NULL,
+    "Query station list",                     "query-station-list",       &ConsoleCommandHandler::handleQueryStationList,                    NULL,
+    "Query receiver list",                    "query-receiver-list",      &ConsoleCommandHandler::handleQueryReceiverList,                   NULL,
+    "Query units",                            "query-units",              &ConsoleCommandHandler::handleQueryUnits,                          NULL,
+    "Query console time",                     "query-console-time",       &ConsoleCommandHandler::handleQueryConsoleTime,                    NULL,
+    "Query Hi/Lows",                          "query-highlows",           &ConsoleCommandHandler::handleQueryHighLows,                       NULL,
+    "Query alarm thresholds",                 "query-alarm-thresholds",   &ConsoleCommandHandler::handleQueryAlarmThresholds,                NULL,
+    "Query network configuration",            "query-network-config",     &ConsoleCommandHandler::handleQueryNetworkConfiguration,           NULL,
+    "Query calibration adjustments",          "query-cal-adjustments",    &ConsoleCommandHandler::handleQueryCalibrationAdjustments,         NULL,
+    "Query active alarms",                    "query-active-alarms",      &ConsoleCommandHandler::handleQueryActiveAlarms,                   NULL,
+    "Query barometer calibration parameters", "query-baro-cal-params",    &ConsoleCommandHandler::handleQueryBarometerCalibrationParameters, NULL,
+    "Set back light state",                   "backlight",                &ConsoleCommandHandler::handleBacklight,                           backlightArgumentPrompter,
+    "List supported time zones",              "get-timezones",            &ConsoleCommandHandler::handleGetTimezones,                        NULL,
+    "Clear cumulative values",                "clear-cumulative-values",  &ConsoleCommandHandler::handleClearCumulativeValue,                cumulativeValuePrompter,
+    "Clear high values",                      "clear-high-values",        &ConsoleCommandHandler::handleClearHighValues,                     extremePeriodPrompter,
+    "Clear low values",                       "clear-low-values",         &ConsoleCommandHandler::handleClearLowValues,                      extremePeriodPrompter,
 };
 
 /*
-    "backlight",                     &ConsoleCommandHandler::handleBacklight,                           NULL,
     "clear-active-alarms",           NULL,                                                              &VantageWeatherStation::clearActiveAlarms,
     "clear-alarm-thresholds",        NULL,                                                              &VantageWeatherStation::clearAlarmThresholds,
     "clear-console-archive",         NULL,                                                              &VantageWeatherStation::clearArchive,
     "clear-calibration-offsets",     NULL,                                                              &VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets,
-    "clear-cumulative-values",       &ConsoleCommandHandler::handleClearCumulativeValue,                NULL,
     "clear-current-data",            NULL,                                                              &VantageWeatherStation::clearCurrentData,
     "clear-graph-points",            NULL,                                                              &VantageWeatherStation::clearGraphPoints,
-    "clear-high-values",             &ConsoleCommandHandler::handleClearHighValues,                     NULL,
-    "clear-low-values",              &ConsoleCommandHandler::handleClearLowValues,                      NULL,
-    "get-timezones",                 &ConsoleCommandHandler::handleGetTimezones,                        NULL,
-    "query-active-alarms",           &ConsoleCommandHandler::handleQueryActiveAlarms,                   NULL,
-    "query-baro-cal-params",         &ConsoleCommandHandler::handleQueryBarometerCalibrationParameters, NULL,
-    "query-cal-adjustments",         &ConsoleCommandHandler::handleQueryCalibrationAdjustments,         NULL,
     "query-network-status",          &ConsoleCommandHandler::handleQueryNetworkStatus,                  NULL,
     "query-today-network-status",    &ConsoleCommandHandler::handleQueryTodayNetworkStatus,             NULL,
     "put-year-rain",                 &ConsoleCommandHandler::handlePutYearRain,                         NULL,
@@ -120,7 +126,6 @@ main(int argc, char *argv[]) {
         int commandNumber;
         cout << "Choose a command" << endl;
         cout << "    0 - Exit" << endl;
-        cout << "   99 - Set monitored stations" << endl;
         cout << "  999 - run NEWSETUP" << endl;
         int cmdNumber = 1;
         for (auto cmd : commands) {
@@ -130,20 +135,13 @@ main(int argc, char *argv[]) {
         cout << ": ";
         cin >> commandNumber;
 
-        if (commandNumber > sizeof(commands) / sizeof(commands[0]) && commandNumber != 99 && commandNumber != 999) {
+        if (commandNumber > sizeof(commands) / sizeof(commands[0]) && commandNumber != 999) {
             cout << "Invalid command number" << endl;
             continue;
         }
 
         if (commandNumber == 0)
             exit(0);
-
-        if (commandNumber == 99) {
-            vector<StationId> monitoredStations;
-            monitoredStations.push_back(1);
-            network.updateMonitoredStations(monitoredStations);
-            continue;
-        }
 
         if (commandNumber == 999) {
             station.initializeSetup();
@@ -154,9 +152,13 @@ main(int argc, char *argv[]) {
 
         CommandData commandData;
         commandData.commandName = commands[commandNumber].printCommandName;
+        commandData.arguments.clear();
         commandData.response = "";
         commandData.responseHandler = NULL;
         commandData.loadResponseTemplate();
+
+        if (commands[commandNumber].argumentPrompter != NULL)
+            (*commands[commandNumber].argumentPrompter)(commandData);
 
         (cmd.*commands[commandNumber].handler)(commandData);
         commandData.response.append("}");
@@ -169,6 +171,64 @@ main(int argc, char *argv[]) {
             cout << setw(4) << dom << endl;
             cout << "--------------------" << endl;
         }
-
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+backlightArgumentPrompter(CommandData & commandData) {
+    string answer;
+
+    while (answer != "on" && answer != "off") {
+        cout << "Backlight on or off? ";
+        cin >> answer;
+    }
+
+    std::pair<string,string> arg;
+    arg.first = "state";
+    arg.second = answer;
+    commandData.arguments.push_back(arg);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+template<typename T, int C>
+void
+promptForEnum(VantageEnum<T,C> & e, CommandData & commandData, const char * argName) {
+    vector<string> values;
+    e.enumStrings(values);
+
+    int answer = 0;
+    while (answer < 1 || answer > values.size()) {
+        int n = 1;
+        for (auto value : values) {
+            cout << "    " << n << " - " << value << endl;
+            n++;
+        }
+
+        cout << "? ";
+        cin >> answer;
+    }
+
+    CommandData::CommandArgument arg;
+    arg.first = argName;
+    arg.second = values.at(answer - 1);
+    commandData.arguments.push_back(arg);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+cumulativeValuePrompter(CommandData & commandData) {
+    cout << "Choose the cumulative value to clear" << endl;
+    promptForEnum(cumulativeValueEnum, commandData, "value");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+extremePeriodPrompter(CommandData & commandData) {
+    cout << "Choose period for which to clear high values" << endl;
+    promptForEnum(extremePeriodEnum, commandData, "period");
 }
