@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <getopt.h>
 #include <iostream>
 
 #include "json.hpp"
@@ -31,7 +32,7 @@ using namespace std;
 using namespace vws;
 using namespace nlohmann;
 
-static const char USAGE_MESSAGE[] = "Usage: command-line-console <device name>";
+static const char USAGE_MESSAGE[] = "Usage: command-line-console -p <device name> [-v <debug output level (0 - 3)> ] [-h]";
 
 void backlightArgumentPrompter(CommandData & commandData);
 void cumulativeValuePrompter(CommandData & commandData);
@@ -92,18 +93,62 @@ static const Command commands[] = {
 
 int
 main(int argc, char *argv[]) {
-    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_INFO);
 
-    char *device = NULL;
+    string serialPortName;
+    VantageLogger::Level debugLevel;
+    int debugLevelOption;
+    int opt;
+    bool errorFound = false;
+    while ((opt = getopt(argc, argv, "p:v:h")) != -1) {
+        switch (opt) {
+            case 'p':
+                cout << "Serial port: " << optarg << endl;
+                serialPortName = optarg;
+                break;
 
-    if (argc < 2) {
+            case 'v':
+                debugLevelOption = atoi(optarg);
+                if (debugLevelOption < 0 || debugLevelOption > 3) {
+                    cerr << "Invalid debug verbosity. Must be from 0 to 3" << endl;
+                    errorFound = true;
+                }
+                else {
+                    switch (debugLevelOption) {
+                        case 0:
+                            debugLevel = VantageLogger::VANTAGE_INFO;
+                            break;
+
+                        case 1:
+                            debugLevel = VantageLogger::VANTAGE_DEBUG1;
+                            break;
+
+                        case 2:
+                            debugLevel = VantageLogger::VANTAGE_DEBUG2;
+                            break;
+
+                        case 3:
+                            debugLevel = VantageLogger::VANTAGE_DEBUG3;
+                            break;
+                    }
+
+                    VantageLogger::setLogLevel(debugLevel);
+                }
+                break;
+
+            case 'h':
+                errorFound = true;
+                break;
+        }
+    }
+
+    if (errorFound || serialPortName == "") {
         cerr << USAGE_MESSAGE << endl;
         exit(1);
     }
 
-    device = argv[1];
 
-    SerialPort serialPort(device, 19200);
+    SerialPort serialPort(serialPortName, 19200);
     VantageWeatherStation station(serialPort);
     ArchiveManager archive("./", station);
     VantageConfiguration config(station);
@@ -121,6 +166,11 @@ main(int argc, char *argv[]) {
         cerr << "Could not wake up console" << endl;
         exit(2);
     }
+
+    //
+    // Use the console connected processing to get the rain collector bucket size
+    //
+    config.consoleConnected();
 
     while (1) {
         int commandNumber;

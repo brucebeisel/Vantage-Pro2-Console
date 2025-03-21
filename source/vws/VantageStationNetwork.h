@@ -56,7 +56,7 @@ class ArchiveManager;
  *            D --> Console
  *  It depends how the user configured the repeaters. This class will assume the maximum number of repeaters in the
  *  chain until the actual configuration is sent from the user. It will also assume that all sensor stations
- *  are communicating with the first repeater in the chain.o
+ *  are communicating with the first repeater in the chain.
  *
  *  The user should be able to edit the following data:
  *      1. The station list, which includes the type of station and what repeater is being used. The extra temperature
@@ -70,6 +70,26 @@ class ArchiveManager;
  *      4. The names of the sensors. Each sensor probably has a unique goal, such as monitoring the temperature in a
  *         wine cellar. The user can name this sensor "Wine Cellar Thermometer". This name could then be used to label
  *         a dataset in a graph.
+ *
+ * Other considerations:
+ * The Vantage Serial Protocol document states that the extra temperatures and humidity should be numbered 0 - 6
+ * for temperatures and 1 - 7 for humidities. It also states that the numbering should be allocated in increasing
+ * order based on the station ID of the sensor station.
+ * As an example, let's say that station ID 4 is a temperature/humidity sensor station. It would be allocated an
+ * extra temperature index of 0 and an extra humidity index of 1. These extra values are stored as part of the archive
+ * packets data store. In the future, this software may give the user the ability to name these values for readability
+ * purposes. Now let's say that you add a temperature sensor station with ID of 2. Per the protocol document the
+ * extra temperature index for this new station should be 0 and the extra temperature index for the old sensor station
+ * should be changed to 1. This introduces an inconsistency in the archive data. Before station 2 was added
+ * extraTemperature[0] represented the old temperature sensor, now that data is in extraTemperature[1] and
+ * extraTemperature[0] has the values of the newly added thermometer.
+ * Is the protocol document instruction a requirement or a guideline? If it is a guideline, then this is not an issue.
+ * When the second sensor station is added it will get allocated the extra temperature index of 1. The archive will
+ * then be consistent. If it is a requirement, then it makes archive queries more difficult as any archive packets after
+ * the addition of the new sensor station will have to be modified on retrieval to keep the data consistent. This
+ * software will have to keep a record of the exact time the new sensor station came online. Which is a pain. I am
+ * curious how the Davis software handles this issue, if it does at all. Perhaps it just ignores it and lets the user
+ * of the data perform any adjustments.
  */
 
 using namespace EepromConstants;
