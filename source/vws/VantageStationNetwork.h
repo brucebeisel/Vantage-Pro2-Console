@@ -162,7 +162,7 @@ public:
 class StationList {
 public:
     /**
-     * Constuctor to initialize the stations to their default values.
+     * Constructor to initialize the stations to their default values.
      */
     StationList();
 

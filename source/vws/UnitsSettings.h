@@ -23,7 +23,7 @@
 namespace vws {
 
 /**
- * Structure to hold the units that are displayed by the console
+ * Class to hold the units that are displayed by the console.
  */
 class UnitsSettings {
 public:

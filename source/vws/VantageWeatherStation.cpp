@@ -335,7 +335,7 @@ VantageWeatherStation::currentValuesLoop(int records) {
     }
 
     //
-    // If the callback wants to terminated the loop early or there was a problem use the Wakeup sequence to terminate the loop
+    // If the callback wants to terminated the loop early or there was a problem use the wakeup sequence to terminate the loop
     // See the LPS command in the Vantage Pro2, Vue Serial Protocol document
     //
     if (terminateLoop || resetNeeded)
@@ -1395,7 +1395,7 @@ VantageWeatherStation::sendOKedWithDoneCommand(const string & command) {
     //
     // The commands that receive "DONE" in the end can have a very long delay.
     // Tell the serial port to wait up to a minute for the "DONE" response.
-    // This is acceptable because the console will not repond to any other
+    // This is acceptable because the console will not respond to any other
     // command until the command that requires the DONE response is complete.
     //
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Waiting for 'DONE' to complete the command" << endl;

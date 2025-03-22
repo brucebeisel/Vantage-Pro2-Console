@@ -21,6 +21,9 @@
 
 namespace vws {
 
+/**
+ * Interface class used to get notifications when the rain collector size changes.
+ */
 class RainCollectorSizeListener {
 public:
     /**

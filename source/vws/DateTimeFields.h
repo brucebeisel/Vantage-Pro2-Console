@@ -93,7 +93,7 @@ public:
     /**
      * Return whether this date/time has been set.
      *
-     * @return bool True if it is valid
+     * @return True if it is valid
      */
     bool isDateTimeValid() const;
 

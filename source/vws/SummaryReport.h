@@ -329,7 +329,7 @@ public:
 class SummaryRecord {
 public:
     /**
-     * Contructor.
+     * Constructor.
      *
      * @param period    The period of time that this record represents
      * @param startDate The starting date that this record represents

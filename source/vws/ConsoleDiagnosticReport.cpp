@@ -26,7 +26,7 @@ namespace vws {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ConsoleDiagnosticReport::ConsoleDiagnosticReport() : logger(VantageLogger::getLogger("ConsoleDiagnosticReport")),
-                                                     packetCount(0), missedPacketCount(0), syncCount(0), maxPacketSequence(0), crcErrorCount(0) {
+                                                     packetCount(0), missedPacketCount(0), resyncCount(0), maxPacketSequence(0), crcErrorCount(0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ bool
 ConsoleDiagnosticReport::decode(const std::string & report) {
     if (sscanf(report.c_str(), "%d %d %d %d %d", &packetCount,
                                                  &missedPacketCount,
-                                                 &syncCount,
+                                                 &resyncCount,
                                                  &maxPacketSequence,
                                                  &crcErrorCount) != 5) {
 
@@ -56,7 +56,7 @@ ConsoleDiagnosticReport::formatJSON() const {
         << "\"consoleDiagnosticReport\" : { "
         << "\"totalPacketsReceived\" : " << packetCount << ", "
         << "\"totalPacketsMissed\" : " << missedPacketCount << ", "
-        << "\"resyncCount\" : " << syncCount << ", "
+        << "\"resyncCount\" : " << resyncCount << ", "
         << "\"packetReceptionHwm\" : " << maxPacketSequence << ", "
         << "\"crcErrorCount\" : " << crcErrorCount
         << " } }";

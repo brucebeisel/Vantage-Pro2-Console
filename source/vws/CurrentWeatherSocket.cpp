@@ -32,11 +32,25 @@
 using namespace std;
 
 namespace vws {
-const std::string CurrentWeatherSocket::MULTICAST_HOST = "224.0.0.120";
+const std::string CurrentWeatherSocket::DEFAULT_MULTICAST_HOST = "224.0.0.120";
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CurrentWeatherSocket::CurrentWeatherSocket() : logger(VantageLogger::getLogger("CurrentWeatherSocket")), socketId(NO_SOCKET) {
+CurrentWeatherSocket::CurrentWeatherSocket() : CurrentWeatherSocket(DEFAULT_MULTICAST_HOST, DEFAULT_MULTICAST_PORT) {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+CurrentWeatherSocket::CurrentWeatherSocket(int port) : CurrentWeatherSocket(DEFAULT_MULTICAST_HOST, port) {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+CurrentWeatherSocket::CurrentWeatherSocket(const std::string & host, int port) : multicastHost(host),
+                                                                                 multicastPort(port),
+                                                                                 socketId(NO_SOCKET),
+                                                                                 logger(VantageLogger::getLogger("CurrentWeatherSocket")) {
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,8 +129,8 @@ CurrentWeatherSocket::createSocket()
 
     memset(reinterpret_cast<char *>(&groupAddr), 0, sizeof(groupAddr));
     groupAddr.sin_family = AF_INET;
-    groupAddr.sin_addr.s_addr = inet_addr(MULTICAST_HOST.c_str());
-    groupAddr.sin_port = htons(MULTICAST_PORT);
+    groupAddr.sin_addr.s_addr = inet_addr(multicastHost.c_str());
+    groupAddr.sin_port = htons(multicastPort);
 
     struct sockaddr_in saddr;
     if (!getLocalIpAddress(saddr)) {

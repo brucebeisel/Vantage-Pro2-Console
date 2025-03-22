@@ -24,6 +24,10 @@ class VantageWeatherStation;
 class VantageLogger;
 class StormData;
 
+/**
+ * Class that will retrieve various data from the graph portion of the console's EEPROM.
+ * Currently this class only supports storm data.
+ */
 class GraphDataRetriever {
 public:
     /**

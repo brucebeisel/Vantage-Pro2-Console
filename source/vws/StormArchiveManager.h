@@ -30,7 +30,7 @@ class GraphDataRetriever;
 class VantageLogger;
 
 /**
- * Class to manager the storm archive. Note that the console only stores data for the past 24 storms.
+ * Class to manage the storm archive. Note that the console only stores data for the past 24 storms.
  * This class will read the storm data and archive it.
  */
 class StormArchiveManager {

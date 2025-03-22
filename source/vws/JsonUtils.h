@@ -5,10 +5,11 @@
 #include <vector>
 #include "json.hpp"
 
-//using json = nlohmann::json;
-
 namespace vws {
 
+/**
+ * Class that contains static utility methods for JSON processing.
+ */
 class JsonUtils {
 public:
     /**

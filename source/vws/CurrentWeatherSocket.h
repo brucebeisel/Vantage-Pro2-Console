@@ -35,9 +35,24 @@ class CurrentWeatherSocket : public CurrentWeatherPublisher {
 public:
 
     /**
-     * Constructor that creates and configures the UDP multicast socket.
+     * Constructor that creates and configures the UDP multicast socket using the defaults.
      */
     CurrentWeatherSocket();
+
+    /**
+     * Constructor that creates and configures the UDP multicast socket using the default host.
+     *
+     * @param port The multicast port to use for the socket
+     */
+    CurrentWeatherSocket(int port);
+
+    /**
+     * Constructor that creates and configures the UDP multicast socket.
+     *
+     * @param host The multicast host to use for the socket
+     * @param port The multicast port to use for the socket
+     */
+    CurrentWeatherSocket(const std::string & host, int port);
 
     /**
      * Destructor that closes the socket.
@@ -74,9 +89,11 @@ private:
      */
     bool getLocalIpAddress(struct sockaddr_in & saddr);
 
-    static const std::string MULTICAST_HOST;
-    static const int         MULTICAST_PORT = 11461;
+    static const std::string DEFAULT_MULTICAST_HOST;
+    static const int         DEFAULT_MULTICAST_PORT = 11461;
     static const int         NO_SOCKET = -1;
+    std::string              multicastHost;
+    int                      multicastPort;
     int                      socketId;
     struct sockaddr_in       groupAddr;
     VantageLogger &          logger;

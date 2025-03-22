@@ -91,7 +91,7 @@ const std::string ForecastRule::FORECAST[] = {
     "Increasing clouds and warmer. Precipitation possible within 12 hours.",
     "Partly cloudy with little temperature change.",
     "Mostly clear with little temperature change.",
-    "Increasing clouds and warmer. Precipitation likley.",
+    "Increasing clouds and warmer. Precipitation likely.",
     "Clearing and cooler. Precipitation ending within 6 hours.",
     "Partly cloudy with little temperature change.",
     "Clearing and cooler. Precipitation ending within 6 hours.",

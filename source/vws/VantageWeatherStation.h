@@ -550,7 +550,7 @@ private:
      *
      * @param loop2Packet The Loop2Packet into which the data will be copied
      *
-     * @return True if the packet was read succesfully
+     * @return True if the packet was read successfully
      */
     bool readLoop2Packet(Loop2Packet & loop2Packet);
 

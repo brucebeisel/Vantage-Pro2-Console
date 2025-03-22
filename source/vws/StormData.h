@@ -22,6 +22,9 @@
 
 namespace vws {
 
+/**
+ * Class to hold the data for a single storm.
+ */
 class StormData {
 public:
     enum class StormState {
@@ -114,7 +117,7 @@ public:
     bool isStormActive() const;
 
     /**
-     * Return whether this storm has eneded.
+     * Return whether this storm has ended.
      *
      * @return True if the storm has ended
      */

@@ -22,7 +22,7 @@ namespace vws {
 class CurrentWeather;
 
 /**
- * Interface class that will publish current wather JSON.
+ * Interface class that will publish current weather JSON.
  */
 class CurrentWeatherPublisher {
 public:

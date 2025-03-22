@@ -22,6 +22,10 @@
 namespace vws {
 class VantageLogger;
 
+/**
+ * Class the holds the data from a console diagnostics report.
+ * Note that the console will reset this data at midnight and any time the console time is changed.
+ */
 class ConsoleDiagnosticReport {
 public:
     /**
@@ -45,11 +49,11 @@ public:
     std::string formatJSON() const;
 
 private:
-    int packetCount;
-    int missedPacketCount;
-    int syncCount;
-    int maxPacketSequence;
-    int crcErrorCount;
+    int             packetCount;         // The number of packets received since the data was reset
+    int             missedPacketCount;   // The number of missed packets
+    int             resyncCount;         // The number of times the console resynchronized with the ISS
+    int             maxPacketSequence;   // The maximum number of packets the console received in a row with an error
+    int             crcErrorCount;       // The number of CRC errors detected
     VantageLogger & logger;
 };
 
