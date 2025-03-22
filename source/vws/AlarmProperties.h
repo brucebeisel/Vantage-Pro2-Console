@@ -34,6 +34,7 @@ struct AlarmProperties {
     int         alarmBit;              // The bit within the LOOP packet that indicates if this alarm has been triggered
     int         minimumValue;          // The minimum value the threshold can be
     int         maximumValue;          // The maximum value the threshold can be
+    bool        isRainAlarm;           // Whether this alarm is rain related and the rain bucket size is to be used as the scale
     bool        fieldValid;            // Whether this field is valid in the current weather packets
 
     /**

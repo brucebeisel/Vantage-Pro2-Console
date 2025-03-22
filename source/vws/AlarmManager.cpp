@@ -60,6 +60,10 @@ void
 AlarmManager::processRainCollectorSizeChange(Rainfall bucketSize) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Received new rain bucket size of " << bucketSize << " inches" << endl;
     rainCollectorSize = bucketSize;
+
+    for (auto & alarm : alarms) {
+        alarm.setRainAlarmScale(bucketSize);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

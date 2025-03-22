@@ -130,6 +130,15 @@ public:
      */
     double calculateActualValue(int eepromValue) const;
 
+    /**
+     * Set the scale if this is a rain alarm.
+     * This is needed because the alarms are stored in the console as bucket tips, but the user interface
+     * presents inches. This will just change the scale value used for conversions.
+     *
+     * @param bucketSize The size of the bucket in inches
+     */
+    void setRainAlarmScale(double bucketSize);
+
 
 private:
     /**

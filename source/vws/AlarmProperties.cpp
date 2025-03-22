@@ -30,7 +30,7 @@ static const AlarmProperties alarmProperties[] = {
          0,                       // Not set value
          0,                       // Triggered bit within LOOP packet alarms
          1, 255,                  // Minimum/Maximum values of the alarm threshold
-         true
+         false, true
     },
     {
         "Barometer Rising",
@@ -40,7 +40,7 @@ static const AlarmProperties alarmProperties[] = {
          0,
          1,
          1, 255,
-         true
+         false, true
     },
     {
         "Low Inside Temperature",
@@ -50,7 +50,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           2,
           0, 254,
-          true
+          false, true
     },
     {
         "High Inside Temperature",
@@ -60,7 +60,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           3,
           0, 254,
-          true
+          false, true
     },
     {
         "Low Inside Humidity",
@@ -70,7 +70,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           4,
           0, 100,
-          true
+          false, true
     },
     {
         "High Inside Humidity",
@@ -80,7 +80,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           5,
           0, 100,
-          true
+          false, true
     },
     {
         "Time Alarm",
@@ -90,7 +90,7 @@ static const AlarmProperties alarmProperties[] = {
         -1,
          6,
          0,   255,
-         false
+         false, false
     },
     {
         "Time Alarm 2s-Compliment",
@@ -100,7 +100,7 @@ static const AlarmProperties alarmProperties[] = {
          0,
         -1,
          0,   255,
-         false
+         false, false
     },
     {
         "Low Outside Temperature",
@@ -110,7 +110,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          16,
           0,  254,
-          true
+          false, true
     },
     {
         "High Outside Temperature",
@@ -120,7 +120,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          17,
           0, 254,
-          true
+          false, true
     },
     {
         "Low Extra Temperature 1",
@@ -130,7 +130,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          40,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Extra Temperature 2",
@@ -140,7 +140,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          48,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Extra Temperature 3",
@@ -150,7 +150,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          56,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Extra Temperature 4",
@@ -160,7 +160,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          64,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Extra Temperature 5",
@@ -170,7 +170,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          72,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Extra Temperature 6",
@@ -180,7 +180,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          80,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Extra Temperature 7",
@@ -190,7 +190,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          88,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Soil Temperature 1",
@@ -200,7 +200,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
         102,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Soil Temperature 2",
@@ -210,7 +210,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
         (13 * 8) + 6,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Soil Temperature 3",
@@ -220,7 +220,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (14 * 8) + 6,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Soil Temperature 4",
@@ -230,7 +230,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (15 * 8) + 6,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Leaf Temperature 1",
@@ -240,7 +240,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (12 * 8) + 4,
          0,   254,
-         false
+         false, false
     },
     {
         "Low Leaf Temperature 2",
@@ -250,7 +250,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (13 * 8) + 4,
           0,  254,
-          false
+          false, false
     },
     {
         "Low Leaf Temperature 3",
@@ -260,7 +260,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (14 * 8) + 4,
           0,  254,
-          false
+          false, false
     },
     {
         "Low Leaf Temperature 4",
@@ -270,7 +270,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (15 * 8) + 4,
           0,  254,
-          false
+          false, false
     },
     {
         "High Extra Temperature 1",
@@ -280,7 +280,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (5 * 8) + 1,
           0,  254,
-          false
+          false, false
     },
     {
         "High Extra Temperature 2",
@@ -290,7 +290,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (6 * 8) + 1,
           0,  254,
-          false
+          false, false
     },
     {
         "High Extra Temperature 3",
@@ -300,7 +300,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (7 * 8) + 1,
           0,  254,
-          false
+          false, false
     },
     {
         "High Extra Temperature 4",
@@ -310,7 +310,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (8 * 8) + 1,
           0,  254,
-          false
+          false, false
     },
     {
         "High Extra Temperature 5",
@@ -320,7 +320,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (9 * 8) + 1,
           0,  254,
-          false
+          false, false
     },
     {
         "High Extra Temperature 6",
@@ -330,7 +330,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (10 * 8) + 1,
           0,  254,
-          false
+          false, false
     },
     {
         "High Extra Temperature 7",
@@ -340,7 +340,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (11 * 8) + 1,
           0,  254,
-          false
+          false, false
     },
     {
         "High Soil Temperature 1",
@@ -350,7 +350,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (12 * 8) + 7,
           0,  254,
-          false
+          false, false
     },
     {
         "High Soil Temperature 2",
@@ -360,7 +360,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (13 * 8) + 7,
           0,  254,
-          false
+          false, false
     },
     {
         "High Soil Temperature 3",
@@ -370,7 +370,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (14 * 8) + 7,
           0,  254,
-          false
+          false, false
     },
     {
         "High Soil Temperature 4",
@@ -380,7 +380,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (15 * 8) + 7,
           0,  254,
-          false
+          false, false
     },
     {
         "High Leaf Temperature 1",
@@ -390,7 +390,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (12 * 8) + 5,
           0,  254,
-          false
+          false, false
     },
     {
         "High Leaf Temperature 2",
@@ -400,7 +400,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (13 * 8) + 5,
           0,  254,
-          false
+          false, false
     },
     {
         "High Leaf Temperature 3",
@@ -410,7 +410,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (14 * 8) + 5,
           0,  254,
-          false
+          false, false
     },
     {
         "High Leaf Temperature 4",
@@ -420,7 +420,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (15 * 8) + 5,
           0,  254,
-          false
+          false, false
     },
     {
         "Low Outside Humidity",
@@ -430,7 +430,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (4 * 8) + 2,
           0,  100,
-          true
+          false, true
     },
     {
         "Low Extra Humidity 1",
@@ -440,7 +440,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (5 * 8) + 2,
           0,  100,
-          false
+          false, false
     },
     {
         "Low Extra Humidity 2",
@@ -450,7 +450,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (6 * 8) + 2,
           0,  100,
-          false
+          false, false
     },
     {
         "Low Extra Humidity 3",
@@ -460,7 +460,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (7 * 8) + 2,
           0,  100,
-          false
+          false, false
     },
     {
         "Low Extra Humidity 4",
@@ -470,7 +470,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (8 * 8) + 2,
           0,  100,
-          false
+          false, false
     },
     {
         "Low Extra Humidity 5",
@@ -480,7 +480,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (9 * 8) + 2,
           0,  100,
-          false
+          false, false
     },
     {
         "Low Extra Humidity 6",
@@ -490,7 +490,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (0 * 8) + 2,
           0,  100,
-          false
+          false, false
     },
     {
         "Low Extra Humidity 7",
@@ -500,7 +500,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (1 * 8) + 2,
           0,  100,
-          false
+          false, false
     },
     {
         "High Outside Humidity",
@@ -510,7 +510,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (4 * 8) + 3,
           0,  100,
-          false
+          false, false
     },
     {
         "High Extra Humidity 1",
@@ -520,7 +520,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (5 * 8) + 3,
           0, 100,
-          false
+          false, false
     },
     {
         "High Extra Humidity 2",
@@ -530,7 +530,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (6 * 8) + 3,
           0, 100,
-          false
+          false, false
     },
     {
         "High Extra Humidity 3",
@@ -540,7 +540,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (7 * 8) + 3,
           0, 100,
-          false
+          false, false
     },
     {
         "High Extra Humidity 4",
@@ -550,7 +550,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (8 * 8) + 3,
           0, 100,
-          false
+          false, false
     },
     {
         "High Extra Humidity 5",
@@ -560,7 +560,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (9 * 8) + 3,
           0, 100,
-          false
+          false, false
     },
     {
         "High Extra Humidity 6",
@@ -570,7 +570,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (10 * 8) + 3,
           0, 100,
-          false
+          false, false
     },
     {
         "High Extra Humidity 7",
@@ -580,7 +580,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (11 * 8) + 3,
           0, 100,
-          false
+          false, false
     },
     {
         "Low Dew Point",
@@ -590,7 +590,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (2 * 8) + 4,
           0, 100,
-          true
+          false, true
     },
     {
         "High Dew Point",
@@ -600,7 +600,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (2 * 8) + 5,
           0, 100,
-          true
+          false, true
     },
     {
         "Low Wind Chill",
@@ -610,7 +610,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (2 * 8) + 7,
           0, 100,
-          true
+          false, true
     },
     {
         "High Heat Index",
@@ -620,7 +620,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (2 * 8) + 6,
           0, 254,
-          true
+          false, true
     },
     {
         "High THSW",
@@ -630,7 +630,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (3 * 8) + 0,
           0, 254,
-          true
+          false, true
     },
     {
         "Wind Speed",
@@ -640,7 +640,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (2 * 8) + 2,
           0, 254,
-          true
+          false, true
     },
     {
         "10 Minute Average Wind Speed",
@@ -650,7 +650,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (2 * 8) + 3,
           0, 254,
-          true
+          false, true
     },
     {
         "High UV",
@@ -660,7 +660,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (3 * 8) + 2,
           0, 254,
-          true
+          false, true
     },
     {
         "UV Dose", // This alarm is a bit strange according to the serial protocol manual
@@ -670,7 +670,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (3 * 8) + 3,
           0,   254,
-          false
+          false, false
     },
     {
         "Low Soil Moisture 1",
@@ -680,7 +680,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (12 * 8) + 2,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Soil Moisture 2",
@@ -690,7 +690,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (13 * 8) + 2,
          0,  254,
-         false
+         false, false
     },
     {
         "Low Soil Moisture 3",
@@ -700,7 +700,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (14 * 8) + 2,
          0,  254,
-         false
+         false, false
     },
     {
         "Low Soil Moisture 4",
@@ -710,7 +710,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (15 * 8) + 2,
          0,  254,
-         false
+         false, false
     },
     {
         "High Soil Moisture 1",
@@ -720,7 +720,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (12 * 8) + 3,
          0,  254,
-         false
+         false, false
     },
     {
         "High Soil Moisture 2",
@@ -730,7 +730,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (13 * 8) + 3,
           0, 254,
-          false
+          false, false
     },
     {
         "High Soil Moisture 3",
@@ -740,7 +740,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (14 * 8) + 3,
           0, 254,
-          false
+          false, false
     },
     {
         "High Soil Moisture 4",
@@ -750,7 +750,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (15 * 8) + 3,
           0, 254,
-          false
+          false, false
     },
     {
         "Low Leaf Wetness 1",
@@ -760,7 +760,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (12 * 8) + 0,
           0,  15,
-          false
+          false, false
     },
     {
         "Low Leaf Wetness 2",
@@ -770,7 +770,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (13 * 8) + 0,
           0,  15,
-          false
+          false, false
     },
     {
         "Low Leaf Wetness 3",
@@ -780,7 +780,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (14 * 8) + 0,
           0,  15,
-          false
+          false, false
     },
     {
         "Low Leaf Wetness 4",
@@ -790,7 +790,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (15 * 8) + 0,
           0,  15,
-          false
+          false, false
     },
     {
         "High Leaf Wetness 1",
@@ -800,7 +800,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (12 * 8) + 1,
           0,  15,
-          false
+          false, false
     },
     {
         "High Leaf Wetness 2",
@@ -810,7 +810,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (13 * 8) + 1,
           0,  15,
-          false
+          false, false
     },
     {
         "High Leaf Wetness 3",
@@ -820,7 +820,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (14 * 8) + 1,
           0,  15,
-          false
+          false, false
     },
     {
         "High Leaf Wetness 4",
@@ -830,7 +830,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
          (15 * 8) + 1,
           0,  15,
-          false
+          false, false
     },
     {
         "High Solar Radiation",
@@ -840,9 +840,9 @@ static const AlarmProperties alarmProperties[] = {
       32767,
           (3 * 8) + 1,
           1, 1800,
-          true
+          false, true
     },
-    { // TBD, rate alarm need rain collector size
+    {
         "High Rain Rate",
         "rainRate",
          85,   2,
@@ -850,9 +850,9 @@ static const AlarmProperties alarmProperties[] = {
       65535,
           (1 * 8) + 0,
           1, 60000,
-          true
+          true, true
     },
-    { // TBD, rate alarm need rain collector size
+    {
         "15 Minute Rain",
         "rain15Minute",
          87,   2,
@@ -860,9 +860,9 @@ static const AlarmProperties alarmProperties[] = {
       65535,
           (1 * 8) + 1,
           1,  10000,
-          true
+          true, true
     },
-    { // TBD, rate alarm need rain collector size
+    {
         "24 Hour Rain",
         "rain24Hour",
          89,   2,
@@ -870,9 +870,9 @@ static const AlarmProperties alarmProperties[] = {
       65535,
           (1 * 8) + 1,
           1, 10000,
-          true
+          true, true
     },
-    { // TBD, rate alarm need rain collector size
+    {
         "Storm Total Rain",
         "stormRain",
          91,   2,
@@ -880,7 +880,7 @@ static const AlarmProperties alarmProperties[] = {
       65535,
           (1 * 8) + 3,
           1, 10000,
-          true
+          true, true
     },
     {
         "Daily ET",
@@ -890,7 +890,7 @@ static const AlarmProperties alarmProperties[] = {
         255,
           (1 * 8) + 4,
           1, 254,
-          true
+          false, true
     }
 };
 

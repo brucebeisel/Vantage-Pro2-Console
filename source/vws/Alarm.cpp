@@ -161,4 +161,16 @@ Alarm::fromActualToEepromThreshold(double actualValue, int offset, int scale) {
     return eepromThreshold;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+Alarm::setRainAlarmScale(double bucketSize) {
+    //
+    // Only set the scale if this is a rain-related alarm
+    //
+    if (properties.isRainAlarm) {
+        properties.eepromThresholdScale = bucketSize;
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Setting threshold scale for alarm " + properties.alarmName + " to " << bucketSize << endl;
+    }
+}
 }
