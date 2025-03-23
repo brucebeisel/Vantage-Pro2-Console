@@ -1,6 +1,8 @@
 TOPTARGETS := all clean depend
 
+# vws must be first
 SUBDIRS := \
+	source/vws \
 	source/archive-dumper \
 	source/archive-fixer \
 	source/archive-rebuilder \
@@ -8,8 +10,7 @@ SUBDIRS := \
 	source/command-line-console \
 	source/console-archive-dumper \
 	source/loop-packet-dumper \
-	source/test \
-	source/vws 
+	source/test
 
 $(TOPTARGETS): $(SUBDIRS)
 
