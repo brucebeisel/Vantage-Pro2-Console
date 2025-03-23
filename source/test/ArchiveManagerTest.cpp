@@ -64,6 +64,7 @@ changePacketTime(vws::byte * packetData, const DateTimeFields & packetTime) {
 VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
                                                                         archivePeriodMinutes(0),
                                                                         consoleType(VANTAGE_PRO_2),
+                                                                        rainCollectorSize(.01),
                                                                         logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
 
@@ -72,7 +73,7 @@ VantageWeatherStation::~VantageWeatherStation() {
 }
 
 bool
-VantageWeatherStation::VantageWeatherStation::wakeupStation() {
+VantageWeatherStation::wakeupStation() {
     return true;
 }
 
@@ -114,6 +115,11 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & after, vector<ArchivePac
 int
 VantageWeatherStation::getArchivePeriod() const {
     return 5;
+}
+
+void
+VantageWeatherStation::processRainCollectorSizeChange(Rainfall bucketSize) {
+    rainCollectorSize = bucketSize;
 }
 };
 
