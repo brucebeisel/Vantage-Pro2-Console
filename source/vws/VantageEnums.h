@@ -156,9 +156,9 @@ public:
  * ExtremePeriod Enumeration
  ****************************************/
 static const NameValuePair<ProtocolConstants::ExtremePeriod> epMappings[] = {
-    { "Daily", ProtocolConstants::ExtremePeriod::DAILY },
+    { "Daily",   ProtocolConstants::ExtremePeriod::DAILY },
     { "Monthly", ProtocolConstants::ExtremePeriod::MONTHLY },
-    { "Yearly", ProtocolConstants::ExtremePeriod::YEARLY }
+    { "Yearly",  ProtocolConstants::ExtremePeriod::YEARLY }
 };
 
 class ExtremePeriodEnum : public VantageEnum<ProtocolConstants::ExtremePeriod,3>  {
@@ -185,7 +185,7 @@ operator<<(std::ostream & os, ProtocolConstants::ExtremePeriod value) {
  * RainUnits Enumeration
  ****************************************/
 static const NameValuePair<ProtocolConstants::RainUnits> ruMappings[] = {
-    { "inches", ProtocolConstants::RainUnits::INCHES },
+    { "inches",      ProtocolConstants::RainUnits::INCHES },
     { "millimeters", ProtocolConstants::RainUnits::MILLIMETERS }
 };
 
@@ -214,8 +214,8 @@ operator<<(std::ostream & os, ProtocolConstants::RainUnits value) {
  ****************************************/
 static const NameValuePair<ProtocolConstants::BarometerUnits> buMappings[] = {
     { "inHg", ProtocolConstants::BarometerUnits::IN_HG },
-    { "mm", ProtocolConstants::BarometerUnits::MILLIMETER },
-    { "hPa", ProtocolConstants::BarometerUnits::HPA },
+    { "mm",   ProtocolConstants::BarometerUnits::MILLIMETER },
+    { "hPa",  ProtocolConstants::BarometerUnits::HPA },
     { "mbar", ProtocolConstants::BarometerUnits::MILLIBAR }
 };
 
@@ -241,9 +241,9 @@ operator<<(std::ostream & os, ProtocolConstants::BarometerUnits value) {
  * TemperatureUnits Enumeration
  ****************************************/
 static const NameValuePair<ProtocolConstants::TemperatureUnits> tuMappings[] = {
-    { "F", ProtocolConstants::TemperatureUnits::FAHRENHEIT },
+    { "F",   ProtocolConstants::TemperatureUnits::FAHRENHEIT },
     { ".1F", ProtocolConstants::TemperatureUnits::TENTH_FAHRENHEIT },
-    { "C", ProtocolConstants::TemperatureUnits::CELSIUS },
+    { "C",   ProtocolConstants::TemperatureUnits::CELSIUS },
     { ".1C", ProtocolConstants::TemperatureUnits::TENTH_CELSIUS }
 };
 
@@ -301,7 +301,7 @@ operator<<(std::ostream & os, ProtocolConstants::WindUnits value) {
  * ElevationUnits Enumeration
  ****************************************/
 static const NameValuePair<ProtocolConstants::ElevationUnits> euMappings[] = {
-    { "feet", ProtocolConstants::ElevationUnits::FEET },
+    { "feet",   ProtocolConstants::ElevationUnits::FEET },
     { "meters", ProtocolConstants::ElevationUnits::METERS }
 };
 
@@ -329,12 +329,12 @@ operator<<(std::ostream & os, ProtocolConstants::ElevationUnits value) {
  * BarometerTrend Enumeration
  ****************************************/
 static const NameValuePair<ProtocolConstants::BarometerTrend> btMappings[] = {
-    { "Steady", ProtocolConstants::BarometerTrend::STEADY },
-    { "Rising Slowly", ProtocolConstants::BarometerTrend::RISING_SLOWLY },
-    { "Rising Rapidly", ProtocolConstants::BarometerTrend::RISING_RAPIDLY },
+    { "Steady",          ProtocolConstants::BarometerTrend::STEADY },
+    { "Rising Slowly",   ProtocolConstants::BarometerTrend::RISING_SLOWLY },
+    { "Rising Rapidly",  ProtocolConstants::BarometerTrend::RISING_RAPIDLY },
     { "Falling Rapidly", ProtocolConstants::BarometerTrend::FALLING_RAPIDLY },
-    { "Falling Slowly", ProtocolConstants::BarometerTrend::FALLING_SLOWLY },
-    { "Unknown", ProtocolConstants::BarometerTrend::UNKNOWN }
+    { "Falling Slowly",  ProtocolConstants::BarometerTrend::FALLING_SLOWLY },
+    { "Unknown",         ProtocolConstants::BarometerTrend::UNKNOWN }
 };
 
 class BarometerTrendEnum : public VantageEnum<ProtocolConstants::BarometerTrend,sizeof(btMappings)/sizeof(btMappings[0])>  {
@@ -361,14 +361,14 @@ operator<<(std::ostream & os, ProtocolConstants::BarometerTrend value) {
  * Forecast Enumeration
  ****************************************/
 static const NameValuePair<ProtocolConstants::Forecast> fcMappings[] = {
-    { "Sunny", ProtocolConstants::Forecast::SUNNY },
-    { "Partly cloudy", ProtocolConstants::Forecast::PARTLY_CLOUDY },
-    { "Mostly cloudy", ProtocolConstants::Forecast::MOSTLY_CLOUDY },
-    { "Mostly cloudy with rain within 12 hours", ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_RAIN },
-    { "Mostly cloudy with snow within 12 hours", ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_SNOW },
+    { "Sunny",                                           ProtocolConstants::Forecast::SUNNY },
+    { "Partly cloudy",                                   ProtocolConstants::Forecast::PARTLY_CLOUDY },
+    { "Mostly cloudy",                                   ProtocolConstants::Forecast::MOSTLY_CLOUDY },
+    { "Mostly cloudy with rain within 12 hours",         ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_RAIN },
+    { "Mostly cloudy with snow within 12 hours",         ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_SNOW },
     { "Mostly cloudy with rain or snow within 12 hours", ProtocolConstants::Forecast::MOSTLY_CLOUDY_WITH_RAIN_OR_SNOW },
-    { "Partly cloudy with rain within 12 hours", ProtocolConstants::Forecast::PARTLY_CLOUDY_WITH_RAIN_LATER },
-    { "Partly cloudy with snow within 12 hours", ProtocolConstants::Forecast::PARTLY_CLOUDY_WITH_SNOW_LATER },
+    { "Partly cloudy with rain within 12 hours",         ProtocolConstants::Forecast::PARTLY_CLOUDY_WITH_RAIN_LATER },
+    { "Partly cloudy with snow within 12 hours",         ProtocolConstants::Forecast::PARTLY_CLOUDY_WITH_SNOW_LATER },
     { "Partly cloudy with rain or snow within 12 hours", ProtocolConstants::Forecast::PARTLY_CLOUDY_WITH_RAIN_OR_SNOW_LATER }
 };
 
@@ -397,16 +397,16 @@ operator<<(std::ostream & os, ProtocolConstants::Forecast value) {
  ****************************************/
 static const NameValuePair<EepromConstants::StationType> sstMappings[] = {
     { "Integrated Sensor Station", EepromConstants::StationType::INTEGRATED_SENSOR_STATION },
-    { "Temperature Only", EepromConstants::StationType::TEMPERATURE_ONLY_STATION },
-    { "Humidity Only", EepromConstants::StationType::HUMIDITY_ONLY_STATION },
-    { "Temperature/Humidity", EepromConstants::StationType::TEMPERATURE_HUMIDITY_STATION },
-    { "Anemometer", EepromConstants::StationType::ANEMOMETER_STATION },
-    { "Rain", EepromConstants::StationType::RAIN_STATION },
-    { "Leaf", EepromConstants::StationType::LEAF_STATION },
-    { "Soil", EepromConstants::StationType::SOIL_STATION },
-    { "Soil/Leaf", EepromConstants::StationType::SOIL_LEAF_STATION },
-    { "No Station", EepromConstants::StationType::NO_STATION },
-    { "Unknown Station", EepromConstants::StationType::UNKNOWN_STATION }
+    { "Temperature Only",          EepromConstants::StationType::TEMPERATURE_ONLY_STATION },
+    { "Humidity Only",             EepromConstants::StationType::HUMIDITY_ONLY_STATION },
+    { "Temperature/Humidity",      EepromConstants::StationType::TEMPERATURE_HUMIDITY_STATION },
+    { "Anemometer",                EepromConstants::StationType::ANEMOMETER_STATION },
+    { "Rain",                      EepromConstants::StationType::RAIN_STATION },
+    { "Leaf",                      EepromConstants::StationType::LEAF_STATION },
+    { "Soil",                      EepromConstants::StationType::SOIL_STATION },
+    { "Soil/Leaf",                 EepromConstants::StationType::SOIL_LEAF_STATION },
+    { "No Station",                EepromConstants::StationType::NO_STATION },
+    { "Unknown Station",           EepromConstants::StationType::UNKNOWN_STATION }
 };
 
 class StationTypeEnum : public VantageEnum<EepromConstants::StationType,sizeof(sstMappings)/sizeof(sstMappings[0])>  {
@@ -434,14 +434,14 @@ operator<<(std::ostream & os, EepromConstants::StationType value) {
  ****************************************/
 static const NameValuePair<EepromConstants::RepeaterId> riMappings[] = {
     { "No Repeater", EepromConstants::RepeaterId::NO_REPEATER },
-    { "Repeater A", EepromConstants::RepeaterId::REPEATER_A },
-    { "Repeater B", EepromConstants::RepeaterId::REPEATER_B },
-    { "Repeater C", EepromConstants::RepeaterId::REPEATER_C },
-    { "Repeater D", EepromConstants::RepeaterId::REPEATER_D },
-    { "Repeater E", EepromConstants::RepeaterId::REPEATER_E },
-    { "Repeater F", EepromConstants::RepeaterId::REPEATER_F },
-    { "Repeater G", EepromConstants::RepeaterId::REPEATER_G },
-    { "Repeater H", EepromConstants::RepeaterId::REPEATER_H }
+    { "Repeater A",  EepromConstants::RepeaterId::REPEATER_A },
+    { "Repeater B",  EepromConstants::RepeaterId::REPEATER_B },
+    { "Repeater C",  EepromConstants::RepeaterId::REPEATER_C },
+    { "Repeater D",  EepromConstants::RepeaterId::REPEATER_D },
+    { "Repeater E",  EepromConstants::RepeaterId::REPEATER_E },
+    { "Repeater F",  EepromConstants::RepeaterId::REPEATER_F },
+    { "Repeater G",  EepromConstants::RepeaterId::REPEATER_G },
+    { "Repeater H",  EepromConstants::RepeaterId::REPEATER_H }
 };
 
 class RepeaterIdEnum : public VantageEnum<EepromConstants::RepeaterId,sizeof(riMappings)/sizeof(riMappings[0])>  {
@@ -471,10 +471,10 @@ static const NameValuePair<ProtocolConstants::CumulativeValue> cvMappings[] = {
     { "Daily Rain", ProtocolConstants::CumulativeValue::DAILY_RAIN_CUM },
     { "Storm Rain", ProtocolConstants::CumulativeValue::STORM_RAIN_CUM },
     { "Month Rain", ProtocolConstants::CumulativeValue::MONTH_RAIN_CUM },
-    { "Year Rain", ProtocolConstants::CumulativeValue::YEAR_RAIN_CUM },
-    { "Day ET", ProtocolConstants::CumulativeValue::DAY_ET_CUM },
-    { "Month ET", ProtocolConstants::CumulativeValue::MONTH_ET_CUM },
-    { "Year ET", ProtocolConstants::CumulativeValue::YEAR_ET_CUM }
+    { "Year Rain",  ProtocolConstants::CumulativeValue::YEAR_RAIN_CUM },
+    { "Day ET",     ProtocolConstants::CumulativeValue::DAY_ET_CUM },
+    { "Month ET",   ProtocolConstants::CumulativeValue::MONTH_ET_CUM },
+    { "Year ET",    ProtocolConstants::CumulativeValue::YEAR_ET_CUM }
 };
 
 class CumulativeValueEnum : public VantageEnum<ProtocolConstants::CumulativeValue,sizeof(cvMappings)/sizeof(cvMappings[0])>  {
@@ -501,18 +501,18 @@ operator<<(std::ostream & os, ProtocolConstants::CumulativeValue value) {
  * Month Enumeration
  ****************************************/
 static const NameValuePair<ProtocolConstants::Month> mMappings[] = {
-    { "January", ProtocolConstants::Month::JANUARY },
-    { "February", ProtocolConstants::Month::FEBRUARY },
-    { "March", ProtocolConstants::Month::MARCH },
-    { "April", ProtocolConstants::Month::APRIL },
-    { "May", ProtocolConstants::Month::MAY },
-    { "June", ProtocolConstants::Month::JUNE },
-    { "July", ProtocolConstants::Month::JULY },
-    { "August", ProtocolConstants::Month::AUGUST },
+    { "January",   ProtocolConstants::Month::JANUARY },
+    { "February",  ProtocolConstants::Month::FEBRUARY },
+    { "March",     ProtocolConstants::Month::MARCH },
+    { "April",     ProtocolConstants::Month::APRIL },
+    { "May",       ProtocolConstants::Month::MAY },
+    { "June",      ProtocolConstants::Month::JUNE },
+    { "July",      ProtocolConstants::Month::JULY },
+    { "August",    ProtocolConstants::Month::AUGUST },
     { "September", ProtocolConstants::Month::SEPTEMBER },
-    { "October", ProtocolConstants::Month::OCTOBER },
-    { "November", ProtocolConstants::Month::NOVEMBER },
-    { "December", ProtocolConstants::Month::DECEMBER }
+    { "October",   ProtocolConstants::Month::OCTOBER },
+    { "November",  ProtocolConstants::Month::NOVEMBER },
+    { "December",  ProtocolConstants::Month::DECEMBER }
 };
 
 class MonthEnum : public VantageEnum<ProtocolConstants::Month,sizeof(mMappings)/sizeof(mMappings[0])>  {
@@ -540,7 +540,7 @@ operator<<(std::ostream & os, ProtocolConstants::Month value) {
  ****************************************/
 static const NameValuePair<ProtocolConstants::ConsoleType> ctMappings[] = {
     { "Vantage Pro2", ProtocolConstants::ConsoleType::VANTAGE_PRO_2 },
-    { "Vantage Vue", ProtocolConstants::ConsoleType::VANTAGE_VUE }
+    { "Vantage Vue",  ProtocolConstants::ConsoleType::VANTAGE_VUE }
 };
 
 class ConsoleTypeEnum : public VantageEnum<ProtocolConstants::ConsoleType,sizeof(ctMappings)/sizeof(ctMappings[0])>  {
@@ -611,8 +611,8 @@ operator<<(std::ostream & os, ProtocolConstants::DirectionCode value) {
  ****************************************/
 static const NameValuePair<ProtocolConstants::RainBucketSizeType> rbtMappings[] = {
     { ".01 inch", ProtocolConstants::RainBucketSizeType::POINT_01_INCH },
-    { ".1 mm", ProtocolConstants::RainBucketSizeType::POINT_1_MM },
-    { ".2 mm", ProtocolConstants::RainBucketSizeType::POINT_2_MM }
+    { ".1 mm",    ProtocolConstants::RainBucketSizeType::POINT_1_MM },
+    { ".2 mm",    ProtocolConstants::RainBucketSizeType::POINT_2_MM }
 };
 
 class RainBucketSizeTypeEnum : public VantageEnum<ProtocolConstants::RainBucketSizeType,sizeof(rbtMappings)/sizeof(rbtMappings[0])>  {
@@ -677,10 +677,10 @@ rainToRainBucketEnumValue(Rainfall rain) {
  * Summary Period Enumeration
  ****************************************/
 static const NameValuePair<SummaryPeriod> spMappings[] = {
-    { "Day", SummaryPeriod::DAY },
-    { "Week", SummaryPeriod::WEEK },
+    { "Day",   SummaryPeriod::DAY },
+    { "Week",  SummaryPeriod::WEEK },
     { "Month", SummaryPeriod::MONTH },
-    { "Year", SummaryPeriod::YEAR }
+    { "Year",  SummaryPeriod::YEAR }
 };
 
 class SummaryPeriodEnum : public VantageEnum<SummaryPeriod,sizeof(spMappings)/sizeof(spMappings[0])>  {
@@ -700,9 +700,9 @@ static SummaryPeriodEnum summaryPeriodEnum;
  ****************************************/
 static const NameValuePair<EepromConstants::SecondaryWindCupSize> swcsMappings[] = {
     { "Undefined", EepromConstants::SecondaryWindCupSize::UNDEFINED },
-    { "Small", EepromConstants::SecondaryWindCupSize::SMALL },
-    { "Large", EepromConstants::SecondaryWindCupSize::LARGE },
-    { "Other", EepromConstants::SecondaryWindCupSize::OTHER }
+    { "Small",     EepromConstants::SecondaryWindCupSize::SMALL },
+    { "Large",     EepromConstants::SecondaryWindCupSize::LARGE },
+    { "Other",     EepromConstants::SecondaryWindCupSize::OTHER }
 };
 
 class SecondaryWindCupSizeEnum : public VantageEnum<EepromConstants::SecondaryWindCupSize,sizeof(swcsMappings)/sizeof(swcsMappings[0])>  {
@@ -716,6 +716,31 @@ public:
 };
 
 static SecondaryWindCupSizeEnum secondaryWindCupSizeEnum;
+
+/****************************************
+ * Archive Period Enumeration
+ ****************************************/
+static const NameValuePair<ProtocolConstants::ArchivePeriod> apMappings[] = {
+    { "1 Minute",   ProtocolConstants::ArchivePeriod::ONE_MINUTE },
+    { "5 Minutes",  ProtocolConstants::ArchivePeriod::FIVE_MINUTES },
+    { "10 Minutes", ProtocolConstants::ArchivePeriod::TEN_MINUTES },
+    { "15 Minutes", ProtocolConstants::ArchivePeriod::FIFTEEN_MINUTES },
+    { "30 Minutes", ProtocolConstants::ArchivePeriod::THIRTY_MINUTES },
+    { "1 Hour",     ProtocolConstants::ArchivePeriod::ONE_HOUR },
+    { "2 Hours",    ProtocolConstants::ArchivePeriod::TWO_HOURS }
+};
+
+class ArchivePeriodEnum : public VantageEnum<ProtocolConstants::ArchivePeriod,sizeof(apMappings)/sizeof(apMappings[0])>  {
+public:
+    ArchivePeriodEnum() {};
+    virtual ~ArchivePeriodEnum() {};
+
+    virtual const NameValuePair<ProtocolConstants::ArchivePeriod> * getMappings() const {
+        return apMappings;
+    }
+};
+
+static ArchivePeriodEnum archivePeriodEnum;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

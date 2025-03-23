@@ -220,7 +220,7 @@ VantageWeatherStation::retrieveConsoleType(string * consoleTypeString) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageWeatherStation::performReceiveTest() {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Sending RXCHECK command" << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Sending RXTEST command" << endl;
 
     //
     // There is no documentation in the serial protocol document regarding this
@@ -315,20 +315,28 @@ VantageWeatherStation::currentValuesLoop(int records) {
             //
             // Send the LOOP packet to each listener
             //
-             for (auto listener : loopPacketListenerList) {
+            for (auto listener : loopPacketListenerList) {
                 terminateLoop = terminateLoop || !listener->processLoopPacket(loopPacket);
             }
 
-            if (!terminateLoop && readLoop2Packet(loop2Packet)) {
+            //
+            // If all the listeners said to keep going
+            //
+            if (!terminateLoop) {
                 //
-                // Send the LOOP2 packet to each listener
+                // LOOP2 packet is read second
                 //
-                for (auto listener : loopPacketListenerList) {
-                    terminateLoop = terminateLoop || !listener->processLoop2Packet(loop2Packet);
+                if (readLoop2Packet(loop2Packet)) {
+                    //
+                    // Send the LOOP2 packet to each listener
+                    //
+                    for (auto listener : loopPacketListenerList) {
+                        terminateLoop = terminateLoop || !listener->processLoop2Packet(loop2Packet);
+                    }
                 }
+                else
+                    resetNeeded = true;
             }
-            else
-                resetNeeded = true;
         }
         else
             resetNeeded = true;
@@ -433,7 +441,6 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
                 break;
             }
         }
-
     }
 }
 

@@ -38,6 +38,9 @@ void backlightArgumentPrompter(CommandData & commandData);
 void cumulativeValuePrompter(CommandData & commandData);
 void extremePeriodPrompter(CommandData & commandData);
 void confirmPrompter(CommandData & commandData);
+void yearRainPrompter(CommandData & commandData);
+void yearEtPrompter(CommandData & commandData);
+void archivePeriodPrompter(CommandData & commandData);
 
 struct Command {
     std::string commandName;
@@ -64,6 +67,8 @@ static const Command commands[] = {
     "Query calibration adjustments",          "query-cal-adjustments",     &ConsoleCommandHandler::handleQueryCalibrationAdjustments,         NULL,                                                               NULL,
     "Query active alarms",                    "query-active-alarms",       &ConsoleCommandHandler::handleQueryActiveAlarms,                   NULL,                                                               NULL,
     "Query barometer calibration parameters", "query-baro-cal-params",     &ConsoleCommandHandler::handleQueryBarometerCalibrationParameters, NULL,                                                               NULL,
+    "Query network status",                   "query-network-status",      &ConsoleCommandHandler::handleQueryNetworkStatus,                  NULL,                                                               NULL,
+    "Query network status for today",         "query-today-network-status",&ConsoleCommandHandler::handleQueryTodayNetworkStatus,             NULL,                                                               NULL,
     "Set back light state",                   "backlight",                 &ConsoleCommandHandler::handleBacklight,                           NULL,                                                               backlightArgumentPrompter,
     "List supported time zones",              "get-timezones",             &ConsoleCommandHandler::handleGetTimezones,                        NULL,                                                               NULL,
     "Clear cumulative values",                "clear-cumulative-values",   &ConsoleCommandHandler::handleClearCumulativeValue,                NULL,                                                               cumulativeValuePrompter,
@@ -77,17 +82,15 @@ static const Command commands[] = {
     "Clear calibration offsets",              "clear-calibration-offsets", NULL,                                                              &VantageWeatherStation::clearTemperatureHumidityCalibrationOffsets, NULL,
     "Clear current data",                     "clear-current-data",        NULL,                                                              &VantageWeatherStation::clearCurrentData,                           NULL,
     "Clear graph points",                     "clear-graph-points",        NULL,                                                              &VantageWeatherStation::clearGraphPoints,                           NULL,
+    "Put year rain",                          "put-year-rain",             &ConsoleCommandHandler::handlePutYearRain,                         NULL,                                                               yearRainPrompter,
+    "Put year ET",                            "put-year-et",               &ConsoleCommandHandler::handlePutYearET,                           NULL,                                                               yearEtPrompter,
+    "Update archive period",                  "update-archive-period",     &ConsoleCommandHandler::handleUpdateArchivePeriod,                 NULL,                                                               archivePeriodPrompter,
 };
 
 /*
-    "query-network-status",          &ConsoleCommandHandler::handleQueryNetworkStatus,                  NULL,
-    "query-today-network-status",    &ConsoleCommandHandler::handleQueryTodayNetworkStatus,             NULL,
 
-    "put-year-rain",                 &ConsoleCommandHandler::handlePutYearRain,                         NULL, //
-    "put-year-et",                   &ConsoleCommandHandler::handlePutYearET,                           NULL,
 
     "update-alarm-thresholds",       &ConsoleCommandHandler::handleUpdateAlarmThresholds,               NULL,
-    "update-archive-period",         &ConsoleCommandHandler::handleUpdateArchivePeriod,                 NULL,
     "update-baro-reading-elevation", &ConsoleCommandHandler::handleUpdateBarometerReadingAndElevation,  NULL,
     "update-cal-adjustments",        &ConsoleCommandHandler::handleUpdateCalibrationAdjustments,        NULL,
     "update-configuration-data",     &ConsoleCommandHandler::handleUpdateConfigurationData,             NULL,
@@ -299,6 +302,15 @@ extremePeriodPrompter(CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
+archivePeriodPrompter(CommandData & commandData) {
+    cout << "Choose archive period" << endl;
+    promptForEnum(archivePeriodEnum, commandData, "period");
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
 confirmPrompter(CommandData & commandData) {
     cout << "Command " << commandData.commandName << " is destructive to the data on the console" << endl;
     string answer;
@@ -310,4 +322,45 @@ confirmPrompter(CommandData & commandData) {
 
     if (answer != "Yes")
         exit(2);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+template<typename T>
+std::string
+numberPrompter(const std::string & prompt, T min, T max, int precision) {
+    cout << "Enter value for " << prompt << ". Range " << min << " - " << max << endl;
+
+    T value = min - 1;;
+    while (value <= min && value >= max) {
+        cout << "? ";
+        cin >> value;
+    }
+
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(precision) << value;
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+yearRainPrompter(CommandData & commandData) {
+    std::string value = numberPrompter("Year Rain", 0.0, 327.0, 2);
+    CommandData::CommandArgument arg;
+    arg.first = "value";
+    arg.second = value;
+    commandData.arguments.push_back(arg);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+yearEtPrompter(CommandData & commandData) {
+    std::string value = numberPrompter("Year Rain", 0.0, 327.0, 3);
+    CommandData::CommandArgument arg;
+    arg.first = "value";
+    arg.second = value;
+    commandData.arguments.push_back(arg);
 }

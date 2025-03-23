@@ -30,7 +30,7 @@ static const AlarmProperties alarmProperties[] = {
          0,                       // Not set value
          0,                       // Triggered bit within LOOP packet alarms
          1, 255,                  // Minimum/Maximum values of the alarm threshold
-         false, true
+         false, true              // True if alarm is rain related, True if this alarm is sent in alarm list
     },
     {
         "Barometer Rising",
@@ -589,7 +589,7 @@ static const AlarmProperties alarmProperties[] = {
         120,   1,
         255,
           (2 * 8) + 4,
-          0, 100,
+          0, 254,
           false, true
     },
     {
@@ -599,7 +599,7 @@ static const AlarmProperties alarmProperties[] = {
         120,   1,
         255,
           (2 * 8) + 5,
-          0, 100,
+          0, 254,
           false, true
     },
     {
@@ -609,7 +609,7 @@ static const AlarmProperties alarmProperties[] = {
         120,   1,
         255,
           (2 * 8) + 7,
-          0, 100,
+          0, 254,
           false, true
     },
     {

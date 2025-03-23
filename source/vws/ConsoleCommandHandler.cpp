@@ -523,12 +523,16 @@ ConsoleCommandHandler::handleUpdateArchivePeriod(CommandData & commandData) {
 
     ArchivePeriod period = static_cast<ArchivePeriod>(periodValue);
 
-    if ((period == ArchivePeriod::ONE_MINUTE || period == ArchivePeriod::FIVE_MINUTES || period == ArchivePeriod::TEN_MINUTES ||
+    if (period == ArchivePeriod::ONE_MINUTE || period == ArchivePeriod::FIVE_MINUTES || period == ArchivePeriod::TEN_MINUTES ||
         period == ArchivePeriod::FIFTEEN_MINUTES || period == ArchivePeriod::THIRTY_MINUTES || period == ArchivePeriod::ONE_HOUR ||
-        period == ArchivePeriod::TWO_HOURS) && station.updateArchivePeriod(period))
-        oss << SUCCESS_TOKEN;
+        period == ArchivePeriod::TWO_HOURS) {
+        if (station.updateArchivePeriod(period))
+            oss << SUCCESS_TOKEN;
+        else
+            oss << CommandData::buildFailureString("Command error");
+    }
     else
-        oss << CommandData::buildFailureString("Invalid argument or command error");
+        oss << CommandData::buildFailureString("Invalid argument");
 
     commandData.response.append(oss.str());
 }
