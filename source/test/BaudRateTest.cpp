@@ -11,7 +11,6 @@ speed_t value2400 = CBR_2400;
 speed_t value1200 = CBR_1200;
 #else
 speed_t value19200 = B19200;
-speed_t value14400 = B14400;
 speed_t value9600 = B9600;
 speed_t value4800 = B4800;
 speed_t value2400 = B2400;
@@ -55,11 +54,13 @@ main(int argc, char *argv[]) {
     else
         cout << "FAILED: Baud rate values are not correct at 9600 (" << br << ")" << endl;
 
+#ifdef __CYGWIN__
     br = BaudRate::findBaudRateBySpeed(14400);
     if (br.getOsValue() == value14400 && br.getVantageValue() == 14400)
         cout << "PASSED: Baud rate values are correct at 14400 (" << br << ")" << endl;
     else
         cout << "FAILED: Baud rate values are not correct at 14400 (" << br << ")" << endl;
+#endif
 
     br = BaudRate::findBaudRateBySpeed(19200);
     if (br.getOsValue() == value19200 && br.getVantageValue() == 19200)
