@@ -62,7 +62,7 @@ main(int argc, char * argv[]) {
 
         cout << "Summarizing " << period << " period from " << startDate.formatDate() << " to " << endDate.formatDate() << " from file " << archiveFile << endl;
 
-        SerialPort port("port", 19200);
+        SerialPort port("port", vws::BaudRate::BR_19200);
         VantageWeatherStation station(port);
         ArchiveManager archiveManager(archiveFile, station);
         WindRoseData windRoseData(ProtocolConstants::WindUnits::MPH, 5.0, 2);

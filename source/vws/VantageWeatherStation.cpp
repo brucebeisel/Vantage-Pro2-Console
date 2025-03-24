@@ -921,20 +921,25 @@ VantageWeatherStation::clearCurrentData() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::updateBaudRate(BaudRate baudRate) {
+VantageWeatherStation::updateBaudRate(vws::BaudRate baudRate) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Sending BAUD (Set Baud Rate) command" << endl;
 
     ostringstream command;
-    command << SET_BAUD_RATE_CMD << " " << static_cast<int>(baudRate);
+    command << SET_BAUD_RATE_CMD << " " << baudRate.getVantageValue();
 
     //
     // First set the console's baud rate, then reopen the serial port with the
-    // new baud rate
+    // new baud rate.
+    // Per the protocol document the OK will be sent using the new baud rate, but a "NO"
+    // response is written at the old baud rate. This creates an issue with this command
+    // as you don't know which baud rate to use to read the response. In reality this
+    // command should not be used during normal operations.
+    //
     // TBD The console can respond with a "NO" to indicate failure
     //
-    if (sendOKedCommand(CLEAR_CURRENT_DATA_VALUES_CMD)) {
+    if (sendOKedCommand(command.str())) {
         serialPort.close();
-        serialPort.setBaudRate(static_cast<int>(baudRate));
+        serialPort.setBaudRate(baudRate);
         serialPort.open();
     }
 

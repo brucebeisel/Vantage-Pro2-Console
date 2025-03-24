@@ -4,6 +4,7 @@ CXXFLAGS= -g -I../vws -std=c++20 -Wno-psabi
 SRCS=\
 	ArchiveManagerTest.cpp \
 	ArchivePacketTest.cpp \
+	BaudRateTest.cpp \
 	BitConverterTest.cpp \
 	CommandSocketTest.cpp \
 	DataCommandHandlerTest.cpp \
@@ -25,6 +26,9 @@ OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 $(OBJDIR)/%.o : %.cpp
 	$(CC) $(CXXFLAGS) -c $< -o $@
 	
+BAUDRATEOBJS=\
+	$(VWSTESTOBJDIR)/BaudRate.o
+
 DOMWINDOBJS=\
 	$(VWSTESTOBJDIR)/DominantWindDirections.o \
 	$(VWSTESTOBJDIR)/WindDirectionSlice.o \
@@ -52,7 +56,7 @@ BITCONVERTEROBJS= \
 SUMMARYOBJS= \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
-	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/BaudRate.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
 	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSTESTOBJDIR)/ConsoleDiagnosticReport.o \
@@ -65,6 +69,7 @@ SUMMARYOBJS= \
 	$(VWSTESTOBJDIR)/UnitConverter.o \
 	$(VWSTESTOBJDIR)/VantageCRC.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
 	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/WindRoseData.o 
@@ -73,6 +78,7 @@ SUMMARYOBJS= \
 ARCHIVEMANAGEROBJS= \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
+	$(VWSTESTOBJDIR)/BaudRate.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
 	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
@@ -154,6 +160,7 @@ STORMDATAOBJS= \
 	$(VWSTESTOBJDIR)/Weather.o
 	
 STORMARCHIVEMANAGEROBJS= \
+	$(VWSTESTOBJDIR)/BaudRate.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
 	$(VWSTESTOBJDIR)/GraphDataRetriever.o \
@@ -166,6 +173,7 @@ STORMARCHIVEMANAGEROBJS= \
 	
 all: ArchiveManagerTest \
 	ArchivePacketTest \
+	BaudRateTest \
 	BitConverterTest \
 	CommandSocketTest \
 	DateTimeFieldsTest \
@@ -183,6 +191,9 @@ ArchiveManagerTest: $(ARCHIVEMANAGEROBJS) $(OBJDIR)/ArchiveManagerTest.o
 
 ArchivePacketTest: $(ARCHIVEPACKETOBJS) $(OBJDIR)/ArchivePacketTest.o
 	$(CC) -g -o ArchivePacketTest $(OBJDIR)/ArchivePacketTest.o $(ARCHIVEPACKETOBJS)
+
+BaudRateTest: $(BAUDRATEOBJS) $(OBJDIR)/BaudRateTest.o
+	$(CC) -g -o BaudRateTest $(OBJDIR)/BaudRateTest.o $(BAUDRATEOBJS)
 
 BitConverterTest: $(BITCONVERTEROBJS) $(OBJDIR)/BitConverterTest.o
 	$(CC) -g -o BitConverterTest $(OBJDIR)/BitConverterTest.o $(BITCONVERTEROBJS)

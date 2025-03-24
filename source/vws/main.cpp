@@ -86,7 +86,7 @@ sigHandler(int sig) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-startVWS(const string & dataDirectory, const string & serialPortName, int baudRate, int socketPort) {
+startVWS(const string & dataDirectory, const string & serialPortName, vws::BaudRate baudRate, int socketPort) {
 
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "Creating runtime objects" << endl;
 
@@ -187,7 +187,7 @@ startVWS(const string & dataDirectory, const string & serialPortName, int baudRa
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-const char * usage = "Usage: vws -p <weather station serial port> -d <data directory> [-v <debug verbosity (0-3, 0 = INFO)>] [-l <log file prefix>]";
+const char * usage = "Usage: vws -p <weather station serial port> -d <data directory> [-b <baud rate>] [-s <command socket port>] [-v <debug verbosity (0-3, 0 = INFO)>] [-l <log file prefix>]";
 
 int
 main(int argc, char *argv[]) {
@@ -206,11 +206,16 @@ main(int argc, char *argv[]) {
     VantageLogger::Level debugLevel;
     int debugLevelOption;
     int socketPort = DEFAULT_SOCKET_PORT;
+    vws::BaudRate baudRate = vws::BaudRate::BR_19200;
 
     bool errorFound = false;
     int opt;
-    while ((opt = getopt(argc, argv, "d:l:p:s:v:h")) != -1) {
+    while ((opt = getopt(argc, argv, "b:d:l:p:s:v:h")) != -1) {
         switch (opt) {
+            case 'b':
+                baudRate = vws::BaudRate::findBaudRateBySpeed(atoi(optarg));
+                break;
+
             case 'd':
                 dataDirectory = optarg;
                 break;
@@ -280,6 +285,6 @@ main(int argc, char *argv[]) {
         exit(1);
     }
 
-    startVWS(dataDirectory, serialPortName, 19200, socketPort);
+    startVWS(dataDirectory, serialPortName, baudRate, socketPort);
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "main() is ending" << endl;
 }

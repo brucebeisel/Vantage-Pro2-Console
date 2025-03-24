@@ -19,11 +19,13 @@
 
 #ifdef __CYGWIN__
 #include <windows.h>
+#include <winbase.h>
 #else
 typedef int HANDLE;
 #endif
 #include <string>
 #include "WeatherTypes.h"
+#include "BaudRate.h"
 
 namespace vws {
 class VantageLogger;
@@ -41,7 +43,7 @@ public:
      * @param device The serial device to open
      * @param baudRate The baud rate at which to communicate with the console
      */
-    SerialPort(const std::string & device, int baudRate);
+    SerialPort(const std::string & device, vws::BaudRate baudRate);
 
     /**
      * Destructor, that will close the serial port.
@@ -111,7 +113,7 @@ public:
      *
      * @param rate The new baud rate
      */
-    void setBaudRate(int rate);
+    void setBaudRate(vws::BaudRate rate);
 
     /**
      * Check if the serial port is open.
@@ -128,7 +130,7 @@ private:
 
     HANDLE          commPort; // The file descriptor of the open port
     std::string     device;   // The name of the serial port to be opened
-    int             baudRate; // The baud rate used to communicate over the serial port
+    speed_t         baudRate; // The baud rate used to communicate over the serial port
     VantageLogger & logger;
 };
 }

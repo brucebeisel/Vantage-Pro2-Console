@@ -29,6 +29,7 @@ static const int INVALID_HANDLE_VALUE = -1;
 #include <string.h>
 #include "VantageLogger.h"
 #include "Weather.h"
+#include "BaudRate.h"
 
 using namespace std;
 
@@ -36,10 +37,10 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-SerialPort::SerialPort(const std::string & device, int baudRate) : commPort(INVALID_HANDLE_VALUE),
-                                                                   device(device),
-                                                                   baudRate(baudRate),
-                                                                   logger(VantageLogger::getLogger("SerialPort")) {
+SerialPort::SerialPort(const std::string & device, vws::BaudRate br) : commPort(INVALID_HANDLE_VALUE),
+                                                                       device(device),
+                                                                       baudRate(br.getOsValue()),
+                                                                       logger(VantageLogger::getLogger("SerialPort")) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,11 +140,13 @@ SerialPort::open() {
         return false;
     }
 
-    cfsetospeed(&tio, B19200);
-    cfsetispeed(&tio, B0);
-    cfmakeraw(&tio);
-    tio.c_cflag &= ~(PARENB | CSTOPB);
-    tio.c_cflag != CS8;
+    cfsetospeed(&tio, baudRate);            // Baud rate
+    cfsetispeed(&tio, B0);                  // B0 baud rate means same as the output baud rate
+    cfmakeraw(&tio);                        // Sets the terminal to something like the "raw" mode of the old Version 7 terminal driver
+    tio.c_cflag &= ~PARENB;                 // No parity
+    tio.c_cflag &= ~CSTOPB;                 // 1 stop bit and 1 start bit
+    tio.c_cflag &= ~CSIZE;                  // Clear out the data bits field before setting it
+    tio.c_cflag |= CS8;                     // 8 data bits
     int rv = tcsetattr(commPort, 0, &tio);
 
     if (rv != 0) {
@@ -277,8 +280,8 @@ SerialPort::readBytes(byte buffer[], int requiredBytes, int timeoutMillis) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-SerialPort::setBaudRate(int rate) {
-    baudRate = rate;
+SerialPort::setBaudRate(vws::BaudRate br) {
+    baudRate = br.getOsValue();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -287,4 +290,5 @@ bool
 SerialPort::isOpen() const {
     return commPort != INVALID_HANDLE_VALUE;
 }
+
 }

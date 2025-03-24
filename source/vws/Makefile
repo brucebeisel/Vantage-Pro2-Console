@@ -8,6 +8,7 @@ SRCS=\
 	AlarmProperties.cpp \
 	ArchiveManager.cpp \
 	ArchivePacket.cpp \
+	BaudRate.cpp \
 	BitConverter.cpp \
     CalibrationAdjustmentsPacket.cpp \
 	CommandData.cpp \

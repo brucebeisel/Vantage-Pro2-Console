@@ -22,6 +22,7 @@
 #include "SerialPort.h"
 #include "VantageLogger.h"
 #include "VantageDecoder.h"
+#include "BaudRate.h"
 
 using namespace vws;
 using namespace std;
@@ -129,7 +130,7 @@ int
 main(int argc, char * argv[]) {
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     VantageDecoder::setRainCollectorSize(.01);
-    SerialPort port("device", 19200);
+    SerialPort port("device", vws::BaudRate::BR_19200);
     VantageWeatherStation station(port);
     GraphDataRetriever gdr(station);
     StormArchiveManager sam(".", gdr);

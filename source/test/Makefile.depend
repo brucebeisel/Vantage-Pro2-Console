@@ -3,17 +3,38 @@
  ../vws/VantageEnums.h ../vws/SummaryEnums.h \
  ../vws/VantageEepromConstants.h ../vws/VantageProtocolConstants.h \
  ../vws/VantageWeatherStation.h ../vws/ArchivePacket.h \
- ../vws/DateTimeFields.h ../vws/BitConverter.h ../vws/ArchiveManager.h \
- ../vws/SummaryReport.h ../vws/Weather.h ../vws/WindRoseData.h \
- ../vws/SerialPort.h ../vws/VantageLogger.h ../vws/VantageDecoder.h \
- ../vws/VantageLogger.h
+ ../vws/DateTimeFields.h ../vws/BitConverter.h \
+ ../vws/RainCollectorSizeListener.h ../vws/BaudRate.h \
+ ../vws/ArchiveManager.h ../vws/SummaryReport.h ../vws/Weather.h \
+ ../vws/WindRoseData.h ../vws/SerialPort.h ../vws/VantageLogger.h \
+ ../vws/VantageDecoder.h ../vws/VantageLogger.h ../vws/BaudRate.h
 ../../target/test/ArchivePacketTest.o: ArchivePacketTest.cpp \
  ../vws/ArchivePacket.h ../vws/WeatherTypes.h ../vws/Measurement.h \
  ../vws/DateTimeFields.h ../vws/VantageDecoder.h \
  ../vws/VantageEepromConstants.h ../vws/VantageLogger.h \
  ../vws/VantageProtocolConstants.h
+../../target/test/BaudRateTest.o: BaudRateTest.cpp ../vws/BaudRate.h
 ../../target/test/BitConverterTest.o: BitConverterTest.cpp \
  ../vws/BitConverter.h ../vws/WeatherTypes.h ../vws/WeatherTypes.h
+../../target/test/CommandSocketTest.o: CommandSocketTest.cpp \
+ ../vws/CommandSocket.h ../vws/ResponseHandler.h ../vws/CommandHandler.h \
+ ../vws/CommandQueue.h ../vws/CommandData.h ../vws/VantageLogger.h
+../../target/test/DataCommandHandlerTest.o: DataCommandHandlerTest.cpp \
+ ../vws/ArchiveManager.h ../vws/WeatherTypes.h ../vws/ArchivePacket.h \
+ ../vws/Measurement.h ../vws/DateTimeFields.h \
+ ../vws/StormArchiveManager.h ../vws/Weather.h ../vws/StormData.h \
+ ../vws/CurrentWeatherManager.h ../vws/CurrentWeather.h \
+ ../vws/Loop2Packet.h ../vws/VantageProtocolConstants.h \
+ ../vws/LoopPacket.h ../vws/DominantWindDirections.h \
+ ../vws/WindDirectionSlice.h ../vws/VantageWeatherStation.h \
+ ../vws/BitConverter.h ../vws/RainCollectorSizeListener.h \
+ ../vws/BaudRate.h ../vws/LoopPacketListener.h \
+ ../vws/DataCommandHandler.h ../vws/CommandHandler.h \
+ ../vws/CommandQueue.h ../vws/GraphDataRetriever.h \
+ ../vws/CurrentWeatherSocket.h ../vws/CurrentWeatherPublisher.h \
+ ../vws/CommandData.h ../vws/SerialPort.h ../vws/ResponseHandler.h \
+ ../vws/VantageDecoder.h ../vws/VantageEepromConstants.h \
+ ../vws/VantageLogger.h
 ../../target/test/DateTimeFieldsTest.o: DateTimeFieldsTest.cpp \
  ../vws/DateTimeFields.h ../vws/WeatherTypes.h ../vws/Weather.h \
  ../vws/Measurement.h
@@ -29,10 +50,11 @@
  ../vws/VantageWeatherStation.h ../vws/ArchivePacket.h \
  ../vws/WeatherTypes.h ../vws/Measurement.h ../vws/DateTimeFields.h \
  ../vws/BitConverter.h ../vws/VantageProtocolConstants.h \
+ ../vws/RainCollectorSizeListener.h ../vws/BaudRate.h \
  ../vws/StormArchiveManager.h ../vws/Weather.h ../vws/StormData.h \
  ../vws/GraphDataRetriever.h ../vws/SerialPort.h ../vws/VantageLogger.h \
  ../vws/VantageDecoder.h ../vws/VantageEepromConstants.h \
- ../vws/VantageLogger.h
+ ../vws/VantageLogger.h ../vws/BaudRate.h
 ../../target/test/StormDataTest.o: StormDataTest.cpp ../vws/StormData.h \
  ../vws/DateTimeFields.h ../vws/WeatherTypes.h
 ../../target/test/SummaryTest.o: SummaryTest.cpp ../vws/SummaryReport.h \
@@ -41,6 +63,7 @@
  ../vws/VantageProtocolConstants.h ../vws/SummaryEnums.h ../vws/Weather.h \
  ../vws/VantageEnums.h ../vws/VantageEepromConstants.h \
  ../vws/VantageWeatherStation.h ../vws/BitConverter.h \
+ ../vws/RainCollectorSizeListener.h ../vws/BaudRate.h \
  ../vws/ArchiveManager.h ../vws/SerialPort.h ../vws/VantageLogger.h \
  ../vws/VantageDecoder.h ../vws/VantageLogger.h ../vws/WindRoseData.h
 ../../target/test/WindDirectionSliceTest.o: WindDirectionSliceTest.cpp \

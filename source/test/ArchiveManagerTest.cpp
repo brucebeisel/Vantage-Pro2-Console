@@ -26,6 +26,7 @@
 #include "SerialPort.h"
 #include "VantageLogger.h"
 #include "VantageDecoder.h"
+#include "BaudRate.h"
 
 using namespace vws;
 using namespace std;
@@ -141,7 +142,7 @@ main(int argc, char * argv[]) {
     // This archive manager uses the default file, which should not be changed for data integrity reasons.
     // You don't want to accidentally change the deployed archive file
     //
-    SerialPort port("port", 19200);
+    SerialPort port("port", vws::BaudRate::BR_19200);
     VantageWeatherStation station(port);
     ArchiveManager archiveManager(archiveDirectory, station);
 

@@ -25,6 +25,7 @@
 #include "BitConverter.h"
 #include "VantageProtocolConstants.h"
 #include "RainCollectorSizeListener.h"
+#include "BaudRate.h"
 
 using namespace vws::ProtocolConstants;
 
@@ -380,7 +381,7 @@ public:
      *
      * @return True if successful
      */
-    bool updateBaudRate(BaudRate rate);
+    bool updateBaudRate(vws::BaudRate rate);
     
     /**
      * Update the console's time.
