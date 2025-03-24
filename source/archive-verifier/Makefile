@@ -13,6 +13,7 @@ OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 VWSOBJS = \
 	$(VWSOBJDIR)/ArchivePacket.o \
 	$(VWSOBJDIR)/ArchiveManager.o \
+	$(VWSOBJDIR)/BaudRate.o \
 	$(VWSOBJDIR)/BitConverter.o \
 	$(VWSOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSOBJDIR)/ConsoleDiagnosticReport.o \

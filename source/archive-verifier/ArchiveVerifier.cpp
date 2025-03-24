@@ -59,7 +59,7 @@ main(int argc, char *argv[]) {
 
     archiveFile = path.filename().c_str();
 
-    SerialPort port("/dev/tty", 9600);
+    SerialPort port("/dev/tty", vws::BaudRate::BR_9600);
     VantageWeatherStation station(port);
 
     ArchiveManager mgr(archiveDir, archiveFile, station);

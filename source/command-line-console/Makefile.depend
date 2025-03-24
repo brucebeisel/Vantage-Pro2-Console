@@ -1,12 +1,13 @@
 ../../target/test/commandLineConsole.o: commandLineConsole.cpp \
- ../vws/VantageWeatherStation.h ../vws/ArchivePacket.h \
- ../vws/WeatherTypes.h ../vws/Measurement.h ../vws/DateTimeFields.h \
- ../vws/BitConverter.h ../vws/VantageProtocolConstants.h \
- ../vws/SerialPort.h ../vws/ConsoleCommandHandler.h ../vws/CommandData.h \
- ../vws/CommandHandler.h ../vws/CommandQueue.h \
- ../vws/VantageConfiguration.h ../3rdParty/json.hpp \
- ../vws/VantageWeatherStation.h ../vws/LoopPacketListener.h \
- ../vws/ConsoleConnectionMonitor.h ../vws/UnitsSettings.h \
- ../vws/VantageEepromConstants.h ../vws/VantageStationNetwork.h \
- ../vws/AlarmManager.h ../vws/LoopPacket.h ../vws/Alarm.h \
- ../vws/AlarmProperties.h ../vws/ArchiveManager.h ../vws/VantageLogger.h
+ ../3rdParty/json.hpp ../vws/VantageWeatherStation.h \
+ ../vws/ArchivePacket.h ../vws/WeatherTypes.h ../vws/Measurement.h \
+ ../vws/DateTimeFields.h ../vws/BitConverter.h \
+ ../vws/VantageProtocolConstants.h ../vws/RainCollectorSizeListener.h \
+ ../vws/BaudRate.h ../vws/SerialPort.h ../vws/ConsoleCommandHandler.h \
+ ../vws/CommandData.h ../vws/CommandHandler.h ../vws/CommandQueue.h \
+ ../vws/VantageConfiguration.h ../vws/VantageWeatherStation.h \
+ ../vws/LoopPacketListener.h ../vws/ConsoleConnectionMonitor.h \
+ ../vws/UnitsSettings.h ../vws/VantageEepromConstants.h \
+ ../vws/VantageStationNetwork.h ../vws/AlarmManager.h ../vws/LoopPacket.h \
+ ../vws/Alarm.h ../vws/AlarmProperties.h ../vws/ArchiveManager.h \
+ ../vws/VantageLogger.h ../vws/VantageEnums.h ../vws/SummaryEnums.h

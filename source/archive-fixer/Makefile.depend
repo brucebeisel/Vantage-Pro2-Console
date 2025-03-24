@@ -1,2 +1,3 @@
 ../../target/test/ArchiveFixer.o: ArchiveFixer.cpp ../vws/ArchivePacket.h \
- ../vws/WeatherTypes.h ../vws/Measurement.h
+ ../vws/WeatherTypes.h ../vws/Measurement.h ../vws/DateTimeFields.h \
+ ../vws/Weather.h

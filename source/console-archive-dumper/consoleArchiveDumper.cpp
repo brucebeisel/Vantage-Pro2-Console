@@ -68,7 +68,7 @@ main(int argc, char *argv[]) {
 
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
 
-    SerialPort serialPort(device, 19200);
+    SerialPort serialPort(device, vws::BaudRate::BR_19200);
     VantageWeatherStation ws(serialPort);
 
     if (!ws.openStation()) {

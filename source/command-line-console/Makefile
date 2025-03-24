@@ -16,6 +16,7 @@ VWSOBJS = \
 	$(VWSOBJDIR)/AlarmProperties.o \
 	$(VWSOBJDIR)/ArchiveManager.o \
 	$(VWSOBJDIR)/ArchivePacket.o \
+	$(VWSOBJDIR)/BaudRate.o \
 	$(VWSOBJDIR)/BitConverter.o \
 	$(VWSOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSOBJDIR)/CommandData.o \

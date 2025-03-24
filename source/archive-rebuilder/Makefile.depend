@@ -1,1 +1,3 @@
-../../target/test/ArchiveRebuilder.o: ArchiveRebuilder.cpp
+../../target/test/ArchiveRebuilder.o: ArchiveRebuilder.cpp \
+ ../vws/ArchivePacket.h ../vws/WeatherTypes.h ../vws/Measurement.h \
+ ../vws/DateTimeFields.h

@@ -1,7 +1,9 @@
 ../../target/test/consoleArchiveDumper.o: consoleArchiveDumper.cpp \
  ../vws/ArchivePacket.h ../vws/WeatherTypes.h ../vws/Measurement.h \
- ../vws/VantageProtocolConstants.h ../vws/VantageDecoder.h \
+ ../vws/DateTimeFields.h ../vws/VantageProtocolConstants.h \
+ ../vws/VantageEepromConstants.h ../vws/VantageDecoder.h \
  ../vws/VantageEepromConstants.h ../vws/VantageLogger.h \
- ../vws/VantageProtocolConstants.h ../vws/Weather.h \
+ ../vws/VantageProtocolConstants.h ../vws/Weather.h ../vws/WeatherTypes.h \
  ../vws/VantageWeatherStation.h ../vws/ArchivePacket.h \
- ../vws/BitConverter.h ../vws/SerialPort.h ../vws/VantageLogger.h
+ ../vws/BitConverter.h ../vws/RainCollectorSizeListener.h \
+ ../vws/BaudRate.h ../vws/SerialPort.h ../vws/VantageLogger.h

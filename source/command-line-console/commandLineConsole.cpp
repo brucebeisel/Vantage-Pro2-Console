@@ -155,7 +155,7 @@ main(int argc, char *argv[]) {
     }
 
 
-    SerialPort serialPort(serialPortName, 19200);
+    SerialPort serialPort(serialPortName, vws::BaudRate::BR_19200);
     VantageWeatherStation station(serialPort);
     ArchiveManager archive("./", station);
     VantageConfiguration config(station);
