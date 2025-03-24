@@ -39,7 +39,7 @@ namespace vws {
 ////////////////////////////////////////////////////////////////////////////////
 SerialPort::SerialPort(const std::string & device, vws::BaudRate br) : commPort(INVALID_HANDLE_VALUE),
                                                                        device(device),
-                                                                       baudRate(br.getOsValue()),
+                                                                       baudRate(br),
                                                                        logger(VantageLogger::getLogger("SerialPort")) {
 }
 
@@ -61,7 +61,7 @@ SerialPort::open() {
 
     DCB dcb;
     GetCommState(commPort, &dcb);
-    dcb.BaudRate = baudRate;
+    dcb.BaudRate = baudRate.getOsValue();
     dcb.Parity = NOPARITY;
     dcb.ByteSize = 8;
     dcb.StopBits = ONESTOPBIT;
@@ -130,6 +130,8 @@ SerialPort::discardInBuffer() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 SerialPort::open() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Opening serial port device " << device << endl;
+
     commPort = ::open(device.c_str(), O_RDWR);
     if (commPort < 0)
         return false;
@@ -140,13 +142,14 @@ SerialPort::open() {
         return false;
     }
 
-    cfsetospeed(&tio, baudRate);            // Baud rate
-    cfsetispeed(&tio, B0);                  // B0 baud rate means same as the output baud rate
-    cfmakeraw(&tio);                        // Sets the terminal to something like the "raw" mode of the old Version 7 terminal driver
-    tio.c_cflag &= ~PARENB;                 // No parity
-    tio.c_cflag &= ~CSTOPB;                 // 1 stop bit and 1 start bit
-    tio.c_cflag &= ~CSIZE;                  // Clear out the data bits field before setting it
-    tio.c_cflag |= CS8;                     // 8 data bits
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Setting serial port attributes, including baud rate of " << baudRate << endl;
+    cfsetospeed(&tio, baudRate.getOsValue()); // Baud rate
+    cfsetispeed(&tio, B0);                    // B0 baud rate means same as the output baud rate
+    cfmakeraw(&tio);                          // Sets the terminal to something like the "raw" mode of the old Version 7 terminal driver
+    tio.c_cflag &= ~PARENB;                   // No parity
+    tio.c_cflag &= ~CSTOPB;                   // 1 stop bit and 1 start bit
+    tio.c_cflag &= ~CSIZE;                    // Clear out the data bits field before setting it
+    tio.c_cflag |= CS8;                       // 8 data bits
     int rv = tcsetattr(commPort, 0, &tio);
 
     if (rv != 0) {
@@ -163,6 +166,8 @@ SerialPort::open() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 SerialPort::close() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Closing serial port device " << device << endl;
+
     ::close(commPort);
     commPort = -1;
 }
@@ -281,7 +286,7 @@ SerialPort::readBytes(byte buffer[], int requiredBytes, int timeoutMillis) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 SerialPort::setBaudRate(vws::BaudRate br) {
-    baudRate = br.getOsValue();
+    baudRate = br;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

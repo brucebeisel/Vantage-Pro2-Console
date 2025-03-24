@@ -35,7 +35,7 @@ namespace vws {
 class BaudRate {
 public:
     /**
-     * The valid baud rates for the Vantage console
+     * The valid baud rates for the Vantage console, but note that Linux does not support the baud rate of 14400.
      */
     static const BaudRate BR_19200;
 #ifdef __CYGWIN__
