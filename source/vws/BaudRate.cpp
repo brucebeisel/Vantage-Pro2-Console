@@ -29,7 +29,6 @@ const vws::BaudRate vws::BaudRate::BR_2400(CBR_2400, 2400);
 const vws::BaudRate vws::BaudRate::BR_1200(CBR_1200, 1200);
 #else
 const vws::BaudRate vws::BaudRate::BR_19200(B19200, 19200);
-const vws::BaudRate vws::BaudRate::BR_14400(B14400, 14400);
 const vws::BaudRate vws::BaudRate::BR_9600(B9600, 9600);
 const vws::BaudRate vws::BaudRate::BR_4800(B4800, 4800);
 const vws::BaudRate vws::BaudRate::BR_2400(B2400, 2400);
@@ -49,8 +48,10 @@ BaudRate::findBaudRateBySpeed(int speed) {
 
     if (speed == BR_19200.vantageValue)
         rv = BR_19200;
+#ifdef __CYGWIN__
     else if (speed == BR_14400.vantageValue)
         rv = BR_14400;
+#endif
     else if (speed == BR_9600.vantageValue)
         rv = BR_9600;
     else if (speed == BR_4800.vantageValue)

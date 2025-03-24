@@ -21,6 +21,8 @@
 #include "windows.h"
 #include "winbase.h"
 typedef DWORD speed_t;
+#else
+#include <termios.h>
 #endif
 #include <iosfwd>
 
@@ -36,7 +38,9 @@ public:
      * The valid baud rates for the Vantage console
      */
     static const BaudRate BR_19200;
+#ifdef __CYGWIN__
     static const BaudRate BR_14400;
+#endif
     static const BaudRate BR_9600;
     static const BaudRate BR_4800;
     static const BaudRate BR_2400;
@@ -63,14 +67,26 @@ public:
      */
     int getVantageValue() const;
 
+    /**
+     * ostream operator.
+     *
+     * @param os The ostream
+     * @param br The baud rate to output
+     * @return The ostream passed in
+     */
     friend std::ostream & operator<<(std::ostream & os, const vws::BaudRate & br);
 
-
 private:
+    /**
+     * Constructor.
+     *
+     * @param osBaudRate      The value the operating system uses to configure a serial port
+     * @param vantageBaudRate The value the Vantage console uses for baud rate
+     */
     BaudRate(speed_t osBaudRate, int vantageBaudRate);
 
-    speed_t osValue;
-    int     vantageValue;
+    speed_t osValue;       // Operating system specific value (CBR_##### for windows and B##### for Linux)
+    int     vantageValue;  // The value that the Vantage console uses for the BAUD command
 };
 
 }
