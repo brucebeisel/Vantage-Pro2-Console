@@ -27,6 +27,7 @@
 #include "ArchiveManager.h"
 #include "VantageLogger.h"
 #include "VantageEnums.h"
+#include "GraphDataRetriever.h"
 
 using namespace std;
 using namespace vws;
@@ -167,6 +168,8 @@ main(int argc, char *argv[]) {
 
     ConsoleCommandHandler cmd(station, config, network, alarm);
 
+    GraphDataRetriever gdr(station);
+
     if (!station.openStation()) {
         cerr << "Could not open weather console" << endl;
         exit(1);
@@ -186,6 +189,7 @@ main(int argc, char *argv[]) {
         int commandNumber;
         cout << "Choose a command" << endl;
         cout << "    0 - Exit" << endl;
+        cout << "   99 - Retrieve RX Percentage Data" << endl;
         cout << "  999 - run NEWSETUP" << endl;
         int cmdNumber = 1;
         for (auto cmd : commands) {
@@ -205,6 +209,11 @@ main(int argc, char *argv[]) {
 
         if (commandNumber == 999) {
             station.initializeSetup();
+            continue;
+        }
+
+        if (commandNumber == 99) {
+            gdr.retrieveDayReceivePercentages();
             continue;
         }
 

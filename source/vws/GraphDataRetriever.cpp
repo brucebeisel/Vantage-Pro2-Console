@@ -83,4 +83,40 @@ GraphDataRetriever::retrieveStormData(std::vector<StormData> & storms) {
     return true;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+GraphDataRetriever::retrieveDayReceivePercentages() {
+    int nextDayPointer;
+    if (!retrieveNextDayPointer(nextDayPointer)) {
+        return false;
+    }
+
+    byte buffer[EEPROM_RX_PERCENTAGE_RECORDS];
+
+    if (!station.eepromBinaryRead(EepromConstants::EE_RX_PERCENTAGE_ADDRESS, sizeof(buffer), buffer))
+        return false;
+
+    cout << "Next day pointer: " << nextDayPointer << endl;
+    cout << "RX Percentages:" << endl;
+    for (int i = 0; i < EEPROM_RX_PERCENTAGE_RECORDS; i++) {
+        cout << i << ": " << static_cast<int>(buffer[i]) << endl;
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+GraphDataRetriever::retrieveNextDayPointer(int & nextDay) {
+    byte value;
+
+    if (!station.eepromBinaryRead(EepromConstants::EE_NEXT_DAY_PTR_ADDRESS, 1, &value))
+        return false;
+
+    nextDay = static_cast<int>(value);
+    return true;
+
+}
 } /* namespace vws */

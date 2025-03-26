@@ -146,6 +146,7 @@ namespace EepromConstants {
     static constexpr unsigned EE_INSIDE_TEMP_DAY_LOWS_ADDRESS =       EE_GRAPH_DATA_ADDRESS + 96;
     static constexpr unsigned EE_INSIDE_TEMP_DAY_LOW_TIMES_ADDRESS =  EE_GRAPH_DATA_ADDRESS + 120;
     static constexpr unsigned EE_RAIN_STORM_DATA_ADDRESS =            EE_GRAPH_DATA_ADDRESS + 2642;
+    static constexpr unsigned EE_RX_PERCENTAGE_ADDRESS =              EE_GRAPH_DATA_ADDRESS + 3730;
 
 };
 

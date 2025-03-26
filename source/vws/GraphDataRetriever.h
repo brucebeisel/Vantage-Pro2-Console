@@ -47,7 +47,11 @@ public:
      */
     bool retrieveStormData(std::vector<StormData> & stormData);
 
+    bool retrieveDayReceivePercentages();
+
 private:
+    bool retrieveNextDayPointer(int & nextDay);
+
     //
     // The storm data is stored in 3 parallel buffer arrays. The EEPROM allocates 25 records for each
     // array, but only 24 records are used.
@@ -56,6 +60,7 @@ private:
     static constexpr int STORM_DATE_RECORD_SIZE = 2;
     static constexpr int EEPROM_STORM_RECORDS = 25;
     static constexpr int NUM_RAIN_STORM_RECORDS = 24;
+    static constexpr int EEPROM_RX_PERCENTAGE_RECORDS = 24;
     static constexpr int EEPROM_STORM_DATA_SIZE = (STORM_RAINFALL_RECORD_SIZE * EEPROM_STORM_RECORDS) + (STORM_DATE_RECORD_SIZE * EEPROM_STORM_RECORDS * 2);
 
     VantageWeatherStation & station;

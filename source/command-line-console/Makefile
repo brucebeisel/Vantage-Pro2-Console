@@ -11,6 +11,8 @@ OBJLIST=$(SRCS:.cpp=.o)
 OBJS=$(addprefix $(OBJDIR)/, $(OBJLIST))
 
 VWSOBJS = \
+	$(VWSOBJDIR)/GraphDataRetriever.o \
+	$(VWSOBJDIR)/StormData.o \
 	$(VWSOBJDIR)/Alarm.o \
 	$(VWSOBJDIR)/AlarmManager.o \
 	$(VWSOBJDIR)/AlarmProperties.o \
