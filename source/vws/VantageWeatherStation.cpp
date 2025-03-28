@@ -1202,8 +1202,15 @@ VantageWeatherStation::determineIfArchivingIsActive() {
 
     //
     // Dump after a time before what should be the last packet in the archive
+    // TODO Round time off to the nearest archive interval so that the console does not dump the entire archive
     //
-    DateTimeFields dumpTime(time(0) - archivePeriodMinutes * 60);
+    DateTime now = time(0);
+    int archivePeriodSeconds = archivePeriodMinutes * 60;
+    DateTime after = now - (now % archivePeriodSeconds);
+
+    DateTimeFields dumpTime(after);
+    dumpTime.setSecond(0);
+
     vector<ArchivePacket> packets;
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Dumping archive after time " << dumpTime << " to see if archive is up to date" << endl;
     dumpAfter(dumpTime, packets);
