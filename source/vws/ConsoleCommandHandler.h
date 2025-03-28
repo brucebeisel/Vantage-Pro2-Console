@@ -181,6 +181,8 @@ public:
     //     2. Stop Archiving    (STOP)                                                                    //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    void handleQueryArchivingState(CommandData & commandData);
+
     // GETTIME
     void handleQueryConsoleTime(CommandData & commandData);
 

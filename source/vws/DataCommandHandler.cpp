@@ -171,8 +171,7 @@ DataCommandHandler::handleQueryArchiveStatistics(CommandData & commandData) {
     oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { "
         << "\"oldestRecordTime\" : \"" << oldestRecordTime.formatDateTime() << "\", "
         << "\"newestRecordTime\" : \"" << newestRecordTime.formatDateTime() << "\", "
-        << "\"recordCount\" : " << archiveRecordCount << ", "
-        << "\"archivingActive\" : " << boolalpha << archiveManager.getArchivingState() << noboolalpha
+        << "\"recordCount\" : " << archiveRecordCount
         << "}";
 
     commandData.response.append(oss.str());

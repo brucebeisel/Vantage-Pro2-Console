@@ -178,9 +178,6 @@ VantageDriver::disconnectFromConsole() {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageDriver::retrieveConfiguration() {
-    ArchivePeriod period;
-    station.retrieveArchivePeriod(period);
-
     //
     // Get one LOOP packet weather so that the sensors are detected
     //
@@ -292,10 +289,7 @@ VantageDriver::mainLoop() {
                 logger.log(VantageLogger::VANTAGE_INFO) << "New archive record available. Record ID = " << nextRecord << endl;
                 previousNextRecord = nextRecord;
 
-                if (archiveManager.synchronizeArchive()) {
-                    ArchivePacket packet;
-                    archiveManager.getNewestRecord(packet);
-                    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Most recent archive packet time is: " << packet.getPacketDateTimeString() << endl;
+                if (synchronizeArchive()) {
                     previousNextRecord = nextRecord;
                 }
             }
@@ -307,6 +301,34 @@ VantageDriver::mainLoop() {
 
     station.closeStation();
     logger.log(VantageLogger::VANTAGE_INFO) << "Exiting main loop" << endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageDriver::synchronizeArchive() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing local archive from Vantage console's archive" << endl;
+    vector<ArchivePacket> list;
+    bool result = false;
+
+    DateTimeFields oldestRecordTime;
+    DateTimeFields newestRecordTime;
+    int count;
+    archiveManager.getArchiveRange(oldestRecordTime, newestRecordTime, count);
+
+    for (int i = 0; i < SYNC_ARCHIVE_RETRIES && !result; i++) {
+        list.clear();
+        if (station.wakeupStation() && station.dumpAfter(newestRecordTime, list)) {
+            archiveManager.addPacketsToArchive(list);
+            result = true;
+            if (list.size() > 0)
+                logger.log(VantageLogger::VANTAGE_DEBUG1) << "Newest archive packet time after sync is: " << list.at(list.size() - 1).getPacketDateTimeString() << endl;
+            else
+                logger.log(VantageLogger::VANTAGE_INFO) << "No archive records were retrieved from the console during sync" << endl;
+        }
+    }
+
+    return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

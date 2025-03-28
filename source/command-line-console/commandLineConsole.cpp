@@ -77,6 +77,7 @@ static const Command commands[] = {
     "Clear low values",                       "clear-low-values",          &ConsoleCommandHandler::handleClearLowValues,                      NULL,                                                               extremePeriodPrompter,
     "Start archiving",                        "start-archiving",           NULL,                                                              &VantageWeatherStation::startArchiving,                             NULL,
     "Stop archiving",                         "stop-archiving",            NULL,                                                              &VantageWeatherStation::stopArchiving,                              NULL,
+    "Query archiving state",                  "query-archiving-state",     &ConsoleCommandHandler::handleQueryArchivingState,                 NULL,                                                               NULL,
     "Clear active alarms",                    "clear-active-alarms",       NULL,                                                              &VantageWeatherStation::clearActiveAlarms,                          NULL,
     "Clear alarm thresholds",                 "clear-alarm-thresholds",    NULL,                                                              &VantageWeatherStation::clearAlarmThresholds,                       NULL,
     "Clear console's archive",                "clear-console-archive",     NULL,                                                              &VantageWeatherStation::clearArchive,                               confirmPrompter,
@@ -158,7 +159,7 @@ main(int argc, char *argv[]) {
 
     SerialPort serialPort(serialPortName, vws::BaudRate::BR_19200);
     VantageWeatherStation station(serialPort);
-    ArchiveManager archive("./", station);
+    ArchiveManager archive("./");
     VantageConfiguration config(station);
     VantageStationNetwork network("./", station, archive);
     AlarmManager alarm(station);
@@ -184,6 +185,7 @@ main(int argc, char *argv[]) {
     // Use the console connected processing to get the rain collector bucket size
     //
     config.consoleConnected();
+    station.consoleConnected();
 
     while (1) {
         int commandNumber;

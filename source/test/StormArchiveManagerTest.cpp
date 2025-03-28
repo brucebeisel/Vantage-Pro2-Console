@@ -103,6 +103,7 @@ namespace vws {
 VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
                                                                         archivePeriodMinutes(0),
                                                                         consoleType(VANTAGE_PRO_2),
+                                                                        archivingActive(true),
                                                                         rainCollectorSize(.01),
                                                                         logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
@@ -123,6 +124,14 @@ VantageWeatherStation::eepromBinaryRead(unsigned address, unsigned count, char *
 void
 VantageWeatherStation::processRainCollectorSizeChange(Rainfall bucketSize) {
     rainCollectorSize = bucketSize;
+}
+
+void
+VantageWeatherStation::consoleConnected() {
+}
+
+void
+VantageWeatherStation::consoleDisconnected() {
 }
 }
 

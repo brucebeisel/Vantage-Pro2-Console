@@ -80,6 +80,7 @@ static const ConsoleCommandEntry consoleCommandList[] = {
     "put-year-et",                   &ConsoleCommandHandler::handlePutYearET,                           NULL,
     "start-archiving",               NULL,                                                              &VantageWeatherStation::startArchiving,
     "stop-archiving",                NULL,                                                              &VantageWeatherStation::stopArchiving,
+    "query-archiving-state",         &ConsoleCommandHandler::handleQueryArchivingState,                 NULL,
     "update-alarm-thresholds",       &ConsoleCommandHandler::handleUpdateAlarmThresholds,               NULL,
     "update-archive-period",         &ConsoleCommandHandler::handleUpdateArchivePeriod,                 NULL,
     "update-baro-reading-elevation", &ConsoleCommandHandler::handleUpdateBarometerReadingAndElevation,  NULL,
@@ -172,6 +173,17 @@ ConsoleCommandHandler::handleNoArgCommand(bool (VantageWeatherStation::*handler)
 /******************************************************************************
  *                      TESTING COMMANDS                                      *
  ******************************************************************************/
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+ConsoleCommandHandler::handleQueryArchivingState(CommandData & commandData) {
+    ostringstream oss;
+    bool archivingActive = station.getArchivingState();
+    oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"archivingActive\" : \"" << boolalpha << archivingActive << "\" }";
+    commandData.response.append(oss.str());
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void

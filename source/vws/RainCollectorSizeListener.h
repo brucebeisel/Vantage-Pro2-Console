@@ -33,8 +33,9 @@ public:
 
     /**
      * Called when the rain collector size changes or at startup.
+     * It does not appear that .1 mm is a valid option as there are no parts sold with a .1 mm capacity.
      *
-     * @param bucketSize The size of the rain bucket in inches (.01 inches, .02 include, or .01 mm)
+     * @param bucketSize The size of the rain bucket in inches (.01 inches, .1 mm, or .2 mm (.0079 inches))
      */
     virtual void processRainCollectorSizeChange(Rainfall bucketSize) = 0;
 };

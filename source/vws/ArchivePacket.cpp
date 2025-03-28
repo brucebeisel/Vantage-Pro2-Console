@@ -41,7 +41,7 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchivePacket::ArchivePacket() : packetEpochDateTime(0), windSampleCount(0), buffer(""), logger(&VantageLogger::getLogger("ArchivePacket")) {
+ArchivePacket::ArchivePacket() : packetEpochDateTime(EMPTY_ARCHIVE_PACKET_TIME), windSampleCount(0), buffer(""), logger(&VantageLogger::getLogger("ArchivePacket")) {
 }
 
 
@@ -153,7 +153,7 @@ ArchivePacket::clearArchivePacketData() {
     for (int i = 0; i < BYTES_PER_ARCHIVE_PACKET; i++)
         this->buffer[i] = PACKET_NO_VALUE;
 
-    packetEpochDateTime = 0;
+    packetEpochDateTime = EMPTY_ARCHIVE_PACKET_TIME;
     windSampleCount = 0;
     packetDateTimeFields.resetDateTimeFields();
 }

@@ -57,6 +57,7 @@ VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPo
                                                                         archivePeriodMinutes(0),
                                                                         consoleType(VANTAGE_PRO_2),
                                                                         rainCollectorSize(0.0),
+                                                                        archivingActive(false),
                                                                         logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
 
@@ -88,6 +89,20 @@ void
 VantageWeatherStation::processRainCollectorSizeChange(Rainfall bucketSize) {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Received new rain bucket size of " << bucketSize << " inches" << endl;
     rainCollectorSize = bucketSize;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageWeatherStation::consoleConnected() {
+    determineIfArchivingIsActive();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageWeatherStation::consoleDisconnected() {
+    // Nothing to do on disconnect
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1138,7 +1153,12 @@ VantageWeatherStation::startArchiving() {
     // of the START command. The OK sequence was determined by trial and error.
     //
     logger.log(VantageLogger::VANTAGE_INFO) << "Starting to archive" << endl;
-    return sendOKedCommand(START_ARCHIVING_CMD);
+    if (sendOKedCommand(START_ARCHIVING_CMD)) {
+        archivingActive = true;
+        return true;
+    }
+    else
+        return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1152,7 +1172,47 @@ VantageWeatherStation::stopArchiving() {
     // of the STOP command. The OK sequence was determined by trial and error.
     //
     logger.log(VantageLogger::VANTAGE_INFO) << "Stopping archiving" << endl;
-    return sendOKedCommand(STOP_ARCHIVING_CMD);
+    if (sendOKedCommand(STOP_ARCHIVING_CMD)) {
+        archivingActive = false;
+        return true;
+    }
+    else
+        return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+VantageWeatherStation::getArchivingState() const {
+    return archivingActive;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+VantageWeatherStation::determineIfArchivingIsActive() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Checking if archiving is currently active" << endl;
+    archivingActive = false;
+
+    ArchivePeriod archivePeriod;
+    if (!retrieveArchivePeriod(archivePeriod))
+        return;
+
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Archive period for archiving active check is " << archivePeriodMinutes << " minutes" << endl;
+
+    //
+    // Dump after a time before what should be the last packet in the archive
+    //
+    DateTimeFields dumpTime(time(0) - archivePeriodMinutes * 60);
+    vector<ArchivePacket> packets;
+    logger.log(VantageLogger::VANTAGE_DEBUG2) << "Dumping archive after time " << dumpTime << " to see if archive is up to date" << endl;
+    dumpAfter(dumpTime, packets);
+
+    //
+    // If the dump after command returns at least one packet, archiving is active
+    //
+    archivingActive = packets.size() > 0;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Archiving active: " << boolalpha << archivingActive << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

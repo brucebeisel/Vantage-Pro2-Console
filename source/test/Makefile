@@ -56,21 +56,13 @@ BITCONVERTEROBJS= \
 SUMMARYOBJS= \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
-	$(VWSTESTOBJDIR)/BaudRate.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
-	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
-	$(VWSTESTOBJDIR)/ConsoleDiagnosticReport.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
-	$(VWSTESTOBJDIR)/HiLowPacket.o \
-	$(VWSTESTOBJDIR)/LoopPacket.o \
-	$(VWSTESTOBJDIR)/Loop2Packet.o \
-	$(VWSTESTOBJDIR)/SerialPort.o \
 	$(VWSTESTOBJDIR)/SummaryReport.o \
 	$(VWSTESTOBJDIR)/UnitConverter.o \
 	$(VWSTESTOBJDIR)/VantageCRC.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
-	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
 	$(VWSTESTOBJDIR)/Weather.o \
 	$(VWSTESTOBJDIR)/WindRoseData.o 
         
@@ -78,18 +70,12 @@ SUMMARYOBJS= \
 ARCHIVEMANAGEROBJS= \
 	$(VWSTESTOBJDIR)/ArchivePacket.o \
 	$(VWSTESTOBJDIR)/ArchiveManager.o \
-	$(VWSTESTOBJDIR)/BaudRate.o \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/BitConverter.o \
-	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
 	$(VWSTESTOBJDIR)/DateTimeFields.o \
-	$(VWSTESTOBJDIR)/HiLowPacket.o \
-	$(VWSTESTOBJDIR)/LoopPacket.o \
-	$(VWSTESTOBJDIR)/Loop2Packet.o \
 	$(VWSTESTOBJDIR)/UnitConverter.o \
 	$(VWSTESTOBJDIR)/VantageCRC.o \
 	$(VWSTESTOBJDIR)/VantageDecoder.o \
-	$(VWSTESTOBJDIR)/SerialPort.o \
 	$(VWSTESTOBJDIR)/Weather.o
 	
 ARCHIVEPACKETOBJS= \

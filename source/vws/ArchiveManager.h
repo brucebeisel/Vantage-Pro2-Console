@@ -25,7 +25,6 @@
 #include "ArchivePacket.h"
 
 namespace vws {
-class VantageWeatherStation;
 class VantageLogger;
 
 static const std::string DEFAULT_ARCHIVE_FILE = "weather-archive.dat";
@@ -59,23 +58,16 @@ public:
      * Constructor.
      * 
      * @param dataDirctory The directory into which the archive will be written
-     * @param station      The weather station object used to communicate with the console
      */
-    //
-    // TODO Analyze the dependency of a VantageWeatherStation. Currently it is needed to
-    // synchronize with the console archive and to query the archive interval. Could these
-    // functions be moved elsewhere to allow ArchiveManager to be more of a stand alone class?
-    //
-    ArchiveManager(const std::string & dataDirectory, VantageWeatherStation & station);
+    ArchiveManager(const std::string & dataDirectory);
 
     /**
      * Constructor where the archive file is specified.
      *
      * @param dataDirctory The directory into which the archive will be written
      * @param archiveFile  The name of the file to be used as the archive
-     * @param station      The weather station object used to communicate with the console
      */
-    ArchiveManager(const std::string & dataDirectory, const std::string & archiveFile, VantageWeatherStation & station);
+    ArchiveManager(const std::string & dataDirectory, const std::string & archiveFile);
 
     /**
      * Destructor.
@@ -83,11 +75,11 @@ public:
     ~ArchiveManager();
 
     /**
-     * Synchronize the archive file with the contents from the console.
+     * Add a list of packets to the archive.
      *
-     * @return True if successful
+     * @param packets The list packets to be added to the archive
      */
-    bool synchronizeArchive();
+    void addPacketsToArchive(const std::vector<ArchivePacket> & packets);
 
     /**
      * Query the archive records that occur between the specified times (inclusive).
@@ -170,24 +162,7 @@ public:
      */
     bool verifyArchiveFile(const std::string & archiveFilePath, bool logResults = false) const;
 
-    /**
-     * Set the state of archiving.
-     * Note that this state can be explicitly set or implicitly determined based on the
-     * archive interval and the time of the newest record in the archive.
-     *
-     * @param active True if archiving is active
-     */
-    void setArchivingState(bool active);
-
-    /**
-     * Get the state of archiving.
-     *
-     * @return True if archiving is active
-     */
-    bool getArchivingState() const;
-
 private:
-    static constexpr int SYNC_RETRIES = 5;
     static constexpr int BACKUP_RETAIN_DAYS = 30;
 
     /**
@@ -198,20 +173,6 @@ private:
      * @param afterTime  Whether the stream will be position on or after the search time
      */
     void positionStream(std::istream & is, DateTime searchTime, bool afterTime);
-
-    /**
-     * Add a single packet to the archive.
-     *
-     * @param packet The packet to add to the archive
-     */
-    void addPacketToArchive(const ArchivePacket & packet);
-
-    /**
-     * Add a list of packets to the archive.
-     * 
-     * @param packets The list packets to be added to the archive
-     */
-    void addPacketsToArchive(const std::vector<ArchivePacket> & packets);
 
     /**
      * Save a packet to a file that can be replayed at a later time.
@@ -225,25 +186,14 @@ private:
      */
     void findArchivePacketTimeRange();
 
-    /**
-     * Determine if archiving is active.
-     * The newest packet time must be set for this method to determine if archiving is active or not.
-     */
-    void determineIfArchivingIsActive();
-
     const std::string        archiveFile;            // The name of the archive file
     const std::string        packetSaveDirectory;    // The directory into which the packets will be saved
     const std::string        archiveBackupDir;       // The name of the archive backup directory
     const std::string        archiveVerifyLog;       // The name of the file where the verification results are written
     DateTime                 nextBackupTime;         // The next time the archive should be backed up
-
     ArchivePacket            newestPacket;
     ArchivePacket            oldestPacket;
-
-
     int                      archivePacketCount;     // The number of packets in the archive
-    bool                     archivingActive;        // Whether archiving is active
-    VantageWeatherStation &  station;                // Reference to the Vantage weather station object
     VantageLogger &          logger;
     mutable std::mutex       mutex;                  // The mutex to protect the archive file against access by multiple threads
 };

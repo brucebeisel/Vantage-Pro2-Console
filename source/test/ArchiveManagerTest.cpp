@@ -31,8 +31,6 @@
 using namespace vws;
 using namespace std;
 
-namespace vws {
-
 static const unsigned char archivePage[] = {
     0x00, 0xde, 0x30, 0xc4, 0x04, 0x3b, 0x03, 0x3e, 0x03, 0x38, 0x03, 0x00, 0x00, 0x00, 0x00, 0x25,
     0x75, 0xee, 0x03, 0x75, 0x00, 0x09, 0x03, 0x36, 0x54, 0x03, 0x07, 0x04, 0x03, 0x58, 0x00, 0x22,
@@ -62,27 +60,8 @@ changePacketTime(vws::byte * packetData, const DateTimeFields & packetTime) {
     BitConverter::getBytes(timestamp, packetData, 2, 2);
 }
 
-VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
-                                                                        archivePeriodMinutes(0),
-                                                                        consoleType(VANTAGE_PRO_2),
-                                                                        rainCollectorSize(.01),
-                                                                        logger(VantageLogger::getLogger("VantageWeatherStation")) {
-}
-
-VantageWeatherStation::~VantageWeatherStation() {
-
-}
-
-bool
-VantageWeatherStation::wakeupStation() {
-    return true;
-}
-
-static int numberOfPacketsToDump = 1;
-
-bool
-VantageWeatherStation::dumpAfter(const DateTimeFields & after, vector<ArchivePacket> & packets) {
-    cout << "Entered dummy dumpAfter(). After = " << after.formatDateTime() << endl;
+void
+createPackets(int packetCount, const DateTimeFields & after, vector<ArchivePacket> & packets) {
     packets.clear();
 
     vws::byte packetData[54];
@@ -97,7 +76,7 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & after, vector<ArchivePac
         packetEpochTime = today.getEpochDateTime();
     }
 
-    for (int i = 0; i < numberOfPacketsToDump; i++) {
+    for (int i = 0; i < packetCount; i++) {
         packetEpochTime += 300;
         DateTimeFields packetTime;
         packetTime.setFromEpoch(packetEpochTime);
@@ -108,20 +87,6 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & after, vector<ArchivePac
 
         cout << "Added packet with time: " << packet.getPacketDateTimeString() << endl;
     }
-
-    return true;
-};
-
-
-int
-VantageWeatherStation::getArchivePeriod() const {
-    return 5;
-}
-
-void
-VantageWeatherStation::processRainCollectorSizeChange(Rainfall bucketSize) {
-    rainCollectorSize = bucketSize;
-}
 };
 
 
@@ -142,9 +107,7 @@ main(int argc, char * argv[]) {
     // This archive manager uses the default file, which should not be changed for data integrity reasons.
     // You don't want to accidentally change the deployed archive file
     //
-    SerialPort port("port", vws::BaudRate::BR_19200);
-    VantageWeatherStation station(port);
-    ArchiveManager archiveManager(archiveDirectory, station);
+    ArchiveManager archiveManager(archiveDirectory);
 
     DateTimeFields oldestPacket;
     DateTimeFields newestPacket;
@@ -186,11 +149,12 @@ main(int argc, char * argv[]) {
     cout << "Epoch time for " << dtf2.formatDateTime(true) << " is " << dtf2.getEpochDateTime() << endl;
 
     unlink(std::string(std::string(archiveDirectory) + "/test-archive.dat").c_str());
-    ArchiveManager am2(archiveDirectory, "/test-archive.dat", station);
+    ArchiveManager am2(archiveDirectory, "/test-archive.dat");
 
-    numberOfPacketsToDump = 1;
+    int numberOfPacketsToDump = 1;
 
-    am2.synchronizeArchive();
+    createPackets(numberOfPacketsToDump, dtf1, packets);
+    am2.addPacketsToArchive(packets);
 
     am2.getArchiveRange(oldestPacket, newestPacket, packetCount);
 
@@ -210,21 +174,28 @@ main(int argc, char * argv[]) {
         cout << "FAILED: Cleared archive does not contain exactly 0 packet. Count: " << packetCount << endl;
 
     numberOfPacketsToDump = 10;
-    am2.synchronizeArchive();
+    createPackets(numberOfPacketsToDump, dtf1, packets);
+    am2.addPacketsToArchive(packets);
 
     t = time(0);
     am2.backupArchiveFile(t);
 
     t += 86500;
-    am2.synchronizeArchive();
+    am2.getArchiveRange(oldestPacket, newestPacket, packetCount);
+    createPackets(numberOfPacketsToDump, newestPacket, packets);
+    am2.addPacketsToArchive(packets);
     am2.backupArchiveFile(t);
 
     t += 86500;
-    am2.synchronizeArchive();
+    am2.getArchiveRange(oldestPacket, newestPacket, packetCount);
+    createPackets(numberOfPacketsToDump, newestPacket, packets);
+    am2.addPacketsToArchive(packets);
     am2.backupArchiveFile(t);
 
     vector<string> fileList;
-    am2.synchronizeArchive();
+    am2.getArchiveRange(oldestPacket, newestPacket, packetCount);
+    createPackets(numberOfPacketsToDump, newestPacket, packets);
+    am2.addPacketsToArchive(packets);
     am2.getBackupFileList(fileList);
 
     if (fileList.size() == 3)

@@ -32,7 +32,6 @@
 
 #include "ArchivePacket.h"
 #include "VantageProtocolConstants.h"
-#include "VantageWeatherStation.h"
 #include "VantageLogger.h"
 #include "Weather.h"
 
@@ -44,57 +43,25 @@ using vws::VantageLogger;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchiveManager::ArchiveManager(const string & dataDirectory, VantageWeatherStation & station) :
-                                                    ArchiveManager(dataDirectory, DEFAULT_ARCHIVE_FILE, station) {
+ArchiveManager::ArchiveManager(const string & dataDirectory) : ArchiveManager(dataDirectory, DEFAULT_ARCHIVE_FILE) {
     findArchivePacketTimeRange();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-ArchiveManager::ArchiveManager(const string & dataDirectory, const string & archiveFile, VantageWeatherStation & station) :
-                                                                    archiveFile(dataDirectory + "/" + archiveFile),
-                                                                    packetSaveDirectory(dataDirectory + PACKET_SAVE_DIR),
-                                                                    archiveBackupDir(dataDirectory + ARCHIVE_BACKUP_DIR),
-                                                                    archiveVerifyLog(dataDirectory + ARCHIVE_VERIFY_LOG),
-                                                                    nextBackupTime(0),
-                                                                    station(station),
-                                                                    archivePacketCount(0),
-                                                                    archivingActive(true),
-                                                                    logger(VantageLogger::getLogger("ArchiveManager")) {
+ArchiveManager::ArchiveManager(const string & dataDirectory, const string & archiveFile) : archiveFile(dataDirectory + "/" + archiveFile),
+                                                                                           packetSaveDirectory(dataDirectory + PACKET_SAVE_DIR),
+                                                                                           archiveBackupDir(dataDirectory + ARCHIVE_BACKUP_DIR),
+                                                                                           archiveVerifyLog(dataDirectory + ARCHIVE_VERIFY_LOG),
+                                                                                           nextBackupTime(0),
+                                                                                           archivePacketCount(0),
+                                                                                           logger(VantageLogger::getLogger("ArchiveManager")) {
     findArchivePacketTimeRange();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ArchiveManager::~ArchiveManager() {
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// TODO There seems to be a bug with daylight savings time. There is an hour gap in the archive records
-// when DST ends.
-bool
-ArchiveManager::synchronizeArchive() {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing local archive from Vantage console's archive" << endl;
-    //logger.log(VantageLogger::VANTAGE_INFO) << "Synchronizing archive is temporarily disabled" << endl;
-    //return true;
-    vector<ArchivePacket> list;
-    bool result = false;
-
-    DateTimeFields timeFields = newestPacket.getDateTimeFields();
-
-    for (int i = 0; i < SYNC_RETRIES && !result; i++) {
-        list.clear();
-        if (station.wakeupStation() && station.dumpAfter(timeFields, list)) {
-            addPacketsToArchive(list);
-            result = true;
-            break;
-        }
-    }
-
-    backupArchiveFile();
-
-    return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -560,29 +527,6 @@ ArchiveManager::verifyArchiveFile(const string & archiveFilePath, bool logResult
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-ArchiveManager::setArchivingState(bool active) {
-    archivingActive = active;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-bool
-ArchiveManager::getArchivingState() const {
-    return archivingActive;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-ArchiveManager::addPacketToArchive(const ArchivePacket & packet) {
-    vector<ArchivePacket> list;
-    list.push_back(packet);
-    addPacketsToArchive(list);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
 ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
     std::lock_guard<std::mutex> guard(mutex);
     if (packets.size() == 0)
@@ -615,8 +559,6 @@ ArchiveManager::addPacketsToArchive(const vector<ArchivePacket> & packets) {
     archivePacketCount = fileSize / ArchivePacket::BYTES_PER_ARCHIVE_PACKET;
 
     stream.close();
-
-    determineIfArchivingIsActive();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -676,7 +618,6 @@ ArchiveManager::findArchivePacketTimeRange() {
         stream.seekg(-ArchivePacket::BYTES_PER_ARCHIVE_PACKET, ios::end);
         stream.read(buffer, sizeof(buffer));
         newestPacket.updateArchivePacketData(buffer);
-        determineIfArchivingIsActive();
     }
     else {
         archivePacketCount = 0;
@@ -685,16 +626,4 @@ ArchiveManager::findArchivePacketTimeRange() {
     stream.close();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void
-ArchiveManager::determineIfArchivingIsActive() {
-
-    archivingActive = false;
-
-    if (archivePacketCount == 0 || station.getArchivePeriod() == 0)
-        return;
-
-    archivingActive = newestPacket.getEpochDateTime() > (time(0) - (station.getArchivePeriod() * 60));
-}
 }

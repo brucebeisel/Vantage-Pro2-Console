@@ -18,9 +18,9 @@
 #include "SummaryReport.h"
 #include "Weather.h"
 #include "VantageEnums.h"
-#include "VantageWeatherStation.h"
+//#include "VantageWeatherStation.h"
 #include "ArchiveManager.h"
-#include "SerialPort.h"
+//#include "SerialPort.h"
 #include "VantageLogger.h"
 #include "VantageDecoder.h"
 #include "WindRoseData.h"
@@ -62,9 +62,9 @@ main(int argc, char * argv[]) {
 
         cout << "Summarizing " << period << " period from " << startDate.formatDate() << " to " << endDate.formatDate() << " from file " << archiveFile << endl;
 
-        SerialPort port("port", vws::BaudRate::BR_19200);
-        VantageWeatherStation station(port);
-        ArchiveManager archiveManager(archiveFile, station);
+        //SerialPort port("port", vws::BaudRate::BR_19200);
+        //VantageWeatherStation station(port);
+        ArchiveManager archiveManager(archiveFile);//, station);
         WindRoseData windRoseData(ProtocolConstants::WindUnits::MPH, 5.0, 2);
 
 

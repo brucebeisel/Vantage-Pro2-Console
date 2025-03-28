@@ -145,6 +145,18 @@ private:
     static constexpr int ARCHIVE_VERIFY_INTERVAL = 86400;
 
     /**
+     * How many times to try to synchronize the archive.
+     */
+    static constexpr int SYNC_ARCHIVE_RETRIES = 5;
+
+    /**
+     * Synchronize the console's archive with the archive on disk.
+     *
+     * @return True if successful
+     */
+    bool synchronizeArchive();
+
+    /**
      * Open console and retrieve configuration data.
      *
      * @return True if connected to the console

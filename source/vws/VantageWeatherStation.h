@@ -25,6 +25,7 @@
 #include "BitConverter.h"
 #include "VantageProtocolConstants.h"
 #include "RainCollectorSizeListener.h"
+#include "ConsoleConnectionMonitor.h"
 #include "BaudRate.h"
 
 using namespace vws::ProtocolConstants;
@@ -42,7 +43,7 @@ class ConsoleDiagnosticReport;
 /**
  * Class that handles the command protocols with the Vantage console.
  */
-class VantageWeatherStation : public RainCollectorSizeListener {
+class VantageWeatherStation : public RainCollectorSizeListener, public ConsoleConnectionMonitor  {
 public:
     struct BarometerCalibrationParameters {
         int recentMeasurement;         // In 1/1000 of an inch
@@ -89,6 +90,16 @@ public:
      * @param bucketSize The size of the rain collector bucket
      */
     virtual void processRainCollectorSizeChange(Rainfall bucketSize);
+
+    /**
+     * Called when a connection with the console is established.
+     */
+    virtual void consoleConnected();
+
+    /**
+     * Called when the connection with the console is lost.
+     */
+    virtual void consoleDisconnected();
 
     /**
      * Open the Vantage console.
@@ -439,6 +450,13 @@ public:
     bool stopArchiving();
 
     /**
+     * Get the state of archiving.
+     *
+     * @return True if archiving is active
+     */
+    bool getArchivingState() const;
+
+    /**
      * Reinitialize the console after making any of the following changes to the configuration:
      *      1. Lat/Lon
      *      2. Elevation
@@ -638,6 +656,12 @@ private:
     bool consumeAck();
 
 private:
+    /**
+     * Determine if archiving is active.
+     * The newest packet time must be set for this method to determine if archiving is active or not.
+     */
+    void determineIfArchivingIsActive();
+
     typedef std::vector<LoopPacketListener *> LoopPacketListenerList;
 
     SerialPort &               serialPort;               // The serial port object that communicates with the console
@@ -646,6 +670,7 @@ private:
     ConsoleType                consoleType;              // The type of Davis Vantage console this is
     int                        archivePeriodMinutes;     // The number of minutes between archive records
     Rainfall                   rainCollectorSize;        // The amount of rain for each rain bucket tip
+    bool                       archivingActive;          // Whether the console is currently archiving
     VantageLogger &            logger;
 
 };

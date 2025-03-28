@@ -338,7 +338,7 @@ VantageStationNetwork::updateStationList(const StationList & stationList) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 VantageStationNetwork::processLoopPacket(const LoopPacket & packet) {
-    for (auto station : stations) {
+    for (auto & station : stations) {
         station.second.isBatteryGood = packet.isTransmitterBatteryGood(station.second.stationData.stationId - 1);
     }
 
@@ -639,15 +639,26 @@ VantageStationNetwork::retrieveStationInfo() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+VantageStationNetwork::LinkQuality
 VantageStationNetwork::calculateLinkQuality(int stationId, int windSamples, int archivePeriod, int archiveRecords) const {
 
-    float archivePeriodSeconds = static_cast<float>(archivePeriod) * 60.0F;
-    float stationIndex = static_cast<float>(stationId - 1);
+    LinkQuality archivePeriodSeconds = static_cast<LinkQuality>(archivePeriod) * 60.0F;
+    LinkQuality stationIndex = static_cast<double>(stationId - 1);
+    //
+    // A packet should be received about every 2.5625 seconds for Station ID of 1 (41 / 16 = 2.5625)
+    // That is 23.4 packets per minute or 117.07 packets per 5 minute archive interval.
+    // Given varying time window frames it is possible to receive 118 packets in a 5 minute interval.
+    // Over a number of archive intervals it is possible that the link quality can exceed 100%, so we check
+    // for the ceiling value.
+    //
+    LinkQuality maxWindSamples = round(archivePeriodSeconds / ((41.0F + stationIndex) / 16.0F));
+    LinkQuality linkQuality = static_cast<LinkQuality>(windSamples) / (maxWindSamples * archiveRecords) * 100.0F;
 
-    int maxWindSamples = static_cast<int>(archivePeriodSeconds / ((41.0F + stationIndex) / 16.0F));
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Calculated link quality of " << fixed << setprecision(2)
+                                              << " with windSampleCount=" << windSamples
+                                              << " archivePeriod=" << archivePeriod
+                                              << " archiveRecordCount=" << archiveRecords << endl;
 
-    int linkQuality = (windSamples * 100) / (maxWindSamples * archiveRecords);
     if (linkQuality > MAX_STATION_RECEPTION)
         linkQuality = MAX_STATION_RECEPTION;
 
@@ -656,7 +667,7 @@ VantageStationNetwork::calculateLinkQuality(int stationId, int windSamples, int 
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+VantageStationNetwork::LinkQuality
 VantageStationNetwork::calculateLinkQualityFromArchiveRecords(const std::vector<ArchivePacket> & list) const {
     int totalWindSamples = 0;
     for (const ArchivePacket & packet : list)
@@ -667,7 +678,7 @@ VantageStationNetwork::calculateLinkQualityFromArchiveRecords(const std::vector<
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+VantageStationNetwork::LinkQuality
 VantageStationNetwork::calculateLinkQualityFromArchiveRecord(const ArchivePacket & packet) const {
     vector<ArchivePacket> list;
     list.push_back(packet);
@@ -697,7 +708,7 @@ VantageStationNetwork::queryArchiveForDay(DateTime day, vector<ArchivePacket> & 
 }
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-int
+VantageStationNetwork::LinkQuality
 VantageStationNetwork::calculateLinkQualityForDay(DateTime day) const {
     vector<ArchivePacket> list;
     queryArchiveForDay(day, list);
@@ -756,6 +767,7 @@ VantageStationNetwork::formatNetworkStatusJSON(struct tm & tm) const {
     strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d", &tm);
 
     oss << "{ \"date\" : \"" << timeBuffer << "\", \"consoleVoltage\" : " << console.batteryVoltage  << ", "
+        << fixed << setprecision(1)
         << "\"windStationLinkQuality\" : " << windStationLinkQuality << ", \"stationsBatteryStatus\" : [";
 
     bool first = true;
@@ -1014,7 +1026,7 @@ VantageStationNetwork::todayNetworkStatusJSON() const {
 
     vector<ArchivePacket> list;
     queryArchiveForDay(time(0), list);
-    int linkQuality = calculateLinkQualityFromArchiveRecords(list);
+    LinkQuality linkQuality = calculateLinkQualityFromArchiveRecords(list);
     oss << " { \"overall\" : " << linkQuality << ", \"individual\" : [ ";
 
     first = true;
@@ -1022,6 +1034,7 @@ VantageStationNetwork::todayNetworkStatusJSON() const {
         if (!first) oss << ", "; else first = false;
         linkQuality = calculateLinkQualityFromArchiveRecord(packet);
         oss << " { \"time\" : \""  << packet.getPacketDateTimeString() << "\", "
+            << fixed << setprecision(1)
             << " \"linkQuality\" : " << linkQuality << " }";
     }
 

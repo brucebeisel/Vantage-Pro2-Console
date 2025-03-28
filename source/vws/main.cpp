@@ -97,7 +97,7 @@ startVWS(const string & dataDirectory, const string & serialPortName, vws::BaudR
     CurrentWeatherManager currentWeatherManager(dataDirectory, currentWeatherSocket);
     SerialPort serialPort(serialPortName, baudRate);
     VantageWeatherStation station(serialPort);
-    ArchiveManager archiveManager(dataDirectory, station);
+    ArchiveManager archiveManager(dataDirectory);
     VantageConfiguration configuration(station);
     VantageStationNetwork network(dataDirectory, station, archiveManager);
     AlarmManager alarmManager(station);
@@ -127,6 +127,7 @@ startVWS(const string & dataDirectory, const string & serialPortName, vws::BaudR
     // Add the console connection monitors, adding consoleDriver last so that all other
     // configuration is complete before the driver
     //
+    consoleDriver.addConnectionMonitor(station);
     consoleDriver.addConnectionMonitor(configuration);
     consoleDriver.addConnectionMonitor(network);
     consoleDriver.addConnectionMonitor(alarmManager);

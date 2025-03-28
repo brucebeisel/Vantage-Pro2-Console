@@ -382,11 +382,12 @@ private:
     // The console ID is set to 16 to avoid clashes with Station ID range of 0 (invalid) to 8 and the
     // Repeater ID of 8 through 15.
     //
-    static constexpr StationId CONSOLE_STATION_ID = 16;
-    static constexpr StationId UNKNOWN_STATION_ID = 0;
-    static constexpr int       MAX_REPEATERS_PER_CHAIN = 4;
-    static constexpr int       MAX_STATION_RECEPTION = 100;
-    static constexpr StationId NO_RETRANSMIT_STATION_ID = 0;
+    using LinkQuality = double;
+    static constexpr StationId   CONSOLE_STATION_ID = 16;
+    static constexpr StationId   UNKNOWN_STATION_ID = 0;
+    static constexpr int         MAX_REPEATERS_PER_CHAIN = 4;
+    static constexpr LinkQuality MAX_STATION_RECEPTION = 100.0;
+    static constexpr StationId   NO_RETRANSMIT_STATION_ID = 0;
 
 
     bool retrieveStationInfo();
@@ -397,10 +398,10 @@ private:
     void decodeStationData();
     void detectSensors(const LoopPacket & packet);
 
-    int calculateLinkQuality(int stationId, int windSamples, int archivePeriod, int archiveRecords) const;
-    int calculateLinkQualityFromArchiveRecords(const std::vector<ArchivePacket> & list) const;
-    int calculateLinkQualityFromArchiveRecord(const ArchivePacket & packet) const;
-    int calculateLinkQualityForDay(DateTime day) const;
+    LinkQuality calculateLinkQuality(int stationId, int windSamples, int archivePeriod, int archiveRecords) const;
+    LinkQuality calculateLinkQualityFromArchiveRecords(const std::vector<ArchivePacket> & list) const;
+    LinkQuality calculateLinkQualityFromArchiveRecord(const ArchivePacket & packet) const;
+    LinkQuality calculateLinkQualityForDay(DateTime day) const;
     std::string formatNetworkStatusJSON(struct tm & tm) const;
     void writeStatusFile(struct tm & tm);
     void queryArchiveForDay(DateTime day, std::vector<ArchivePacket> & list) const;
@@ -424,7 +425,7 @@ private:
     Console                 console;                         // The console with which this software is communicating
 
     StationId               windStationId;                   // The station ID of the sensor station that has the wind sensor
-    int                     windStationLinkQuality;          // The current link quality of the sensor station that has the wind sensor
+    LinkQuality             windStationLinkQuality;          // The current link quality of the sensor station that has the wind sensor
     int                     linkQualityCalculationMday;      // The day of the month for which the last link quality was calculated
     bool                    firstLoopPacketReceived;         // Whether the first LOOP packet has been received
 };

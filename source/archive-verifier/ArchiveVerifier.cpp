@@ -18,8 +18,6 @@
 #include <iostream>
 #include <filesystem>
 #include "ArchiveManager.h"
-#include "VantageWeatherStation.h"
-#include "SerialPort.h"
 #include "ArchivePacket.h"
 #include "Weather.h"
 
@@ -59,10 +57,7 @@ main(int argc, char *argv[]) {
 
     archiveFile = path.filename().c_str();
 
-    SerialPort port("/dev/tty", vws::BaudRate::BR_9600);
-    VantageWeatherStation station(port);
-
-    ArchiveManager mgr(archiveDir, archiveFile, station);
+    ArchiveManager mgr(archiveDir, archiveFile);
 
     mgr.verifyArchiveFile(argv[1]);
 
