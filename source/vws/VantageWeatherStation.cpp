@@ -557,16 +557,16 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 VantageWeatherStation::LinkQuality
-VantageWeatherStation::calculateLinkQuality(int stationId, int windSamples, int archiveRecords) const {
+VantageWeatherStation::calculateLinkQuality(int stationId, int windSampleCount, int archiveRecordCount) const {
     int archivePeriodSeconds = archivePeriodMinutes * 60;
 
-    LinkQuality linkQuality = calculateLinkQuality(archivePeriodSeconds, stationId, windSamples, archiveRecords);
+    LinkQuality linkQuality = calculateLinkQuality(archivePeriodSeconds, stationId, windSampleCount, archiveRecordCount);
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Calculated link quality of " << fixed << setprecision(2) << linkQuality
                                               << " with station ID=" << stationId
-                                              << " windSampleCount=" << windSamples
+                                              << " windSampleCount=" << windSampleCount
                                               << " archivePeriod=" << archivePeriodMinutes
-                                              << " archiveRecordCount=" << archiveRecords << endl;
+                                              << " archiveRecordCount=" << archiveRecordCount << endl;
 
     return linkQuality;
 }
@@ -574,58 +574,54 @@ VantageWeatherStation::calculateLinkQuality(int stationId, int windSamples, int 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 VantageWeatherStation::LinkQuality
-VantageWeatherStation::calculateLinkQuality(int archivePeriodSeconds, int stationId, int windSamples, int archiveRecords) {
-
-    int stationIndex = stationId - 1;
-
+VantageWeatherStation::calculateLinkQuality(int archivePeriodSeconds, int stationId, int windSampleCount, int archiveRecordCount) {
     //
     // A packet should be received about every 2.5625 seconds for Station ID of 1 (41 / 16 = 2.5625)
     // That is 23.4 packets per minute or 117.07 packets per 5 minute archive interval.
-    // Given varying time window frames it is possible to receive 118 packets in a 5 minute interval.
-    // Over a number of archive intervals it is possible that the link quality can exceed 100%, so we check
-    // for the ceiling value.
+    // According to Vantage protocol document:
+    //     It is possible for the number of wind samples to be larger than the "expected" maximum value.
+    //     This is because the maximum value is a long term average, rounded to an integer.
     //
-    LinkQuality maxWindSamplesPerArchiveRecordF = static_cast<LinkQuality>(archivePeriodSeconds) / ((41.0F + static_cast<LinkQuality>(stationIndex)) / 16.0F);
-    LinkQuality linkQualityF = std::round(static_cast<LinkQuality>(windSamples) / (maxWindSamplesPerArchiveRecordF * static_cast<LinkQuality>(archiveRecords)) * 100.0F * 10.0F) / 10.0F;
+    // The document does not go into details as to when the maximum value is rounded to an integer.
+    // Though it does refer to the math coming up with a result of 105% which is 25 packets received
+    // divided by 24 packets expected. This would be applicable when the archive interval is 1 minute.
+    //
+    // Trial and error testing was not able to replicate how the console calculates the link quality for a 5 minute
+    // archive interval. As a result, the link quality algorithm will round the maximum samples to the nearest
+    // integer, even though it does match the link quality reported on the console.
+    //
 
-    cout << "Max samples: " << fixed << setprecision(2) << maxWindSamplesPerArchiveRecordF
-         << " Samples: " << windSamples
-         << " Records: " << archiveRecords
-         << " Station: " << stationIndex
-         << " Quality: " << fixed << setprecision(2) << linkQualityF
-         << endl;
+    //
+    // The interval at which a radio packet is received by the console
+    //
+    int stationIndex = stationId - 1;
+    double packetIntervalSeconds = (41.0F + static_cast<LinkQuality>(stationIndex)) / 16.0F;
 
-    int maxWindSamplesPerArchiveRecord = lround(static_cast<LinkQuality>(archivePeriodSeconds) /
-                                               ((41.0F + static_cast<LinkQuality>(stationIndex)) / 16.0F));
+    //
+    // The maximum number of wind samples that should be received during an archive packet interval
+    //
+    long maxWindSamplesPerArchiveRecord = lround(static_cast<LinkQuality>(archivePeriodSeconds) / packetIntervalSeconds);
 
-    LinkQuality linkQuality = std::round(static_cast<LinkQuality>(windSamples) /
-                                         static_cast<LinkQuality>(maxWindSamplesPerArchiveRecord * archiveRecords) * 100.0F * 100.0F) / 100.0F;
+    //
+    // Given the number of archive records used for this calculation, calculate the maximum number of wind samples
+    // that could have been received
+    //
+    long maxWindSamples = maxWindSamplesPerArchiveRecord * archiveRecordCount;
 
-    cout << "Max samples: " << maxWindSamplesPerArchiveRecord
-         << " Samples: " << windSamples
-         << " Records: " << archiveRecords
-         << " Station: " << stationIndex
-         << " Quality: " << fixed << setprecision(2) << linkQuality
-         << endl;
+    //
+    // Convert to a percentage
+    //
+    LinkQuality linkQuality = (static_cast<LinkQuality>(windSampleCount) / static_cast<LinkQuality>(maxWindSamples)) * 100.0F;
 
-    int maxWindSamplesPerArchiveRecord3 = archivePeriodSeconds / ((41.0 + stationIndex) / 16.0);
-    int maxTotalSamples = maxWindSamplesPerArchiveRecord * archiveRecords;
-
-    LinkQuality linkQuality3 = std::round(static_cast<LinkQuality>(windSamples) /
-                                         static_cast<LinkQuality>(maxTotalSamples) * 100.0F * 100.0F) / 100.0F;
-
-    cout << "Max samples: " << maxWindSamplesPerArchiveRecord3
-         << " Max total samples: " << maxTotalSamples
-         << " Samples: " << windSamples
-         << " Records: " << archiveRecords
-         << " Station: " << stationIndex
-         << " Quality: " << fixed << setprecision(2) << linkQuality3
-         << endl;
+    //
+    // Round the link quality to the nearest 1/10th even though the console only reports whole numbers
+    //
+    LinkQuality roundedLinkQuality = round(linkQuality * 10.0) / 10.0;
 
     if (linkQuality > MAX_LINK_QUALITY)
         linkQuality = MAX_LINK_QUALITY;
 
-    return linkQuality;
+    return roundedLinkQuality;
 }
 
 //

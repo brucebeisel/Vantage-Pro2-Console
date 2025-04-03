@@ -64,8 +64,8 @@ public:
      * Constructor.
      * 
      * @param serialPort           The serial port to use to communicate with the console
-     * @param archivePeriodMinutes The number of minutes per archive record, used for test purposes only
-     * @param rainCollectorSize    The size of the rain collector bucket, used for test purposes only
+     * @param archivePeriodMinutes The number of minutes per archive record, used for test purposes only (normally retrieved from the console at startup)
+     * @param rainCollectorSize    The size of the rain collector bucket, used for test purposes only (normally retrieved from the console at startup)
      */
     VantageWeatherStation(SerialPort & serialPort, int archivePeriodMinutes = 0, Rainfall rainCollectorSize = 0.0);
 

@@ -307,7 +307,7 @@ public:
      * @param dataDirectory The directory into which the network status file and the network configuration file will be written.
      * @param station       The object used to communicate with the console
      * @param networkFile   The file to read/write the network configuration data
-     * @param windStationId The station ID of the station with the anemometer, only used for testing
+     * @param windStationId The station ID of the station with the anemometer, only used for testing (normally retrieved from the console at startup)
      */
     VantageStationNetwork(const std::string & dataDirectory, VantageWeatherStation & station, ArchiveManager & archiveManager, StationId windStationId = UNKNOWN_STATION_ID);
 
@@ -325,14 +325,44 @@ public:
      */
     bool retrieveMonitoredStations(std::vector<StationId> & monitoredStations);
 
+    /**
+     * Update the list of station IDs that the console will monitor.
+     *
+     * @param monitoredStations The list of station IDs to be monitored
+     * @return True if successful
+     */
     bool updateMonitoredStations(const std::vector<StationId> & monitoredStations);
 
+    /**
+     * Retrieve the retransmit station ID for this console.
+     *
+     * @param [out] retransmitId The retransmit ID of the console
+     * @return True if successful
+     */
     bool retrieveRetransmitId(StationId & retransmitId);
 
+    /**
+     * Change the retransmit ID of the console.
+     *
+     * @param retransmitId The ID to which to change the console's retransmit ID
+     * @return True if successful
+     */
     bool updateRetransmitId(StationId retransmitId);
 
+    /**
+     * Retrieve the console's station list data (always 8 entries).
+     *
+     * @param [out] stationList The station list data from the console
+     * @return True if successful
+     */
     bool retrieveStationList(StationList & stationList);
 
+    /**
+     * Update the console's station list data (always 8 entries).
+     *
+     * @param [out] stationList The station list data from the console
+     * @return True if successful
+     */
     bool updateStationList(const StationList & stationList);
 
     /**
@@ -387,9 +417,30 @@ public:
      */
     virtual void consoleDisconnected();
 
+    /**
+     * Calculate the link quality over the list of archive packets.
+     *
+     * @param list The list of archive packets from which to calculate a link quality
+     * @return The calculated link quality
+     */
     VantageWeatherStation::LinkQuality calculateLinkQuality(const std::vector<ArchivePacket> & list) const;
+
+    /**
+     * Calculate the link quality for a single archive packets.
+     *
+     * @param packet The archive packet with which to calculate a link quality
+     * @return The calculated link quality
+     */
     VantageWeatherStation::LinkQuality calculateLinkQuality(const ArchivePacket & packet) const;
+
+    /**
+     * Calculate the link quality for a single day.
+     *
+     * @param packet The day for which to calculate link quality
+     * @return The calculated link quality
+     */
     VantageWeatherStation::LinkQuality calculateLinkQualityForDay(DateTime day) const;
+
 private:
     //
     // The console ID is set to 16 to avoid clashes with Station ID range of 0 (invalid) to 8 and the
@@ -406,7 +457,6 @@ private:
     bool initializeNetworkFromConsole();
     void findRepeaters();
     void createRepeaterChains();
-    void decodeStationData();
     void detectSensors(const LoopPacket & packet);
 
     std::string formatNetworkStatusJSON(struct tm & tm) const;
@@ -420,20 +470,20 @@ private:
     VantageLogger &         logger;
     VantageWeatherStation & station;
     ArchiveManager &        archiveManager;
-    std::string             networkStatusFile;               // The file in which the network status is stored.
-    byte                    monitoredStationMask;            // The mask of station IDs that the console is monitoring
-    std::vector<StationId>  monitoredStations;               // The list of monitored stations extracted from the monitored station mask
+    std::string             networkStatusFile;                 // The file in which the network status is stored.
+    byte                    monitoredStationMask;              // The mask of station IDs that the console is monitoring
+    std::vector<StationId>  monitoredStations;                 // The list of monitored stations extracted from the monitored station mask
 
-    RepeaterChainMap        chains;                          // The chains of repeaters and their sensor stations in the network
-    RepeaterMap             repeaters;                       // The repeaters in the network
-    StationList             stationList;                     // The sensor station data as reported by the console
-    StationMap              stations;                        // The sensor stations being monitored
-    Console                 console;                         // The console with which this software is communicating
+    RepeaterChainMap        chains;                            // The chains of repeaters and their sensor stations in the network
+    RepeaterMap             repeaters;                         // The repeaters in the network
+    StationList             stationList;                       // The sensor station data as reported by the console
+    StationMap              stations;                          // The sensor stations being monitored
+    Console                 console;                           // The console with which this software is communicating
 
-    StationId               windStationId;                   // The station ID of the sensor station that has the wind sensor
-    VantageWeatherStation::LinkQuality             windStationLinkQuality;          // The current link quality of the sensor station that has the wind sensor
-    int                     linkQualityCalculationMday;      // The day of the month for which the last link quality was calculated
-    bool                    firstLoopPacketReceived;         // Whether the first LOOP packet has been received
+    StationId               windStationId;                     // The station ID of the sensor station that has the wind sensor
+    VantageWeatherStation::LinkQuality windStationLinkQuality; // The current link quality of the sensor station that has the wind sensor
+    int                     linkQualityCalculationMday;        // The day of the month for which the last link quality was calculated
+    bool                    firstLoopPacketReceived;           // Whether the first LOOP packet has been received
 };
 
 } /* namespace vws */

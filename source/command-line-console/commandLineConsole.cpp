@@ -191,7 +191,6 @@ main(int argc, char *argv[]) {
         int commandNumber;
         cout << "Choose a command" << endl;
         cout << "    0 - Exit" << endl;
-        cout << "   99 - Retrieve RX Percentage Data" << endl;
         cout << "  999 - run NEWSETUP" << endl;
         int cmdNumber = 1;
         for (auto cmd : commands) {
@@ -201,7 +200,7 @@ main(int argc, char *argv[]) {
         cout << ": ";
         cin >> commandNumber;
 
-        if (commandNumber > sizeof(commands) / sizeof(commands[0]) && commandNumber != 999 && commandNumber != 99) {
+        if (commandNumber > sizeof(commands) / sizeof(commands[0]) && commandNumber != 999) {
             cout << "Invalid command number" << endl;
             continue;
         }
@@ -211,11 +210,6 @@ main(int argc, char *argv[]) {
 
         if (commandNumber == 999) {
             station.initializeSetup();
-            continue;
-        }
-
-        if (commandNumber == 99) {
-            gdr.retrieveDayReceivePercentages();
             continue;
         }
 
