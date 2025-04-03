@@ -99,9 +99,13 @@ ArchiveManager::queryArchiveRecords(const DateTimeFields & startTime, const Date
 
     stream.close();
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query found " << list.size()
-                                              << " items. Time of last record is "
-                                              << timeOfLastRecord.formatDateTime() << endl;
+    if (list.size() > 0)
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query found " << list.size()
+                                                  << " items. Time of last record is "
+                                                  << timeOfLastRecord.formatDateTime() << endl;
+    else
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Query found 0 items" << endl;
+
     return timeOfLastRecord;
 }
 
