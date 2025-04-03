@@ -592,6 +592,12 @@ VantageWeatherStation::calculateLinkQuality(int archivePeriodSeconds, int statio
     //
 
     //
+    // Handle zero case to avoid division by 0
+    //
+    if (archiveRecordCount == 0)
+        return 0.0;
+
+    //
     // The interval at which a radio packet is received by the console
     //
     int stationIndex = stationId - 1;

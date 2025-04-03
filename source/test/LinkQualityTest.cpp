@@ -51,7 +51,7 @@ main(int argc, char *argv[]) {
     DateTime t = now - (86400 * 30) - 600;
     for (int i = 0; t < now; i++) {
         linkQuality = net.calculateLinkQualityForDay(t);
-        cout << Weather::formatDate(t) << ": " << fixed << setprecision(3) << linkQuality << " " << setprecision(0) << round(linkQuality) << endl;
+        cout << Weather::formatDate(t) << ": " << fixed << setprecision(1) << linkQuality << " " << setw(3) << setprecision(0) << round(linkQuality) << endl;
         t += 86400;
     }
 }
