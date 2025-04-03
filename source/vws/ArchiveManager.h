@@ -89,7 +89,16 @@ public:
      * @param list      The list into which any found archive records will be added
      * @return The time of the last record in the list
      */
-    DateTimeFields queryArchiveRecords(const DateTimeFields & startTime, const DateTimeFields & endTime, std::vector<ArchivePacket> & list);
+    DateTimeFields queryArchiveRecords(const DateTimeFields & startTime, const DateTimeFields & endTime, std::vector<ArchivePacket> & list) const;
+
+    /**
+     * Query the archive records for a single day.
+     *
+     * @param date The time that is used as the date to query, the time fields are ignored
+     * @param list The list into which any found archive records will be added
+     * @return The number of record returned
+     */
+    int queryArchiveRecordsForDay(const DateTimeFields & date, std::vector<ArchivePacket> & list) const;
 
     /**
      * Get the newest record from the archive.
@@ -172,7 +181,7 @@ private:
      * @param searchTime The time to search within the archive
      * @param afterTime  Whether the stream will be position on or after the search time
      */
-    void positionStream(std::istream & is, DateTime searchTime, bool afterTime);
+    void positionStream(std::istream & is, DateTime searchTime, bool afterTime) const;
 
     /**
      * Save a packet to a file that can be replayed at a later time.

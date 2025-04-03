@@ -11,6 +11,7 @@ SRCS=\
 	DateTimeFieldsTest.cpp \
 	DominantWindTest.cpp \
 	EnumTest.cpp \
+	LinkQualityTest.cpp \
 	LoggerTest.cpp \
 	StormArchiveManagerTest.cpp \
 	StormDataTest.cpp \
@@ -92,6 +93,25 @@ COMMANDQUEUEOBJS= \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/Weather.o 
 
+LINKQUALITYOBJS= \
+	$(VWSTESTOBJDIR)/ArchiveManager.o \
+	$(VWSTESTOBJDIR)/ArchivePacket.o \
+	$(VWSTESTOBJDIR)/BaudRate.o \
+	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
+	$(VWSTESTOBJDIR)/ConsoleDiagnosticReport.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
+	$(VWSTESTOBJDIR)/HiLowPacket.o \
+	$(VWSTESTOBJDIR)/LoopPacket.o \
+	$(VWSTESTOBJDIR)/Loop2Packet.o \
+	$(VWSTESTOBJDIR)/SerialPort.o \
+	$(VWSTESTOBJDIR)/VantageCRC.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageStationNetwork.o \
+	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/Weather.o 
+
 COMMANDSOCKETOBJS= \
 	$(VWSTESTOBJDIR)/CommandData.o \
 	$(VWSTESTOBJDIR)/CommandSocket.o \
@@ -166,6 +186,7 @@ all: ArchiveManagerTest \
 	DominantWindTest \
 	DominantWindInjectionTest \
 	EnumTest \
+	LinkQualityTest \
 	LoggerTest \
 	StormArchiveManagerTest \
 	StormDataTest \
@@ -205,6 +226,9 @@ DominantWindInjectionTest: $(DOMWINDINJOBJS) $(OBJDIR)/DominantWindInjectionTest
 EnumTest: $(ENUMOBJS) $(OBJDIR)/EnumTest.o
 	$(CC) -g -o EnumTest $(OBJDIR)/EnumTest.o $(ENUMOBJS)
 	
+LinkQualityTest: $(LINKQUALITYOBJS) $(OBJDIR)/LinkQualityTest.o
+	$(CC) -g -o LinkQualityTest $(OBJDIR)/LinkQualityTest.o $(LINKQUALITYOBJS)
+
 LoggerTest: $(LOGGEROBJS) $(OBJDIR)/LoggerTest.o
 	$(CC) -g -o LoggerTest $(OBJDIR)/LoggerTest.o $(LOGGEROBJS)
 

@@ -107,7 +107,7 @@ public:
     const Measurement<SoilMoisture> &       getSoilMoisture(int index) const;
     const Measurement<LeafWetness> &        getLeafWetness(int index) const;
     const AlarmBitSet &                     getAlarmBits() const;
-    bool                                    isTransmitterBatteryGood(int index) const;
+    bool                                    isTransmitterBatteryGood(StationId stationId) const;
     float                                   getConsoleBatteryVoltage() const;
     ProtocolConstants::Forecast             getForecastIcon() const;
     std::string                             getForecastIconString() const;

@@ -53,10 +53,11 @@ static constexpr int NUM_PROTECTED_EEPROM_BYTES = sizeof(protectedEepromBytes) /
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
-                                                                        archivePeriodMinutes(0),
+VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort, int apm, Rainfall rcs) :
+                                                                        serialPort(serialPort),
+                                                                        archivePeriodMinutes(apm),
                                                                         consoleType(VANTAGE_PRO_2),
-                                                                        rainCollectorSize(0.0),
+                                                                        rainCollectorSize(rcs),
                                                                         archivingActive(false),
                                                                         logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
@@ -95,6 +96,10 @@ VantageWeatherStation::processRainCollectorSizeChange(Rainfall bucketSize) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 VantageWeatherStation::consoleConnected() {
+    ArchivePeriod archivePeriod;
+    if (!retrieveArchivePeriod(archivePeriod))
+        return;
+
     determineIfArchivingIsActive();
 }
 
@@ -547,6 +552,80 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
         return true;
 
     return readAfterArchivePages(time, list, firstRecord, numPages);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+VantageWeatherStation::LinkQuality
+VantageWeatherStation::calculateLinkQuality(int stationId, int windSamples, int archiveRecords) const {
+    int archivePeriodSeconds = archivePeriodMinutes * 60;
+
+    LinkQuality linkQuality = calculateLinkQuality(archivePeriodSeconds, stationId, windSamples, archiveRecords);
+
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Calculated link quality of " << fixed << setprecision(2) << linkQuality
+                                              << " with station ID=" << stationId
+                                              << " windSampleCount=" << windSamples
+                                              << " archivePeriod=" << archivePeriodMinutes
+                                              << " archiveRecordCount=" << archiveRecords << endl;
+
+    return linkQuality;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+VantageWeatherStation::LinkQuality
+VantageWeatherStation::calculateLinkQuality(int archivePeriodSeconds, int stationId, int windSamples, int archiveRecords) {
+
+    int stationIndex = stationId - 1;
+
+    //
+    // A packet should be received about every 2.5625 seconds for Station ID of 1 (41 / 16 = 2.5625)
+    // That is 23.4 packets per minute or 117.07 packets per 5 minute archive interval.
+    // Given varying time window frames it is possible to receive 118 packets in a 5 minute interval.
+    // Over a number of archive intervals it is possible that the link quality can exceed 100%, so we check
+    // for the ceiling value.
+    //
+    LinkQuality maxWindSamplesPerArchiveRecordF = static_cast<LinkQuality>(archivePeriodSeconds) / ((41.0F + static_cast<LinkQuality>(stationIndex)) / 16.0F);
+    LinkQuality linkQualityF = std::round(static_cast<LinkQuality>(windSamples) / (maxWindSamplesPerArchiveRecordF * static_cast<LinkQuality>(archiveRecords)) * 100.0F * 10.0F) / 10.0F;
+
+    cout << "Max samples: " << fixed << setprecision(2) << maxWindSamplesPerArchiveRecordF
+         << " Samples: " << windSamples
+         << " Records: " << archiveRecords
+         << " Station: " << stationIndex
+         << " Quality: " << fixed << setprecision(2) << linkQualityF
+         << endl;
+
+    int maxWindSamplesPerArchiveRecord = lround(static_cast<LinkQuality>(archivePeriodSeconds) /
+                                               ((41.0F + static_cast<LinkQuality>(stationIndex)) / 16.0F));
+
+    LinkQuality linkQuality = std::round(static_cast<LinkQuality>(windSamples) /
+                                         static_cast<LinkQuality>(maxWindSamplesPerArchiveRecord * archiveRecords) * 100.0F * 100.0F) / 100.0F;
+
+    cout << "Max samples: " << maxWindSamplesPerArchiveRecord
+         << " Samples: " << windSamples
+         << " Records: " << archiveRecords
+         << " Station: " << stationIndex
+         << " Quality: " << fixed << setprecision(2) << linkQuality
+         << endl;
+
+    int maxWindSamplesPerArchiveRecord3 = archivePeriodSeconds / ((41.0 + stationIndex) / 16.0);
+    int maxTotalSamples = maxWindSamplesPerArchiveRecord * archiveRecords;
+
+    LinkQuality linkQuality3 = std::round(static_cast<LinkQuality>(windSamples) /
+                                         static_cast<LinkQuality>(maxTotalSamples) * 100.0F * 100.0F) / 100.0F;
+
+    cout << "Max samples: " << maxWindSamplesPerArchiveRecord3
+         << " Max total samples: " << maxTotalSamples
+         << " Samples: " << windSamples
+         << " Records: " << archiveRecords
+         << " Station: " << stationIndex
+         << " Quality: " << fixed << setprecision(2) << linkQuality3
+         << endl;
+
+    if (linkQuality > MAX_LINK_QUALITY)
+        linkQuality = MAX_LINK_QUALITY;
+
+    return linkQuality;
 }
 
 //
@@ -1193,10 +1272,6 @@ void
 VantageWeatherStation::determineIfArchivingIsActive() {
     logger.log(VantageLogger::VANTAGE_INFO) << "Checking if archiving is currently active" << endl;
     archivingActive = false;
-
-    ArchivePeriod archivePeriod;
-    if (!retrieveArchivePeriod(archivePeriod))
-        return;
 
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Archive period for archiving active check is " << archivePeriodMinutes << " minutes" << endl;
 

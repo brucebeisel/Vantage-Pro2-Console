@@ -372,7 +372,7 @@ void
 ConsoleCommandHandler::handleQueryBarometerCalibrationParameters(CommandData & commandData) {
     ostringstream oss;
 
-    VantageWeatherStation::BarometerCalibrationParameters baroCalParams;
+    BarometerCalibrationParameters baroCalParams;
     if (station.retrieveBarometerCalibrationParameters(baroCalParams)) {
         oss << SUCCESS_TOKEN << ", " << DATA_TOKEN << " : { \"barometerCalibrationParameters\" : { "
             << " \"recentMeasurement\" : " << (baroCalParams.recentMeasurement / BAROMETER_SCALE) << ", "

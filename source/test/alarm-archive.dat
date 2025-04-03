@@ -1,0 +1,3 @@
+2025-10-10 21:11:11 <ACTIVE|CLEARED> <"alarm name"> <trigger threshold> 
+2025-10-10 21:11:11, ACTIVE,  Barometer Rising, .100
+2025-10-10 21:15:21 CLEARED "Barometer Rising" .100

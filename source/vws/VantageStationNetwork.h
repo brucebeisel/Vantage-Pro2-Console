@@ -149,6 +149,15 @@ public:
      */
     std::string formatJSON() const;
 
+    /**
+     * Output the station data to an ostream.
+     *
+     * @param os          The ostream
+     * @param stationData The station data to output
+     * @return The ostream passed in
+     */
+    friend std::ostream & operator<<(std::ostream & os, const StationData stationData);
+
     StationId   stationId;              // Valid IDs are 1 - 8
     RepeaterId  repeaterId;             // NO_REPEATER or repeater A - H
     StationType stationType;            // NO_STATION if this station is not being monitored
@@ -221,13 +230,13 @@ public:
      */
     bool decode(const byte buffer[], size_t bufferSize);
 
-
     /**
      * Format the station list into JSON.
      *
      * @return The JSON formatted string
      */
     std::string formatJSON() const;
+
 private:
     StationData     stationData[MAX_STATIONS];
     StationData     invalidStation;            // An error return value for the get methods
@@ -298,8 +307,9 @@ public:
      * @param dataDirectory The directory into which the network status file and the network configuration file will be written.
      * @param station       The object used to communicate with the console
      * @param networkFile   The file to read/write the network configuration data
+     * @param windStationId The station ID of the station with the anemometer, only used for testing
      */
-    VantageStationNetwork(const std::string & dataDirectory, VantageWeatherStation & station, ArchiveManager & archiveManager);
+    VantageStationNetwork(const std::string & dataDirectory, VantageWeatherStation & station, ArchiveManager & archiveManager, StationId windStationId = UNKNOWN_STATION_ID);
 
     /**
      * Destructor.
@@ -377,16 +387,17 @@ public:
      */
     virtual void consoleDisconnected();
 
+    VantageWeatherStation::LinkQuality calculateLinkQuality(const std::vector<ArchivePacket> & list) const;
+    VantageWeatherStation::LinkQuality calculateLinkQuality(const ArchivePacket & packet) const;
+    VantageWeatherStation::LinkQuality calculateLinkQualityForDay(DateTime day) const;
 private:
     //
     // The console ID is set to 16 to avoid clashes with Station ID range of 0 (invalid) to 8 and the
     // Repeater ID of 8 through 15.
     //
-    using LinkQuality = double;
     static constexpr StationId   CONSOLE_STATION_ID = 16;
     static constexpr StationId   UNKNOWN_STATION_ID = 0;
     static constexpr int         MAX_REPEATERS_PER_CHAIN = 4;
-    static constexpr LinkQuality MAX_STATION_RECEPTION = 100.0;
     static constexpr StationId   NO_RETRANSMIT_STATION_ID = 0;
 
 
@@ -398,13 +409,8 @@ private:
     void decodeStationData();
     void detectSensors(const LoopPacket & packet);
 
-    LinkQuality calculateLinkQuality(int stationId, int windSamples, int archivePeriod, int archiveRecords) const;
-    LinkQuality calculateLinkQualityFromArchiveRecords(const std::vector<ArchivePacket> & list) const;
-    LinkQuality calculateLinkQualityFromArchiveRecord(const ArchivePacket & packet) const;
-    LinkQuality calculateLinkQualityForDay(DateTime day) const;
     std::string formatNetworkStatusJSON(struct tm & tm) const;
     void writeStatusFile(struct tm & tm);
-    void queryArchiveForDay(DateTime day, std::vector<ArchivePacket> & list) const;
     void calculateDailyNetworkStatus();
 
     typedef std::map<RepeaterId,RepeaterChain> RepeaterChainMap;
@@ -425,7 +431,7 @@ private:
     Console                 console;                         // The console with which this software is communicating
 
     StationId               windStationId;                   // The station ID of the sensor station that has the wind sensor
-    LinkQuality             windStationLinkQuality;          // The current link quality of the sensor station that has the wind sensor
+    VantageWeatherStation::LinkQuality             windStationLinkQuality;          // The current link quality of the sensor station that has the wind sensor
     int                     linkQualityCalculationMday;      // The day of the month for which the last link quality was calculated
     bool                    firstLoopPacketReceived;         // Whether the first LOOP packet has been received
 };

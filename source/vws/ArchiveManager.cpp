@@ -67,7 +67,7 @@ ArchiveManager::~ArchiveManager() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 DateTimeFields
-ArchiveManager::queryArchiveRecords(const DateTimeFields & startTime, const DateTimeFields & endTime, vector<ArchivePacket> & list) {
+ArchiveManager::queryArchiveRecords(const DateTimeFields & startTime, const DateTimeFields & endTime, vector<ArchivePacket> & list) const {
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Querying archive records between "
                                               << startTime.formatDateTime()
                                               << " and " << endTime.formatDateTime() << endl;
@@ -107,8 +107,28 @@ ArchiveManager::queryArchiveRecords(const DateTimeFields & startTime, const Date
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+int
+ArchiveManager::queryArchiveRecordsForDay(const DateTimeFields & date, std::vector<ArchivePacket> & list) const {
+    DateTimeFields startTime = date;
+    DateTimeFields endTime = date;
+
+    startTime.setHour(0);
+    startTime.setMinute(0);
+    startTime.setSecond(0);
+
+    endTime.setHour(23);
+    endTime.setMinute(59);
+    endTime.setSecond(59);
+
+    queryArchiveRecords(startTime, endTime, list);
+
+    return list.size();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void
-ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool afterTime) {
+ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool afterTime) const {
     if (archivePacketCount < 2)
         return;
 

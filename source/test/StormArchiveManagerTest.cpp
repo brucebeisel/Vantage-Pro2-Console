@@ -100,12 +100,12 @@ static const unsigned char testBuffer3[] = {
 static const unsigned char * testBufferToUse = NULL;
 
 namespace vws {
-VantageWeatherStation::VantageWeatherStation(SerialPort & serialPort) : serialPort(serialPort),
-                                                                        archivePeriodMinutes(0),
-                                                                        consoleType(VANTAGE_PRO_2),
-                                                                        archivingActive(true),
-                                                                        rainCollectorSize(.01),
-                                                                        logger(VantageLogger::getLogger("VantageWeatherStation")) {
+VantageWeatherStation::VantageWeatherStation(SerialPort & sp, int apm, Rainfall rcs) : serialPort(sp),
+                                                                                       archivePeriodMinutes(apm),
+                                                                                       consoleType(VANTAGE_PRO_2),
+                                                                                       archivingActive(true),
+                                                                                       rainCollectorSize(rcs),
+                                                                                       logger(VantageLogger::getLogger("VantageWeatherStation")) {
 }
 
 VantageWeatherStation::~VantageWeatherStation() {

@@ -40,30 +40,34 @@ class VantageLogger;
 class LoopPacketListener;
 class ConsoleDiagnosticReport;
 
+struct BarometerCalibrationParameters {
+    int recentMeasurement;         // In 1/1000 of an inch
+    int elevation;                 // In feet
+    int dewPoint;                  // Fahrenheit
+    int avgTemperature12Hour;      // Fahrenheit
+    int humidityCorrectionFactor;  // %
+    int correctionRatio;           // Unknown units
+    int offsetCorrectionFactor;    // Unknown units
+    int fixedGain;                 // Unknown units, fixed per console
+    int fixedOffset;               // Unknown units, fixed per console
+};
+
 /**
  * Class that handles the command protocols with the Vantage console.
  */
 class VantageWeatherStation : public RainCollectorSizeListener, public ConsoleConnectionMonitor  {
 public:
-    struct BarometerCalibrationParameters {
-        int recentMeasurement;         // In 1/1000 of an inch
-        int elevation;                 // In feet
-        int dewPoint;                  // Fahrenheit
-        int avgTemperature12Hour;      // Fahrenheit
-        int humidityCorrectionFactor;  // %
-        int correctionRatio;           // Unknown units
-        int offsetCorrectionFactor;    // Unknown units
-        int fixedGain;                 // Unknown units, fixed per console
-        int fixedOffset;               // Unknown units, fixed per console
-    };
-
+    using LinkQuality = double;
+    static constexpr LinkQuality MAX_LINK_QUALITY = 100.0;
 
     /**
      * Constructor.
      * 
-     * @param serialPort The serial port to use to communicate with the console
+     * @param serialPort           The serial port to use to communicate with the console
+     * @param archivePeriodMinutes The number of minutes per archive record, used for test purposes only
+     * @param rainCollectorSize    The size of the rain collector bucket, used for test purposes only
      */
-    VantageWeatherStation(SerialPort & serialPort);
+    VantageWeatherStation(SerialPort & serialPort, int archivePeriodMinutes = 0, Rainfall rainCollectorSize = 0.0);
 
     /**
      * Destructor.
@@ -278,6 +282,27 @@ public:
      * @return True if successful
      */
     bool dumpAfter(const DateTimeFields & time, std::vector<ArchivePacket> & archive);
+
+    /**
+     * Calculate link quality for a given station ID.
+     *
+     * @param archivePeriodSeconds The number of seconds between packets in the archive
+     * @param stationId            The ID of the station for which to calculate link quality
+     * @param windSamples          The total number of wind samples counted across one or more archive packets
+     * @param archiveRecords       The number of archive records from which the wind samples were counted
+     * @return The link quality 0 - 100%
+     */
+    static LinkQuality calculateLinkQuality(int archivePeriodSeconds, int stationId, int windSamples, int archiveRecords);
+
+    /**
+     * Calculate link quality for a given station ID.
+     *
+     * @param stationId            The ID of the station for which to calculate link quality
+     * @param windSamples          The total number of wind samples counted across one or more archive packets
+     * @param archiveRecords       The number of archive records from which the wind samples were counted
+     * @return The link quality 0 - 100%
+     */
+    LinkQuality calculateLinkQuality(int stationId, int windSamples, int archiveRecords) const;
 
     /////////////////////////////////////////////////////////////////////////////////
     // End Download Commands
