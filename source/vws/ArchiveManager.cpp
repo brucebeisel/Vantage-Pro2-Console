@@ -155,11 +155,15 @@ ArchiveManager::positionStream(istream & stream, DateTime searchTime, bool after
     DateTime newestPacketTime = newestPacket.getEpochDateTime();
 
     //
-    // If the start time is newer than the oldest packet in the archive, look for the packet that is after the specified time.
-    // Otherwise the start time is before the beginning of the file, so just start at the beginning.
+    // If the search time is newer than the oldest packet in the archive, look for the packet that is after the specified time.
+    // If the search time is before the beginning of the file, start at the beginning.
+    // If the search time is after the end of the file, go to the end so zero records will be read.
     //
     if (searchTime <= oldestPacketTime) {
         stream.seekg(0, ios::beg);
+    }
+    else if (searchTime > newestPacketTime) {
+        stream.seekg(0, ios::end);
     }
     else if (searchTime > oldestPacketTime && searchTime < newestPacketTime) {
         //

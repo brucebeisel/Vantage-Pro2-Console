@@ -39,14 +39,19 @@ main(int argc, char *argv[]) {
     linkQuality = ws.calculateLinkQuality(1, 234, 2);
     cout << "Link quality: " << linkQuality << endl;
 
-    ArchiveManager am(".");
+    const char * archiveDir = ".";
+
+    if (argc > 1)
+        archiveDir = argv[1];
+
+    ArchiveManager am(archiveDir);
     VantageStationNetwork net(".", ws, am, 1);
 
     DateTime now = time(0);
-    DateTime t = now - (86400 * 30);
+    DateTime t = now - (86400 * 30) - 600;
     for (int i = 0; t < now; i++) {
         linkQuality = net.calculateLinkQualityForDay(t);
-        t += 86400;
         cout << Weather::formatDate(t) << ": " << fixed << setprecision(3) << linkQuality << " " << setprecision(0) << round(linkQuality) << endl;
+        t += 86400;
     }
 }
