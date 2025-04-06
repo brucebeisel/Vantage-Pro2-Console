@@ -2,6 +2,7 @@ CC= g++
 CXXFLAGS= -g -I../vws -std=c++20 -Wno-psabi
 
 SRCS=\
+	AlarmManagerTest.cpp \
 	ArchiveManagerTest.cpp \
 	ArchivePacketTest.cpp \
 	BaudRateTest.cpp \
@@ -199,7 +200,9 @@ STORMARCHIVEMANAGEROBJS= \
 	$(VWSTESTOBJDIR)/VantageLogger.o \
 	$(VWSTESTOBJDIR)/Weather.o
 	
-all: ArchiveManagerTest \
+all: \
+    AlarmManagerTest \
+    ArchiveManagerTest \
 	ArchivePacketTest \
 	BaudRateTest \
 	BitConverterTest \
