@@ -33,6 +33,7 @@ using namespace std;
 int
 main(int argc, char * argv[]) {
 
+    VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     const char * device = NULL;
 
     if (argc == 2)
@@ -57,6 +58,7 @@ main(int argc, char * argv[]) {
     station.consoleConnected();
     alarmManager.consoleConnected();
     alarmManager.processRainCollectorSizeChange(.01);
+    VantageDecoder::rainCollectorSizeInches(.01);
 
     station.currentValuesLoop(1);
 
