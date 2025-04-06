@@ -5,11 +5,12 @@
  ../vws/VantageWeatherStation.h ../vws/ArchivePacket.h \
  ../vws/DateTimeFields.h ../vws/BitConverter.h \
  ../vws/RainCollectorSizeListener.h ../vws/ConsoleConnectionMonitor.h \
- ../vws/BaudRate.h ../vws/AlarmManager.h ../vws/VantageWeatherStation.h \
- ../vws/LoopPacket.h ../vws/Alarm.h ../vws/AlarmProperties.h \
- ../vws/LoopPacketListener.h ../vws/CurrentWeather.h ../vws/Loop2Packet.h \
- ../vws/SerialPort.h ../vws/VantageLogger.h ../vws/VantageDecoder.h \
- ../vws/VantageLogger.h ../vws/BaudRate.h
+ ../vws/BaudRate.h ../vws/AlarmManager.h ../3rdParty/json.hpp \
+ ../vws/VantageWeatherStation.h ../vws/LoopPacket.h ../vws/Alarm.h \
+ ../vws/AlarmProperties.h ../vws/LoopPacketListener.h \
+ ../vws/CurrentWeather.h ../vws/Loop2Packet.h ../vws/SerialPort.h \
+ ../vws/VantageLogger.h ../vws/VantageDecoder.h ../vws/VantageLogger.h \
+ ../vws/BaudRate.h
 ../../target/test/ArchiveManagerTest.o: ArchiveManagerTest.cpp \
  ../vws/Weather.h ../vws/Measurement.h ../vws/WeatherTypes.h \
  ../vws/VantageEnums.h ../vws/SummaryEnums.h \

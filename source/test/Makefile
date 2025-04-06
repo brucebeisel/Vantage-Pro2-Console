@@ -1,5 +1,5 @@
 CC= g++
-CXXFLAGS= -g -I../vws -std=c++20 -Wno-psabi
+CXXFLAGS= -g -I../3rdParty -I../vws -std=c++20 -Wno-psabi
 
 SRCS=\
 	AlarmManagerTest.cpp \
@@ -281,7 +281,7 @@ $(OBJDIR):
 depend:
 	rm -f Makefile.depend; \
 	for i in $(SRCS); do \
-		$(CC) -I../vws -MM -MT "$(OBJDIR)/`basename $$i .cpp`.o" $$i >> Makefile.depend; \
+		$(CC) -I../3rdParty -I../vws -MM -MT "$(OBJDIR)/`basename $$i .cpp`.o" $$i >> Makefile.depend; \
 	done;
 
 include Makefile.depend

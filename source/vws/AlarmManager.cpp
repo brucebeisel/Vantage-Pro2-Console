@@ -198,7 +198,7 @@ bool
 AlarmManager::setAlarmState(const std::string & alarmName, bool triggered) {
     for (auto & alarm : alarms) {
         if (alarm.getAlarmName() == alarmName) {
-            alarm.setThreshold(triggered);
+            alarm.setTriggered(triggered);
             return true;
         }
     }
