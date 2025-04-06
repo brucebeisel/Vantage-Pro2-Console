@@ -172,7 +172,9 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
         uint8 alarms = BitConverter::toUint8(packetData, ALARMS_OFFSET + i);
         for (int j = 0; j < 8; j++) {
             int bit = (i * 8) + j;
-            alarmBits[bit] = (alarms & (1 << j)) == 0 ? 0 : 1;
+            alarmBits[bit] = (alarms & (1 << j)) == 0 ? false : true;
+            if (alarmBits[bit])
+                logger->log(VantageLogger::VANTAGE_DEBUG2) << "Alarm byte " << i << " bit " << j << " is set. Set bitset[" << bit << "] to true" << endl;
         }
     }
 

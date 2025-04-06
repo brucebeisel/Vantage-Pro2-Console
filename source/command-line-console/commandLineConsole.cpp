@@ -162,7 +162,7 @@ main(int argc, char *argv[]) {
     ArchiveManager archive("./");
     VantageConfiguration config(station);
     VantageStationNetwork network("./", station, archive);
-    AlarmManager alarm(station);
+    AlarmManager alarm(".", station);
 
     config.addRainCollectorSizeListener(alarm);
     config.addRainCollectorSizeListener(station);

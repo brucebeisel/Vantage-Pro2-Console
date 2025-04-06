@@ -23,6 +23,7 @@
 #include "ConsoleConnectionMonitor.h"
 #include "RainCollectorSizeListener.h"
 #include "LoopPacketListener.h"
+#include "CurrentWeather.h"
 
 namespace vws {
 class VantageLogger;
@@ -32,7 +33,8 @@ class VantageLogger;
  */
 class AlarmManager : public LoopPacketListener, public ConsoleConnectionMonitor, public RainCollectorSizeListener {
 public:
-    static const int NUM_ALARMS = 86;
+    static const std::string ALARM_FILENAME;
+    static constexpr int NUM_ALARMS = 86;
     typedef std::pair<std::string,double> Threshold;
 
     /**
@@ -40,7 +42,7 @@ public:
      *
      * @param station The weather station object used to read and write from the EEPROM
      */
-    explicit AlarmManager(VantageWeatherStation & station);
+    AlarmManager(const std::string & logDirectory, VantageWeatherStation & station);
 
     /**
      * Process a LOOP packets as part of the LoopPacketListener interface.
@@ -141,9 +143,17 @@ private:
      */
     void setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits);
 
+    void loadAlarmStatesFromFile();
+
+    void writeAlarmTransition(const Alarm & alarm, const DateTimeFields & transitionTime);
+
+    bool findWeatherValue(const std::string & field, double & value);
+
     std::vector<Alarm>      alarms;
     VantageWeatherStation & station;
     Rainfall                rainCollectorSize;
+    std::string             alarmLogFile;
+    CurrentWeather          currentWeather;
     VantageLogger &         logger;
 };
 

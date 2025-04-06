@@ -100,7 +100,7 @@ startVWS(const string & dataDirectory, const string & serialPortName, vws::BaudR
     ArchiveManager archiveManager(dataDirectory);
     VantageConfiguration configuration(station);
     VantageStationNetwork network(dataDirectory, station, archiveManager);
-    AlarmManager alarmManager(station);
+    AlarmManager alarmManager(dataDirectory, station);
     GraphDataRetriever graphDataRetriever(station);
     StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
     ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);

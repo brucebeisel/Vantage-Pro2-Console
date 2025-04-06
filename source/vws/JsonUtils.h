@@ -73,6 +73,19 @@ public:
         else
             return false;
     }
+
+    /**
+     * Pull out the key and value from the given JSON object.
+     *
+     * @param [in]  object The object from which to pull the key/value pair
+     * @param [out] key    The key of the JSON object
+     * @param [out] value  The value of the JSON object
+     */
+    static void extractJsonKeyValue(const nlohmann::json object, std::string & key, std::string & value) {
+        auto iterator = object.begin();
+        key = iterator.key();
+        value = iterator.value();
+    }
 };
 
 }

@@ -6,4 +6,5 @@
  ../vws/VantageProtocolConstants.h ../vws/Weather.h ../vws/WeatherTypes.h \
  ../vws/VantageWeatherStation.h ../vws/ArchivePacket.h \
  ../vws/BitConverter.h ../vws/RainCollectorSizeListener.h \
- ../vws/BaudRate.h ../vws/SerialPort.h ../vws/VantageLogger.h
+ ../vws/ConsoleConnectionMonitor.h ../vws/BaudRate.h ../vws/SerialPort.h \
+ ../vws/VantageLogger.h

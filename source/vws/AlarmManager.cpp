@@ -18,24 +18,34 @@
 #include "AlarmManager.h"
 
 #include <sstream>
+#include <fstream>
 #include "VantageEepromConstants.h"
 #include "VantageLogger.h"
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 namespace vws {
 
 using namespace EepromConstants;
 
+const string AlarmManager::ALARM_FILENAME = "vws-alarms.log";
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-AlarmManager::AlarmManager(VantageWeatherStation & station) : station(station), logger(VantageLogger::getLogger("AlarmManager")), rainCollectorSize(0.0) {
+AlarmManager::AlarmManager(const string & logDirectory, VantageWeatherStation & station) : station(station),
+                                                                                           alarmLogFile(logDirectory + "/" + ALARM_FILENAME),
+                                                                                           rainCollectorSize(0.0),
+                                                                                           logger(VantageLogger::getLogger("AlarmManager")) {
     int numProperties;
     const AlarmProperties * alarmProperties = AlarmProperties::getAlarmProperties(numProperties);
     for (int i = 0; i < numProperties; i++) {
         Alarm alarm(alarmProperties[i]);
         alarms.push_back(alarm);
     }
+
+    loadAlarmStatesFromFile();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,6 +53,7 @@ AlarmManager::AlarmManager(VantageWeatherStation & station) : station(station), 
 bool
 AlarmManager::processLoopPacket(const LoopPacket & packet) {
     setAlarmStates(packet.getAlarmBits());
+    currentWeather.setLoopData(packet);
     return true;
 }
 
@@ -50,7 +61,7 @@ AlarmManager::processLoopPacket(const LoopPacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 AlarmManager::processLoop2Packet(const Loop2Packet & packet) {
-    // LOOP2 packet is of no concern to this class
+    currentWeather.setLoop2Data(packet);
     return true;
 }
 
@@ -236,11 +247,66 @@ AlarmManager::updateThresholds() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 AlarmManager::setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits) {
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Setting alarm states. Bitset=" << alarmBits << endl;
+    DateTimeFields t(time(0));
     for (auto & alarm : alarms) {
+        bool currentState = alarm.isTriggered();
         AlarmProperties props = alarm.getAlarmProperties();
-        if (props.alarmBit >= 0)
-            alarm.setTriggered(alarmBits[props.alarmBit] == 1);
+        if (props.alarmBit >= 0) {
+            bool newState = alarmBits[props.alarmBit] == 1;
+            alarm.setTriggered(newState);
+             if (currentState != newState)
+                 writeAlarmTransition(alarm, t);
+        }
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+AlarmManager::loadAlarmStatesFromFile() {
+    //sscanf("2025-10-10 13:12:11 ACTIVE \"foo bar\" .001", "%s %s %s \"%[^\"]\" %f", s1, s2, s3, s4, &f1);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+AlarmManager::writeAlarmTransition(const Alarm & alarm, const DateTimeFields & transitionTime) {
+    string state = "ACTIVE";
+
+    if (!alarm.isTriggered())
+        state = "CLEAR";
+
+    ofstream ofs(alarmLogFile);
+    if (!ofs.is_open()) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open alarm log file '" << alarmLogFile << "'" << endl;
+        return;
+    }
+
+    double value;
+    if (findWeatherValue(alarm.getAlarmCurrentWeatherFieldName(), value))
+        ofs << transitionTime.formatDateTime(true) << " " << state << " \"" << alarm.getAlarmName() << "\" " << alarm.getActualThreshold() << " " << value << endl;
+    else
+        ofs << transitionTime.formatDateTime(true) << " " << state << " \"" << alarm.getAlarmName() << "\" " << alarm.getActualThreshold() << " ---" << endl;
+
+    ofs.close();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+AlarmManager::findWeatherValue(const std::string & field, double & value) {
+    string jsonString = currentWeather.formatJSON();
+    json cw = json::parse(jsonString.begin(), jsonString.end());
+
+    string valueString = cw.value(field, "---");
+
+    if (valueString == "---")
+        return false;
+
+    value = strtod(valueString.c_str(), NULL);
+
+    return true;
+}
 }

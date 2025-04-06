@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "CommandData.h"
+#include "JsonUtils.h"
 
 #include "json.hpp"
 
@@ -22,15 +23,6 @@ using namespace std;
 using json = nlohmann::json;
 
 namespace vws {
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-static void
-jsonKeyValue(json object, std::string & key, std::string & value) {
-    auto iterator = object.begin();
-    key = iterator.key();
-    value = iterator.value();
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,9 +51,8 @@ CommandData::setCommandFromJson(const std::string  & commandJson) {
         vector<pair<string,string>> argumentList;
         for (int i = 0; i < args.size(); i++) {
             json arg = args[i];
-            std::string key, value;
             CommandArgument argument;
-            jsonKeyValue(arg, argument.first, argument.second);
+            JsonUtils::extractJsonKeyValue(arg, argument.first, argument.second);
             arguments.push_back(argument);
         }
 

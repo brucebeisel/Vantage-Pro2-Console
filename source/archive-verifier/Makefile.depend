@@ -1,7 +1,4 @@
 ../../target/test/ArchiveVerifier.o: ArchiveVerifier.cpp \
  ../vws/ArchiveManager.h ../vws/WeatherTypes.h ../vws/ArchivePacket.h \
- ../vws/Measurement.h ../vws/DateTimeFields.h \
- ../vws/VantageWeatherStation.h ../vws/BitConverter.h \
- ../vws/VantageProtocolConstants.h ../vws/RainCollectorSizeListener.h \
- ../vws/BaudRate.h ../vws/SerialPort.h ../vws/ArchivePacket.h \
+ ../vws/Measurement.h ../vws/DateTimeFields.h ../vws/ArchivePacket.h \
  ../vws/Weather.h

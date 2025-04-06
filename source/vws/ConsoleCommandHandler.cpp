@@ -864,8 +864,8 @@ ConsoleCommandHandler::handleQueryAlarmThresholds(CommandData & commandData) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 ConsoleCommandHandler::handleQueryActiveAlarms(CommandData & commandData) {
-        commandData.response.append(SUCCESS_TOKEN).append(", ").append(DATA_TOKEN).append(" : ");
-        commandData.response.append(alarmManager.formatActiveAlarmsJSON());
+    commandData.response.append(SUCCESS_TOKEN).append(", ").append(DATA_TOKEN).append(" : ");
+    commandData.response.append(alarmManager.formatActiveAlarmsJSON());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

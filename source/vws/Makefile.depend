@@ -8,7 +8,8 @@
  DateTimeFields.h BitConverter.h VantageProtocolConstants.h \
  RainCollectorSizeListener.h ConsoleConnectionMonitor.h BaudRate.h \
  LoopPacket.h Alarm.h AlarmProperties.h LoopPacketListener.h \
- VantageEepromConstants.h VantageLogger.h
+ CurrentWeather.h Loop2Packet.h VantageEepromConstants.h VantageLogger.h \
+ ../3rdParty/json.hpp
 ../../target/vws/AlarmProperties.o: AlarmProperties.cpp AlarmProperties.h
 ../../target/vws/ArchiveManager.o: ArchiveManager.cpp ArchiveManager.h \
  WeatherTypes.h ArchivePacket.h Measurement.h DateTimeFields.h \
@@ -38,7 +39,8 @@
  RainCollectorSizeListener.h ConsoleConnectionMonitor.h BaudRate.h \
  LoopPacketListener.h UnitsSettings.h VantageEepromConstants.h \
  VantageEnums.h SummaryEnums.h VantageLogger.h VantageStationNetwork.h \
- AlarmManager.h LoopPacket.h Alarm.h AlarmProperties.h
+ AlarmManager.h LoopPacket.h Alarm.h AlarmProperties.h CurrentWeather.h \
+ Loop2Packet.h
 ../../target/vws/ConsoleDiagnosticReport.o: ConsoleDiagnosticReport.cpp \
  ConsoleDiagnosticReport.h VantageLogger.h
 ../../target/vws/CommandQueue.o: CommandQueue.cpp CommandQueue.h \
@@ -99,10 +101,10 @@
  ArchivePacket.h WeatherTypes.h Measurement.h DateTimeFields.h \
  BitConverter.h VantageProtocolConstants.h RainCollectorSizeListener.h \
  ConsoleConnectionMonitor.h BaudRate.h LoopPacket.h Alarm.h \
- AlarmProperties.h LoopPacketListener.h ArchiveManager.h CommandSocket.h \
- ResponseHandler.h ConsoleCommandHandler.h CommandData.h CommandHandler.h \
- CommandQueue.h DataCommandHandler.h CurrentWeatherManager.h \
- CurrentWeather.h Loop2Packet.h DominantWindDirections.h \
+ AlarmProperties.h LoopPacketListener.h CurrentWeather.h Loop2Packet.h \
+ ArchiveManager.h CommandSocket.h ResponseHandler.h \
+ ConsoleCommandHandler.h CommandData.h CommandHandler.h CommandQueue.h \
+ DataCommandHandler.h CurrentWeatherManager.h DominantWindDirections.h \
  WindDirectionSlice.h CurrentWeatherSocket.h CurrentWeatherPublisher.h \
  SerialPort.h VantageDriver.h VantageConfiguration.h ../3rdParty/json.hpp \
  UnitsSettings.h VantageEepromConstants.h VantageLogger.h \

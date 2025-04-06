@@ -51,6 +51,28 @@ DOMWINDINJOBJS=\
 ENUMOBJS=\
 	$(VWSTESTOBJDIR)/Weather.o 
 	
+ALARMMANAGEROBJS= \
+	$(VWSTESTOBJDIR)/Alarm.o \
+	$(VWSTESTOBJDIR)/AlarmManager.o \
+	$(VWSTESTOBJDIR)/AlarmProperties.o \
+	$(VWSTESTOBJDIR)/ArchivePacket.o \
+	$(VWSTESTOBJDIR)/BaudRate.o \
+	$(VWSTESTOBJDIR)/BitConverter.o \
+	$(VWSTESTOBJDIR)/CalibrationAdjustmentsPacket.o \
+	$(VWSTESTOBJDIR)/ConsoleDiagnosticReport.o \
+	$(VWSTESTOBJDIR)/CurrentWeather.o \
+	$(VWSTESTOBJDIR)/DateTimeFields.o \
+	$(VWSTESTOBJDIR)/ForecastRule.o \
+	$(VWSTESTOBJDIR)/HiLowPacket.o \
+	$(VWSTESTOBJDIR)/LoopPacket.o \
+	$(VWSTESTOBJDIR)/Loop2Packet.o \
+	$(VWSTESTOBJDIR)/SerialPort.o \
+	$(VWSTESTOBJDIR)/VantageCRC.o \
+	$(VWSTESTOBJDIR)/VantageDecoder.o \
+	$(VWSTESTOBJDIR)/VantageWeatherStation.o \
+	$(VWSTESTOBJDIR)/VantageLogger.o \
+	$(VWSTESTOBJDIR)/Weather.o 
+
 BITCONVERTEROBJS= \
 	$(VWSTESTOBJDIR)/BitConverter.o 
 
@@ -195,6 +217,9 @@ all: ArchiveManagerTest \
 
 ArchiveManagerTest: $(ARCHIVEMANAGEROBJS) $(OBJDIR)/ArchiveManagerTest.o
 	$(CC) -g -o ArchiveManagerTest $(OBJDIR)/ArchiveManagerTest.o $(ARCHIVEMANAGEROBJS)
+
+AlarmManagerTest: $(ALARMMANAGEROBJS) $(OBJDIR)/AlarmManagerTest.o
+	$(CC) -g -o AlarmManagerTest $(OBJDIR)/AlarmManagerTest.o $(ALARMMANAGEROBJS)
 
 ArchivePacketTest: $(ARCHIVEPACKETOBJS) $(OBJDIR)/ArchivePacketTest.o
 	$(CC) -g -o ArchivePacketTest $(OBJDIR)/ArchivePacketTest.o $(ARCHIVEPACKETOBJS)

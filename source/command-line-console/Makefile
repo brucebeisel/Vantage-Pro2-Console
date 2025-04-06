@@ -26,7 +26,9 @@ VWSOBJS = \
 	$(VWSOBJDIR)/CommandQueue.o \
 	$(VWSOBJDIR)/ConsoleCommandHandler.o \
 	$(VWSOBJDIR)/ConsoleDiagnosticReport.o \
+	$(VWSOBJDIR)/CurrentWeather.o \
 	$(VWSOBJDIR)/DateTimeFields.o \
+	$(VWSOBJDIR)/ForecastRule.o \
 	$(VWSOBJDIR)/HiLowPacket.o \
 	$(VWSOBJDIR)/LoopPacket.o \
 	$(VWSOBJDIR)/Loop2Packet.o \
