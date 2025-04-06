@@ -31,6 +31,8 @@ namespace vws {
 using namespace EepromConstants;
 
 const string AlarmManager::ALARM_FILENAME = "vws-alarms.log";
+const string AlarmManager::ALARM_ACTIVE_STRING = "ACTIVE";
+const string AlarmManager::ALARM_CLEAR_STRING = "CLEAR";
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +190,20 @@ AlarmManager::clearAlarmThreshold(const std::string & alarmName) {
         }
     }
     return false;
+}
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+bool
+AlarmManager::setAlarmState(const std::string & alarmName, bool triggered) {
+    for (auto & alarm : alarms) {
+        if (alarm.getAlarmName() == alarmName) {
+            alarm.setThreshold(triggered);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -252,15 +267,30 @@ void
 AlarmManager::setAlarmStates() {
     const LoopPacket::AlarmBitSet & alarmBits = currentWeather.getLoopPacket().getAlarmBits();
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Setting alarm states. Bitset=" << alarmBits << endl;
-    DateTimeFields t(time(0));
+
+    bool firstTransition = true;
+    json cwJsonObject;
+    DateTimeFields now(time(0));
     for (auto & alarm : alarms) {
         bool currentState = alarm.isTriggered();
         AlarmProperties props = alarm.getAlarmProperties();
         if (props.alarmBit >= 0) {
             bool newState = alarmBits[props.alarmBit] == 1;
             alarm.setTriggered(newState);
-             if (currentState != newState)
-                 writeAlarmTransition(alarm, t);
+             if (currentState != newState) {
+                 //
+                 // The first time we encounter a change to an alarm state build the current weather
+                 // JSON string so the current weather value can be retrieved. If there are no transitions
+                 // then we don't take up any cycles performing JSON processing.
+                 //
+                 if (firstTransition) {
+                     string cwJsonString = cwJsonString = currentWeather.formatJSON();
+                     cwJsonObject = json::parse(cwJsonString.begin(), cwJsonString.end());
+                     firstTransition = false;
+                 }
+
+                 writeAlarmTransition(cwJsonObject, alarm, now);
+             }
         }
     }
 }
@@ -269,27 +299,58 @@ AlarmManager::setAlarmStates() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 AlarmManager::loadAlarmStatesFromFile() {
-    //sscanf("2025-10-10 13:12:11 ACTIVE \"foo bar\" .001", "%s %s %s \"%[^\"]\" %f", s1, s2, s3, s4, &f1);
+    ifstream ifs(alarmLogFile);
+    if (!ifs.is_open()) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open alarm log file '" << alarmLogFile << "' for reading" << endl;
+        return;
+    }
+
+    //
+    // TODO figure out a way to not go through the entire file to determine which alarms were active when the program was
+    // stopped
+    //
+    string line;
+    char date[100];
+    char time[100];
+    char state[100];
+    char alarmName[100];
+    char threshold[100];
+    char valueAtTransition[100];
+    while (getline(ifs, line)) {
+        int tokens = sscanf(line.c_str(), "%s %s %s \"%[^\"]\" %s %s", date, time, state, alarmName, threshold, valueAtTransition);
+        if (tokens != 6) {
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Skipping alarm log line due to missing tokens. Expected 6, got " << tokens << ": '" << line << "'" << endl;
+            continue;
+        }
+
+        bool triggered = ALARM_ACTIVE_STRING == state;
+        bool found = setAlarmState(alarmName, triggered);
+        if (found)
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Set alarm state from log file of alarm: '" << alarmName << "' Triggered: " << boolalpha << triggered << endl;
+        else
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to set alarm: '" << alarmName << "' from log file. Alarm name was not found." << endl;
+
+    }
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-AlarmManager::writeAlarmTransition(const Alarm & alarm, const DateTimeFields & transitionTime) {
-    string state = "ACTIVE";
+AlarmManager::writeAlarmTransition(const json & jsonObject, const Alarm & alarm, const DateTimeFields & transitionTime) {
+    string state = ALARM_ACTIVE_STRING;
 
     if (!alarm.isTriggered())
-        state = "CLEAR";
+        state = ALARM_CLEAR_STRING;
 
     ofstream ofs(alarmLogFile, ios::app);
     if (!ofs.is_open()) {
-        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open alarm log file '" << alarmLogFile << "'" << endl;
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open alarm log file '" << alarmLogFile << "' for writing" << endl;
         return;
     }
 
     double value;
-    if (findWeatherValue(alarm.getAlarmCurrentWeatherFieldName(), value))
+    if (findWeatherValue(jsonObject, alarm.getAlarmCurrentWeatherFieldName(), value))
         ofs << transitionTime.formatDateTime(true) << " " << state << " \"" << alarm.getAlarmName() << "\" " << alarm.getActualThreshold() << " " << value << endl;
     else
         ofs << transitionTime.formatDateTime(true) << " " << state << " \"" << alarm.getAlarmName() << "\" " << alarm.getActualThreshold() << " ---" << endl;
@@ -300,14 +361,9 @@ AlarmManager::writeAlarmTransition(const Alarm & alarm, const DateTimeFields & t
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-AlarmManager::findWeatherValue(const std::string & field, double & value) {
-    string jsonString = currentWeather.formatJSON();
-    cout << "Current weather: " << jsonString << endl;
-    cout << "Looking for field with name '" << field << "'" << endl;
-    json cw = json::parse(jsonString.begin(), jsonString.end());
-
+AlarmManager::findWeatherValue(const json & jsonObject, const std::string & field, double & value) {
     try {
-        double lookupValue = cw.at(field);
+        double lookupValue = jsonObject.at(field);
         value = lookupValue;
         return true;
     }

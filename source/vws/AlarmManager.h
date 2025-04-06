@@ -17,6 +17,7 @@
 #ifndef ALARM_MANAGER_H
 #define ALARM_MANAGER_H
 
+#include "json.hpp"
 #include "VantageWeatherStation.h"
 #include "LoopPacket.h"
 #include "Alarm.h"
@@ -117,6 +118,9 @@ public:
     virtual void consoleDisconnected();
 
 private:
+    static const std::string ALARM_ACTIVE_STRING;
+    static const std::string ALARM_CLEAR_STRING;
+
     /**
      * Retrieve the threshold from the weather station.
      *
@@ -137,15 +141,42 @@ private:
     void clearAllThresholds();
 
     /**
+     * Set the state of an alarm.
+     *
+     * @param alarmName The name of the alarm for which to set the state
+     * @param triggered True if the alarm is to be set to triggered
+     * @return True if alarm with the given name was found
+     */
+    bool setAlarmState(const std::string & alarmName, bool triggered);
+
+    /**
      * Set the alarm bits as provided by the LOOP packet.
      */
     void setAlarmStates();
 
+    /**
+     * Load the alarm states from the log file.
+     */
     void loadAlarmStatesFromFile();
 
-    void writeAlarmTransition(const Alarm & alarm, const DateTimeFields & transitionTime);
+    /**
+     * Write an alarm transition record to the log file.
+     *
+     * @param jsonObject     A JSON object that represents the current weather data
+     * @param alarm          The alarm that has changed state
+     * @param transitionTime The time at which the transition occurred
+     */
+    void writeAlarmTransition(const nlohmann::json & jsonObject, const Alarm & alarm, const DateTimeFields & transitionTime);
 
-    bool findWeatherValue(const std::string & field, double & value);
+    /**
+     * Find the current weather value in the JSON object.
+     *
+     * @param [in]  jsonObject A JSON object that represents the current weather data
+     * @param [in]  field      The name of the JSON element being searched
+     * @param [out] value      The value of the field if found or unchanged if not found
+     * @return True if the field was found and the value argument was written
+     */
+    bool findWeatherValue(const nlohmann::json & jsonObject, const std::string & field, double & value);
 
     std::vector<Alarm>      alarms;
     VantageWeatherStation & station;
