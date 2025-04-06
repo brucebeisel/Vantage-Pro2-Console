@@ -1295,7 +1295,7 @@ VantageWeatherStation::determineIfArchivingIsActive() {
     // If the dump after command returns at least one packet, archiving is active
     //
     archivingActive = packets.size() > 0;
-    logger.log(VantageLogger::VANTAGE_INFO) << "Archiving active: " << boolalpha << archivingActive << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Archiving active: " << boolalpha << archivingActive << ". Last archive packet time: " << packets[0].getPacketDateTimeString() << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

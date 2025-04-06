@@ -306,13 +306,15 @@ AlarmManager::findWeatherValue(const std::string & field, double & value) {
     cout << "Looking for field with name '" << field << "'" << endl;
     json cw = json::parse(jsonString.begin(), jsonString.end());
 
-    string valueString = cw.value(field, "---");
-
-    if (valueString == "---")
+    try {
+        double lookupValue = cw.at(field);
+        value = lookupValue;
+        return true;
+    }
+    catch (const json::out_of_range & e) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to find current weather field '" << field << "'" << endl;
         return false;
+    }
 
-    value = strtod(valueString.c_str(), NULL);
-
-    return true;
 }
 }
