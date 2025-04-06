@@ -9,6 +9,7 @@ source/archive-fixer/archive-fixer
 source/archive-rebuilder/archive-rebuilder
 source/archive-verifier/archive-verifier
 source/console-archive-dumper/console-archive-dumper
+source/command-line-console/command-line-console
 source/loop-packet-dumper/loop-dumper
 source/loop-packet-dumper/out
 source/test/ArchiveManagerTest
@@ -26,6 +27,11 @@ source/test/StormDataTest
 source/test/SummaryTest
 source/test/weather-archive-verify.log
 source/test/WindDirectionSliceTest
+source/test/AlarmManagerTest
+source/test/BaudRateTest
+source/test/CommandSocketTest
+source/test/DominantWindInjectionTest
+source/test/LinkQualityTest
 source/vws/archive.dat
 source/vws/log/
 source/vws/out
