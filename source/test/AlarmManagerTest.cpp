@@ -58,7 +58,7 @@ main(int argc, char * argv[]) {
     station.consoleConnected();
     alarmManager.consoleConnected();
     alarmManager.processRainCollectorSizeChange(.01);
-    VantageDecoder::rainCollectorSizeInches(.01);
+    VantageDecoder::setRainCollectorSize(.01);
 
     station.currentValuesLoop(1);
 

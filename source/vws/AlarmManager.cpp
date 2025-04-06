@@ -278,7 +278,7 @@ AlarmManager::writeAlarmTransition(const Alarm & alarm, const DateTimeFields & t
     if (!alarm.isTriggered())
         state = "CLEAR";
 
-    ofstream ofs(alarmLogFile);
+    ofstream ofs(alarmLogFile, ios::app);
     if (!ofs.is_open()) {
         logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open alarm log file '" << alarmLogFile << "'" << endl;
         return;
@@ -298,6 +298,8 @@ AlarmManager::writeAlarmTransition(const Alarm & alarm, const DateTimeFields & t
 bool
 AlarmManager::findWeatherValue(const std::string & field, double & value) {
     string jsonString = currentWeather.formatJSON();
+    cout << "Current weather: " << jsonString << endl;
+    cout << "Looking for field with name '" << field << "'" << endl;
     json cw = json::parse(jsonString.begin(), jsonString.end());
 
     string valueString = cw.value(field, "---");
