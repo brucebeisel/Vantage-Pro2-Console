@@ -138,10 +138,8 @@ private:
 
     /**
      * Set the alarm bits as provided by the LOOP packet.
-     *
-     * @param alarmBits The bits that indicate which alarms are triggered
      */
-    void setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits);
+    void setAlarmStates();
 
     void loadAlarmStatesFromFile();
 

@@ -52,7 +52,6 @@ AlarmManager::AlarmManager(const string & logDirectory, VantageWeatherStation & 
 ////////////////////////////////////////////////////////////////////////////////
 bool
 AlarmManager::processLoopPacket(const LoopPacket & packet) {
-    setAlarmStates(packet.getAlarmBits());
     currentWeather.setLoopData(packet);
     return true;
 }
@@ -61,7 +60,11 @@ AlarmManager::processLoopPacket(const LoopPacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 AlarmManager::processLoop2Packet(const Loop2Packet & packet) {
+    //
+    // Process the alarm bits after a LOOP2 packet is received.
+    //
     currentWeather.setLoop2Data(packet);
+    setAlarmStates();
     return true;
 }
 
@@ -246,7 +249,8 @@ AlarmManager::updateThresholds() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-AlarmManager::setAlarmStates(const LoopPacket::AlarmBitSet & alarmBits) {
+AlarmManager::setAlarmStates() {
+    const LoopPacket::AlarmBitSet & alarmBits = currentWeather.getLoopPacket().getAlarmBits();
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Setting alarm states. Bitset=" << alarmBits << endl;
     DateTimeFields t(time(0));
     for (auto & alarm : alarms) {
