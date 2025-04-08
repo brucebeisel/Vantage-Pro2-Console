@@ -194,6 +194,35 @@ AlarmManager::clearAlarmThreshold(const std::string & alarmName) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+string
+AlarmManager::formatAlarmHistoryJSON(const DateTimeFields & startTime, const DateTimeFields & endTime) const {
+    ostringstream oss;
+    bool first = true;
+
+    oss << "{ \"alarmHistory\" : [";
+    readAlarmLogFile([&](const AlarmLog & logEntry) {
+        string dateTimeString = "";
+        dateTimeString.append(logEntry.date).append(" ").append(logEntry.time);
+        DateTimeFields alarmTime(dateTimeString);
+        if (alarmTime >= startTime && alarmTime <= endTime) {
+            if (!first) oss << ", "; first = false;
+            oss << "{ "
+                << "\"time\" : \"" << dateTimeString << "\", "
+                << "\"state\" : \"" << logEntry.state << "\", "
+                << "\"alarmName\" : \"" << logEntry.alarmName << "\", "
+                << "\"threshold\" : \"" << logEntry.threshold << "\", "
+                << "\"value\" : \"" << logEntry.value << "\""
+                << " }";
+        }
+    });
+
+    oss << " ] }";
+
+    return oss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 bool
 AlarmManager::setAlarmState(const std::string & alarmName, bool triggered) {
     for (auto & alarm : alarms) {
@@ -231,6 +260,9 @@ AlarmManager::retrieveThresholds() {
         int offset = props.eepromThresholdByte;
         int thresholdValue = 0;
 
+        //
+        // Thresholds are 1 or 2 byte unsigned integers
+        //
         if (props.eepromThresholdSize == 1)
             thresholdValue = BitConverter::toUint8(buffer, offset);
         else
@@ -273,9 +305,9 @@ AlarmManager::setAlarmStates() {
     DateTimeFields now(time(0));
     for (auto & alarm : alarms) {
         bool currentState = alarm.isTriggered();
-        AlarmProperties props = alarm.getAlarmProperties();
-        if (props.alarmBit >= 0) {
-            bool newState = alarmBits[props.alarmBit] == 1;
+        int alarmBit = alarm.getAlarmProperties().alarmBit;
+        if (alarmBit >= 0) {
+            bool newState = alarmBits[alarmBit] == 1;
             alarm.setTriggered(newState);
              if (currentState != newState) {
                  //
@@ -298,40 +330,40 @@ AlarmManager::setAlarmStates() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-AlarmManager::loadAlarmStatesFromFile() {
+AlarmManager::readAlarmLogFile(std::function< void (const AlarmLog & logEntry) > callback) const {
     ifstream ifs(alarmLogFile);
     if (!ifs.is_open()) {
         logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to open alarm log file '" << alarmLogFile << "' for reading" << endl;
         return;
     }
 
-    //
-    // TODO figure out a way to not go through the entire file to determine which alarms were active when the program was
-    // stopped
-    //
     string line;
-    char date[100];
-    char time[100];
-    char state[100];
-    char alarmName[100];
-    char threshold[100];
-    char valueAtTransition[100];
     while (getline(ifs, line)) {
-        int tokens = sscanf(line.c_str(), "%s %s %s \"%[^\"]\" %s %s", date, time, state, alarmName, threshold, valueAtTransition);
+        AlarmLog entry;
+        int tokens = sscanf(line.c_str(), "%s %s %s \"%[^\"]\" %s %s", entry.date, entry.time, entry.state, entry.alarmName, entry.threshold, entry.value);
         if (tokens != 6) {
             logger.log(VantageLogger::VANTAGE_WARNING) << "Skipping alarm log line due to missing tokens. Expected 6, got " << tokens << ": '" << line << "'" << endl;
-            continue;
         }
-
-        bool triggered = ALARM_ACTIVE_STRING == state;
-        bool found = setAlarmState(alarmName, triggered);
-        if (found)
-            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Set alarm state from log file of alarm: '" << alarmName << "' Triggered: " << boolalpha << triggered << endl;
         else
-            logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to set alarm: '" << alarmName << "' from log file. Alarm name was not found." << endl;
-
+            callback(entry);
     }
 
+    ifs.close();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+AlarmManager::loadAlarmStatesFromFile() {
+
+    readAlarmLogFile([&](const AlarmLog & logEntry) {
+        bool triggered = ALARM_ACTIVE_STRING == logEntry.state;
+        bool found = setAlarmState(logEntry.alarmName, triggered);
+        if (found)
+            logger.log(VantageLogger::VANTAGE_DEBUG2) << "Set alarm state from log file of alarm: '" << logEntry.alarmName << "' Triggered: " << boolalpha << triggered << endl;
+        else
+            logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to set alarm: '" << logEntry.alarmName << "' from log file. Alarm name was not found." << endl;
+    });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -350,10 +382,16 @@ AlarmManager::writeAlarmTransition(const json & jsonObject, const Alarm & alarm,
     }
 
     double value;
-    if (findWeatherValue(jsonObject, alarm.getAlarmCurrentWeatherFieldName(), value))
-        ofs << transitionTime.formatDateTime(true) << " " << state << " \"" << alarm.getAlarmName() << "\" " << alarm.getActualThreshold() << " " << value << endl;
+    ostringstream threshold;
+    if (alarm.isThresholdSet())
+        threshold << alarm.getActualThreshold();
     else
-        ofs << transitionTime.formatDateTime(true) << " " << state << " \"" << alarm.getAlarmName() << "\" " << alarm.getActualThreshold() << " ---" << endl;
+        threshold << DASHED_VALUE_STRING;
+
+    if (findWeatherValue(jsonObject, alarm.getAlarmCurrentWeatherFieldName(), value))
+        ofs << transitionTime.formatDateTime(true) << " " << state << " \"" << alarm.getAlarmName() << "\" " << threshold.str() << " " << value << endl;
+    else
+        ofs << transitionTime.formatDateTime(true) << " " << state << " \"" << alarm.getAlarmName() << "\" " << threshold.str() << " " << DASHED_VALUE_STRING << endl;
 
     ofs.close();
 }
@@ -362,7 +400,13 @@ AlarmManager::writeAlarmTransition(const json & jsonObject, const Alarm & alarm,
 ////////////////////////////////////////////////////////////////////////////////
 bool
 AlarmManager::findWeatherValue(const json & jsonObject, const std::string & field, double & value) {
+    //
+    // TODO This lookup algorithm will not work for extra temperatures, extra humidities, leaf wetness, soil temperature,
+    // soil moisture or leaf temperatures. This is because these values are part of an array.
+    //
     try {
+        json obj = jsonObject.at(field);
+        cout << "Field " << field << " has type " << obj.type_name() << endl;
         double lookupValue = jsonObject.at(field);
         value = lookupValue;
         return true;
@@ -371,6 +415,5 @@ AlarmManager::findWeatherValue(const json & jsonObject, const std::string & fiel
         logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to find current weather field '" << field << "'" << endl;
         return false;
     }
-
 }
 }

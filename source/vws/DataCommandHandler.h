@@ -28,6 +28,7 @@ class CommandQueue;
 class ArchiveManager;
 class StormArchiveManager;
 class CurrentWeatherManager;
+class AlarmManager;
 
 /**
  * Command handler that will process command that do not need to talk to the Vantage Pro2 console, but can
@@ -41,8 +42,9 @@ public:
      * @param archiveManager        The manager used to query the weather data archive
      * @param stormArchiveManager   The manager to query past storms
      * @param currentWeatherManager The manager to query the loop packets that make up the current weather
+     * @param alarmManager          The manager of alarm events
      */
-    DataCommandHandler(ArchiveManager & archiveManager, StormArchiveManager & stormArchiveManager, CurrentWeatherManager & currentWeatherManager);
+    DataCommandHandler(ArchiveManager & archiveManager, StormArchiveManager & stormArchiveManager, CurrentWeatherManager & currentWeatherManager, AlarmManager & alarmManager);
 
     /**
      * Destructor.
@@ -100,10 +102,13 @@ public:
 
     void handleClearExtendedArchive(CommandData & commandData);
 
+    void handleQueryAlarmHistory(CommandData & commandData);
+
 private:
     ArchiveManager &        archiveManager;
     StormArchiveManager &   stormArchiveManager;
     CurrentWeatherManager & currentWeatherManager;
+    AlarmManager &          alarmManager;
     bool                    terminating;
     std::thread *           commandThread;       // The thread that processes data commands
     VantageLogger &         logger;

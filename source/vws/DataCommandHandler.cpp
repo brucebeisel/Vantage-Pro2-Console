@@ -23,6 +23,7 @@
 #include "DateTimeFields.h"
 #include "StormArchiveManager.h"
 #include "ArchiveManager.h"
+#include "AlarmManager.h"
 #include "CommandQueue.h"
 #include "SummaryReport.h"
 #include "SummaryEnums.h"
@@ -48,7 +49,8 @@ static const DataCommandEntry dataCommandList[] = {
         "query-archive-summary",    &DataCommandHandler::handleQueryArchiveSummary,
         "query-storm-archive",      &DataCommandHandler::handleQueryStormArchive,
         "clear-extended-archive",   &DataCommandHandler::handleClearExtendedArchive,
-        "query-current-weather",    &DataCommandHandler::handleQueryLoopArchive
+        "query-current-weather",    &DataCommandHandler::handleQueryLoopArchive,
+        "query-alarm-history",      &DataCommandHandler::handleQueryAlarmHistory
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,12 +62,13 @@ dataCommandThreadEntry(DataCommandHandler * dch) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-DataCommandHandler::DataCommandHandler(ArchiveManager & am, StormArchiveManager & sam, CurrentWeatherManager & cwm) : archiveManager(am),
-                                                                                                                      stormArchiveManager(sam),
-                                                                                                                      currentWeatherManager(cwm),
-                                                                                                                      terminating(false),
-                                                                                                                      commandThread(NULL),
-                                                                                                                      logger(VantageLogger::getLogger("DataCommandHandler")) {
+DataCommandHandler::DataCommandHandler(ArchiveManager & am, StormArchiveManager & sam, CurrentWeatherManager & cwm, AlarmManager & alm) : archiveManager(am),
+                                                                                                                                         stormArchiveManager(sam),
+                                                                                                                                         currentWeatherManager(cwm),
+                                                                                                                                         alarmManager(alm),
+                                                                                                                                         terminating(false),
+                                                                                                                                         commandThread(NULL),
+                                                                                                                                         logger(VantageLogger::getLogger("DataCommandHandler")) {
 
 }
 
@@ -343,6 +346,32 @@ DataCommandHandler::handleClearExtendedArchive(CommandData & commandData) {
         commandData.response.append(SUCCESS_TOKEN);
     else
         commandData.response.append(CONSOLE_COMMAND_FAILURE_STRING);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::handleQueryAlarmHistory(CommandData & commandData) {
+    DateTimeFields startDate;
+    DateTimeFields endDate;
+
+    for (CommandData::CommandArgument arg : commandData.arguments) {
+        int year, month, monthDay;
+        if (arg.first == "start-time") {
+            startDate.parseDate(arg.second);
+        }
+        else if (arg.first == "end-time") {
+            endDate.parseDate(arg.second);
+        }
+    }
+
+    if (!startDate.isDateTimeValid() || !endDate.isDateTimeValid()) {
+        commandData.response.append(CommandData::buildFailureString("Missing argument"));
+    }
+    else {
+        string alarmHistoryJson = alarmManager.formatAlarmHistoryJSON(startDate, endDate);
+        commandData.response.append(SUCCESS_TOKEN).append(", ").append(DATA_TOKEN).append(" : ").append(alarmHistoryJson);
+    }
 }
 
 }

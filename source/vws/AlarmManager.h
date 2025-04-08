@@ -29,6 +29,15 @@
 namespace vws {
 class VantageLogger;
 
+struct AlarmLog {
+    char date[100];       // The date on which the alarm changed state
+    char time[100];       // The time at which the alarm changed state
+    char state[100];      // The state of the alarm
+    char alarmName[100];  // The name of the alarm
+    char threshold[100];  // The threshold when the alarm state changed or --- if not set
+    char value[100];      // The value of the weather variable associated with this alarm when the state changed or --- if not available
+};
+
 /**
  * Class to manage all of the alarms of the console.
  */
@@ -67,6 +76,16 @@ public:
      * @param bucketSize The size of the rain collector bucket
      */
     virtual void processRainCollectorSizeChange(Rainfall bucketSize);
+
+    /**
+     * Called when a connection is established with the console.
+     */
+    virtual void consoleConnected();
+
+    /**
+     * Called when the connection with the console is lost.
+     */
+    virtual void consoleDisconnected();
 
     /**
      * Format the JSON message that contains all the alarms and their current thresholds.
@@ -108,18 +127,21 @@ public:
     bool clearAlarmThreshold(const std::string & alarmName);
 
     /**
-     * Called when a connection is established with the console.
+     * Format a JSON message that contains the alarm history between the start and end dates.
+     * Note that any clear transition for an alarm that is active before the start time will not be
+     * included in the query.
+     *
+     * @param startTime The start of the alarm history query
+     * @param endTime The inclusive end time of the alarm history query
+     * @return The JSON report
      */
-    virtual void consoleConnected();
-
-    /**
-     * Called when the connection with the console is lost.
-     */
-    virtual void consoleDisconnected();
+    std::string formatAlarmHistoryJSON(const DateTimeFields & startTime, const DateTimeFields & endTime) const;
 
 private:
     static const std::string ALARM_ACTIVE_STRING;
     static const std::string ALARM_CLEAR_STRING;
+
+    void readAlarmLogFile(std::function< void (const AlarmLog & logEntry)>) const;
 
     /**
      * Retrieve the threshold from the weather station.

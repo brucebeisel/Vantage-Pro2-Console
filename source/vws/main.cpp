@@ -104,7 +104,7 @@ startVWS(const string & dataDirectory, const string & serialPortName, vws::BaudR
     GraphDataRetriever graphDataRetriever(station);
     StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
     ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);
-    DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager);
+    DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager, alarmManager);
     VantageDriver consoleDriver(station, archiveManager, consoleCommandHandler, stormArchiveManager);
     CommandSocket commandSocket(socketPort);
 

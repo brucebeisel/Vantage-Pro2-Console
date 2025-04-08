@@ -30,15 +30,33 @@
 using namespace vws;
 using namespace std;
 
+const char * usage = "Usage: AlarmManagerTest -d <device> [-h] [-n]\nwhere <device> = serial device\n      -h = Print help\n     -n = Do not open device, just test log file code";
 int
 main(int argc, char * argv[]) {
 
     VantageLogger::setLogLevel(VantageLogger::VANTAGE_DEBUG3);
     const char * device = NULL;
+    bool noDevice = false;
 
-    if (argc == 2)
-        device = argv[1];
-    else {
+    int opt;
+    while ((opt = getopt(argc, argv, "d:nh")) != -1) {
+        switch (opt) {
+            case 'd':
+                device = optarg;
+                break;
+
+            case 'h':
+                cout << usage << endl;
+                break;
+
+            case 'n':
+                noDevice = true;
+                break;
+        }
+    }
+
+
+    if (device == NULL) {
         cout << "Usage: AlarmManagerTest <device>" << endl;
         exit(1);
     }
@@ -48,19 +66,22 @@ main(int argc, char * argv[]) {
     AlarmManager alarmManager(".", station);
 
     station.addLoopPacketListener(alarmManager);
-
-    if (!station.openStation())
-        exit(2);
-
-    if (!station.wakeupStation())
-        exit(3);
-
-    station.consoleConnected();
-    alarmManager.consoleConnected();
     alarmManager.processRainCollectorSizeChange(.01);
     VantageDecoder::setRainCollectorSize(.01);
 
-    station.currentValuesLoop(1);
+    if (!noDevice) {
+        if (!station.openStation())
+            exit(2);
+
+        if (!station.wakeupStation())
+            exit(3);
+
+        station.consoleConnected();
+        alarmManager.consoleConnected();
+        station.currentValuesLoop(1);
+    }
 
     cout << "Active alarms: " << endl << alarmManager.formatActiveAlarmsJSON() << endl;
+    DateTimeFields start(time(0) - 86400), end(time(0));
+    cout << "Alarms history: " << endl << alarmManager.formatAlarmHistoryJSON(start, end) << endl;
 }

@@ -478,6 +478,27 @@ VantageStationNetwork::detectSensors(const LoopPacket & packet) {
     //
     // TODO Now find the sensors on the temperature/humidity sensor stations
     //
+    for (int i = 0; i < MAX_STATION_ID; i++) {
+        if (stationList[i].stationType == StationType::TEMPERATURE_ONLY_STATION) {
+            int temperatureIndex = stationList[i].extraTemperatureIndex;
+            if (packet.getExtraTemperature(temperatureIndex).isValid()) {
+                sensor.name = "Extra Temperature " + temperatureIndex;
+                sensor.sensorType = SensorType::THERMOMETER;
+                sensor.onStationId = i + 1;
+                stations[i].connectedSensors.push_back(sensor);
+            }
+        }
+        else if (stationList[i].stationType == StationType::HUMIDITY_ONLY_STATION) {
+            int humidityIndex = stationList[i].extraHumidityIndex;
+            if (packet.getExtraHumidity(humidityIndex).isValid()) {
+                sensor.name = "Extra Humidity " + humidityIndex;
+                sensor.sensorType = SensorType::HYGROMETER;
+                sensor.onStationId = i + 1;
+                stations[i].connectedSensors.push_back(sensor);
+            }
+        }
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

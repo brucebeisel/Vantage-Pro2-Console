@@ -22,6 +22,8 @@
 
 namespace vws {
 
+static const std::string DASHED_VALUE_STRING = "---";
+
 /**
  * Class to hold a measurement value and the state of its validity.
  */
