@@ -17,6 +17,7 @@
 #ifndef CURRENT_WEATHER_MANAGER_H
 #define CURRENT_WEATHER_MANAGER_H
 
+#include <mutex>
 #include <fstream>
 #include "CurrentWeather.h"
 #include "DominantWindDirections.h"
@@ -52,6 +53,13 @@ public:
      * any obsolete archive files.
      */
     void initialize();
+
+    /**
+     * Get the current weather values.
+     *
+     * @return The current weather values
+     */
+    CurrentWeather getCurrentWeather() const;
 
     /**
      * Process a LOOP packet in a callback.
@@ -129,6 +137,7 @@ private:
      */
     void cleanupArchive();
 
+    mutable std::mutex        mutex;
     std::string               archiveDirectory;
     CurrentWeatherPublisher & currentWeatherPublisher;
     CurrentWeather            currentWeather;

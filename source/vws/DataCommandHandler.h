@@ -92,17 +92,19 @@ public:
     //
     void handleQueryArchiveStatistics(CommandData & commandData);
 
+    void handleQueryAlarmHistory(CommandData & commandData);
+
     void handleQueryArchive(CommandData & commandData);
 
     void handleQueryArchiveSummary(CommandData & commandData);
 
-    void handleQueryLoopArchive(CommandData & commandData);
-
-    void handleQueryStormArchive(CommandData & commandData);
+    void handleQueryCurrentWeather(CommandData & commandData);
 
     void handleClearExtendedArchive(CommandData & commandData);
 
-    void handleQueryAlarmHistory(CommandData & commandData);
+    void handleQueryLoopArchive(CommandData & commandData);
+
+    void handleQueryStormArchive(CommandData & commandData);
 
 private:
     ArchiveManager &        archiveManager;

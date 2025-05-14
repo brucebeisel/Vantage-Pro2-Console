@@ -49,8 +49,9 @@ static const DataCommandEntry dataCommandList[] = {
         "query-archive-summary",    &DataCommandHandler::handleQueryArchiveSummary,
         "query-storm-archive",      &DataCommandHandler::handleQueryStormArchive,
         "clear-extended-archive",   &DataCommandHandler::handleClearExtendedArchive,
-        "query-current-weather",    &DataCommandHandler::handleQueryLoopArchive,
-        "query-alarm-history",      &DataCommandHandler::handleQueryAlarmHistory
+        "query-weather-history",    &DataCommandHandler::handleQueryLoopArchive,
+        "query-alarm-history",      &DataCommandHandler::handleQueryAlarmHistory,
+        "query-current-weather",    &DataCommandHandler::handleQueryCurrentWeather
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -374,4 +375,11 @@ DataCommandHandler::handleQueryAlarmHistory(CommandData & commandData) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void
+DataCommandHandler::handleQueryCurrentWeather(CommandData & commandData) {
+    CurrentWeather currentWeather = currentWeatherManager.getCurrentWeather();
+    commandData.response.append(SUCCESS_TOKEN).append(", ").append(DATA_TOKEN).append(" : ").append(currentWeather.formatJSON(false));
+}
 }

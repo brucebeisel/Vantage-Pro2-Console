@@ -59,6 +59,15 @@ CurrentWeatherManager::initialize() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+CurrentWeather
+CurrentWeatherManager::getCurrentWeather() const {
+    std::lock_guard<std::mutex> guard(mutex);
+
+    return currentWeather;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 /**
  * The archive is written as a ring buffer in 24 hour files. The archive will contain
  * between 23 and 24 hours of data. As each hour starts, the hour file will be truncated.
@@ -112,6 +121,7 @@ CurrentWeatherManager::writeLoopArchive(DateTime packetTime, int packetType, con
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CurrentWeatherManager::processLoopPacket(const LoopPacket & packet) {
+    std::lock_guard<std::mutex> guard(mutex);
     DateTime packetTime = time(0);
     currentWeather.setLoopData(packet);
     writeLoopArchive(packetTime, packet.getPacketType(), packet.getPacketData(), LoopPacket::LOOP_PACKET_SIZE);
@@ -134,6 +144,7 @@ CurrentWeatherManager::processLoopPacket(const LoopPacket & packet) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CurrentWeatherManager::processLoop2Packet(const Loop2Packet & packet) {
+    std::lock_guard<std::mutex> guard(mutex);
     DateTime packetTime = time(0);
     firstLoop2PacketReceived = true;
     currentWeather.setLoop2Data(packet);
@@ -220,6 +231,7 @@ CurrentWeatherManager::readArchiveFile(std::ifstream & ifs, vector<CurrentWeathe
 ////////////////////////////////////////////////////////////////////////////////
 void
 CurrentWeatherManager::queryCurrentWeatherArchive(int hours, std::vector<CurrentWeather> & list) {
+    std::lock_guard<std::mutex> guard(mutex);
     list.clear();
 
     if (hours >= 24)
