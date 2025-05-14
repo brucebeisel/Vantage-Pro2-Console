@@ -392,14 +392,71 @@ public:
     /////////////////////////////////////////////////////////////////////////////////
     // Clearing Commands
     /////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Clear the console's archive.
+     *
+     * @return True if successful
+     */
     bool clearArchive();
+
+    /**
+     * Clear all of the alarm thresholds, disabling all active alarms.
+     *
+     * @return True if successful
+     */
     bool clearAlarmThresholds();
+
+    /**
+     * Clear all the temperature and humidity calibration offsets.
+     *
+     * @return True if successful
+     */
     bool clearTemperatureHumidityCalibrationOffsets();
+
+    /**
+     * Clear the graph points stored in the EEPROM.
+     *
+     * @return True if successful
+     */
     bool clearGraphPoints();
+
+    /**
+     * Clear the cumulative values for the specified rain or ET measurement.
+     *
+     * @param cumValue The rain or ET cumulative value to clear
+     * @return True if successful
+     */
     bool clearCumulativeValue(ProtocolConstants::CumulativeValue cumValue);
+
+    /**
+     * Clear all the high values for the specified period.
+     *
+     * @param period The period of the high values to clear (daily, monthly, yearly)
+     * @return True if successful
+     */
     bool clearHighValues(ProtocolConstants::ExtremePeriod period);
+
+    /**
+     * Clear all the low values for the specified period.
+     *
+     * @param period The period of the low values to clear (daily, monthly, yearly)
+     * @return True if successful
+     */
     bool clearLowValues(ProtocolConstants::ExtremePeriod period);
+
+    /**
+     * Clear any active alarms, which will reactivate if the values are still beyond the alarm threshold.
+     *
+     * @return True if successful
+     */
     bool clearActiveAlarms();
+
+    /**
+     * Clear all the current value data, changing all of the fields on the console's display to "dashed values".
+     *
+     * @return True if successful
+     */
     bool clearCurrentData();
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -559,11 +616,12 @@ private:
     static constexpr int CONSOLE_TIME_DELTA_THRESHOLD_SECONDS = 5; // The number of seconds that the console time can be off before the time will be set
     static constexpr int CRC_BYTES = 2;                            // The number of bytes in the CRC
 
-    static constexpr int NUM_ARCHIVE_PAGES = 512;        // The total number of pages in the console's memory
-    static constexpr int ARCHIVE_PAGE_SIZE = 265;        // 1 sequence byte, 5 52 byte records (260 bytes) and 4 spare bytes. 1 + 260 + 4 = 265 bytes
-    static constexpr int RECORDS_PER_ARCHIVE_PAGE = 5;   // The number of archive records per archive page
-    static constexpr int DUMP_AFTER_RESPONSE_LENGTH = 4; // The length of the response to the DMPAFT command
-    static constexpr int EEPROM_READ_LINE_LENGTH = 4;    // The length of the response to the EEPROM READ command
+    static constexpr int NUM_ARCHIVE_PAGES = 512;         // The total number of pages in the console's memory
+    static constexpr int ARCHIVE_PAGE_SIZE = 265;         // 1 sequence byte, 5 52 byte records (260 bytes) and 4 spare bytes. 1 + 260 + 4 = 265 bytes
+    static constexpr int RECORDS_PER_ARCHIVE_PAGE = 5;    // The number of archive records per archive page
+    static constexpr int MAX_ARCHIVE_PAGE_SEQUENCE = 255; // The maximum value for an archive page number, it wraps back to 0 if more pages are dumped
+    static constexpr int DUMP_AFTER_RESPONSE_LENGTH = 4;  // The length of the response to the DMPAFT command
+    static constexpr int EEPROM_READ_LINE_LENGTH = 4;     // The length of the response to the EEPROM READ command
 
     static constexpr int TIME_RESPONSE_LENGTH = 6;
     static constexpr int TIME_LENGTH = 4;
@@ -616,10 +674,11 @@ private:
      * @param packets                    The vector into which the processed archive packets will be returned
      * @param firstRecordInPageToProcess The first record in the page to process, which may not be zero if this is the first page that is being dumped by a DMPAFT command
      * @param newestPacketTime           The newest packet used to detect if the page contains the end of the ring buffer
+     * @param [in/out] lastPageSequence  The page sequence number of the last archive page dumped and returns the page sequence number that was read
      *
      * @return True if the page was read successfully
      */
-    bool readNextArchivePage(std::vector<ArchivePacket> & packets, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime);
+    bool readNextArchivePage(std::vector<ArchivePacket> & packets, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime, int & lastPageSequenceNumber);
 
     /**
      * Decode an archive page that contains up to 5 packets.
@@ -627,8 +686,9 @@ private:
      * @param packets                    The vector into which the processed archive packets will be returned
      * @param firstRecordInPageToProcess The first record in the page to process, which may not be zero if this is the first page that is being dumped by a DMPAFT command
      * @param newestPacketTime           The newest packet used to detect if the page contains the end of the ring buffer
+     * @return The page sequence of the decoded archive page
      */
-    void decodeArchivePage(std::vector<ArchivePacket> &, const byte * buffer, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime);
+    int decodeArchivePage(std::vector<ArchivePacket> &, const byte * buffer, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime);
 
     /**
      * Checks if an archive packet contains data.
@@ -682,8 +742,8 @@ private:
 
 private:
     /**
-     * Determine if archiving is active.
-     * The newest packet time must be set for this method to determine if archiving is active or not.
+     * Determine if archiving is active by dumping the latest record(s) from the archive.
+     * The results are stored in the "archiveActive" member variable.
      */
     void determineIfArchivingIsActive();
 

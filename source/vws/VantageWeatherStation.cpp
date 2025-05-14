@@ -452,10 +452,12 @@ VantageWeatherStation::dump(vector<ArchivePacket> & list) {
     list.clear();
     list.reserve(NUM_ARCHIVE_RECORDS);
 
+    int lastPageSequenceNumber = MAX_ARCHIVE_PAGE_SEQUENCE;
+
     if (sendAckedCommand(DUMP_ARCHIVE_CMD)) {
         DateTimeFields zeroTime;
         for (int i = 0; i < NUM_ARCHIVE_PAGES; i++) {
-            readNextArchivePage(list, 0, zeroTime);
+            readNextArchivePage(list, 0, zeroTime, lastPageSequenceNumber);
             if (!serialPort.write(DMP_SEND_NEXT_PAGE)) {
                 logger.log(VantageLogger::VANTAGE_WARNING) << "Canceling DMP command due to error writing send-next-page command" << endl;
                 break;
@@ -1382,13 +1384,14 @@ bool
 VantageWeatherStation::readAfterArchivePages(const DateTimeFields & afterTime, vector<ArchivePacket> & list, int firstRecordInFirstPageToProcess, int numPages) {
     DateTimeFields newestPacketTime = afterTime;
     int firstRecordInPageToProcess = firstRecordInFirstPageToProcess;
+    int lastPageSequenceNumber = MAX_ARCHIVE_PAGE_SEQUENCE;
 
     bool success = true;
     for (int i = 0; i < numPages; i++) {
         //
         // Process a single page. This will return 1 - 5 packets
         //
-        if (!readNextArchivePage(list, firstRecordInPageToProcess, newestPacketTime)) {
+        if (!readNextArchivePage(list, firstRecordInPageToProcess, newestPacketTime, lastPageSequenceNumber)) {
             serialPort.write(DMP_CANCEL_DOWNLOAD); // No need to check write() return as this is an abort sequence
             success = false;
             break;
@@ -1427,9 +1430,15 @@ VantageWeatherStation::readAfterArchivePages(const DateTimeFields & afterTime, v
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime) {
+VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime, int & lastPageSequenceNumber) {
     bool success = true;
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Processing archive page. Newest packet time = " << newestPacketTime << endl;
+
+    int expectedPageSequenceValue = lastPageSequenceNumber;
+    if (expectedPageSequenceValue == MAX_ARCHIVE_PAGE_SEQUENCE)
+        expectedPageSequenceValue = 0;
+    else
+        expectedPageSequenceValue++;
 
     //
     // Try to read the page. Will attempt 3 tries to correct CRC errors.
@@ -1437,8 +1446,15 @@ VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int fir
     for (int i = 0; i < ARCHIVE_PAGE_READ_RETRIES; i++) {
         if (serialPort.readBytes(buffer, ARCHIVE_PAGE_SIZE + CRC_BYTES)) {
             if (VantageCRC::checkCRC(buffer, ARCHIVE_PAGE_SIZE)) {
-                decodeArchivePage(list, buffer, firstRecordInPageToProcess, newestPacketTime);
-                success = true;
+                int pageSequence = decodeArchivePage(list, buffer, firstRecordInPageToProcess, newestPacketTime);
+                if (pageSequence == expectedPageSequenceValue) {
+                    success = true;
+                    lastPageSequenceNumber = pageSequence;
+                }
+                else {
+                    success = false;
+                    logger.log(VantageLogger::VANTAGE_WARNING) << "Aborting archive dump due to page sequence check failure. Expected page sequence " << expectedPageSequenceValue << " received " << pageSequence << endl;
+                }
                 break;
             }
             else {
@@ -1462,7 +1478,7 @@ VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int fir
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void
+int
 VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byte * buffer, int firstRecordInPageToProcess, const DateTimeFields & newestPacketTime) {
     int recordCount = 0;
 
@@ -1501,6 +1517,8 @@ VantageWeatherStation::decodeArchivePage(vector<ArchivePacket> & list, const byt
     }
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Page " << pageSequence << " contained " << recordCount << " records" << endl;
+
+    return pageSequence;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
