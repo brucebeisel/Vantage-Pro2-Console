@@ -84,6 +84,15 @@ bool
 CommandQueue::waitForCommand(CommandData & command) {
     std::unique_lock<std::mutex> guard(mutex);
 
+    //
+    // If there is something in the queue, return it immediately
+    //
+    if (retrieveNextCommand(command))
+        return true;
+
+    //
+    // Wait for the condition variable to be woken
+    //
     logger.log(VantageLogger::VANTAGE_DEBUG3) << "Waiting for command" << endl;
     cv.wait(guard);
 
