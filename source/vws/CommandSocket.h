@@ -103,6 +103,17 @@ private:
     static constexpr int MIN_COMMAND_LENGTH = 20; // Arbitrary number for quick error checks
 
     /**
+     * Structure used to uniquely identify a socket to ensure that the response is sent on the same file
+     * descriptor instance that the command was received on. Since file descriptors are reused there is
+     * a possibility that the file descriptor value on which the command was received was closed and then
+     * reopened.
+     */
+    struct SocketId {
+        int sequence;
+        int fd;
+    };
+
+    /**
      * Accept a new client socket connection.
      */
     void acceptConnection();
@@ -115,16 +126,16 @@ private:
     /**
      * Read a command from one of the client sockets.
      *
-     * @param fd The file descriptor from which to read
+     * @param socket The socket from which to read
      */
-    void readCommand(int fd);
+    void readCommand(const SocketId & socket);
 
     /**
      * Close the specified client socket.
      *
-     * @param fd The file descriptor to close
+     * @param socket The socket to close
      */
-    void closeSocket(int fd);
+    void closeSocket(const SocketId & socket);
 
     /**
      * Send any pending responses.
@@ -133,7 +144,8 @@ private:
 
     int                           port;                // The port on which the console will listen for client connections
     int                           listenFd;            // The file description on which this thread is listening
-    std::vector<int>              socketFdList;        // The list of client file descriptors currently open
+    int                           nextSocketSequence;  // The sequence number for the next command socket accepted
+    std::vector<SocketId>         socketList;          // The list of client file descriptors currently open
     std::vector<CommandHandler *> commandHandlers;     // The handlers that will be offered commands
     bool                          terminating;         // True if this thread's main loop should exit
     int                           responseEventFd;     // The file descriptor used to receive indications of an available response

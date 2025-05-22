@@ -47,9 +47,16 @@ commandThreadEntry(CommandSocket * cs) {
     cs->mainLoop();
 }
 
+/*
+ * TODO There appears to be a bug where two web servers can step on each other resulting
+ * in bad commands being received or somehow overridden. For instance, it appears
+ * that one server can override the "query-current-weather" command so that it has
+ * no arguments.
+ */
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 CommandSocket::CommandSocket(int port) : port(port),
+                                         nextSocketSequence(100),
                                          responseEventFd(-1),
                                          terminating(false),
                                          commandThread(NULL),
@@ -71,8 +78,8 @@ CommandSocket::~CommandSocket() {
         responseEventFd = -1;
     }
 
-    for (int fd : socketFdList)
-        close(fd);
+    for (SocketId socket : socketList)
+        close(socket.fd);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,16 +109,16 @@ CommandSocket::mainLoop() {
             if (responseEventFd != -1)
                 FD_SET(responseEventFd, &readFdSet);
 
-            logger.log(VantageLogger::VANTAGE_DEBUG3) << "Adding " << socketFdList.size() << " file descriptors to read mask" << endl;
+            logger.log(VantageLogger::VANTAGE_DEBUG3) << "Adding " << socketList.size() << " file descriptors to read mask" << endl;
 
-            for (int fd : socketFdList)
-                FD_SET(fd, &readFdSet);
+            for (const SocketId & socketId : socketList)
+                FD_SET(socketId.fd, &readFdSet);
 
             //
             // This single if statement works because socketFdList is sorted
             //
-            if (socketFdList.size() > 0)
-                nfds = std::max(socketFdList[socketFdList.size() - 1], nfds);
+            if (socketList.size() > 0)
+                nfds = std::max(socketList[socketList.size() - 1].fd, nfds);
 
             nfds++;
 
@@ -134,9 +141,9 @@ CommandSocket::mainLoop() {
             else
                 sendCommandResponses();
 
-            for (int fd : socketFdList) {
-                if (FD_ISSET(fd, &readFdSet)) {
-                    readCommand(fd);
+            for (const SocketId & socketId : socketList) {
+                if (FD_ISSET(socketId.fd, &readFdSet)) {
+                    readCommand(socketId);
                 }
             }
         }
@@ -191,20 +198,21 @@ CommandSocket::start() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandSocket::closeSocket(int fd) {
+CommandSocket::closeSocket(const SocketId & socket) {
     //
     // Since the list is sorted, deleting a single item will not change the sort order
     //
-    socketFdList.erase(std::find(socketFdList.begin(), socketFdList.end(), fd));
-    close(fd);
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Closed socket that used fd = " << fd << endl;
+    socketList.erase(std::find_if(socketList.begin(), socketList.end(), [&socket](const SocketId & other) { return socket.sequence == other.sequence;}));
+
+    close(socket.fd);
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Closed socket that used fd = " << socket.fd << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 void
-CommandSocket::readCommand(int fd) {
-    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Reading data on fd " << fd << endl;
+CommandSocket::readCommand(const SocketId & socket) {
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Reading data on fd " << socket.fd << endl;
 
     char buffer[10240];
     int readPosition = 0;
@@ -213,18 +221,18 @@ CommandSocket::readCommand(int fd) {
     // First read the header
     //
     while (readPosition < HEADER_SIZE) {
-        int nbytes = read(fd, &buffer[readPosition], HEADER_SIZE - readPosition);
+        int nbytes = read(socket.fd, &buffer[readPosition], HEADER_SIZE - readPosition);
         //
         // If 0 bytes are read that most likely means the other end has closed the socket
         //
         if (nbytes == 0) {
             logger.log(VantageLogger::VANTAGE_DEBUG1) << "Attempted read of command header indicates the socket has been closed by the other end, closing socket. Read returned 0." << endl;
-            closeSocket(fd);
+            closeSocket(socket);
             return;
         }
         else if (nbytes < 0) {
             logger.log(VantageLogger::VANTAGE_WARNING) << "Read() returned an error while reading command header, closing socket. Read returned -1." << endl;
-            closeSocket(fd);
+            closeSocket(socket);
             return;
         }
         else {
@@ -243,7 +251,7 @@ CommandSocket::readCommand(int fd) {
     int messageLength = atoi(&buffer[strlen(HEADER_TEXT) + 1]);
     if (messageLength < MIN_COMMAND_LENGTH) {
         logger.log(VantageLogger::VANTAGE_WARNING) << "Command length in header is too small. Received " << messageLength << endl;
-        closeSocket(fd);
+        closeSocket(socket);
         return;
     }
 
@@ -252,15 +260,15 @@ CommandSocket::readCommand(int fd) {
     //
     readPosition = 0;
     while (readPosition < messageLength) {
-        int nbytes = read(fd, &buffer[readPosition], messageLength - readPosition);
+        int nbytes = read(socket.fd, &buffer[readPosition], messageLength - readPosition);
         if (nbytes == 0) {
             logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to read command body, closing socket. Read returned 0." << endl;
-            closeSocket(fd);
+            closeSocket(socket);
             return;
         }
         else if (nbytes < 0) {
             logger.log(VantageLogger::VANTAGE_WARNING) << "Read() returned an error while reading command body, closing socket. Read returned -1." << endl;
-            closeSocket(fd);
+            closeSocket(socket);
             return;
         }
         else {
@@ -276,10 +284,10 @@ CommandSocket::readCommand(int fd) {
     //
     // At this point the command is in buffer. Use auto-conversion to get it into the required std::string
     //
-    CommandData commandData(*this, fd);
+    CommandData commandData(*this, socket.sequence);
     commandData.setCommandFromJson(string(buffer));
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Offering command " << commandData.commandName << " that was received on fd " << commandData.fd << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Offering command " << commandData.commandName << " that was received on fd " << socket.fd << endl;
     bool consumed = false;
     for (auto handler : commandHandlers) {
         consumed = consumed || handler->offerCommand(commandData);
@@ -327,11 +335,24 @@ CommandSocket::sendCommandResponse(const CommandData & commandData) {
 
     const char * responseBuffer = response.c_str();
 
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response on fd " << commandData.fd << " Response: '" << response << "'" << endl;
-
-    if (write(commandData.fd, responseBuffer, strlen(responseBuffer)) < 0) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << commandData.fd <<  endl;
+    //
+    // Lookup the socket file descriptor
+    //
+    int fd = -1;
+    for (const SocketId & socket : socketList) {
+        if (socket.sequence == commandData.socketId)
+            fd = socket.fd;
     }
+
+    if (fd != -1) {
+        logger.log(VantageLogger::VANTAGE_DEBUG1) << "Writing response on fd " << fd << " Response: '" << response << "'" << endl;
+
+        if (write(fd, responseBuffer, strlen(responseBuffer)) < 0)
+            logger.log(VantageLogger::VANTAGE_ERROR) << "Could not write response to command server socket. fd = " << fd <<  endl;
+    }
+    else
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Could not find socket with ID " << commandData.socketId << " to write response. Response: " << response << endl;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -415,9 +436,13 @@ CommandSocket::acceptConnection() {
         logger.log(VantageLogger::VANTAGE_WARNING) << "setsockopt() failed. Error: " << strerror(en) << endl;
     }
 
-    socketFdList.push_back(fd);
-    std::sort(socketFdList.begin(), socketFdList.end());
-    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Accepted socket using fd = " << fd << endl;
+    SocketId socket;
+    socket.fd = fd;
+    socket.sequence = nextSocketSequence++;
+
+    socketList.push_back(socket);
+    std::sort(socketList.begin(), socketList.end(), [&](SocketId & s1, SocketId & s2) {return s1.fd < s2.fd; });
+    logger.log(VantageLogger::VANTAGE_DEBUG1) << "Accepted socket using fd = " << fd << " with assigned sequence = " << socket.sequence << endl;
 }
 
 }

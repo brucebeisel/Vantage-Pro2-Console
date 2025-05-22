@@ -59,7 +59,7 @@ struct CommandData {
      * @param fd      The file descriptor on which to write the response
      *
      */
-    CommandData(ResponseHandler & handler, int fd);
+    CommandData(ResponseHandler & handler, int socketId);
 
     /**
      * Set the command name and arguments from the provided JSON.
@@ -91,7 +91,7 @@ struct CommandData {
     friend std::ostream & operator<<(std::ostream & os, const CommandData & commandData);
 
     ResponseHandler *   responseHandler;  // The response handler that will process the response
-    int                 fd;               // The file descriptor on which the command was received, so the response can be sent on the same file descriptor
+    int                 socketId;         // The unique socket identifier on which to send the response
     std::string         commandName;      // The command that was processed
     CommandArgumentList arguments;        // The arguments as a list of name/value pairs
     std::string         response;         // The response to the command

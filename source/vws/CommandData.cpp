@@ -26,17 +26,17 @@ namespace vws {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CommandData::CommandData(): fd(-1), responseHandler(NULL)  {
+CommandData::CommandData(): socketId(-1), responseHandler(NULL)  {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CommandData::CommandData(ResponseHandler & handler): fd(-1), responseHandler(&handler)  {
+CommandData::CommandData(ResponseHandler & handler): socketId(-1), responseHandler(&handler)  {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CommandData::CommandData(ResponseHandler & handler, int fileDesc) : fd(fileDesc), responseHandler(&handler) {
+CommandData::CommandData(ResponseHandler & handler, int sockId) : socketId(sockId), responseHandler(&handler) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,6 @@ CommandData::setCommandFromJson(const std::string  & commandJson) {
         json command = json::parse(commandJson.begin(), commandJson.end());
         commandName = command.value("command", "unknown");
         json args = command.at("arguments");
-        vector<pair<string,string>> argumentList;
         for (int i = 0; i < args.size(); i++) {
             json arg = args[i];
             CommandArgument argument;
@@ -85,7 +84,7 @@ CommandData::buildFailureString(const std::string & errorString) {
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream &
 operator<<(std::ostream & os, const CommandData & commandData) {
-    os << "Command Name: " << commandData.commandName << " fd: " << commandData.fd << " Arguments: ( ";
+    os << "Command Name: " << commandData.commandName << " socketId: " << commandData.socketId << " Arguments: ( ";
     for (auto arg : commandData.arguments)
         os << " [" << arg.first << "=" << arg.second << "], ";
 
