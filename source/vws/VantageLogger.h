@@ -17,6 +17,7 @@
 #ifndef VANTAGE_LOGGER_H
 #define VANTAGE_LOGGER_H
 #include <map>
+#include <mutex>
 #include <string>
 #include <iostream>
 
@@ -89,7 +90,14 @@ public:
      * @param level The level of the log entry
      * @return The stream so that standard c++ stream mechanisms can be used
      */
-    std::ostream & log(Level level) const;
+    std::ostream & log(Level level);
+
+    /**
+     * Output the saved errno to the log stream.
+     *
+     * @return The string representing the errno that was saved at the start of a log() call
+     */
+    std::string strerror() const;
 
 private:
     static const int MAX_FILE_SIZE_INFINITE = -1;
@@ -155,8 +163,10 @@ private:
     static int         maxFiles;
     static int         maxFileSizeInMb;
     static std::string currentLogFile;
+    static std::mutex  mutex;
 
     std::string loggerName;
+    int         errnoSave;  // The value of errno when a log() was called
 };
 
 }

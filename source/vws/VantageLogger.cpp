@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <fstream>
 #include <mutex>
+#include <string.h>
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
@@ -39,14 +40,13 @@ int                      VantageLogger::maxFiles;
 string                   VantageLogger::logFilePattern;
 string                   VantageLogger::currentLogFile("");
 bool                     VantageLogger::usingFilePattern = false;
+std::mutex               VantageLogger::mutex;
 
 const static char *LEVEL_STRINGS[] = {"ERROR  ", "WARNING", "INFO   ", "DEBUG1 ", "DEBUG2 ", "DEBUG3 "};
 
-static std::mutex mutex;
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-VantageLogger::VantageLogger(const string & name) : loggerName(name) {
+VantageLogger::VantageLogger(const string & name) : loggerName(name), errnoSave(0) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +58,7 @@ VantageLogger::~VantageLogger() {
 ////////////////////////////////////////////////////////////////////////////////
 VantageLogger &
 VantageLogger::getLogger(const std::string & name) {
+    std::lock_guard<std::mutex> guard(mutex);
     LoggerMap::iterator loggerIterator = loggers.find(name);
 
     VantageLogger * logger = NULL;
@@ -186,8 +187,9 @@ VantageLogger::checkFileSize() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ostream &
-VantageLogger::log(Level level) const {
+VantageLogger::log(Level level) {
     std::lock_guard<std::mutex> guard(mutex);
+    errnoSave = errno;
     char timeString[100];
     if (isLogEnabled(level)) {
         checkFileSize();
@@ -201,5 +203,12 @@ VantageLogger::log(Level level) const {
     else {
         return nullStream;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+std::string
+VantageLogger::strerror() const {
+    return string(::strerror(errnoSave));
 }
 } /* End namespace */
