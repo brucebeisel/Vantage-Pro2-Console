@@ -98,9 +98,9 @@ public:
     void join();
 
 private:
-    static constexpr int HEADER_SIZE = 15;
+    static constexpr int          HEADER_SIZE = 15;
     static constexpr const char * HEADER_TEXT = "VANTAGE";
-    static constexpr int MIN_COMMAND_LENGTH = 20; // Arbitrary number for quick error checks
+    static constexpr int          MIN_COMMAND_LENGTH = 20; // Arbitrary number for quick error checks
 
     /**
      * Structure used to uniquely identify a socket to ensure that the response is sent on the same file
@@ -114,12 +114,28 @@ private:
     };
 
     /**
+     * Output the socket list on stdout.
+     */
+    void dumpSocketList() const;
+
+    /**
+     * ostream operator for SocketId.
+     *
+     * @param os       The ostream on which to output the SocketId
+     * @param socketId The SocketId to output
+     * @return The modified ostream
+     */
+    friend std::ostream & operator<<(std::ostream & os, const SocketId & socketId);
+
+    /**
      * Accept a new client socket connection.
      */
     void acceptConnection();
 
     /**
      * Create the socket for listening for new connections.
+     *
+     * @return True if successful
      */
     bool createListenSocket();
 
@@ -127,15 +143,9 @@ private:
      * Read a command from one of the client sockets.
      *
      * @param socket The socket from which to read
+     * @return True if socket should remain open
      */
-    void readCommand(const SocketId & socket);
-
-    /**
-     * Close the specified client socket.
-     *
-     * @param socket The socket to close
-     */
-    void closeSocket(const SocketId & socket);
+    bool readCommand(const SocketId & socket);
 
     /**
      * Send any pending responses.

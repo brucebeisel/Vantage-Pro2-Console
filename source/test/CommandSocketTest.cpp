@@ -17,6 +17,7 @@
 
 #include "CommandSocket.h"
 
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -32,12 +33,18 @@ using namespace vws;
 
 VantageLogger * glogger;
 
+bool changeSocketId = false;
 
 class TestCommandHandler : public CommandHandler {
 public:
-    virtual void handleCommand(CommandData & command) {
-        command.response.append("\"success\"}");
-        command.responseHandler->handleCommandResponse(command);
+    virtual void handleCommand(CommandData & commandData) {
+        glogger->log(VantageLogger::VANTAGE_INFO) << "Handling command: " << commandData << endl;
+
+        if (changeSocketId)
+            commandData.socketId = 9999;
+
+        commandData.response.append("\"success\"}");
+        commandData.responseHandler->handleCommandResponse(commandData);
     }
 
     virtual bool offerCommand(const CommandData & commandData) {
@@ -47,6 +54,47 @@ public:
         return true;
     }
 };
+
+int
+connectSocket() {
+    int s = socket(AF_INET, SOCK_STREAM, 0);
+
+    sockaddr_in serverAddress;
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(11463);
+    serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+    struct timeval tv;
+    tv.tv_sec = 2;
+    tv.tv_usec = 0;
+
+    if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        glogger->log(VantageLogger::VANTAGE_WARNING) << "setsockopt() failed (" << glogger->strerror() << ")" << endl;
+    }
+
+
+    connect(s, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+
+    return s;
+}
+
+std::string
+readResponse(int s) {
+    char buffer[1024];
+    buffer[0] = '\0';
+    int n = read(s, buffer, sizeof(buffer));
+
+    if (n > 0) {
+        buffer[n] = '\0';
+        glogger->log(VantageLogger::VANTAGE_INFO) << "Response: '" << buffer << "'" << endl;
+    }
+    else if (n < 0)
+        glogger->log(VantageLogger::VANTAGE_ERROR) << "read() returned an error (" << glogger->strerror() << ")" << endl;
+    else
+        glogger->log(VantageLogger::VANTAGE_ERROR) << "read() returned 0" << endl;
+
+    return string(buffer);
+}
 
 int
 main(int argc, char *argv[]) {
@@ -61,25 +109,40 @@ main(int argc, char *argv[]) {
 
     sleep(1);
 
-    int s = socket(AF_INET, SOCK_STREAM, 0);
-
-    sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(11463);
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
-
-    connect(s, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
-
-    const char * command  = "VANTAGE 000054 { \"command\" : \"query-console-time\", \"arguments\" : [] }";
-
+    int s = connectSocket();
+    const char * command  = "VANTAGE 000054 { \"command\" : \"query-console-time1\", \"arguments\" : [] }";
     write(s, (void *)command, strlen(command));
-
-    char buffer[1024];
-    int n = read(s, buffer, sizeof(buffer));
-    buffer[n] = '\0';
-
-    logger.log(VantageLogger::VANTAGE_INFO) << "Response: '" << buffer << "'" << endl;
+    string response = readResponse(s);
     close(s);
+
+    sleep(1);
+
+    changeSocketId = true;
+    s = connectSocket();
+    command  = "VANTAGE 000055 { \"command\" : \"query-console-time2\", \"arguments\" : [] }";
+    write(s, (void *)command, strlen(command));
+    response = readResponse(s);
+    close(s);
+
+    changeSocketId = false;
+    s = connectSocket();
+    command  = "VANTAGE 000055 { \"command\" : \"query-console-time3\", \"arguments\" : [] }";
+    write(s, (void *)command, strlen(command));
+    response = readResponse(s);
+    close(s);
+
+    sleep(1);
+
+    int s1 = connectSocket();
+    int s2 = connectSocket();
+
+    sleep(1);
+
+    close(s1);
+
+    sleep(1);
+
+    close(s2);
 
     sleep(1);
 
