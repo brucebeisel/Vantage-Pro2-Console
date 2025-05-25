@@ -7,6 +7,7 @@ SRCS=\
 	ArchivePacketTest.cpp \
 	BaudRateTest.cpp \
 	BitConverterTest.cpp \
+	CommandQueueTest.cpp \
 	CommandSocketTest.cpp \
 	DataCommandHandlerTest.cpp \
 	DateTimeFieldsTest.cpp \
@@ -206,6 +207,7 @@ all: \
 	ArchivePacketTest \
 	BaudRateTest \
 	BitConverterTest \
+	CommandQueueTest \
 	CommandSocketTest \
 	DateTimeFieldsTest \
 	DominantWindTest \
@@ -234,7 +236,7 @@ BitConverterTest: $(BITCONVERTEROBJS) $(OBJDIR)/BitConverterTest.o
 	$(CC) -g -o BitConverterTest $(OBJDIR)/BitConverterTest.o $(BITCONVERTEROBJS)
 
 CommandQueueTest: $(COMMANDQUEUEOBJS) $(OBJDIR)/CommandQueueTest.o
-	$(CC) -g -o CommandQueueTest $(OBJDIR)/CommandQueueTest.o $(COMMANDQUEUEOBJS)
+	$(CC) -g -o CommandQueueTest $(OBJDIR)/CommandQueueTest.o $(COMMANDQUEUEOBJS) -lpthread
 
 CommandSocketTest: $(COMMANDSOCKETOBJS) $(OBJDIR)/CommandSocketTest.o
 	$(CC) -g -o CommandSocketTest $(OBJDIR)/CommandSocketTest.o $(COMMANDSOCKETOBJS) -lpthread
