@@ -1547,8 +1547,12 @@ VantageWeatherStation::sendOKedCommand(const string & command) {
                 success = true;
         }
 
-        if (!success)
-            wakeupStation();
+        if (!success) {
+            if (i == COMMAND_RETRIES - 1)
+                logger.log(VantageLogger::VANTAGE_WARNING) << "OKed command retries exceeded" << endl;
+            else
+                wakeupStation();
+        }
     }
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Command " << command << " status is " << success << endl;
@@ -1610,8 +1614,12 @@ VantageWeatherStation::sendAckedCommand(const string & command) {
         else
             success = consumeAck();
 
-        if (!success)
-            wakeupStation();
+        if (!success) {
+            if (i == COMMAND_RETRIES - 1)
+                logger.log(VantageLogger::VANTAGE_WARNING) << "ACKed command retries exceeded" << endl;
+            else
+                wakeupStation();
+        }
     }
 
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Command " << command << " status is " << success << endl;

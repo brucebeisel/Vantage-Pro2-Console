@@ -88,6 +88,9 @@ sigHandler(int sig) {
 void
 startVWS(const string & dataDirectory, const string & serialPortName, vws::BaudRate baudRate, int socketPort) {
 
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "++++++++++++++++++++++++++" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Starting VWS" << endl;
+
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "Creating runtime objects" << endl;
 
     //
@@ -181,6 +184,7 @@ startVWS(const string & dataDirectory, const string & serialPortName, vws::BaudR
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for command socket thread to terminate" << endl;
     commandSocket.join();
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "Command socket thread has terminated" << endl;
+
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for data command thread to terminate" << endl;
     dataCommandHandler.join();
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "Data command thread has terminated" << endl;
@@ -288,4 +292,5 @@ main(int argc, char *argv[]) {
 
     startVWS(dataDirectory, serialPortName, baudRate, socketPort);
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "main() is ending" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "--------------------------" << endl;
 }

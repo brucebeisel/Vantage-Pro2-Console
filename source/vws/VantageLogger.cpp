@@ -88,6 +88,7 @@ VantageLogger::setLogStream(std::ostream &stream) {
     loggerStream = &stream;
     maxFileSizeInMb = MAX_FILE_SIZE_INFINITE;
     usingFilePattern = false;
+    stream << std::boolalpha;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,6 +131,8 @@ VantageLogger::openLogFile() {
         cerr << "Failed to create stream for file logger. Switching to cerr" << endl;
         loggerStream = &cerr;
     }
+
+    *loggerStream << std::boolalpha;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
