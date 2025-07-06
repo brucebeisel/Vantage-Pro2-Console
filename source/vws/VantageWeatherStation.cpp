@@ -148,7 +148,7 @@ VantageWeatherStation::wakeupStation() {
         //
         // After sending the wakeup command the console will respond with <LF><CR>
         //
-        if (serialPort.readBytes(buffer, 2) && buffer[0] == WAKEUP_RESPONSE[0] && buffer[1] == WAKEUP_RESPONSE[1]) {
+        if (serialPort.readBytes(buffer, sizeof(buffer), 2) && buffer[0] == WAKEUP_RESPONSE[0] && buffer[1] == WAKEUP_RESPONSE[1]) {
             awake = true;
             logger.log(VantageLogger::VantageLogger::VANTAGE_INFO) << "Console is awake" << endl;
         }
@@ -181,7 +181,7 @@ VantageWeatherStation::sendTestCommand() {
         return false;
     }
 
-    if (serialPort.readBytes(buffer, TEST_RESPONSE.length())) {
+    if (serialPort.readBytes(buffer, sizeof(buffer), TEST_RESPONSE.length())) {
         logger.log(VantageLogger::VantageLogger::VANTAGE_WARNING) << "sendTestCommand() read failed while waiting for test response" << endl;
         return false;
     }
@@ -221,7 +221,7 @@ VantageWeatherStation::retrieveConsoleType(string * consoleTypeString) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Reading console type" << endl;
 
     byte stationTypeByte;
-    if (!serialPort.readBytes(&stationTypeByte, 1)) {
+    if (!serialPort.readBytes(&stationTypeByte, sizeof(stationTypeByte), 1)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read console type" << endl;
         return false;
     }
@@ -279,7 +279,7 @@ VantageWeatherStation::retrieveReceiverList(std::vector<StationId> & sensorStati
        return false;
 
     byte stations;
-    if (!serialPort.readBytes(&stations, 1))
+    if (!serialPort.readBytes(&stations, sizeof(stations), 1))
         return false;
 
     sensorStations.clear();
@@ -396,7 +396,7 @@ VantageWeatherStation::retrieveHiLowValues(HiLowPacket & packet) {
     if (!sendAckedCommand(HIGH_LOW_CMD))
         return false;
 
-    if (!serialPort.readBytes(buffer, HILOW_PACKET_SIZE + CRC_BYTES)) {
+    if (!serialPort.readBytes(buffer, sizeof(buffer), HILOW_PACKET_SIZE + CRC_BYTES)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to read response to HILOWS command" << endl;
         return false;
     }
@@ -531,7 +531,7 @@ VantageWeatherStation::dumpAfter(const DateTimeFields & time, vector<ArchivePack
     // Now the console sends 4 bytes indicating the number of pages to be
     // dumped and which record in the first page is valid for the date specified
     //
-    if (!serialPort.readBytes(buffer, DUMP_AFTER_RESPONSE_LENGTH + CRC_BYTES)) {
+    if (!serialPort.readBytes(buffer, sizeof(buffer), DUMP_AFTER_RESPONSE_LENGTH + CRC_BYTES)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Canceling DMPAFT due to read failure of time data response" << endl;
         return false;
     }
@@ -639,13 +639,13 @@ VantageWeatherStation::calculateLinkQuality(int archivePeriodSeconds, int statio
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VantageWeatherStation::eepromReadDataBlock(byte buffer[]) {
+VantageWeatherStation::eepromReadDataBlock(byte buffer[], size_t bufferSize) {
     logger.log(VantageLogger::VANTAGE_INFO) << "Sending GETEE (Get EEPROM) command" << endl;
 
     if (!sendAckedCommand(DUMP_EEPROM_CMD))
         return false;
 
-    if (!serialPort.readBytes(buffer, EEPROM_DATA_BLOCK_SIZE + CRC_BYTES) || !VantageCRC::checkCRC(buffer, EEPROM_DATA_BLOCK_SIZE))
+    if (!serialPort.readBytes(buffer, bufferSize, EEPROM_DATA_BLOCK_SIZE + CRC_BYTES) || !VantageCRC::checkCRC(buffer, EEPROM_DATA_BLOCK_SIZE))
         return false;
 
     return true;
@@ -666,7 +666,7 @@ VantageWeatherStation::eepromRead(unsigned address, unsigned count) {
     // Read four bytes at a time, each read will contain a 2 digit hex code and a <LF><CR> sequence.
     //
     for (int i = 0; i < count; i++) {
-        if (serialPort.readBytes(this->buffer, EEPROM_READ_LINE_LENGTH) &&
+        if (serialPort.readBytes(this->buffer, sizeof(this->buffer), EEPROM_READ_LINE_LENGTH) &&
             this->buffer[EEPROM_READ_LINE_LENGTH - 2] == ProtocolConstants::LINE_FEED &&
             this->buffer[EEPROM_READ_LINE_LENGTH - 1] == ProtocolConstants::CARRIAGE_RETURN) {
 
@@ -692,7 +692,7 @@ VantageWeatherStation::eepromBinaryRead(unsigned address, unsigned count, char *
     if (!sendAckedCommand(command.str()))
         return false;
 
-    if (!serialPort.readBytes(buffer, count + CRC_BYTES) || !VantageCRC::checkCRC(buffer, count))
+    if (!serialPort.readBytes(buffer, sizeof(buffer), count + CRC_BYTES) || !VantageCRC::checkCRC(buffer, count))
         return false;
 
     if (output != nullptr)
@@ -830,15 +830,9 @@ VantageWeatherStation::retrieveBarometerCalibrationParameters(BarometerCalibrati
     // Continue reading from the serial port until there is no more data.
     //
     byte buffer[1024];
-    int offset = 0;
-    int bytesRead;
-    do {
-        bytesRead = serialPort.read(buffer, offset, sizeof(buffer), 500);
-        offset += bytesRead;
-    }
-    while(bytesRead > 0);
+    int bytesRead = serialPort.readBytes(buffer, sizeof(buffer), SerialPort::READ_UNTIL_TIMEOUT, 500);
 
-    buffer[offset] = '\0';
+    buffer[bytesRead] = '\0';
     string response(buffer);
 
     regex lineRegex("[^\\n]+\n\r");
@@ -1153,7 +1147,7 @@ VantageWeatherStation::retrieveConsoleTime(DateTimeFields & stationTime) {
     if (!sendAckedCommand(GET_TIME_CMD))
         return false;
 
-    if (serialPort.readBytes(buffer, TIME_RESPONSE_LENGTH + CRC_BYTES)) {
+    if (serialPort.readBytes(buffer, sizeof(buffer), TIME_RESPONSE_LENGTH + CRC_BYTES)) {
         if (VantageCRC::checkCRC(buffer, TIME_RESPONSE_LENGTH)) {
             int second = buffer[0];
             int minute = buffer[1];
@@ -1349,7 +1343,7 @@ VantageWeatherStation::readLoopPacket(LoopPacket & loopPacket) {
     //
     // Read and decode the LOOP packet
     //
-    if (!serialPort.readBytes(buffer, LoopPacket::LOOP_PACKET_SIZE))
+    if (!serialPort.readBytes(buffer, sizeof(buffer), LoopPacket::LOOP_PACKET_SIZE))
         return false;
 
     if (!loopPacket.decodeLoopPacket(buffer))
@@ -1368,7 +1362,7 @@ VantageWeatherStation::readLoop2Packet(Loop2Packet & loop2Packet) {
     //
     // Read and decode LOOP2 packet
     //
-    if (!serialPort.readBytes(buffer, Loop2Packet::LOOP2_PACKET_SIZE))
+    if (!serialPort.readBytes(buffer, sizeof(buffer), Loop2Packet::LOOP2_PACKET_SIZE))
         return false;
 
     if (!loop2Packet.decodeLoop2Packet(buffer))
@@ -1444,7 +1438,7 @@ VantageWeatherStation::readNextArchivePage(vector<ArchivePacket> & list, int fir
     // Try to read the page. Will attempt 3 tries to correct CRC errors.
     //
     for (int i = 0; i < ARCHIVE_PAGE_READ_RETRIES; i++) {
-        if (serialPort.readBytes(buffer, ARCHIVE_PAGE_SIZE + CRC_BYTES)) {
+        if (serialPort.readBytes(buffer, sizeof(buffer), ARCHIVE_PAGE_SIZE + CRC_BYTES)) {
             if (VantageCRC::checkCRC(buffer, ARCHIVE_PAGE_SIZE)) {
                 int pageSequence = decodeArchivePage(list, buffer, firstRecordInPageToProcess, newestPacketTime);
                 if (pageSequence == expectedPageSequenceValue) {
@@ -1537,7 +1531,7 @@ VantageWeatherStation::sendOKedCommand(const string & command) {
             logger.log(VantageLogger::VANTAGE_WARNING) << "Failed to write command terminator" << endl;
             success = false;
         }
-        else if (!serialPort.readBytes(buffer, COMMAND_RECOGNIZED_RESPONSE.length()))
+        else if (!serialPort.readBytes(buffer, sizeof(buffer), COMMAND_RECOGNIZED_RESPONSE.length()))
             success = false;
         else {
             buffer[COMMAND_RECOGNIZED_RESPONSE.length()] = '\0';
@@ -1576,7 +1570,7 @@ VantageWeatherStation::sendOKedWithDoneCommand(const string & command) {
     // command until the command that requires the DONE response is complete.
     //
     logger.log(VantageLogger::VANTAGE_DEBUG1) << "Waiting for 'DONE' to complete the command" << endl;
-    if (!serialPort.readBytes(buffer, DONE_RESPONSE.length(), 60000))
+    if (!serialPort.readBytes(buffer, sizeof(buffer), DONE_RESPONSE.length(), 60000))
         success = false;
     else if (DONE_RESPONSE != buffer)
         success = false;
@@ -1642,11 +1636,11 @@ VantageWeatherStation::sendStringValueCommand(const string & command, string & r
     // The CR is the indicator that the command is complete.
     //
     byte b;
-    while (serialPort.readBytes(&b, 1)) {
+    while (serialPort.readBytes(&b, sizeof(b), 1)) {
         if (b != ProtocolConstants::LINE_FEED && b != ProtocolConstants::CARRIAGE_RETURN)
             results.append(1, b);
         else if (b == ProtocolConstants::LINE_FEED) {
-            if (serialPort.readBytes(&b, 1) && b == ProtocolConstants::CARRIAGE_RETURN) {
+            if (serialPort.readBytes(&b, sizeof(b), 1) && b == ProtocolConstants::CARRIAGE_RETURN) {
                 success = true;
                 break;
             }
@@ -1669,7 +1663,7 @@ VantageWeatherStation::consumeAck() {
     bool rv = true;
     byte b;
 
-    if (!serialPort.readBytes(&b, 1)) {
+    if (!serialPort.readBytes(&b, sizeof(b), 1)) {
         logger.log(VantageLogger::VANTAGE_INFO) << "consumeACK() read failed while consuming ACK" << endl;
         rv = false;
     }

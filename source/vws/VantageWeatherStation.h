@@ -315,9 +315,11 @@ public:
     /**
      * Read the entire EEPROM data block.
      *
+     * @param buffer     The buffer in which to read the EEPROM data
+     * @param bufferSize The size of the buffer pointed to by buffer
      * @return True if the read was successful
      */
-    bool eepromReadDataBlock(byte buffer[]);
+    bool eepromReadDataBlock(byte buffer[], size_t bufferSize);
 
     /**
      * Read part of the EEPROM memory.

@@ -54,10 +54,17 @@ SerialPort::~SerialPort(){
 ////////////////////////////////////////////////////////////////////////////////
 bool
 SerialPort::open() {
+    logger.log(VantageLogger::VANTAGE_INFO) << "Opening serial port device '" << device << "'" << endl;
+
+    if (isOpen()) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "Serial port already open. Ignoring" << endl;
+        return true;
+    }
+
     commPort = CreateFile(device.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
 
     if (commPort == INVALID_HANDLE_VALUE) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open serial port " << device << " (" << logger.strerror() << ")" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open serial port '" << device << "' (" << logger.strerror() << ")" << endl;
         return false;
     }
 
@@ -82,7 +89,12 @@ SerialPort::open() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 SerialPort::close() {
-    CloseHandle(commPort);
+    logger.log(VantageLogger::VANTAGE_INFO) << "Closing serial port device '" << device << "'" << endl;
+
+    if (isOpen()) {
+        CloseHandle(commPort);
+        commPort = INVALID_HANDLE_VALUE;
+    }
 }
 
 
@@ -111,9 +123,14 @@ SerialPort::write(const void * buffer, int nbytes) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-SerialPort::read(byte buffer[], int index, int nbytes, int timeoutMillis) {
+SerialPort::read(byte buffer[], int index, int maximumBytes, int timeoutMillis) {
+    if (!isOpen()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Cannot read from console, serial port not open" << endl;
+        return 0;
+    }
+
     DWORD dwRead;
-    if (!ReadFile(commPort, &buffer[index], nbytes, &dwRead, nullptr)) {
+    if (!ReadFile(commPort, &buffer[index], maximumBytes, &dwRead, nullptr)) {
         logger.log(VantageLogger::VANTAGE_ERROR) << "Read " << dwRead << " bytes from serial port failed (" << logger.strerror() << ")" << endl;
         return -1;
     }
@@ -127,18 +144,24 @@ SerialPort::read(byte buffer[], int index, int nbytes, int timeoutMillis) {
 ////////////////////////////////////////////////////////////////////////////////
 void
 SerialPort::discardInBuffer() {
-    PurgeComm(commPort, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
+    if (isOpen())
+        PurgeComm(commPort, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
 }
 #else
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
 SerialPort::open() {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Opening serial port device " << device << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Opening serial port device '" << device << "'" << endl;
+
+    if (isOpen()) {
+        logger.log(VantageLogger::VANTAGE_INFO) << "Serial port already open. Ignoring" << endl;
+        return true;
+    }
 
     commPort = ::open(device.c_str(), O_RDWR);
     if (commPort < 0) {
-        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open serial port " << device << " (" << logger.strerror() << ")" << endl;
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Failed to open serial port '" << device << "' (" << logger.strerror() << ")" << endl;
         return false;
     }
 
@@ -172,10 +195,12 @@ SerialPort::open() {
 ////////////////////////////////////////////////////////////////////////////////
 void
 SerialPort::close() {
-    logger.log(VantageLogger::VANTAGE_INFO) << "Closing serial port device " << device << endl;
+    logger.log(VantageLogger::VANTAGE_INFO) << "Closing serial port device '" << device << "'" << endl;
 
-    ::close(commPort);
-    commPort = -1;
+    if (isOpen()) {
+        ::close(commPort);
+        commPort = INVALID_HANDLE_VALUE;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +232,12 @@ SerialPort::write(const void * buffer, int nbytes) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int
-SerialPort::read(byte buffer[], int index, int requiredBytes, int timeoutMillis) {
+SerialPort::read(byte buffer[], int index, int maximumBytes, int timeoutMillis) {
+    if (!isOpen()) {
+        logger.log(VantageLogger::VANTAGE_ERROR) << "Cannot read from console, serial port not open" << endl;
+        return 0;
+    }
+
     ssize_t bytesRead = 0;
     struct timeval timeout;
     fd_set readSet;
@@ -226,7 +256,7 @@ SerialPort::read(byte buffer[], int index, int requiredBytes, int timeoutMillis)
     }
     else {
         if (FD_ISSET(commPort, &readSet)) {
-            bytesRead = ::read(commPort, &buffer[index], requiredBytes);
+            bytesRead = ::read(commPort, &buffer[index], maximumBytes);
             logger.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << bytesRead << " bytes" << endl;
         }
     }
@@ -238,7 +268,8 @@ SerialPort::read(byte buffer[], int index, int requiredBytes, int timeoutMillis)
 ////////////////////////////////////////////////////////////////////////////////
 void
 SerialPort::discardInBuffer() {
-    tcflush(commPort, TCIOFLUSH);
+    if (isOpen())
+        tcflush(commPort, TCIOFLUSH);
 }
 #endif
 
@@ -252,22 +283,41 @@ SerialPort::write(const string & s) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 bool
-SerialPort::readBytes(byte buffer[], int requiredBytes, int timeoutMillis) {
+SerialPort::readBytes(byte buffer[], size_t bufferSize, int requiredBytes, int timeoutMillis) {
     logger.log(VantageLogger::VANTAGE_DEBUG2) << "Attempting to read " << requiredBytes << " bytes" << endl;
     int readIndex = 0;
     
+    //
+    // Prevent overflow
+    //
+    if (requiredBytes > bufferSize) {
+        logger.log(VantageLogger::VANTAGE_WARNING) << "Read of " << requiredBytes << " bytes skipped due to buffer being too small (" << bufferSize << ")" << endl;
+        return false;
+    }
+
     //
     // Keep reading until the require number of bytes are read or the number of tries had been reached.
     // Note that the timeout can expire READ_TRIES times, so the total timeout delay can be up to
     // timeoutMillis * READ_TRIES.
     //
-    for (int i = 0; i < READ_TRIES && readIndex < requiredBytes; i++) {
-        int nbytes = this->read(buffer, readIndex, requiredBytes - readIndex, timeoutMillis);
+    for (int i = 0; i < READ_TRIES && (requiredBytes == READ_UNTIL_TIMEOUT || readIndex < requiredBytes); i++) {
+        int maximumBytes;
+        if (requiredBytes == READ_UNTIL_TIMEOUT)
+            maximumBytes = bufferSize - readIndex;
+        else
+            maximumBytes = requiredBytes - readIndex;
+
+        int nbytes = this->read(buffer, readIndex, maximumBytes, timeoutMillis);
         if (nbytes > 0) {
             readIndex += nbytes;
             logger.log(VantageLogger::VANTAGE_DEBUG2) << "Read " << readIndex << " bytes of " << requiredBytes << " bytes" << endl;
         }
         else if (nbytes < 0) {
+            // Error, stop reading
+            break;
+        }
+        else if (requiredBytes == READ_UNTIL_TIMEOUT && nbytes == 0) {
+            // Timeout and only reading until a timeout, stop reading
             break;
         }
     }
@@ -275,13 +325,14 @@ SerialPort::readBytes(byte buffer[], int requiredBytes, int timeoutMillis) {
     //
     // After all is done, check to see if the desired number of bytes were read
     //
-    if (readIndex < requiredBytes) {
+    if (requiredBytes != READ_UNTIL_TIMEOUT && readIndex < requiredBytes) {
         this->discardInBuffer();
-        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read requested bytes. Required=" << requiredBytes << ", Actual=" << readIndex << endl;
+        logger.log(VantageLogger::VANTAGE_INFO) << "Failed to read requested bytes. Required=" << requiredBytes << ", Actual=" << readIndex
+                                                << ". Partial buffer: " << endl << Weather::dumpBuffer(buffer, requiredBytes);
         return false;
     }
     else {
-        logger.log(VantageLogger::VANTAGE_DEBUG3) << Weather::dumpBuffer(buffer, requiredBytes);
+        logger.log(VantageLogger::VANTAGE_DEBUG3) << "Read buffer:" << Weather::dumpBuffer(buffer, requiredBytes);
         return true;
     }
 }

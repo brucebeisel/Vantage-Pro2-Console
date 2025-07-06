@@ -36,6 +36,7 @@ class VantageLogger;
 class SerialPort {
 public:
     static constexpr int DEFAULT_TIMEOUT_MILLIS = 2500;
+    static constexpr int READ_UNTIL_TIMEOUT = 0;
 
     /**
      * Constructor.
@@ -63,27 +64,16 @@ public:
     void close();
 
     /**
-     * Read from the serial port into the specified location of a buffer.
-     * 
-     * @param buffer        The buffer into which the data will be read
-     * @param index         The index into the buffer where bytes read will be stored
-     * @param requiredBytes The number of bytes that are required by this call
-     * @param timeoutMillis The number of milliseconds to wait for data to be available
-     *
-     * @return The number of bytes actually read
-     */
-    int read(byte buffer[], int index, int requiredBytes, int timeoutMillis);
-
-    /**
      * Read from the serial port into the beginning of a buffer.
      * 
      * @param buffer        The buffer into which the data will be read
-     * @param requiredBytes The number of bytes that are required by this call
+     * @param bufferSize    The number of bytes pointed to by buffer
+     * @param requiredBytes The number of bytes that are required by this call. If READ_UNTIL_TIMEOUT,
      * @param timeoutMillis The number of milliseconds to wait for the expected bytes
      *
      * @return True if the number of bytes read is equal to the required number of bytes
      */
-    bool readBytes(byte * buffer, int requiredBytes, int timeoutMillis = DEFAULT_TIMEOUT_MILLIS);
+    bool readBytes(byte * buffer, size_t bufferSize, int requiredBytes, int timeoutMillis = DEFAULT_TIMEOUT_MILLIS);
 
     /**
      * Write a string to the serial port.
@@ -123,6 +113,18 @@ public:
     bool isOpen() const;
 
 private:
+    /**
+     * Read from the serial port into the specified location of a buffer.
+     *
+     * @param buffer        The buffer into which the data will be read
+     * @param index         The index into the buffer where bytes read will be stored
+     * @param maximumBytes  The maximum number of bytes that will be read by this call
+     * @param timeoutMillis The number of milliseconds to wait for data to be available
+     *
+     * @return The number of bytes actually read
+     */
+    int read(byte buffer[], int index, int maximumBytes, int timeoutMillis);
+
     /**
      * The number of time read() will be called to read the number of required bytes
      */
