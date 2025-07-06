@@ -20,6 +20,7 @@
 #include <filesystem>
 #include <iomanip>
 #include <fstream>
+#include <chrono>
 #include <mutex>
 #include <string.h>
 #include <stdio.h>
@@ -196,11 +197,13 @@ VantageLogger::log(Level level) {
     char timeString[100];
     if (isLogEnabled(level)) {
         checkFileSize();
-        time_t now = time(0);
+        chrono::time_point now = std::chrono::system_clock::now();
+        time_t nowSeconds = std::chrono::system_clock::to_time_t(now);
+        auto nowMillis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
         struct tm tm;
-        Weather::localtime(now, tm);
+        Weather::localtime(nowSeconds, tm);
         strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", &tm);
-        *loggerStream << setfill(' ') << setw(25) << loggerName << ": " << timeString << " --- " << LEVEL_STRINGS[level] << " --- ";
+        *loggerStream << setfill(' ') << setw(25) << loggerName << ": " << timeString << "." << setw(3) << setfill('0') << nowMillis.count() << " --- " << LEVEL_STRINGS[level] << " --- ";
         return *loggerStream;
     }
     else {
