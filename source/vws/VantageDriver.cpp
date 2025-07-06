@@ -214,6 +214,7 @@ VantageDriver::mainLoop() {
             // If an asynchronous signal was caught, then exit the loop
             //
             if (signalCaught.load()) {
+                logger.log(VantageLogger::VANTAGE_INFO) << "Signal caught, exiting mainLoop()" << endl;
                 exitLoop = true;
                 continue;
             }
