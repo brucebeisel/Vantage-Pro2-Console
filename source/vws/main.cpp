@@ -88,106 +88,116 @@ sigHandler(int sig) {
 void
 startVWS(const string & dataDirectory, const string & serialPortName, vws::BaudRate baudRate, int socketPort) {
 
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "++++++++++++++++++++++++++" << endl;
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Starting VWS" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "+++++++++++++++++++++++++++++++++++++" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "+++++++++++++ VWS START +++++++++++++" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "+++++++++++++++++++++++++++++++++++++" << endl;
 
     mainLogger->log(VantageLogger::VANTAGE_INFO) << "Creating runtime objects" << endl;
 
-    //
-    // Create all of the runtime object that never get destroyed
-    //
-    CurrentWeatherSocket currentWeatherSocket;
-    CurrentWeatherManager currentWeatherManager(dataDirectory, currentWeatherSocket);
-    SerialPort serialPort(serialPortName, baudRate);
-    VantageWeatherStation station(serialPort);
-    ArchiveManager archiveManager(dataDirectory);
-    VantageConfiguration configuration(station);
-    VantageStationNetwork network(dataDirectory, station, archiveManager);
-    AlarmManager alarmManager(dataDirectory, station);
-    GraphDataRetriever graphDataRetriever(station);
-    StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
-    ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);
-    DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager, alarmManager);
-    VantageDriver consoleDriver(station, archiveManager, consoleCommandHandler, stormArchiveManager);
-    CommandSocket commandSocket(socketPort);
+    {
+        //
+        // Create all of the runtime object that never get destroyed
+        //
+        CurrentWeatherSocket currentWeatherSocket;
+        CurrentWeatherManager currentWeatherManager(dataDirectory, currentWeatherSocket);
+        SerialPort serialPort(serialPortName, baudRate);
+        VantageWeatherStation station(serialPort);
+        ArchiveManager archiveManager(dataDirectory);
+        VantageConfiguration configuration(station);
+        VantageStationNetwork network(dataDirectory, station, archiveManager);
+        AlarmManager alarmManager(dataDirectory, station);
+        GraphDataRetriever graphDataRetriever(station);
+        StormArchiveManager stormArchiveManager(dataDirectory, graphDataRetriever);
+        ConsoleCommandHandler consoleCommandHandler(station, configuration, network, alarmManager);
+        DataCommandHandler dataCommandHandler(archiveManager, stormArchiveManager, currentWeatherManager, alarmManager);
+        VantageDriver consoleDriver(station, archiveManager, consoleCommandHandler, stormArchiveManager);
+        CommandSocket commandSocket(socketPort);
+
+        //
+        // Perform configuration
+        //
+        mainLogger->log(VantageLogger::VANTAGE_INFO) << "Configuring runtime objects" << endl;
+        station.addLoopPacketListener(currentWeatherManager);
+        station.addLoopPacketListener(alarmManager);
+        station.addLoopPacketListener(network);
+        station.addLoopPacketListener(consoleDriver);
+
+        commandSocket.addCommandHandler(dataCommandHandler);
+        commandSocket.addCommandHandler(consoleCommandHandler);
+
+        configuration.addRainCollectorSizeListener(station);
+        configuration.addRainCollectorSizeListener(alarmManager);
+
+        //
+        // Add the console connection monitors, adding consoleDriver last so that all other
+        // configuration is complete before the driver
+        //
+        consoleDriver.addConnectionMonitor(station);
+        consoleDriver.addConnectionMonitor(configuration);
+        consoleDriver.addConnectionMonitor(network);
+        consoleDriver.addConnectionMonitor(alarmManager);
+        consoleDriver.addConnectionMonitor(consoleDriver);
+
+        //
+        // Initialize objects that require it before entering the main loop
+        //
+        mainLogger->log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
+
+        //
+        // Create and/or clean up the loop packet archive
+        //
+        currentWeatherManager.initialize();
+
+        //
+        // Create the current weather broadcast UDP socket
+        //
+        if (!currentWeatherSocket.initialize())
+            return;
+
+        //
+        // Start the thread that handles data commands.
+        //
+        dataCommandHandler.start();
+
+        //
+        // The driver must be initialized before any communication is performed with the console.
+        // Note that any external commands will be ignored until the connection with the console is successful.
+        //
+        consoleDriver.start();
+
+        //
+        // Initialize the command socket last so that all others are initialized before any commands are received.
+        // If the command socket could not be started, terminate the console driver thread.
+        //
+        if (!commandSocket.start())
+            consoleDriver.terminate();
+
+        //
+        // This call will block until the console driver thread ends
+        //
+        mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for console driver thread to terminate" << endl;
+        consoleDriver.join();
+
+        mainLogger->log(VantageLogger::VANTAGE_INFO) << "Console driver thread has terminated. Terminating other threads." << endl;
+
+        commandSocket.terminate();
+        dataCommandHandler.terminate();
+
+        mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for command socket thread to terminate" << endl;
+        commandSocket.join();
+        mainLogger->log(VantageLogger::VANTAGE_INFO) << "Command socket thread has terminated" << endl;
+
+        mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for data command thread to terminate" << endl;
+        dataCommandHandler.join();
+        mainLogger->log(VantageLogger::VANTAGE_INFO) << "Data command thread has terminated" << endl;
+    }
 
     //
-    // Perform configuration
+    // Block causes destructors to be run before this debug is output
     //
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Configuring runtime objects" << endl;
-    station.addLoopPacketListener(currentWeatherManager);
-    station.addLoopPacketListener(alarmManager);
-    station.addLoopPacketListener(network);
-    station.addLoopPacketListener(consoleDriver);
-
-    commandSocket.addCommandHandler(dataCommandHandler);
-    commandSocket.addCommandHandler(consoleCommandHandler);
-
-    configuration.addRainCollectorSizeListener(station);
-    configuration.addRainCollectorSizeListener(alarmManager);
-
-    //
-    // Add the console connection monitors, adding consoleDriver last so that all other
-    // configuration is complete before the driver
-    //
-    consoleDriver.addConnectionMonitor(station);
-    consoleDriver.addConnectionMonitor(configuration);
-    consoleDriver.addConnectionMonitor(network);
-    consoleDriver.addConnectionMonitor(alarmManager);
-    consoleDriver.addConnectionMonitor(consoleDriver);
-
-    //
-    // Initialize objects that require it before entering the main loop
-    //
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Initializing runtime objects" << endl;
-
-    //
-    // Create and/or clean up the loop packet archive
-    //
-    currentWeatherManager.initialize();
-
-    //
-    // Create the current weather broadcast UDP socket
-    //
-    if (!currentWeatherSocket.initialize())
-        return;
-
-    //
-    // Start the thread that handles data commands.
-    //
-    dataCommandHandler.start();
-
-    //
-    // The driver must be initialized before any communication is performed with the console.
-    // Note that any external commands will be ignored until the connection with the console is successful.
-    //
-    consoleDriver.start();
-
-    //
-    // Initialize the command socket last so that all others are initialized before any commands are received.
-    // If the command socket could not be started, terminate the console driver thread.
-    //
-    if (!commandSocket.start())
-        consoleDriver.terminate();
-
-    //
-    // This call will block until the console driver thread ends
-    //
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for console driver thread to terminate" << endl;
-    consoleDriver.join();
-
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Console driver thread has terminated. Terminating other threads." << endl;
-
-    commandSocket.terminate();
-    dataCommandHandler.terminate();
-
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for command socket thread to terminate" << endl;
-    commandSocket.join();
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Command socket thread has terminated" << endl;
-
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Waiting for data command thread to terminate" << endl;
-    dataCommandHandler.join();
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "Data command thread has terminated" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "=====================================" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "============== VWS END ==============" << endl;
+    mainLogger->log(VantageLogger::VANTAGE_INFO) << "=====================================" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -291,6 +301,4 @@ main(int argc, char *argv[]) {
     }
 
     startVWS(dataDirectory, serialPortName, baudRate, socketPort);
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "main() is ending" << endl;
-    mainLogger->log(VantageLogger::VANTAGE_INFO) << "--------------------------" << endl;
 }
