@@ -154,7 +154,7 @@ VantageWeatherStation::wakeupStation() {
         }
         else {
             serialPort.discardInBuffer();
-            Weather::sleep(WAKEUP_WAIT);
+            Weather::sleep(WAKEUP_TRY_INTERVAL_MILLIS);
         }
     }
 

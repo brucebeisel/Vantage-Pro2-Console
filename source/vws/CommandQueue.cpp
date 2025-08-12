@@ -66,7 +66,7 @@ CommandQueue::consumeCommand(CommandData & command) {
 ////////////////////////////////////////////////////////////////////////////////
 bool
 CommandQueue::retrieveNextCommand(CommandData & command) {
-    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Attempting to consume command" << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Attempting to retrieve command" << endl;
     if (commandQueue.empty()) {
         logger.log(VantageLogger::VANTAGE_DEBUG3) << "No command in queue to consume" << endl;
         return false;
@@ -74,8 +74,7 @@ CommandQueue::retrieveNextCommand(CommandData & command) {
 
     command = commandQueue.front();
     commandQueue.pop();
-
-    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Consumed command " << command.commandName << endl;
+    logger.log(VantageLogger::VANTAGE_DEBUG3) << "Retrieved command " << command.commandName << endl;
 
     return true;
 }

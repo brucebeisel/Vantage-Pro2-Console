@@ -615,6 +615,8 @@ public:
 
 private:
     static constexpr int WAKEUP_TRIES = 5;                         // The number of times to try to wake up the console before performing a disconnect/reconnect cycle
+    static constexpr int WAKEUP_TRY_INTERVAL_MILLIS = 1200;        // The number of milliseconds between wake up attempts
+    static constexpr int WAKEUP_INTERVAL_SECS = 120;               // The number of seconds it takes for the console to go to sleep and require a wake up
     static constexpr int CONSOLE_TIME_DELTA_THRESHOLD_SECONDS = 5; // The number of seconds that the console time can be off before the time will be set
     static constexpr int CRC_BYTES = 2;                            // The number of bytes in the CRC
 
@@ -628,7 +630,6 @@ private:
     static constexpr int TIME_RESPONSE_LENGTH = 6;
     static constexpr int TIME_LENGTH = 4;
     static constexpr int SET_TIME_LENGTH = 6;
-    static constexpr int WAKEUP_WAIT = 1000;
     static constexpr int VANTAGE_YEAR_OFFSET = 2000;
     static constexpr int HILOW_PACKET_SIZE = 436;
     static constexpr int EEPROM_DATA_BLOCK_SIZE = 4096;

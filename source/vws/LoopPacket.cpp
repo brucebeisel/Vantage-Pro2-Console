@@ -128,8 +128,8 @@ LoopPacket::decodeLoopPacket(byte buffer[]) {
     insideHumidity = VantageDecoder::decodeHumidity(packetData, INSIDE_HUMIDITY_OFFSET);
     outsideTemperature = VantageDecoder::decode16BitTemperature(packetData, OUTSIDE_TEMPERATURE_OFFSET);
 
-    windSpeed = VantageDecoder::decodeWindSpeed(packetData, WIND_SPEED_OFFSET);
-    windSpeed10MinuteAverage = VantageDecoder::decodeWindSpeed(packetData, TEN_MINUTE_AVG_WIND_SPEED_OFFSET);
+    windSpeed = VantageDecoder::decode8BitWindSpeed(packetData, WIND_SPEED_OFFSET);
+    windSpeed10MinuteAverage = VantageDecoder::decode8BitWindSpeed(packetData, TEN_MINUTE_AVG_WIND_SPEED_OFFSET);
     windDirection = VantageDecoder::decodeWindDirection(packetData, WIND_DIRECTION_OFFSET);
 
     for (int i = 0; i < ProtocolConstants::MAX_EXTRA_TEMPERATURES; i++)

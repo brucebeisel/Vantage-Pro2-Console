@@ -169,10 +169,10 @@ HiLowPacket::decodeHiLowPacket(byte buffer[]) {
     //
     // Wind section
     //
-    wind.todayExtremeValue     = VantageDecoder::decodeWindSpeed(buffer, 16);
+    wind.todayExtremeValue     = VantageDecoder::decode8BitWindSpeed(buffer, 16);
     wind.todayExtremeValueTime = BitConverter::toUint16(buffer, 17);
-    wind.monthExtremeValue   = VantageDecoder::decodeWindSpeed(buffer, 19);
-    wind.yearExtremeValue    = VantageDecoder::decodeWindSpeed(buffer, 20);
+    wind.monthExtremeValue   = VantageDecoder::decode8BitWindSpeed(buffer, 19);
+    wind.yearExtremeValue    = VantageDecoder::decode8BitWindSpeed(buffer, 20);
 
     //
     // Inside temperature section

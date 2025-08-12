@@ -319,7 +319,7 @@ ArchivePacket::getOutsideHumidity() const {
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Speed>
 ArchivePacket::getAverageWindSpeed() const {
-    return VantageDecoder::decodeWindSpeed(buffer, AVG_WIND_SPEED_OFFSET);
+    return VantageDecoder::decode8BitWindSpeed(buffer, AVG_WIND_SPEED_OFFSET);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -333,7 +333,7 @@ ArchivePacket::getPrevailingWindHeadingIndex() const {
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Speed>
 ArchivePacket::getHighWindSpeed() const {
-    return VantageDecoder::decodeWindSpeed(buffer, HIGH_WIND_SPEED_OFFSET);
+    return VantageDecoder::decode8BitWindSpeed(buffer, HIGH_WIND_SPEED_OFFSET);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

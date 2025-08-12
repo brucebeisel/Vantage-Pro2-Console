@@ -2,6 +2,7 @@ This file contains the JSON API used to communicate the the Vantage Pro2 driver.
 
 http://127.0.0.1:3000/console-command?command=update-cal-adjustments
 
+Arguments are optional, but the tag with an empty array must exist
 {
     "command" : "<command name>,
     "arguments" : [
@@ -11,10 +12,11 @@ http://127.0.0.1:3000/console-command?command=update-cal-adjustments
     ]
 }
 
+Anything after the result is optional.
 {
     "response" : "<command name>",
     "result"   : "<success|failure>",
-    "data"  : { "<Any additional information>" }
+    "data"  : { "<data label>" : "<data value>", ... }
 }
 
 {
@@ -70,39 +72,41 @@ http://127.0.0.1:3000/console-command?command=update-cal-adjustments
     }
 }
 
+// Not sure if dstOn is needed if autoDST is true
+// Retransmit ID can be 1 - 8. Undefined means no retransmit is done by the console
 {
-    "command" : "initialization", "arguments" : {
-        "latitude" : 54.4,
-        "longitude" : -120.3,
-        "elevation" : 24,
-        "timezone" : "timezone text",
-        "useDaylightSavings" : true,
-        "dstMode" : "auto",                   // or "manual"
-        "dstOn" : false,                      // Not sure if this is needed if autoDST is true
-        "rainYearStart" : "January",
-        "clockFormat" : "12",                 // or "24"
-        "dateFormat"  : "Day/Month/Year",     // or "Month/Day/Year"
-        "windCupSize" : "large",              // or "small"
-        "rainBucketSize" : ".01 in",          // or ".1 mm" or ".2 mm"
-        "retransmitId" : 1,                   // 1 - 8, missing element indicates no retransmit 
-        "temperatureArchiveMode" : "average", // or "end of period"
-        "baroUnits": "inHg",                  // or "mm", "mbar", "hPa"
-        "elevationUnits": "feet",             // or "meters"
-        "rainUnits": "inches",                // or "mm"
-        "temperatureUnits": ".1F",            // or "F", ".1C", "C"
-        "windUnits": "mph"                    // or "mps", "kph", "kts"
-    }
+    "command" : "initialization", "arguments" : [
+        { "latitude" : 54.4 },
+        { "longitude" : -120.3 },
+        { "elevation" : 24 },
+        { "timezone" : "timezone text" },
+        { "useDaylightSavings" : true },
+        { "dstMode" : "auto|manual" },
+        { "dstOn" : false },
+        { "rainYearStart" : "January" },
+        { "clockFormat" : "12|24" },
+        { "dateFormat"  : "Day/Month/Year|Month/Day/Year" },
+        { "windCupSize" : "large|small" },
+        { "rainBucketSize" : ".01 in|.1 mm | .2 mm" },
+        { "retransmitId" : 1 },
+        { "temperatureArchiveMode" : "average|end of period" },
+        { "baroUnits": "inHg|mm|mbar|hPa" },
+        { "elevationUnits": "feet|meters" },
+        { "rainUnits": "inches|mm" },
+        { "temperatureUnits": ".1F|F|.1C|C" },
+        { "windUnits": "mph|mps|kph|kts" }
+    ]
 }
 
 
 General response:
 Backlight command:
 { "command"  : "backlight", "arguments" : [ { "state" : "on|off" } ] }
-{ "response" : "backlight", "result" : "success", "info" : "Light is on|off" }
+{ "response" : "backlight", "result" : "success", "data" : { } }
 
 Date/Time command:
 { "command"  : "set-date-time", "arguments" : [ { "date" : "YYYY-MM-DD" }, { "time" : "HH:MM:SS" } ] }
-{ "response" : "set-date-time", "result" : "success", "data" : "Date/time set to 2023-03-21 14:23:58" }
+{ "response" : "set-date-time", "result" : "success", "data" : {} }
 
 { "command"  : "get-date-time", "arguments" }
 { "response" : "get-date-time", "result" : "success", "data" : "2023-03-21 14:23:58" }

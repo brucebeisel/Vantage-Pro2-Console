@@ -59,7 +59,7 @@ public:
 
     static Measurement<SolarRadiation> decodeSolarRadiation(const byte buffer[], int offset);
 
-    static Measurement<Speed> decodeWindSpeed(const byte buffer[], int offset);
+    static Measurement<Speed> decode8BitWindSpeed(const byte buffer[], int offset);
 
     static Measurement<Speed> decode16BitWindSpeed(const byte buffer[], int offset);
 

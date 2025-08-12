@@ -437,7 +437,7 @@ Loop2Packet::decodeLoop2Packet(const byte buffer[]) {
     insideHumidity = VantageDecoder::decodeHumidity(packetData, INSIDE_HUMIDITY_OFFSET);
     outsideTemperature = VantageDecoder::decode16BitTemperature(packetData, OUTSIDE_TEMPERATURE_OFFSET);
 
-    windSpeed = VantageDecoder::decodeWindSpeed(packetData, WIND_SPEED_OFFSET);
+    windSpeed = VantageDecoder::decode8BitWindSpeed(packetData, WIND_SPEED_OFFSET);
     windDirection = VantageDecoder::decodeWindDirection(packetData, WIND_DIRECTION_OFFSET);
     windSpeed10MinuteAverage = VantageDecoder::decodeAverageWindSpeed(packetData, TEN_MINUTE_AVG_WIND_SPEED_OFFSET);
     windSpeed2MinuteAverage = VantageDecoder::decodeAverageWindSpeed(packetData, TWO_MINUTE_AVG_WIND_SPEED_OFFSET);

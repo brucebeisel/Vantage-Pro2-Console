@@ -174,7 +174,7 @@ VantageDecoder::decodeSolarRadiation(const byte buffer[], int offset) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 Measurement<Speed>
-VantageDecoder::decodeWindSpeed(const byte buffer[], int offset) {
+VantageDecoder::decode8BitWindSpeed(const byte buffer[], int offset) {
     Measurement<Speed> measurement;
     uint8 value8 = BitConverter::toUint8(buffer, offset);
 
